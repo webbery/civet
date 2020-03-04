@@ -5,7 +5,7 @@
           <el-tree :data="tagData" :props="defaultProps" ></el-tree>
       </el-tab-pane>
       <el-tab-pane label="目录" name="first">
-          <el-tree :data="directoryData" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+          <el-tree :data="directoryData" :props="defaultProps" ></el-tree>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -26,6 +26,7 @@ export default {
   },
   mounted() {
     this.initDirectory('F:/Image/')
+    console.info('init directory')
   },
   methods: {
     initDirectory(dir) {
@@ -60,7 +61,7 @@ export default {
           })
         }, function() {
           self.directoryData = directoryData
-        //   self.$store.commit('SET_EXPAND_IMAGES', directoryData)
+          self.$store.dispatch('updateImageList', directoryData)
         })
         if (err) console.log(err)
         console.log(dirs)

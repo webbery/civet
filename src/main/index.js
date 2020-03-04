@@ -1,6 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, Menu } from 'electron'
+import '../renderer/store'
 
 // var handleSquirrelEvent = function() {
 //   function executeSquirrelCommand(args, done) {

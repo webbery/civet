@@ -1,6 +1,5 @@
 const state = {
-  main: 0,
-  expandImages: []
+  main: 0
 }
 
 const mutations = {
@@ -9,9 +8,6 @@ const mutations = {
   },
   INCREMENT_MAIN_COUNTER (state) {
     state.main++
-  },
-  SET_EXPAND_IMAGES (state, val) {
-    state.expandImages = val
   }
 }
 
@@ -19,7 +15,6 @@ const actions = {
   someAsyncTask ({ commit }) {
     // do something async
     commit('INCREMENT_MAIN_COUNTER')
-    commit('SET_EXPAND_IMAGES')
   }
 }
 
