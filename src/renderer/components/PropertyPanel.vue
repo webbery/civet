@@ -1,17 +1,18 @@
 <template>
     <div>
-        <div>路径:</div>
+        <div>路径: {{picture.realpath}}</div>
         <div>标签:</div>
-        <div>创建日期:</div>
-        <div>拍摄日期:</div>
-        <div>相机:</div>
-        <div>分辨率:</div>
     </div>
 </template>
 
 <script>
 export default {
-  name: 'property-panel'
+  name: 'property-panel',
+  computed: {
+    picture() {
+      return this.$store.state.Selector.picture
+    }
+  }
 }
 </script>
 

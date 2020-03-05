@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-for="image in imageList" :key="image" class="image">
+        <div v-for="image in imageList" :key="image" class="image" @click="onImageClick(image)">
         <el-image :src="image.realpath" lazy class="preview"></el-image>
         <div class="name">{{image.label}}</div>
         </div>
@@ -30,6 +30,9 @@ export default {
       //   for (let item of this.$store.expandImages) {
       //     images.push(item.realpath)
       //   }
+    },
+    onImageClick(image) {
+      this.$store.dispatch('updateSelection', image)
     }
   }
 }

@@ -33,6 +33,10 @@ export default {
       let fs = require('fs')
       let path = require('path')
       let async = require('async')
+      let Segment = require('segment')
+      let POSTAG = Segment.POSTAG
+      let segment = new Segment()
+      segment.useDefault()
       let directoryData = []
       let self = this
       fs.readdir(dir, function(err, files) {
@@ -41,13 +45,24 @@ export default {
         async.each(files, function (filename, done) {
           const fullpath = path.join(dir, filename)
           fs.stat(fullpath, function(err, data) {
+            let validNames = filename.match(/[\u4e00-\u9fa5]+/g)
+            let tags = []
+            if (validNames !== null) {
+              const segs = segment.doSegment(validNames.join(''))
+              for (let word of segs) {
+                if (word.p & (POSTAG.D_N | POSTAG.A_NR | POSTAG.A_NS | POSTAG.A_NT)) {
+                  tags.push(word.w)
+                }
+              }
+            }
             if (data.isFile()) {
               if (self.isImageFile(filename)) {
                 const item = {
                   label: filename,
                   type: 'img',
                   realpath: fullpath,
-                  name: filename
+                  name: filename,
+                  tags: tags
                 }
                 directoryData.push(item)
               }
