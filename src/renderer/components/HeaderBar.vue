@@ -1,6 +1,9 @@
 <template>
   <el-row >
-      <el-col :span="4"><el-button @click="onClickImport">导入</el-button></el-col>
+      <el-col :span="4">
+        <el-button @click="onClickImport">导入</el-button>
+        <el-button @click="onClickConfig">配置</el-button>
+        </el-col>
     <el-col :span="16">贡献者名单</el-col>
     <el-col :span="4">
       <el-input placeholder="请输入内容" v-model="input3" class="input-with-select">
@@ -26,8 +29,11 @@ export default {
         properties: ['openDirectory']
       }, (dir) => {
         if (dir === undefined) return
-        console.info(dir)
+        this.$store.commit('updateImportDirectory', dir)
       })
+    },
+    onClickConfig() {
+      console.info('condif')
     }
   }
 }

@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="organize">
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="标签" name="second">
           <el-tree :data="tagData" :props="defaultProps" ></el-tree>
       </el-tab-pane>
-      <el-tab-pane label="目录" name="first">
+      <el-tab-pane label="目录" name="first" class="directory">
           <el-tree :data="directoryData" :props="defaultProps" ></el-tree>
       </el-tab-pane>
     </el-tabs>
@@ -21,15 +21,37 @@ export default {
           label: '一级 1'
         }
       ],
-      directoryData: [ ]
+      directoryData: null,
+      importor: []
+    }
+  },
+  computed: {
+    loadDirectory() {
+      console.info('computed：', this.$store.EventBus.importDirectory)
+      return this.$store.EventBus.importDirectory
     }
   },
   mounted() {
-    this.initDirectory('F:/Image/')
-    console.info('init directory')
+    this.$ipcRenderer.on('updateDirectories', this.updateLoadingDirectories)
+    this.$ipcRenderer.send('mounted', 'mounted')
+    // this.initDirectory('F:/test/')
+    // 持久化数据记录
+    // let levelup = require('levelup')
+    // let leveldown = require('leveldown')
+    // let db = levelup(leveldown('civet'))
+    // db.put('name', 'levelup', function (err) {
+    // })
   },
   methods: {
-    initDirectory(dir) {
+    updateLoadingDirectories(data) {
+      console.info('update')
+    },
+    importImages(evt) {
+      console.log(evt.data)
+      // self.$store.dispatch('updateImageList', directoryData)
+      // else self.directoryData.push({label: rootName, children: directoryData})
+    },
+    initDirectory(dir, rootName) {
       let fs = require('fs')
       let path = require('path')
       let async = require('async')
@@ -40,7 +62,7 @@ export default {
       let directoryData = []
       let self = this
       fs.readdir(dir, function(err, files) {
-        let dirs = []
+        let parent = []
         // 每加载1000个数据更新一次UI（待实现）
         async.each(files, function (filename, done) {
           const fullpath = path.join(dir, filename)
@@ -66,26 +88,44 @@ export default {
                 }
                 directoryData.push(item)
               }
+            } else if (data.isDirectory()) {
+              parent.push(filename)
             }
-            // else if (data.isDirectory()) {
-            // //   const children = []
-            // //   this.initDirectory()
-            // }
             if (err) console.log(err)
             done(null)
           })
-        }, function() {
-          self.directoryData = directoryData
-          self.$store.dispatch('updateImageList', directoryData)
+        }, async function() {
+          fs.appendFileSync('test.js', 'hello world')
+          console.info('append file')
+          if (self.directoryData === null) {
+            self.directoryData = directoryData
+            self.$store.dispatch('updateImageList', directoryData)
+          }
+
+          // 启动后台工作线程, 继续加载数据
+          // for (let fname of parent) {
+          //   let worker = new Worker()
+          //   worker.postMessage({
+          //     root: dir,
+          //     filename: fname,
+          //     libs: {
+          //       fs: fs,
+          //       path: path,
+          //       segment: segment,
+          //       POSTAG: POSTAG
+          //     }
+          //   })
+          //   self.importor.push(worker)
+          //   console.info('result: ', fname)
+          // }
         })
         if (err) console.log(err)
-        console.log(dirs)
       })
     },
     isImageFile(filename) {
       const suffix = ['.jpg', '.jpeg', '.bmp', '.png']
       for (let suf of suffix) {
-        if (filename.includes(suf)) return true
+        if (filename.toLowerCase().includes(suf)) return true
       }
       return false
     },
@@ -97,4 +137,7 @@ export default {
 </script>
 
 <style scoped>
+.directory{
+  height: 100%;
+}
 </style>

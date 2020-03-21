@@ -1,45 +1,9 @@
 'use strict'
 
-import { app, BrowserWindow, Menu } from 'electron'
+import { app, BrowserWindow, Menu, ipcMain } from 'electron'
 import '../renderer/store'
+// const cpus = require('os').cpus().length
 
-// var handleSquirrelEvent = function() {
-//   function executeSquirrelCommand(args, done) {
-//     var updateDotExe = path.resolve(path.dirname(process.execPath),'..', 'update.exe');
-//     var child = child_process.spawn(updateDotExe, args, { detached: true });
-//     child.on('close', function(code) {
-//       done();
-//     });
-//   };
-//   function install(done) {
-//     var target = path.basename(process.execPath);
-//     executeSquirrelCommand(["--createShortcut", target], done);
-//   };
-//   function uninstall(done) {
-//     var target = path.basename(process.execPath);
-//     executeSquirrelCommand(["--removeShortcut", target], done);
-//   }
-//   var squirrelEvent = process.argv[1];
-//   switch (squirrelEvent) {
-//     case '--squirrel-install':
-//       install(app.quit);
-//       return true;
-//     case '--squirrel-updated':
-//       install(app.quit);
-//       return true;
-//     case '--squirrel-obsolete':
-//       app.quit();
-//       return true;
-//     case '--squirrel-uninstall':
-//       uninstall(app.quit);
-//       return true;
-//   }
-//   return false;
-// }
-
-// if (handleSquirrelEvent()) {
-//   return;
-// }
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -48,11 +12,13 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-let mainWindow
+let mainWindow, workerWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
-
+const workerURL = process.env.NODE_ENV === 'development'
+  ? `worker.html`
+  : `file://${__dirname}/worker.html`
 function createWindow () {
   Menu.setApplicationMenu(null)
   /**
@@ -61,6 +27,7 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
+      nodeIntegrationInWorker: true,
       webSecurity: false
     },
     allowRunningInsecureContent: true,
@@ -74,6 +41,16 @@ function createWindow () {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  workerWindow = new BrowserWindow({
+    // show: false,
+    webPreferences: { nodeIntegration: true }
+  })
+  workerWindow.on('closed', () => {
+    console.log('background window closed')
+  })
+  console.info(workerURL)
+  workerWindow.loadFile(workerURL)
 }
 
 app.on('ready', createWindow)
@@ -136,3 +113,30 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
  */
+
+function sendWindowMessage(targetWindow, message, payload) {
+  if (typeof targetWindow === 'undefined') {
+    console.log('Target window does not exist')
+    return
+  }
+  targetWindow.webContents.send(message, payload)
+}
+
+app.on('ready', async () => {
+  ipcMain.on('message-from-worker', (event, arg) => {
+    sendWindowMessage(mainWindow, 'message-from-worker', arg)
+  })
+  ipcMain.on('for-renderer', (event, arg) => {
+    sendWindowMessage(mainWindow, 'message-to-renderer', arg)
+  })
+  ipcMain.on('message-from-renderer', (event, arg) => {
+    console.info('message-to-background: ' + event + ', ' + arg)
+    // tasks.push(['message-to-background', event, arg])
+    sendWindowMessage(workerWindow, 'message-from-main', arg)
+  })
+  ipcMain.on('ready', (event, arg) => {
+    console.info('child process ready')
+    // available.push(event.sender)
+    // doIt()
+  })
+})
