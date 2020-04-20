@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import bus from './utils/Bus'
+
 export default {
   name: 'organized-panel',
   data() {
@@ -32,7 +34,8 @@ export default {
     }
   },
   mounted() {
-    this.$ipcRenderer.on('updateDirectories', this.updateLoadingDirectories)
+    bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
+    this.$ipcRenderer.on(bus.WORKER_UPDATE_IMAGE_DIRECTORY, this.updateDisplayImageList)
     this.$ipcRenderer.send('mounted', 'mounted')
     // this.initDirectory('F:/test/')
     // 持久化数据记录
@@ -43,8 +46,12 @@ export default {
     // })
   },
   methods: {
-    updateLoadingDirectories(data) {
-      console.info('update')
+    updateLoadingDirectories(dir) {
+      // 导入该文件夹中的所有图片
+      console.info('----update: ', dir)
+    },
+    updateDisplayImageList(appendFiles) {
+      console.info('recieve from worker message:', appendFiles)
     },
     importImages(evt) {
       console.log(evt.data)

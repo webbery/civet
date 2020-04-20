@@ -53,8 +53,6 @@ function createWindow () {
   workerWindow.loadFile(workerURL)
 }
 
-app.on('ready', createWindow)
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
@@ -123,15 +121,16 @@ function sendWindowMessage(targetWindow, message, payload) {
 }
 
 app.on('ready', async () => {
+  createWindow()
   ipcMain.on('message-from-worker', (event, arg) => {
-    sendWindowMessage(mainWindow, 'message-from-worker', arg)
-  })
-  ipcMain.on('for-renderer', (event, arg) => {
+    console.info('########################')
+    console.info(arg.type, arg.data)
     sendWindowMessage(mainWindow, 'message-to-renderer', arg)
   })
   ipcMain.on('message-from-renderer', (event, arg) => {
-    console.info('message-to-background: ' + event + ', ' + arg)
+    // console.info('message-to-background: ', event, arg)
     // tasks.push(['message-to-background', event, arg])
+    // console.info(workerWindow)
     sendWindowMessage(workerWindow, 'message-from-main', arg)
   })
   ipcMain.on('ready', (event, arg) => {

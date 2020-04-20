@@ -20,16 +20,20 @@
 
 <script>
 import { remote } from 'electron'
+import bus from './utils/Bus'
 
 export default {
   name: 'header-bar',
   methods: {
     onClickImport() {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-        properties: ['openDirectory']
-      }, (dir) => {
-        if (dir === undefined) return
-        this.$store.commit('updateImportDirectory', dir)
+        properties: ['openDirectory', 'openFile']
+      }).then((data) => {
+        if (data === undefined) return
+        // this.$store.commit('updateImportDirectory', dir)
+        if (data.canceled === true) return
+        bus.emit(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
+        this.$ipcRenderer.send(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
       })
     },
     onClickConfig() {
