@@ -5,7 +5,7 @@
           <el-tree :data="tagData" :props="defaultProps" ></el-tree>
       </el-tab-pane>
       <el-tab-pane label="目录" name="first" class="directory">
-          <el-tree :data="directoryData" :props="defaultProps" ></el-tree>
+          <el-tree :data="directoryData" :props="dirProps" ></el-tree>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -23,7 +23,7 @@ export default {
           label: '一级 1'
         }
       ],
-      directoryData: null,
+      directoryData: [],
       importor: []
     }
   },
@@ -47,11 +47,34 @@ export default {
   },
   methods: {
     updateLoadingDirectories(dir) {
-      // 导入该文件夹中的所有图片
+      // 从数据库中导入该文件夹中的所有图片
       console.info('----update: ', dir)
     },
     updateDisplayImageList(appendFiles) {
-      console.info('recieve from worker message:', appendFiles)
+      // console.info('recieve from worker message:', appendFiles)
+      // 存储新数据到数据库中
+      // 更新目录窗口
+      let dirs = {}
+      let updateImages = []
+      for (let item of appendFiles) {
+        if (dirs[item.path] === undefined) {
+          dirs[item.path] = []
+        }
+        dirs[item.path].push({label: item.filename})
+        updateImages.push({label: item.filename, realpath: item.path + item.filename})
+      }
+      // 更新视图共享数据
+      this.$store.dispatch('updateImageList', updateImages)
+      for (let item in this.directoryData) {
+        // console.info('***', item.label, dirs[item.label])
+        if (dirs[item.label] !== undefined) {
+          item.children.push(dirs[item.label])
+          delete dirs[item.label]
+        }
+      }
+      for (let k in dirs) {
+        this.directoryData.push({label: k, children: dirs[k]})
+      }
     },
     importImages(evt) {
       console.log(evt.data)
@@ -108,23 +131,6 @@ export default {
             self.directoryData = directoryData
             self.$store.dispatch('updateImageList', directoryData)
           }
-
-          // 启动后台工作线程, 继续加载数据
-          // for (let fname of parent) {
-          //   let worker = new Worker()
-          //   worker.postMessage({
-          //     root: dir,
-          //     filename: fname,
-          //     libs: {
-          //       fs: fs,
-          //       path: path,
-          //       segment: segment,
-          //       POSTAG: POSTAG
-          //     }
-          //   })
-          //   self.importor.push(worker)
-          //   console.info('result: ', fname)
-          // }
         })
         if (err) console.log(err)
       })

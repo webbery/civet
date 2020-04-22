@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import bus from './utils/Bus'
+
 export default {
   name: 'view-panel',
   data() {
@@ -16,6 +18,7 @@ export default {
     }
   },
   mounted() {
+    bus.on(bus.EVENT_UPDATE_DISPLAY_IMAGE, this.onUpdateImages)
   },
   computed: {
     imageList() {
@@ -33,6 +36,11 @@ export default {
     },
     onImageClick(image) {
       this.$store.dispatch('updateSelection', image)
+    },
+    onUpdateImages(updateImages) {
+      // for (let item of updateImages) {
+      //   images.push(item.realpath)
+      // }
     }
   }
 }

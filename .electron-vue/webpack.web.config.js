@@ -118,7 +118,7 @@ let webConfig = {
     }),
     new HtmlWebpackPlugin({
       filename: 'worker.html',
-      template: path.resolve(__dirname, '../src/worker.ejs'),
+      template: path.resolve(__dirname, '../src/worker.html'),
       templateParameters(compilation, assets, options) {
         return {
           compilation: compilation,

@@ -43,13 +43,12 @@ function createWindow () {
   })
 
   workerWindow = new BrowserWindow({
-    // show: false,
+    show: false,
     webPreferences: { nodeIntegration: true }
   })
   workerWindow.on('closed', () => {
     console.log('background window closed')
   })
-  console.info(workerURL)
   workerWindow.loadFile(workerURL)
 }
 
@@ -123,8 +122,8 @@ function sendWindowMessage(targetWindow, message, payload) {
 app.on('ready', async () => {
   createWindow()
   ipcMain.on('message-from-worker', (event, arg) => {
-    console.info('########################')
-    console.info(arg.type, arg.data)
+    // console.info('########################')
+    // console.info(arg.type, arg.data)
     sendWindowMessage(mainWindow, 'message-to-renderer', arg)
   })
   ipcMain.on('message-from-renderer', (event, arg) => {
