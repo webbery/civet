@@ -1,11 +1,19 @@
 <template>
   <el-container>
-    <el-header><HeaderBar></HeaderBar></el-header>
+    <el-header>
+      <HeaderBar></HeaderBar>
+    </el-header>
     <el-row type="flex" class="row-bg">
-  <el-col :span="4"><OrganizedPanel></OrganizedPanel></el-col>
-  <el-col :span="16"><ViewPanel></ViewPanel></el-col>
-  <el-col :span="4"><PropertyPanel></PropertyPanel></el-col>
-</el-row>
+      <el-col :span="4">
+        <OrganizedPanel></OrganizedPanel>
+      </el-col>
+      <el-col :span="16">
+        <ViewPanel></ViewPanel>
+      </el-col>
+      <el-col :span="4">
+        <PropertyPanel></PropertyPanel>
+      </el-col>
+    </el-row>
   </el-container>
 </template>
 
@@ -18,7 +26,10 @@ import PropertyPanel from '@/components/PropertyPanel'
 export default {
   name: 'landing-page',
   components: {
-    HeaderBar, OrganizedPanel, ViewPanel, PropertyPanel
+    HeaderBar,
+    OrganizedPanel,
+    ViewPanel,
+    PropertyPanel
   },
   mounted() {}
 }
@@ -30,5 +41,4 @@ export default {
   background-color: #b3c0d1;
   color: #333;
 }
-
 </style>

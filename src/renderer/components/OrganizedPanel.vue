@@ -4,8 +4,10 @@
       <el-tab-pane label="标签" name="second">
           <el-tree :data="tagData" :props="defaultProps" ></el-tree>
       </el-tab-pane>
-      <el-tab-pane label="目录" name="first" class="directory">
+      <el-tab-pane label="目录" name="first" class="directory" >
+        <el-scrollbar style="height:90vh;">
           <el-tree :data="directoryData" :props="dirProps" ></el-tree>
+        </el-scrollbar>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -13,6 +15,7 @@
 
 <script>
 import bus from './utils/Bus'
+import localStorage from './utils/localStorage'
 
 export default {
   name: 'organized-panel',
@@ -36,14 +39,7 @@ export default {
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
     this.$ipcRenderer.on(bus.WORKER_UPDATE_IMAGE_DIRECTORY, this.updateDisplayImageList)
-    this.$ipcRenderer.send('mounted', 'mounted')
-    // this.initDirectory('F:/test/')
-    // 持久化数据记录
-    // let levelup = require('levelup')
-    // let leveldown = require('leveldown')
-    // let db = levelup(leveldown('civet'))
-    // db.put('name', 'levelup', function (err) {
-    // })
+    this.init()
   },
   methods: {
     updateLoadingDirectories(dir) {
@@ -52,8 +48,6 @@ export default {
     },
     updateDisplayImageList(appendFiles) {
       // console.info('recieve from worker message:', appendFiles)
-      // 存储新数据到数据库中
-      // 更新目录窗口
       let dirs = {}
       let updateImages = []
       for (let item of appendFiles) {
@@ -75,11 +69,11 @@ export default {
       for (let k in dirs) {
         this.directoryData.push({label: k, children: dirs[k]})
       }
+      // 更新目录窗口
+      localStorage.set('directories', this.directoryData)
     },
-    importImages(evt) {
-      console.log(evt.data)
-      // self.$store.dispatch('updateImageList', directoryData)
-      // else self.directoryData.push({label: rootName, children: directoryData})
+    init() {
+      this.directoryData = localStorage.get('directories')
     },
     initDirectory(dir, rootName) {
       let fs = require('fs')
@@ -152,5 +146,13 @@ export default {
 <style scoped>
 .directory{
   height: 100%;
+}
+el-tab-pane {
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+.el-tabs--left .el-tabs__nav.is-left, .el-tabs--left .el-tabs__nav.is-right, .el-tabs--right .el-tabs__nav.is-left, .el-tabs--right .el-tabs__nav.is-right {
+  height: 100%;
+  overflow-y: scroll;
 }
 </style>

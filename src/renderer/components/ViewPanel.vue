@@ -1,9 +1,11 @@
 <template>
-    <div>
+    <div id="main-content">
+    <el-scrollbar style="height:95vh;">
         <div v-for="image in imageList" :key="image" class="image" @click="onImageClick(image)">
-        <el-image :src="image.realpath" lazy class="preview"></el-image>
-        <div class="name">{{image.label}}</div>
+          <el-image :src="image.realpath" lazy class="preview"></el-image>
+          <div class="name">{{image.label}}</div>
         </div>
+      </el-scrollbar>
     </div>
 </template>
 
@@ -26,16 +28,9 @@ export default {
     }
   },
   methods: {
-    initView() {
-      // 从共享状态中获取图像数据，进行显示
-      console.info('-------', this.$store.state.Picture.imageList)
-      // let images = ['file://F:/Image/DSC_2055.jpg', 'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg']
-      //   for (let item of this.$store.expandImages) {
-      //     images.push(item.realpath)
-      //   }
-    },
     onImageClick(image) {
-      this.$store.dispatch('updateSelection', image)
+      bus.emit(bus.EVENT_SELECT_IMAGE, image)
+      // 单图片显示
     },
     onUpdateImages(updateImages) {
       // for (let item of updateImages) {
@@ -51,6 +46,7 @@ export default {
 .image {
   max-width: 19%;
   display: inline-block;
+  /* display: inline-block; */
   padding: 2px;
 }
 .preview {
@@ -60,6 +56,6 @@ export default {
   /* max-width: 19%; */
   text-overflow:ellipsis;
   white-space:nowrap;
-  overflow:hidden;
+  overflow: hidden;
 }
 </style>

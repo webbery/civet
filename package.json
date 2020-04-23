@@ -66,6 +66,7 @@
     }
   },
   "dependencies": {
+    "@hiddentn/yolo.js": "^0.1.0",
     "axios": "^0.18.0",
     "electron-simple-updater": "^2.0.8",
     "element-ui": "^2.13.0",

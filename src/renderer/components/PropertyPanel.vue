@@ -6,11 +6,21 @@
 </template>
 
 <script>
+import bus from './utils/Bus'
+
 export default {
   name: 'property-panel',
-  computed: {
-    picture() {
-      return this.$store.state.Selector.picture
+  data() {
+    return {
+      picture: {realpath: ''}
+    }
+  },
+  mounted() {
+    bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
+  },
+  methods: {
+    displayProperty(image) {
+      this.picture = image
     }
   }
 }
