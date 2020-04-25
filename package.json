@@ -66,14 +66,17 @@
     }
   },
   "dependencies": {
-    "@hiddentn/yolo.js": "^0.1.0",
+    "@tensorflow/tfjs": "^0.12.4",
     "axios": "^0.18.0",
     "electron-simple-updater": "^2.0.8",
     "element-ui": "^2.13.0",
+    "get-pixels": "^3.3.2",
     "leveldown": "^5.5.1",
     "levelup": "^4.3.2",
     "lowdb": "^1.0.0",
     "segment": "^0.1.3",
+    "tfjs-yolo-tiny": "^1.0.1",
+    "tfjs-yolov3": "^1.1.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",

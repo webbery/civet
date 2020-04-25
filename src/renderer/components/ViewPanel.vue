@@ -1,8 +1,8 @@
 <template>
     <div id="main-content">
-    <el-scrollbar style="height:95vh;">
-        <div v-for="image in imageList" :key="image" class="image" @click="onImageClick(image)">
-          <el-image :src="image.realpath" lazy class="preview"></el-image>
+    <el-scrollbar style="height:96vh;">
+        <div v-for="(image,idx) in imageList" :key="idx" class="image" >
+          <el-image :src="image.realpath" lazy class="preview" @click="onImageClick($event, image)"></el-image>
           <div class="name">{{image.label}}</div>
         </div>
       </el-scrollbar>
@@ -11,12 +11,14 @@
 
 <script>
 import bus from './utils/Bus'
+// import detection from './utils/Detection'
+// import getPixes from 'get-pixels'
 
 export default {
   name: 'view-panel',
   data() {
     return {
-      urls: []
+      lastSelection: null
     }
   },
   mounted() {
@@ -28,9 +30,24 @@ export default {
     }
   },
   methods: {
-    onImageClick(image) {
+    async onImageClick(e, image) {
+      // 测试目标检测
+      // getPixes('E:/code/nodejs/civet/eagle.jpg', async function(err, pixels) {
+      //   if (err) {
+      //     console.info(err)
+      //     return
+      //   }
+      //   console.info(pixels)
+      //   const prediction = await detection.predict(pixels)
+      //   image.tags = prediction
+      // })
       bus.emit(bus.EVENT_SELECT_IMAGE, image)
-      // 单图片显示
+      // 框亮显示
+      if (this.lastSelection !== null) {
+        this.lastSelection.style.border = '3px solid white'
+      }
+      e.target.parentNode.style.border = '3px solid red'
+      this.lastSelection = e.target.parentNode
     },
     onUpdateImages(updateImages) {
       // for (let item of updateImages) {
@@ -46,11 +63,20 @@ export default {
 .image {
   max-width: 19%;
   display: inline-block;
-  /* display: inline-block; */
-  padding: 2px;
 }
 .preview {
+  border:3px solid white;
   text-align: center;
+}
+.preview .image-top {
+  display: none !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 99;
+}
+.preview:hover .image-top {
+  display: inline;
 }
 .name {
   /* max-width: 19%; */

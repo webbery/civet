@@ -1,18 +1,27 @@
 <template>
   <el-row >
       <el-col :span="4">
-        <el-button @click="onClickImport">导入</el-button>
-        <el-button @click="onClickConfig">配置</el-button>
+        <el-button @click="onClickImport" size="mini" round>导入</el-button>
+        <el-button @click="onClickConfig" size="mini" round>配置</el-button>
         </el-col>
-    <el-col :span="16">贡献者名单</el-col>
-    <el-col :span="4">
-      <el-input placeholder="请输入内容" v-model="input3" class="input-with-select">
-        <el-select v-model="select" slot="prepend" placeholder="请选择">
+    <el-col :span="6" class="custom">
+      <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider>
+    </el-col>
+    <el-col :span="8" class="custom">
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <!-- <el-breadcrumb-item :to="{ path: '/' }">视图</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="/">活动管理</a></el-breadcrumb-item> -->
+        <el-breadcrumb-item>搜索结果</el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-col>
+    <el-col :span="6">
+      <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini">
+        <el-select v-model="selection" slot="prepend" placeholder="类型">
           <el-option label="所有" value="1"></el-option>
           <el-option label="标签" value="2"></el-option>
           <el-option label="批注" value="3"></el-option>
         </el-select>
-        <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-button slot="append" icon="el-icon-search" size="mini" round></el-button>
       </el-input>
     </el-col>
   </el-row>
@@ -26,6 +35,13 @@ import JString from './utils/String'
 
 export default {
   name: 'header-bar',
+  data() {
+    return {
+      scaleValue: 20,
+      keyword: '',
+      selection: ''
+    }
+  },
   methods: {
     onClickImport() {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
@@ -47,11 +63,34 @@ export default {
     },
     onClickConfig() {
       console.info('condif')
+    },
+    scaleChange() {
+      console.info(this.scaleValue)
     }
   }
 }
 </script>
 
-<style scoped>
+<style>
+.custom .el-slider__runway {
+  height: 6px;
+  margin-top: 8px;
+  margin-bottom: 0 !important;
+  background-color: #FFFFFF;
+  border: 1px solid #DCDFE6;
+}
+.custom .el-slider__bar {
+  height: 6px;
+}
+.custom .el-slider__button {
+  width: 8px;
+  height: 8px;
+}
 
+.el-select .el-input {
+  width: 80px;
+}
+.input-with-select .el-input-group__prepend {
+  background-color: #fff;
+}
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container class="custom">
     <el-header>
       <HeaderBar></HeaderBar>
     </el-header>
@@ -40,5 +40,6 @@ export default {
   display: block;
   background-color: #b3c0d1;
   color: #333;
+  height: 30px !important;
 }
 </style>

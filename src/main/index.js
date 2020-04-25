@@ -44,7 +44,7 @@ function createWindow () {
   })
 
   workerWindow = new BrowserWindow({
-    show: false,
+    // show: false,
     webPreferences: { nodeIntegration: true }
   })
   workerWindow.on('closed', () => {
