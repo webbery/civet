@@ -1,12 +1,14 @@
 <template>
   <div class="organize">
-    <el-tabs v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane label="标签" name="second">
-          <el-tree :data="tagData" :props="defaultProps" ></el-tree>
+    <el-tabs v-model="activeName" @tab-click="handleClick" class="custom">
+      <el-tab-pane label="资源" name="second">
+        <el-scrollbar style="height:95vh;">
+          <el-tree :data="resourceData" :render-content="renderContent"></el-tree>
+        </el-scrollbar>
       </el-tab-pane>
       <el-tab-pane label="目录" name="first" class="directory" >
         <el-scrollbar style="height:90vh;">
-          <el-tree :data="directoryData" :props="dirProps" ></el-tree>
+          <el-tree :data="directoryData" ></el-tree>
         </el-scrollbar>
       </el-tab-pane>
     </el-tabs>
@@ -21,9 +23,16 @@ export default {
   name: 'organized-panel',
   data() {
     return {
-      tagData: [
+      resourceData: [
         {
-          label: '一级 1'
+          label: '分类',
+          icon: 'el-icon-suitcase',
+          children: []
+        },
+        {
+          label: '标签',
+          icon: 'el-icon-collection-tag',
+          children: []
         }
       ],
       directoryData: [],
@@ -74,6 +83,15 @@ export default {
     },
     init() {
       this.directoryData = localStorage.get('directories')
+    },
+    renderContent(h, {node, data, store}) {
+      console.info('renderContent', data)
+      return (
+        <span>
+          <i class={data.icon}></i>
+          <span> {node.label}</span>
+        </span>
+      )
     },
     initDirectory(dir, rootName) {
       let fs = require('fs')
@@ -154,5 +172,13 @@ el-tab-pane {
 .el-tabs--left .el-tabs__nav.is-left, .el-tabs--left .el-tabs__nav.is-right, .el-tabs--right .el-tabs__nav.is-left, .el-tabs--right .el-tabs__nav.is-right {
   height: 100%;
   overflow-y: scroll;
+}
+.custom .el-tabs__item{
+  line-height: 20px;
+  font-size: 12px;
+  font-weight: 300;
+}
+.custom .is-top{
+  height: 20px;
 }
 </style>

@@ -5,14 +5,10 @@
         <el-button @click="onClickConfig" size="mini" round>配置</el-button>
         </el-col>
     <el-col :span="6" class="custom">
-      <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider>
+      <el-page-header @back="goBack" content="全部"></el-page-header>
     </el-col>
     <el-col :span="8" class="custom">
-      <el-breadcrumb separator-class="el-icon-arrow-right">
-        <!-- <el-breadcrumb-item :to="{ path: '/' }">视图</el-breadcrumb-item>
-        <el-breadcrumb-item><a href="/">活动管理</a></el-breadcrumb-item> -->
-        <el-breadcrumb-item>搜索结果</el-breadcrumb-item>
-      </el-breadcrumb>
+      <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider>
     </el-col>
     <el-col :span="6">
       <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini">
@@ -74,6 +70,7 @@ export default {
 <style>
 .custom .el-slider__runway {
   height: 6px;
+  width: 50%;
   margin-top: 8px;
   margin-bottom: 0 !important;
   background-color: #FFFFFF;

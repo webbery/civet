@@ -14,7 +14,8 @@ const { VueLoaderPlugin } = require('vue-loader')
 let webConfig = {
   devtool: '#cheap-module-eval-source-map',
   entry: {
-    web: path.join(__dirname, '../src/renderer/main.js')
+    web: path.join(__dirname, '../src/renderer/main.js'),
+    worker: path.join(__dirname, '../src/main/worker.js')
   },
   module: {
     rules: [
@@ -52,7 +53,7 @@ let webConfig = {
       {
         test: /\.js$/,
         use: 'babel-loader',
-        include: [ path.resolve(__dirname, '../src/renderer') ],
+        include: [ path.resolve(__dirname, '../src/renderer'), path.resolve(__dirname, '../src/worker') ],
         exclude: /node_modules/
       },
       {
@@ -114,11 +115,12 @@ let webConfig = {
         removeAttributeQuotes: true,
         removeComments: true
       },
-      nodeModules: false
+      nodeModules: false,
+      chunks: ['renderer', 'vendor']
     }),
     new HtmlWebpackPlugin({
       filename: 'worker.html',
-      template: path.resolve(__dirname, '../src/worker.html'),
+      template: path.resolve(__dirname, '../src/worker.ejs'),
       templateParameters(compilation, assets, options) {
         return {
           compilation: compilation,
@@ -136,7 +138,8 @@ let webConfig = {
         removeAttributeQuotes: true,
         removeComments: true
       },
-      nodeModules: false
+      nodeModules: false,
+      chunks: ['worker', 'vendor']
     }),
     new webpack.DefinePlugin({
       'process.env.IS_WEB': 'true'

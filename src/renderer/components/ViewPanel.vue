@@ -2,9 +2,18 @@
     <div id="main-content">
     <el-scrollbar style="height:96vh;">
         <div v-for="(image,idx) in imageList" :key="idx" class="image" >
-          <el-image :src="image.realpath" lazy class="preview" @click="onImageClick($event, image)"></el-image>
-          <div class="name">{{image.label}}</div>
+          <el-card :body-style="{ padding: '0px' }" style="position: relative">
+            <div class="bottom clearfix">
+              <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
+            </div>
+          <el-image :src="image.realpath" lazy class="preview" @click="onImageClick($event, image)">
+          </el-image>
+          <div style="padding: 14px;">
+            <span class="name">{{image.label}}</span>
+          </div>
+        </el-card>
         </div>
+        
       </el-scrollbar>
     </div>
 </template>
@@ -59,10 +68,31 @@ export default {
 </script>
 
 <style scoped>
+.time {
+  font-size: 13px;
+  color: #999;
+}
 
+.bottom {
+  /* float: left; */
+  position: absolute;
+  bottom: 22px;
+  right: 0px;
+  z-index: 9;
+}
 .image {
   max-width: 19%;
   display: inline-block;
+}
+
+.clearfix:before,
+.clearfix:after {
+    display: table;
+    content: "";
+}
+
+.clearfix:after {
+    clear: both
 }
 .preview {
   border:3px solid white;

@@ -1,28 +1,20 @@
 # civet
 
-> An electron-vue project
+> 一个图片素材管理软件
 
-#### Build Setup
+#### 下载
 
-``` bash
-# install dependencies
-npm install
+#### 功能列表
 
-# serve with hot reload at localhost:9080
-npm run dev
+- 1. 导入
+- 2. 标签
+- 3. 搜索
+- 4. 预览
 
-# build electron application for production
-npm run build
+#### 问题反馈
 
-# run unit & end-to-end tests
-npm test
-
-
-# lint all JS/Vue component files in `src/`
-npm run lint
-
-```
+如有任何使用上的问题或建议请反馈到 https://github.com/webbery/civet/issues
 
 ---
 
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
+开发者名单：webberg
