@@ -8,6 +8,7 @@ const getters = {
 
 const mutations = {
   updateImageList(state, imageList) {
+    // {label: item.filename, realpath: item.path + item.filename}
     state.imageList = imageList
   }
 }

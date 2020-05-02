@@ -27,7 +27,7 @@
 import { remote } from 'electron'
 import bus from './utils/Bus'
 import localStorage from './utils/localStorage'
-import JString from './utils/String'
+// import JString from '@/../public/String'
 
 export default {
   name: 'header-bar',
@@ -47,8 +47,7 @@ export default {
         // this.$store.commit('updateImportDirectory', dir)
         if (data.canceled === true) return
         // 检查本地数据库中是否已经读取完当前的所有文件
-        let importsDir = localStorage.get('imports').value()
-        if (importsDir === undefined || importsDir.length === 0 || JString.findString(importsDir, data.filePaths[0]) < 0) {
+        if (!localStorage.hasDirectory(data.filePaths[0])) {
           // 如果没有就发送消息继续读取
           this.$ipcRenderer.send(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
         } else {

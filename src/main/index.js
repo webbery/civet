@@ -51,6 +51,7 @@ function createWindow () {
     console.log('background window closed')
   })
   workerWindow.loadFile(workerURL)
+  // workerWindow.loadFile(workerURL)
 }
 
 app.on('window-all-closed', () => {

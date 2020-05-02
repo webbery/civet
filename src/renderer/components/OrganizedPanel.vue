@@ -64,7 +64,7 @@ export default {
           dirs[item.path] = []
         }
         dirs[item.path].push({label: item.filename})
-        updateImages.push({label: item.filename, realpath: item.path + item.filename})
+        updateImages.push({label: item.filename, realpath: item.path + item.filename, src: item.thumbnail})
       }
       // 更新视图共享数据
       this.$store.dispatch('updateImageList', updateImages)
@@ -79,10 +79,11 @@ export default {
         this.directoryData.push({label: k, children: dirs[k]})
       }
       // 更新目录窗口
-      localStorage.set('directories', this.directoryData)
+      localStorage.addImages(appendFiles)
+      // localStorage.set('directories', this.directoryData)
     },
     init() {
-      this.directoryData = localStorage.get('directories')
+      this.directoryData = localStorage.getImagesWithDirectoryFormat()
     },
     renderContent(h, {node, data, store}) {
       console.info('renderContent', data)

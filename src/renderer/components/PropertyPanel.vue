@@ -1,7 +1,7 @@
 <template>
   <div class="property">
     <div class="preview">
-      <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div>
+      <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
       <!-- <el-image :src="picture.realpath" lazy></el-image> -->
     </div>
     <div class="tags">
@@ -34,10 +34,10 @@
       </el-col>
       <el-col :span="12">
         <div class="value">{{picture.realpath}}</div>
-        <div class="value">1280X800</div>
-        <div class="value">11kb</div>
+        <div class="value">{{picture.width}} X {{picture.height}}</div>
+        <div class="value">{{picture.size}}</div>
         <div class="value">jpg</div>
-        <div class="value">2020-03-06</div>
+        <div class="value">{{picture.datetime}}</div>
       </el-col>
     </el-row>
   </div>
@@ -50,7 +50,7 @@ export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { realpath: '' },
+      picture: { realpath: '', width: 0, height: 0, size: 0 },
       dynamicTags: [],
       inputVisible: false,
       inputValue: ''
@@ -61,6 +61,7 @@ export default {
   },
   methods: {
     displayProperty(image) {
+      console.info(image)
       this.picture = image
     },
     handleClose(tag) {

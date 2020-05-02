@@ -2,21 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>civet</title>
+    <title>WORKER</title>
     <% if (htmlWebpackPlugin.options.nodeModules) { %>
       <!-- Add `node_modules/` to global paths so `require` works properly in development -->
       <script>
         require('module').globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
       </script>
     <% } %>
-    <style>
-      .el-scrollbar__wrap {
-        overflow-x: hidden;
-      }
-    </style>
   </head>
   <body style="overflow:hidden">
-    <div id="app"></div>
+    <div id="app">WORKER</div>
     <!-- Set `__static` path to static files in production -->
     <% if (!process.browser) { %>
       <script>

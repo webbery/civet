@@ -6,7 +6,7 @@
             <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div>
-          <el-image :src="image.realpath" lazy class="preview" @click="onImageClick($event, image)">
+          <el-image :src="image.src?image.realpath:('data:image/jpg;base64,'+image.src)" lazy class="preview" @click="onImageClick($event, image)">
           </el-image>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
@@ -15,6 +15,9 @@
         </div>
         
       </el-scrollbar>
+      <div class="detail">
+
+      </div>
     </div>
 </template>
 
@@ -113,5 +116,21 @@ export default {
   text-overflow:ellipsis;
   white-space:nowrap;
   overflow: hidden;
+}
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+.detail{
+  display: none;
 }
 </style>
