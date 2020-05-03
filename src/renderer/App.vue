@@ -1,13 +1,18 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <LandingPage></LandingPage>
   </div>
 </template>
 
 <script>
-  export default {
-    name: 'civet'
+import LandingPage from '@/components/LandingPage'
+
+export default {
+  name: 'civet',
+  components: {
+    LandingPage
   }
+}
 </script>
 
 <style>

@@ -33,7 +33,7 @@ const sharp = require('sharp')
 function readDir(path) {
   fs.readdir(path, async function(err, menu) {
     if (err) return
-    let files = []
+    // let files = []
     for (let item of menu) {
       const info = fs.statSync(path + '/' + item)
       if (info.isDirectory()) {
@@ -42,13 +42,13 @@ function readDir(path) {
         if (JString.isImage(item)) {
           let keywords = JString.getNouns(path)
           keywords += JString.getNouns(item)
-          const fullpath = path + '/' + item
+          const fullpath = JString.joinPath(path, item)
           // console.info(dhash)
           const image = fs.readFileSync(fullpath)
           const tags = ExifReader.load(image)
           delete tags['MakerNote']
           // console.info(fullpath, tags)
-          let size = tags['Image Width'].value * tags['Image Height'].value * tags['Color Components'].value * tags['Bits Per Sample'].value / 8
+          let size = info.size
           let thumbnail = null
           if (size > 5 * 1024 * 1024) {
             thumbnail = tags['Thumbnail'].base64
@@ -66,22 +66,29 @@ function readDir(path) {
           // const hash = JString.dhash(image, tags['Image Width'].value, tags['Image Height'].value)
           // const hash = await imghash.hash(fullpath)
           // const hash = '1'
-          console.info(hash)
-          files.push({
+          let type = tags['format']
+          if (type === undefined) {
+            type = JString.getFormatType(item)
+          } else {
+            type = JString.getFormatType(tags['format'].description)
+          }
+          console.info(tags)
+          let fileInfo = {
             id: hash,
-            path: path + '/',
+            path: JString.joinPath(path, ''),
             filename: item,
             keyword: keywords,
-            size: size,
-            datetime: tags['DateTime'].value,
+            size: info.size,
+            datetime: tags['DateTime'].value[0],
             width: tags['Image Width'].value,
             height: tags['Image Height'].value,
-            thumbnail: thumbnail
-          })
+            thumbnail: thumbnail,
+            type: type
+          }
+          reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [fileInfo])
         }
       }
     }
-    reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, files)
   })
 }
 

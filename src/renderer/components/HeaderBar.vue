@@ -5,7 +5,7 @@
         <el-button @click="onClickConfig" size="mini" round>配置</el-button>
         </el-col>
     <el-col :span="6" class="custom">
-      <el-page-header @back="goBack" content="全部"></el-page-header>
+      <el-page-header @back="goBack" :content="viewDesc"></el-page-header>
     </el-col>
     <el-col :span="8" class="custom">
       <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider>
@@ -35,29 +35,37 @@ export default {
     return {
       scaleValue: 20,
       keyword: '',
-      selection: ''
+      selection: '',
+      viewDesc: '全部'
     }
+  },
+  mounted() {
+    bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
   },
   methods: {
     onClickImport() {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
         properties: ['openDirectory', 'openFile']
-      }).then((data) => {
+      }).then(async (data) => {
         if (data === undefined) return
         // this.$store.commit('updateImportDirectory', dir)
         if (data.canceled === true) return
         // 检查本地数据库中是否已经读取完当前的所有文件
-        if (!localStorage.hasDirectory(data.filePaths[0])) {
+        if (await localStorage.hasDirectory(data.filePaths[0]) === false) {
           // 如果没有就发送消息继续读取
           this.$ipcRenderer.send(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
         } else {
           // 否则发送消息进行显示
-          bus.emit(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
+          // bus.emit(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
         }
       })
     },
     onClickConfig() {
-      console.info('condif')
+      this.viewDesc = '配置'
+      this.$router.push({path: '/config'})
+    },
+    onUpdateHeadNav(desc) {
+      this.viewDesc = desc
     },
     scaleChange() {
       console.info(this.scaleValue)

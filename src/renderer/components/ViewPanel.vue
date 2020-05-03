@@ -6,7 +6,7 @@
             <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div>
-          <el-image :src="image.src?image.realpath:('data:image/jpg;base64,'+image.src)" lazy class="preview" @click="onImageClick($event, image)">
+          <el-image :src="image.src?image.realpath:('data:image/jpg;base64,'+image.src)" lazy class="preview" @click="onImageClick($event, image)" :preview-src-list="[image.realpath]">
           </el-image>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
@@ -15,9 +15,6 @@
         </div>
         
       </el-scrollbar>
-      <div class="detail">
-
-      </div>
     </div>
 </template>
 
@@ -38,6 +35,9 @@ export default {
   },
   computed: {
     imageList() {
+      if (this.$store.state.Picture.imageList.length > 80) {
+        return this.$store.state.Picture.imageList.slice(0, 79)
+      }
       return this.$store.state.Picture.imageList
     }
   },
@@ -53,7 +53,7 @@ export default {
       //   const prediction = await detection.predict(pixels)
       //   image.tags = prediction
       // })
-      bus.emit(bus.EVENT_SELECT_IMAGE, image)
+      bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
       // 框亮显示
       if (this.lastSelection !== null) {
         this.lastSelection.style.border = '3px solid white'

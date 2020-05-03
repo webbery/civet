@@ -1,12 +1,15 @@
 <template>
   <div class="organize">
-    <el-tabs v-model="activeName" @tab-click="handleClick" class="custom">
-      <el-tab-pane label="资源" name="second">
+    <el-tabs v-model="activeName" class="custom">
+      <el-tab-pane label="资源" name="resources">
         <el-scrollbar style="height:95vh;">
-          <el-tree :data="resourceData" :render-content="renderContent"></el-tree>
+          <el-tree :data="resourceData" :render-content="renderContent" @node-click="handleResourceClick"></el-tree>
+          <el-divider content-position="left">文件夹</el-divider>
+          <el-tree :data="folders" :render-content="renderContent" @node-click="handleFolderClick"></el-tree>
+          <el-button type="primary" icon="el-icon-plus" size="mini" circle></el-button>
         </el-scrollbar>
       </el-tab-pane>
-      <el-tab-pane label="目录" name="first" class="directory" >
+      <el-tab-pane label="本地目录" name="direcories" class="directory" >
         <el-scrollbar style="height:90vh;">
           <el-tree :data="directoryData" ></el-tree>
         </el-scrollbar>
@@ -18,25 +21,41 @@
 <script>
 import bus from './utils/Bus'
 import localStorage from './utils/localStorage'
+import JString from '@/../public/String'
 
 export default {
   name: 'organized-panel',
   data() {
     return {
+      activeName: 'resources',
       resourceData: [
         {
-          label: '分类',
-          icon: 'el-icon-suitcase',
+          label: '全部',
+          name: 'all',
+          icon: 'el-icon-folder-opened',
           children: []
         },
         {
-          label: '标签',
+          label: '未分类',
+          name: 'unclass',
+          icon: 'el-icon-copy-document',
+          children: []
+        },
+        {
+          label: '未标签',
+          name: 'untag',
           icon: 'el-icon-collection-tag',
+          children: []
+        },
+        {
+          label: '标签管理',
+          name: 'manageTag',
+          icon: 'el-icon-collection',
           children: []
         }
       ],
       directoryData: [],
-      importor: []
+      folders: [{label: '测试', icon: 'el-icon-suitcase'}]
     }
   },
   computed: {
@@ -58,20 +77,22 @@ export default {
     updateDisplayImageList(appendFiles) {
       // console.info('recieve from worker message:', appendFiles)
       let dirs = {}
-      let updateImages = []
       for (let item of appendFiles) {
         if (dirs[item.path] === undefined) {
           dirs[item.path] = []
         }
         dirs[item.path].push({label: item.filename})
-        updateImages.push({label: item.filename, realpath: item.path + item.filename, src: item.thumbnail})
+        // 更新视图共享数据
+        this.$store.dispatch('addImage', {id: item.id, label: item.filename, path: JString.joinPath(item.path, item.filename), src: item.thumbnail})
       }
-      // 更新视图共享数据
-      this.$store.dispatch('updateImageList', updateImages)
-      for (let item in this.directoryData) {
+
+      // console.info(this.directoryData)
+      for (let item of this.directoryData) {
         // console.info('***', item.label, dirs[item.label])
         if (dirs[item.label] !== undefined) {
-          item.children.push(dirs[item.label])
+          for (let files of dirs[item.label]) {
+            item.children.push({label: files.label})
+          }
           delete dirs[item.label]
         }
       }
@@ -82,8 +103,9 @@ export default {
       localStorage.addImages(appendFiles)
       // localStorage.set('directories', this.directoryData)
     },
-    init() {
-      this.directoryData = localStorage.getImagesWithDirectoryFormat()
+    async init() {
+      this.directoryData = await localStorage.getImagesWithDirectoryFormat()
+      // console.info('init: ', this.directoryData)
     },
     renderContent(h, {node, data, store}) {
       console.info('renderContent', data)
@@ -94,69 +116,20 @@ export default {
         </span>
       )
     },
-    initDirectory(dir, rootName) {
-      let fs = require('fs')
-      let path = require('path')
-      let async = require('async')
-      let Segment = require('segment')
-      let POSTAG = Segment.POSTAG
-      let segment = new Segment()
-      segment.useDefault()
-      let directoryData = []
-      let self = this
-      fs.readdir(dir, function(err, files) {
-        let parent = []
-        // 每加载1000个数据更新一次UI（待实现）
-        async.each(files, function (filename, done) {
-          const fullpath = path.join(dir, filename)
-          fs.stat(fullpath, function(err, data) {
-            let validNames = filename.match(/[\u4e00-\u9fa5]+/g)
-            let tags = []
-            if (validNames !== null) {
-              const segs = segment.doSegment(validNames.join(''))
-              for (let word of segs) {
-                if (word.p & (POSTAG.D_N | POSTAG.A_NR | POSTAG.A_NS | POSTAG.A_NT)) {
-                  tags.push(word.w)
-                }
-              }
-            }
-            if (data.isFile()) {
-              if (self.isImageFile(filename)) {
-                const item = {
-                  label: filename,
-                  type: 'img',
-                  realpath: fullpath,
-                  name: filename,
-                  tags: tags
-                }
-                directoryData.push(item)
-              }
-            } else if (data.isDirectory()) {
-              parent.push(filename)
-            }
-            if (err) console.log(err)
-            done(null)
-          })
-        }, async function() {
-          fs.appendFileSync('test.js', 'hello world')
-          console.info('append file')
-          if (self.directoryData === null) {
-            self.directoryData = directoryData
-            self.$store.dispatch('updateImageList', directoryData)
-          }
-        })
-        if (err) console.log(err)
-      })
-    },
-    isImageFile(filename) {
-      const suffix = ['.jpg', '.jpeg', '.bmp', '.png']
-      for (let suf of suffix) {
-        if (filename.toLowerCase().includes(suf)) return true
-      }
-      return false
-    },
-    handleNodeClick(node) {
+    handleResourceClick(node) {
       console.info(node)
+      switch (node.name) {
+        case 'manageTag':
+          this.$router.push({path: '/tagManager'})
+          break
+        case 'all':
+          this.$router.push({path: '/'})
+          break
+        default:
+          this.$router.push({path: '/'})
+          break
+      }
+      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, node.label)
     }
   }
 }

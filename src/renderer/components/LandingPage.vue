@@ -8,7 +8,7 @@
         <OrganizedPanel></OrganizedPanel>
       </el-col>
       <el-col :span="16">
-        <ViewPanel></ViewPanel>
+        <router-view></router-view>
       </el-col>
       <el-col :span="4">
         <PropertyPanel></PropertyPanel>
@@ -22,6 +22,7 @@ import HeaderBar from '@/components/HeaderBar'
 import OrganizedPanel from '@/components/OrganizedPanel'
 import ViewPanel from '@/components/ViewPanel'
 import PropertyPanel from '@/components/PropertyPanel'
+import TagPanel from '@/components/TagPanel'
 
 export default {
   name: 'landing-page',
@@ -29,7 +30,8 @@ export default {
     HeaderBar,
     OrganizedPanel,
     ViewPanel,
-    PropertyPanel
+    PropertyPanel,
+    TagPanel
   },
   mounted() {}
 }

@@ -33,10 +33,10 @@
         <div class="name">添加日期: </div>
       </el-col>
       <el-col :span="12">
-        <div class="value">{{picture.realpath}}</div>
+        <div class="value">{{picture.path}}</div>
         <div class="value">{{picture.width}} X {{picture.height}}</div>
         <div class="value">{{picture.size}}</div>
-        <div class="value">jpg</div>
+        <div class="value">{{picture.type}}</div>
         <div class="value">{{picture.datetime}}</div>
       </el-col>
     </el-row>
@@ -45,12 +45,13 @@
 
 <script>
 import bus from './utils/Bus'
+import localStorage from './utils/LocalStorage'
 
 export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { realpath: '', width: 0, height: 0, size: 0 },
+      picture: { path: '?', width: 0, height: 0, size: 0 },
       dynamicTags: [],
       inputVisible: false,
       inputValue: ''
@@ -60,8 +61,19 @@ export default {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
   },
   methods: {
-    displayProperty(image) {
+    async displayProperty(imageID) {
+      let getSize = (sz) => {
+        let v = sz / 1024
+        let unit = 'Kb'
+        if (v / 1024 > 1) {
+          unit = 'Mb'
+          v = v / 1024
+        }
+        return parseInt(v) + unit
+      }
+      let image = await localStorage.getImageInfo(imageID)
       console.info(image)
+      image.size = getSize(image.size)
       this.picture = image
     },
     handleClose(tag) {

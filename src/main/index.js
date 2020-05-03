@@ -44,7 +44,7 @@ function createWindow () {
   })
 
   workerWindow = new BrowserWindow({
-    // show: false,
+    show: process.env.NODE_ENV === 'development',
     webPreferences: { nodeIntegration: true }
   })
   workerWindow.on('closed', () => {

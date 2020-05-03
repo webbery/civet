@@ -76,6 +76,7 @@
     "lowdb": "^1.0.0",
     "segment": "^0.1.3",
     "sharp": "^0.25.2",
+    "snap-db": "^1.1.6",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",

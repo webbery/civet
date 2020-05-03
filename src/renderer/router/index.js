@@ -6,9 +6,18 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
+      path: '/config',
+      name: 'config-page',
+      component: require('@/components/ConfigPanel').default
+    },
+    {
+      path: '/tagManager',
+      name: 'tag-page',
+      component: require('@/components/TagPanel').default
+    },
+    {
       path: '/',
-      name: 'landing-page',
-      component: require('@/components/LandingPage').default
+      component: require('@/components/ViewPanel').default
     },
     {
       path: '*',
