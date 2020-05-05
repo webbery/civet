@@ -14,5 +14,7 @@ export default {
   EVENT_UPDATE_DISPLAY_IMAGE: 'updateDisplayImage',
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
   EVENT_SELECT_IMAGE: 'selectImage',
-  EVENT_UPDATE_NAV_DESCRIBTION: 'updateNavDesc'
+  EVENT_UPDATE_NAV_DESCRIBTION: 'updateNavDesc',
+  EVENT_DISPLAY_IMAGE: 'displayImage',
+  EVENT_DISPLAY_SEARCH_RESULT: 'showSearchResult'
 }

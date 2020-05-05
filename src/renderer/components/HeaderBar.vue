@@ -7,17 +7,13 @@
     <el-col :span="6" class="custom">
       <el-page-header @back="goBack" :content="viewDesc"></el-page-header>
     </el-col>
-    <el-col :span="8" class="custom">
-      <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider>
+    <el-col :span="9" class="custom">
+      <ViewFilter></ViewFilter>
+      <!-- <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider> -->
     </el-col>
-    <el-col :span="6">
+    <el-col :span="5">
       <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini">
-        <el-select v-model="selection" slot="prepend" placeholder="类型">
-          <el-option label="所有" value="1"></el-option>
-          <el-option label="标签" value="2"></el-option>
-          <el-option label="批注" value="3"></el-option>
-        </el-select>
-        <el-button slot="append" icon="el-icon-search" size="mini" round></el-button>
+        <el-button slot="append" icon="el-icon-search" size="mini" round @click="onSearch()"></el-button>
       </el-input>
     </el-col>
   </el-row>
@@ -27,7 +23,8 @@
 import { remote } from 'electron'
 import bus from './utils/Bus'
 import localStorage from '@/../public/LocalStorage'
-// import JString from '@/../public/String'
+import ViewFilter from '@/components/ViewFilter'
+import JString from '@/../public/String'
 
 export default {
   name: 'header-bar',
@@ -35,9 +32,11 @@ export default {
     return {
       scaleValue: 20,
       keyword: '',
-      selection: '',
       viewDesc: '全部'
     }
+  },
+  components: {
+    ViewFilter
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
@@ -69,6 +68,21 @@ export default {
     },
     goBack() {
       this.$router.back(-1)
+    },
+    async onSearch() {
+      const keywords = this.keyword.split(' ')
+      console.info('keywords', keywords)
+      const imagesID = await localStorage.findImageWithKeyword(keywords)
+      console.info('imagesID', imagesID)
+      const images = await localStorage.getImagesInfo(imagesID)
+      console.info('images', images)
+      let updateImages = []
+      for (let item of images) {
+        console.info(item)
+        updateImages.push({id: item.id, label: item.filename, path: JString.joinPath(item.path, item.filename), thumbnail: item.thumbnail})
+      }
+      this.$store.dispatch('clearImages')
+      this.$store.dispatch('updateImageList', updateImages)
     },
     scaleChange() {
       console.info(this.scaleValue)

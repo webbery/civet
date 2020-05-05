@@ -12,6 +12,13 @@ let instance = (() => {
   }
 })()
 
+const KEY_IMAGES = 'images'
+const KEY_PATHS = 'paths'
+const KEY_TAGS = 'tags'
+const KEY_WORDS2INDEX = 'words2index'
+const KEY_INDEX2WORD = 'index2word'
+const KEY_REWORD_INDEX = 'reword_index'
+
 async function getOptional(key, defaultValue) {
   try {
     let val = await instance().get(key)
@@ -49,10 +56,53 @@ async function batchPut(data) {
   }
 }
 
-const KEY_IMAGES = 'images'
-const KEY_PATHS = 'paths'
-const KEY_TAGS = 'tags'
+async function getKeywordIndx(keywords) {
+  let keyword2index = await getOptional(KEY_WORDS2INDEX, {})
+  let maxIndx = Object.keys(keyword2index).length + 1
+  let wordIndx = []
+  let shouldUpdate = false
+  let index2word = {}
+  for (let word of keywords) {
+    if (keyword2index[word] === undefined) {
+      keyword2index[word] = maxIndx
+      index2word[maxIndx.toString()] = word
+      maxIndx += 1
+      shouldUpdate = true
+    }
+    wordIndx.push(keyword2index[word])
+  }
+  if (shouldUpdate === true) {
+    put(KEY_WORDS2INDEX, keyword2index)
 
+    let index2keyword = await getOptional(KEY_INDEX2WORD, {})
+    for (let k in index2word) {
+      index2keyword[k] = index2word[k]
+    }
+    put(KEY_INDEX2WORD, index2keyword)
+  }
+  return wordIndx
+}
+
+async function getKeyword(indexes) {
+  let indx2word = await getOptional(KEY_INDEX2WORD, null)
+  if (indx2word === null) return null
+  let words = []
+  for (let idx of indexes) {
+    words.push(indx2word[idx.toString()])
+  }
+  return words
+}
+
+function getOrCreateArray(obj) {
+  if (obj === undefined) obj = []
+  return obj
+}
+
+function pushArray(array, data) {
+  array = getOrCreateArray(array)
+  array.push(data)
+  return array
+}
 export default {
   addImage: (obj) => {
     // 输入：{id: dhash, path: , filename: , keyword: []}
@@ -64,12 +114,13 @@ export default {
     // console.info('addImages IMAGE:', images)
     // 标签索引
     let tags = await getOptional(KEY_TAGS, {})
+    let rewordIndx = await getOptional(KEY_REWORD_INDEX, {})
     for (let item of objs) {
       const k = item.id
       const dir = JString.replaceAll(item.path, '\\\\', '/')
       const fullpath = JString.joinPath(dir, item.filename)
       images.push(k)
-      // console.info('size', item.size)
+      const kwIndx = await getKeywordIndx(item.keyword)
       instance().put(k, JSON.stringify({
         label: item.filename,
         path: fullpath,
@@ -79,17 +130,16 @@ export default {
         datetime: item.datetime,
         type: item.type,
         thumbnail: item.thumbnail,
-        tag: item.keyword
+        tag: kwIndx,
+        keyword: kwIndx
       }))
       if (paths[dir] === undefined) {
         paths[dir] = []
       }
       paths[dir].push(k)
-      for (let tag of item.keyword) {
-        if (tags[tag] === undefined) {
-          tags[tag] = []
-        }
-        tags[tag].push(k)
+      for (let tagIndx of kwIndx) {
+        tags[tagIndx.toString()] = pushArray(tags[tagIndx.toString()], k)
+        rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], k)
       }
     }
     // console.info(KEY_IMAGES)
@@ -106,20 +156,27 @@ export default {
     // 添加标签到数据库
     console.info('write tags:', tags)
     put(KEY_TAGS, tags)
+
+    // 构建倒排索引 [词编号: 图像ID]
+    put(KEY_REWORD_INDEX, rewordIndx)
   },
   getImageInfo: async (imageID) => {
     let image = await getOptional(imageID, null)
     return image
+  },
+  getImagesInfo: async (imagesID) => {
+    let images = []
+    for (let ids of imagesID) {
+      let image = await getOptional(ids, null)
+      images.push(image)
+    }
+    return images
   },
   removeImage: (imageID) => {},
   updateImageTags: (imageID, tags) => {},
   changeImageName: (imageID, label) => {},
   hasDirectory: async (path) => {
     const paths = await getOptional(KEY_PATHS, undefined)
-    // await instance().put('4278916d83fccf02650fb793d998de89', 'hello world')
-    await instance().put('hello', 'hello world')
-    const value = await getOptional('hello', undefined)
-    console.info('++++++++++', value, paths)
     if (paths === undefined) return false
     for (let p of paths) {
       if (p === path) {
@@ -130,15 +187,12 @@ export default {
   },
   getImagesWithDirectoryFormat: async () => {
     let paths = await getOptional(KEY_PATHS, undefined)
-    console.info('path', paths)
     if (paths === undefined) return []
     let directories = []
     for (let p in paths) {
       let children = []
       for (let identify of paths[p]) {
-        console.info('key', typeof identify)
         const image = await getOptional(identify, null)
-        console.info('image', image)
         if (image === null) continue
         children.push({label: image.label, id: identify})
       }
@@ -148,21 +202,24 @@ export default {
     return directories
   },
   getTags: async () => {
-    // 倒排索引{标签: [图片ID]}
+    // 倒排索引 {标签: [图片ID]}
     let tagIDs = await getOptional(KEY_TAGS, {})
     let tags = {}
-    for (let tag in tagIDs) {
-      let py = JString.getFirstLetter(tag)
+    const words = await getKeyword(Object.keys(tagIDs))
+    console.info('words', words)
+    for (let idx in words) {
+      let py = JString.getFirstLetter(words[idx])
       if (tags[py[0]] === undefined) tags[py[0]] = []
-      tags[py[0]].push(tag)
+      tags[py[0]].push(words[idx] + ' ' + tagIDs[idx].length)
     }
     console.info('tags: ', tags)
     return tags
   },
   addTag: async (imageID, tag) => {
     let tagIDs = await getOptional(KEY_TAGS, {})
-    if (tagIDs[tag] === undefined) tagIDs[tag] = []
-    tagIDs[tag].push(imageID)
+    let indx = await getKeywordIndx([tag])
+    if (tagIDs[indx.toString()] === undefined) tagIDs[indx.toString()] = []
+    tagIDs[indx.toString()].push(imageID)
 
     let image = await getOptional(imageID, null)
     image.tag.push(tag)
@@ -174,5 +231,13 @@ export default {
   },
   findSimilarImage: (imageID) => {},
   findImageWithTags: (tags) => {},
-  findImageWithKeyword: (keywords) => {}
+  findImageWithKeyword: async (keywords) => {
+    let indx = await getKeywordIndx(keywords)
+    let rewordIndx = await getOptional(KEY_REWORD_INDEX, {})
+    let imageIDs = []
+    for (let idx of indx) {
+      imageIDs = imageIDs.concat(rewordIndx[idx])
+    }
+    return imageIDs
+  }
 }

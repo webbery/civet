@@ -3,10 +3,10 @@
     <el-scrollbar style="height:96vh;">
         <div v-for="(image,idx) in imageList" :key="idx" class="image" >
           <el-card :body-style="{ padding: '0px' }" style="position: relative">
-            <div class="bottom clearfix">
+            <!-- <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
-            </div>
-          <el-image :src="image.src?image.realpath:('data:image/jpg;base64,'+image.src)" lazy class="preview" @click="onImageClick($event, image)">
+            </div> -->
+          <el-image :src="image.thumbnail?('data:image/jpg;base64,'+image.thumbnail):image.path" lazy class="preview" @click="onImageClick($event, image)" @dblclick="onImageDbClick(image)">
           </el-image>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
@@ -44,16 +44,6 @@ export default {
   },
   methods: {
     async onImageClick(e, image) {
-      // 测试目标检测
-      // getPixes('E:/code/nodejs/civet/eagle.jpg', async function(err, pixels) {
-      //   if (err) {
-      //     console.info(err)
-      //     return
-      //   }
-      //   console.info(pixels)
-      //   const prediction = await detection.predict(pixels)
-      //   image.tags = prediction
-      // })
       let imageInfo = await localStorage.getImageInfo(image.id)
       if (imageInfo !== null) {
         imageInfo['id'] = image.id
@@ -66,6 +56,14 @@ export default {
       }
       e.target.parentNode.style.border = '3px solid red'
       this.lastSelection = e.target.parentNode
+    },
+    async onImageDbClick(image) {
+      let imageInfo = await localStorage.getImageInfo(image.id)
+      if (imageInfo !== null) {
+        imageInfo['id'] = image.id
+        console.info('debug:', imageInfo)
+        this.$router.push({name: 'view-image', params: imageInfo})
+      }
     },
     onUpdateImages(updateImages) {
       // for (let item of updateImages) {

@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/ConfigPanel').default
     },
     {
+      path: '/viewImage',
+      name: 'view-image',
+      component: require('@/components/ImagePanel').default
+    },
+    {
       path: '/tagManager',
       name: 'tag-page',
       component: require('@/components/TagPanel').default

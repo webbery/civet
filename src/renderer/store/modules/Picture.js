@@ -13,6 +13,10 @@ const mutations = {
   },
   addImage(state, image) {
     let newFlag = false
+    if (state.imageList.length === 0) {
+      state.imageList.push(image)
+      return
+    }
     for (let img of state.imageList) {
       if (img.id === image.id) continue
       newFlag = true
@@ -20,6 +24,9 @@ const mutations = {
     if (newFlag === true) {
       state.imageList.push(image)
     }
+  },
+  clearImages(state) {
+    state.imageList = []
   }
 }
 
@@ -30,6 +37,9 @@ const actions = {
   },
   addImage ({ commit }, image) {
     commit('addImage', image)
+  },
+  clearImages ({ commit }) {
+    commit('clearImages')
   }
 }
 

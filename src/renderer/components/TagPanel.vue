@@ -25,7 +25,9 @@ export default {
   },
   methods: {
     async updateTags() {
+      console.info('show Tag')
       const tags = await localStorage.getTags()
+      console.info('show Tag 2')
       let tagsInfo = []
       for (let tagIndx in tags) {
         const tag = {
