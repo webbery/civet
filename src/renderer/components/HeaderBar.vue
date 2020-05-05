@@ -26,7 +26,7 @@
 <script>
 import { remote } from 'electron'
 import bus from './utils/Bus'
-import localStorage from './utils/localStorage'
+import localStorage from '@/../public/LocalStorage'
 // import JString from '@/../public/String'
 
 export default {
@@ -66,6 +66,9 @@ export default {
     },
     onUpdateHeadNav(desc) {
       this.viewDesc = desc
+    },
+    goBack() {
+      this.$router.back(-1)
     },
     scaleChange() {
       console.info(this.scaleValue)

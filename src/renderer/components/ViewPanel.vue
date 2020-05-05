@@ -6,7 +6,7 @@
             <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div>
-          <el-image :src="image.src?image.realpath:('data:image/jpg;base64,'+image.src)" lazy class="preview" @click="onImageClick($event, image)" :preview-src-list="[image.realpath]">
+          <el-image :src="image.src?image.realpath:('data:image/jpg;base64,'+image.src)" lazy class="preview" @click="onImageClick($event, image)">
           </el-image>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
@@ -20,6 +20,7 @@
 
 <script>
 import bus from './utils/Bus'
+import localStorage from '@/../public/LocalStorage'
 // import detection from './utils/Detection'
 // import getPixes from 'get-pixels'
 
@@ -53,7 +54,12 @@ export default {
       //   const prediction = await detection.predict(pixels)
       //   image.tags = prediction
       // })
-      bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
+      let imageInfo = await localStorage.getImageInfo(image.id)
+      if (imageInfo !== null) {
+        imageInfo['id'] = image.id
+        bus.emit(bus.EVENT_SELECT_IMAGE, imageInfo)
+      }
+
       // 框亮显示
       if (this.lastSelection !== null) {
         this.lastSelection.style.border = '3px solid white'

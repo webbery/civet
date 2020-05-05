@@ -20,7 +20,7 @@
 
 <script>
 import bus from './utils/Bus'
-import localStorage from './utils/localStorage'
+import localStorage from '@/../public/LocalStorage'
 import JString from '@/../public/String'
 
 export default {

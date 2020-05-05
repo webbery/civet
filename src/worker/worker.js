@@ -41,7 +41,8 @@ function readDir(path) {
       } else {
         if (JString.isImage(item)) {
           let keywords = JString.getNouns(path)
-          keywords += JString.getNouns(item)
+          keywords = keywords.concat(JString.getNouns(item))
+          console.info('keyword:', keywords)
           const fullpath = JString.joinPath(path, item)
           // console.info(dhash)
           const image = fs.readFileSync(fullpath)
@@ -74,7 +75,7 @@ function readDir(path) {
           }
           console.info(tags)
           let fileInfo = {
-            id: hash,
+            id: hash.toString(),
             path: JString.joinPath(path, ''),
             filename: item,
             keyword: keywords,

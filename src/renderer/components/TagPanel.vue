@@ -11,20 +11,13 @@
 </template>
 
 <script>
-import localStorage from './utils/localStorage'
+import localStorage from '@/../public/LocalStorage'
 
 export default {
   name: 'tag-page',
   data() {
     return {
-      tags: [{
-        letter: 'F',
-        name: ['风 5', '凤 4']
-      },
-      {
-        letter: 'Q',
-        name: ['气象 1', '七秀 2', '棋 3']
-      }]
+      tags: []
     }
   },
   mounted() {
@@ -34,7 +27,11 @@ export default {
     async updateTags() {
       const tags = await localStorage.getTags()
       let tagsInfo = []
-      for (let tag of tags) {
+      for (let tagIndx in tags) {
+        const tag = {
+          letter: tagIndx,
+          name: tags[tagIndx]
+        }
         tagsInfo.push(tag)
       }
       this.tags = tagsInfo

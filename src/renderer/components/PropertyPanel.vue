@@ -45,13 +45,13 @@
 
 <script>
 import bus from './utils/Bus'
-import localStorage from './utils/LocalStorage'
+import localStorage from '@/../public/LocalStorage'
 
 export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { path: '?', width: 0, height: 0, size: 0 },
+      picture: { id: null, path: '?', width: 0, height: 0, size: 0 },
       dynamicTags: [],
       inputVisible: false,
       inputValue: ''
@@ -61,7 +61,7 @@ export default {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
   },
   methods: {
-    async displayProperty(imageID) {
+    async displayProperty(imageInfo) {
       let getSize = (sz) => {
         let v = sz / 1024
         let unit = 'Kb'
@@ -71,10 +71,9 @@ export default {
         }
         return parseInt(v) + unit
       }
-      let image = await localStorage.getImageInfo(imageID)
-      console.info(image)
-      image.size = getSize(image.size)
-      this.picture = image
+      imageInfo.size = getSize(imageInfo.size)
+      this.picture = imageInfo
+      this.dynamicTags = imageInfo.tag
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
@@ -89,6 +88,7 @@ export default {
       let inputValue = this.inputValue
       if (inputValue) {
         this.dynamicTags.push(inputValue)
+        localStorage.addTag(this.picture.id, inputValue)
       }
       this.inputVisible = false
       this.inputValue = ''

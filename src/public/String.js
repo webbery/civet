@@ -1,3 +1,5 @@
+import pinyin from 'pinyin'
+
 const NLP = (function () {
   let Segment = require('segment')
   let POSTAG = Segment.POSTAG
@@ -10,12 +12,14 @@ const NLP = (function () {
       let tags = []
       if (validNames !== null) {
         const segs = segment.doSegment(validNames.join(''))
+        console.info('SEGMENT: ', segs)
         for (let word of segs) {
           if (word.p & (POSTAG.D_N | POSTAG.A_NR | POSTAG.A_NS | POSTAG.A_NT)) {
             tags.push(word.w)
           }
         }
       }
+      console.info('return SEGMENT: ', tags)
       return tags
     }
   }
@@ -61,5 +65,12 @@ export default {
     }
     root += path
     return root
+  },
+  getFirstLetter: (cn) => {
+    return pinyin(cn, {
+      heteronym: true,
+      segment: true,
+      style: pinyin.STYLE_FIRST_LETTER
+    })
   }
 }
