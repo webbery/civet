@@ -1,5 +1,6 @@
 <template>
   <div>
+    <el-color-picker v-model="color" size="mini"></el-color-picker>
     <el-select v-model="value" clearable placeholder="标签" size="mini">
     <el-option
       v-for="item in options"
@@ -29,6 +30,11 @@
 
 <script>
 export default {
-  name: 'view-filter'
+  name: 'view-filter',
+  data() {
+    return {
+      color: '#409EFF'
+    }
+  }
 }
 </script>

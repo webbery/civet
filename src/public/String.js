@@ -72,5 +72,8 @@ export default {
       segment: true,
       style: pinyin.STYLE_FIRST_LETTER
     })
+  },
+  simhash: (pixels, width, height) => {
+    // 使用dhash算法
   }
 }

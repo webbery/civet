@@ -101,14 +101,13 @@ export default {
       }
       // 更新目录窗口
       localStorage.addImages(appendFiles)
-      // localStorage.set('directories', this.directoryData)
     },
     async init() {
       this.directoryData = await localStorage.getImagesWithDirectoryFormat()
       // console.info('init: ', this.directoryData)
     },
     renderContent(h, {node, data, store}) {
-      console.info('renderContent', data)
+      // console.info('renderContent', data)
       return (
         <span>
           <i class={data.icon}></i>
@@ -117,19 +116,18 @@ export default {
       )
     },
     handleResourceClick(node) {
-      console.info(node)
+      // console.info(node)
       switch (node.name) {
         case 'manageTag':
-          this.$router.push({path: '/tagManager'})
+          this.$router.push({path: '/tagManager', query: {name: node.label}})
           break
         case 'all':
-          this.$router.push({path: '/'})
+          this.$router.push({path: '/', query: {name: node.label}})
           break
         default:
           this.$router.push({path: '/'})
           break
       }
-      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, node.label)
     }
   }
 }

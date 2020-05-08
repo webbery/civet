@@ -1,6 +1,6 @@
 import JString from '../public/String'
 import ExifReader from 'exifreader'
-// import fnv from 'fnv-plus'
+// import localStorage from '../public/LocalStorage'
 
 console.info('1111111111111111')
 // your background code here
@@ -40,8 +40,8 @@ async function readImages(fullpath) {
       if (scaleWidth < 8) scaleWidth = tags['Image Width'].value
       const scaleHeight = scaleWidth + 1
       const pixels = await sharp(fullpath)
-        .grayscale()
         .resize(scaleWidth, scaleHeight)
+        .grayscale()
         .toBuffer()
       const MD5 = crypto.createHash('md5')
       // console.info(pixels.toString())
@@ -58,7 +58,7 @@ async function readImages(fullpath) {
       console.info(tags)
       const dir = path.dirname(fullpath)
       let fileInfo = {
-        id: hash.toString(),
+        hash: hash.toString(),
         path: dir,
         filename: item,
         keyword: keywords,

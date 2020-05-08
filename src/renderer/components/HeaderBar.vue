@@ -84,6 +84,7 @@ export default {
       this.$store.dispatch('clearImages')
       console.info('updateImages:', updateImages)
       this.$store.dispatch('updateImageList', updateImages)
+      this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”'}})
     },
     scaleChange() {
       console.info(this.scaleValue)

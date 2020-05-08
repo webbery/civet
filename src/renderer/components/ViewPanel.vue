@@ -32,19 +32,32 @@ export default {
     }
   },
   async mounted() {
-    let imagesIndex = await localStorage.getImagesIndex()
-    console.info(imagesIndex)
-    let images = await localStorage.getImagesInfo(imagesIndex)
-    this.$store.dispatch('updateImageList', images)
     // bus.on(bus.EVENT_UPDATE_DISPLAY_IMAGE, this.onUpdateImages)
   },
   computed: {
     imageList() {
       // console.info('+++++++++', this.$store.state.Picture.imageList[0])
-      if (this.$store.state.Picture.imageList.length > 80) {
-        return this.$store.state.Picture.imageList.slice(0, 79)
-      }
+      // if (this.$store.state.Picture.imageList.length > 80) {
+      //   return this.$store.state.Picture.imageList.slice(0, 79)
+      // }
       return this.$store.state.Picture.imageList
+    }
+  },
+  watch: {
+    $route: async function(to, from) {
+      console.info('to: ', to, 'from:', from.path)
+      let name = to.query.name
+      if (name === undefined) {
+        name = '全部'
+      }
+      if (to.path === '/') {
+        console.info('-------------------')
+        let imagesIndex = await localStorage.getImagesIndex()
+        let images = await localStorage.getImagesInfo(imagesIndex)
+        console.info(images)
+        this.$store.dispatch('updateImageList', images)
+      }
+      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, name)
     }
   },
   methods: {
@@ -67,7 +80,7 @@ export default {
       if (imageInfo !== null) {
         imageInfo['id'] = image.id
         console.info('debug:', imageInfo)
-        this.$router.push({name: 'view-image', params: imageInfo})
+        this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.label}})
       }
     },
     dropFiles(event) {

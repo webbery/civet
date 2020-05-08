@@ -13,6 +13,7 @@ const TableTAG = 'tag'
 const TableWord2Index = 'word2index'
 const TableIndex2Word = 'index2word'
 const TableRewordIndex = 'reword_index'
+const TableHash = 'hash'
 
 // KEY
 const KeyPath = 'v' + DBVersion + '.' + TablePath
@@ -23,6 +24,7 @@ const KeyWord2Index = 'v' + DBVersion + '.' + TableWord2Index
 const KeyIndex2Word = 'v' + DBVersion + '.' + TableIndex2Word
 const KeyRewordIndex = 'v' + DBVersion + '.' + TableRewordIndex
 const KeyID = 'v' + DBVersion + '.id'
+const KeyHash = 'v' + DBVersion + '.' + TableHash
 
 let instance = (() => {
   const levelup = require('levelup')
@@ -129,7 +131,7 @@ async function getKeywordIndx(keywords) {
     }
     wordIndx.push(keyword2index[word])
   }
-  console.info('keyword2index', keyword2index, wordIndx)
+  // console.info('keyword2index', keyword2index, wordIndx)
   if (shouldUpdate === true) {
     put(KeyWord2Index, keyword2index)
 
@@ -165,8 +167,10 @@ function pushArray(array, data) {
 
 async function getImageInfoImpl(imageID) {
   let image = await getOptional(imageID, null)
+  // console.info('image', image, imageID)
   const tagsName = await getKeyword(image.tag)
   image.tag = tagsName
+  image.id = imageID
   return image
 }
 export default {
@@ -181,9 +185,10 @@ export default {
     // 标签索引
     let tags = await getOptional(KeyTag, {})
     let rewordIndx = await getOptional(KeyRewordIndex, {})
+    let simhash = await getOptional(KeyHash, {})
     for (let item of objs) {
       const k = await IDGenerator.getID()
-      console.info('image key', k)
+      // console.info('image key', k)
       const dir = JString.replaceAll(item.path, '\\\\', '/')
       const fullpath = JString.joinPath(dir, item.filename)
       images.push(k)
@@ -200,12 +205,10 @@ export default {
         tag: kwIndx,
         keyword: kwIndx
       }))
-      if (paths[dir] === undefined) {
-        paths[dir] = []
-      }
-      paths[dir].push(k)
+      paths[dir] = pushArray(paths[dir], k)
+      simhash[item.hash] = pushArray(simhash[item.hash], k)
       for (let tagIndx of kwIndx) {
-        console.info('tagIndx', tagIndx)
+        // console.info('tagIndx', tagIndx)
         tags[tagIndx.toString()] = pushArray(tags[tagIndx.toString()], k)
         rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], k)
       }
@@ -228,8 +231,11 @@ export default {
     // 构建倒排索引 [词编号: 图像ID]
     console.info('reword index:', rewordIndx)
     put(KeyRewordIndex, rewordIndx)
+    // 保存局部敏感hash[hash: 图像ID]
+    put(KeyHash, simhash)
   },
   getImageInfo: (imageID) => {
+    console.info('imageID', imageID)
     return getImageInfoImpl(imageID)
   },
   getImagesInfo: async (imagesID) => {
@@ -297,9 +303,14 @@ export default {
     let image = await getOptional(imageID, null)
     image.tag.push(tag)
 
+    let rewordIndex = await getOptional(KeyRewordIndex, {})
+    if (rewordIndex[tag] === undefined) rewordIndex[tag] = []
+    rewordIndex[tag].push(imageID)
+
     let data = {}
     data[KeyTag] = tagIDs
     data[imageID] = image
+    data[KeyRewordIndex] = rewordIndex
     batchPut(data)
   },
   findSimilarImage: (imageID) => {},

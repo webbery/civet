@@ -21,6 +21,10 @@ export default new Router({
       component: require('@/components/TagPanel').default
     },
     {
+      path: '/query',
+      component: require('@/components/ViewPanel').default
+    },
+    {
       path: '/',
       component: require('@/components/ViewPanel').default
     },

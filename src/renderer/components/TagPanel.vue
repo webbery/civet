@@ -12,6 +12,7 @@
 
 <script>
 import localStorage from '@/../public/LocalStorage'
+import bus from './utils/Bus'
 
 export default {
   name: 'tag-page',
@@ -21,13 +22,13 @@ export default {
     }
   },
   mounted() {
+    console.info(this.$route)
+    bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.$route.query.name)
     this.updateTags()
   },
   methods: {
     async updateTags() {
-      console.info('show Tag')
       const tags = await localStorage.getTags()
-      console.info('show Tag 2')
       let tagsInfo = []
       for (let tagIndx in tags) {
         const tag = {
