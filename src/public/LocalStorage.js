@@ -1,50 +1,81 @@
 // import lowdb from 'lowdb'
 // import FileSync from 'lowdb/adapters/FileSync'
-import JString from '@/../public/String'
+import JString from './String'
 
-// 图片ID采用5位自增式,使用0~9,a~z共36个符号
-// 增加一个回收ID表
+// 数据库版本
+const DBVersion = 1
+
+// 表名
+const TablePath = 'path'
+// const TableImage = 'image'
+const TableImageIndexes = 'image_index'
+const TableTAG = 'tag'
+const TableWord2Index = 'word2index'
+const TableIndex2Word = 'index2word'
+const TableRewordIndex = 'reword_index'
+
+// KEY
+const KeyPath = 'v' + DBVersion + '.' + TablePath
+// const KeyImage = 'v' + DBVersion + '.' + TableImage
+const KeyImageIndexes = 'v' + DBVersion + '.' + TableImageIndexes
+const KeyTag = 'v' + DBVersion + '.' + TableTAG
+const KeyWord2Index = 'v' + DBVersion + '.' + TableWord2Index
+const KeyIndex2Word = 'v' + DBVersion + '.' + TableIndex2Word
+const KeyRewordIndex = 'v' + DBVersion + '.' + TableRewordIndex
+const KeyID = 'v' + DBVersion + '.id'
+
 let instance = (() => {
   const levelup = require('levelup')
   const leveldown = require('leveldown')
+  // const rocksdb = require('rocksdb')
   var db
+  // let options = {'prefix_extractor': }
   // db.isCompacting = process.env.NODE_ENV === 'development'
   return function() {
-    return db || (db = levelup(leveldown('civet.db')))
+    return db || (db = levelup(leveldown('civetdb')))
   }
 })()
 
-const IDGenerator = (function (){
-  const val = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l',
-    'm','n','o','p','q','r','s','t','u','v','w','x','y','z']
+// 10进制转36进制
+const conv36 = (v) => {
+  const val = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+    'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  let ret = ''
+  let cond = v
+  do {
+    let r = cond % val.length
+    ret = val[r] + ret
+    cond = (cond - r) / val.length
+  } while (cond > 0)
+  return ret
+}
+
+// 图片ID采用5位自增式,使用0~9,a~z共36个符号
+// 增加一个回收ID表
+const IDGenerator = (function () {
   // 初始化从数据库获取最后数值(10进制)
   let startID = 0
-  const init = () => {
+  const init = async () => {
     if (startID === 0) {
-      
+      startID = await getOptional(KeyID, 0)
     }
+    return startID
   }
   // 退出时最后数值写入数据库
-  const exit = () => {}
-  // 10进制转36进制
-  const conv = (v) => {
-    return v
+  const release = async () => {
+    await put(KeyID, startID)
   }
+
   return {
-    getID: () => {
-      init()
+    getID: async () => {
+      await init()
       startID += 1
-      return conv(startID)
-    }
+      return conv36(startID)
+    },
+    release: release
   }
 })()
-
-const KEY_IMAGES = 'images'
-const KEY_PATHS = 'paths'
-const KEY_TAGS = 'tags'
-const KEY_WORDS2INDEX = 'words2index'
-const KEY_INDEX2WORD = 'index2word'
-const KEY_REWORD_INDEX = 'reword_index'
 
 async function getOptional(key, defaultValue) {
   try {
@@ -84,7 +115,7 @@ async function batchPut(data) {
 }
 
 async function getKeywordIndx(keywords) {
-  let keyword2index = await getOptional(KEY_WORDS2INDEX, {})
+  let keyword2index = await getOptional(KeyWord2Index, {})
   let maxIndx = Object.keys(keyword2index).length + 1
   let wordIndx = []
   let shouldUpdate = false
@@ -98,20 +129,21 @@ async function getKeywordIndx(keywords) {
     }
     wordIndx.push(keyword2index[word])
   }
+  console.info('keyword2index', keyword2index, wordIndx)
   if (shouldUpdate === true) {
-    put(KEY_WORDS2INDEX, keyword2index)
+    put(KeyWord2Index, keyword2index)
 
-    let index2keyword = await getOptional(KEY_INDEX2WORD, {})
+    let index2keyword = await getOptional(KeyIndex2Word, {})
     for (let k in index2word) {
       index2keyword[k] = index2word[k]
     }
-    put(KEY_INDEX2WORD, index2keyword)
+    put(KeyIndex2Word, index2keyword)
   }
   return wordIndx
 }
 
 async function getKeyword(indexes) {
-  let indx2word = await getOptional(KEY_INDEX2WORD, null)
+  let indx2word = await getOptional(KeyIndex2Word, null)
   if (indx2word === null) return null
   let words = []
   for (let idx of indexes) {
@@ -130,20 +162,28 @@ function pushArray(array, data) {
   array.push(data)
   return array
 }
+
+async function getImageInfoImpl(imageID) {
+  let image = await getOptional(imageID, null)
+  const tagsName = await getKeyword(image.tag)
+  image.tag = tagsName
+  return image
+}
 export default {
   addImage: (obj) => {
     // 输入：{id: dhash, path: , filename: , keyword: []}
   },
   addImages: async (objs) => {
-    let paths = await getOptional(KEY_PATHS, {})
+    let paths = await getOptional(KeyPath, {})
     console.info('addImages PATH:', paths)
-    let images = await getOptional(KEY_IMAGES, [])
+    let images = await getOptional(KeyImageIndexes, [])
     // console.info('addImages IMAGE:', images)
     // 标签索引
-    let tags = await getOptional(KEY_TAGS, {})
-    let rewordIndx = await getOptional(KEY_REWORD_INDEX, {})
+    let tags = await getOptional(KeyTag, {})
+    let rewordIndx = await getOptional(KeyRewordIndex, {})
     for (let item of objs) {
-      const k = item.id
+      const k = await IDGenerator.getID()
+      console.info('image key', k)
       const dir = JString.replaceAll(item.path, '\\\\', '/')
       const fullpath = JString.joinPath(dir, item.filename)
       images.push(k)
@@ -165,45 +205,50 @@ export default {
       }
       paths[dir].push(k)
       for (let tagIndx of kwIndx) {
+        console.info('tagIndx', tagIndx)
         tags[tagIndx.toString()] = pushArray(tags[tagIndx.toString()], k)
         rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], k)
       }
     }
     // console.info(KEY_IMAGES)
-    let imageSet = new Set(images)
-    put(KEY_IMAGES, imageSet)
+    // let imageSet = new Set(images)
+    put(KeyImageIndexes, images)
 
     // 路径文件排重
     for (let p in paths) {
       let files = new Set(paths[p])
       paths[p] = files
     }
-    put(KEY_PATHS, paths)
+    put(KeyPath, paths)
 
     // 添加标签到数据库
     console.info('write tags:', tags)
-    put(KEY_TAGS, tags)
+    put(KeyTag, tags)
 
     // 构建倒排索引 [词编号: 图像ID]
-    put(KEY_REWORD_INDEX, rewordIndx)
+    console.info('reword index:', rewordIndx)
+    put(KeyRewordIndex, rewordIndx)
   },
-  getImageInfo: async (imageID) => {
-    let image = await getOptional(imageID, null)
-    return image
+  getImageInfo: (imageID) => {
+    return getImageInfoImpl(imageID)
   },
   getImagesInfo: async (imagesID) => {
     let images = []
     for (let ids of imagesID) {
-      let image = await getOptional(ids, null)
+      let image = await getImageInfoImpl(ids)
       images.push(image)
     }
     return images
+  },
+  getImagesIndex: async () => {
+    let imagesIndex = await getOptional(KeyImageIndexes, [])
+    return imagesIndex
   },
   removeImage: (imageID) => {},
   updateImageTags: (imageID, tags) => {},
   changeImageName: (imageID, label) => {},
   hasDirectory: async (path) => {
-    const paths = await getOptional(KEY_PATHS, undefined)
+    const paths = await getOptional(KeyPath, undefined)
     if (paths === undefined) return false
     for (let p of paths) {
       if (p === path) {
@@ -213,7 +258,7 @@ export default {
     return false
   },
   getImagesWithDirectoryFormat: async () => {
-    let paths = await getOptional(KEY_PATHS, undefined)
+    let paths = await getOptional(KeyPath, undefined)
     if (paths === undefined) return []
     let directories = []
     for (let p in paths) {
@@ -230,7 +275,7 @@ export default {
   },
   getTags: async () => {
     // 倒排索引 {标签: [图片ID]}
-    let tagIDs = await getOptional(KEY_TAGS, {})
+    let tagIDs = await getOptional(KeyTag, {})
     let tags = {}
     const words = await getKeyword(Object.keys(tagIDs))
     // console.info('words', words, 'tags', tagIDs[1].length)
@@ -244,7 +289,7 @@ export default {
     return tags
   },
   addTag: async (imageID, tag) => {
-    let tagIDs = await getOptional(KEY_TAGS, {})
+    let tagIDs = await getOptional(KeyTag, {})
     let indx = await getKeywordIndx([tag])
     if (tagIDs[indx.toString()] === undefined) tagIDs[indx.toString()] = []
     tagIDs[indx.toString()].push(imageID)
@@ -253,7 +298,7 @@ export default {
     image.tag.push(tag)
 
     let data = {}
-    data[KEY_TAGS] = tagIDs
+    data[KeyTag] = tagIDs
     data[imageID] = image
     batchPut(data)
   },
@@ -261,11 +306,18 @@ export default {
   findImageWithTags: (tags) => {},
   findImageWithKeyword: async (keywords) => {
     let indx = await getKeywordIndx(keywords)
-    let rewordIndx = await getOptional(KEY_REWORD_INDEX, {})
+    console.info(indx)
+    let rewordIndx = await getOptional(KeyRewordIndex, {})
+    console.info('rewordIndx', rewordIndx)
     let imageIDs = []
     for (let idx of indx) {
+      console.info(idx)
       imageIDs = imageIDs.concat(rewordIndx[idx])
     }
+    console.info('imageIDs', imageIDs)
     return imageIDs
+  },
+  release: async () => {
+    await IDGenerator.release()
   }
 }

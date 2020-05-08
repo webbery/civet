@@ -31,12 +31,16 @@ export default {
       lastSelection: null
     }
   },
-  mounted() {
-    bus.on(bus.EVENT_UPDATE_DISPLAY_IMAGE, this.onUpdateImages)
+  async mounted() {
+    let imagesIndex = await localStorage.getImagesIndex()
+    console.info(imagesIndex)
+    let images = await localStorage.getImagesInfo(imagesIndex)
+    this.$store.dispatch('updateImageList', images)
+    // bus.on(bus.EVENT_UPDATE_DISPLAY_IMAGE, this.onUpdateImages)
   },
   computed: {
     imageList() {
-      console.info('+++++++++', this.$store.state.Picture.imageList[0])
+      // console.info('+++++++++', this.$store.state.Picture.imageList[0])
       if (this.$store.state.Picture.imageList.length > 80) {
         return this.$store.state.Picture.imageList.slice(0, 79)
       }

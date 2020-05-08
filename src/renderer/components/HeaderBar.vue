@@ -12,7 +12,7 @@
       <!-- <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider> -->
     </el-col>
     <el-col :span="5">
-      <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini">
+      <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onSearch()">
         <el-button slot="append" icon="el-icon-search" size="mini" round @click="onSearch()"></el-button>
       </el-input>
     </el-col>

@@ -54,7 +54,7 @@ function createWindow () {
   // workerWindow.loadFile(workerURL)
 }
 
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
