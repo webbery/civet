@@ -1,5 +1,5 @@
 <template>
-    <div id="main-content">
+    <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
     <el-scrollbar style="height:96vh;">
         <div v-for="(image,idx) in imageList" :key="idx" class="image" >
           <el-card :body-style="{ padding: '0px' }" style="position: relative">
@@ -36,6 +36,7 @@ export default {
   },
   computed: {
     imageList() {
+      console.info('+++++++++', this.$store.state.Picture.imageList[0])
       if (this.$store.state.Picture.imageList.length > 80) {
         return this.$store.state.Picture.imageList.slice(0, 79)
       }
@@ -64,6 +65,20 @@ export default {
         console.info('debug:', imageInfo)
         this.$router.push({name: 'view-image', params: imageInfo})
       }
+    },
+    dropFiles(event) {
+      let files = event.dataTransfer.files
+      if (files.length > 0) {
+        this.$ipcRenderer.send(bus.EVENT_DROP_IMAGES, files)
+      }
+    },
+    dragEnter(event) {
+      console.info('drag enter')
+    },
+    allowDrop(e) {
+      console.info('allow drop')
+      e.stopPropagation()
+      e.preventDefault()
     },
     onUpdateImages(updateImages) {
       // for (let item of updateImages) {

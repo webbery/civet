@@ -24,7 +24,7 @@ import { remote } from 'electron'
 import bus from './utils/Bus'
 import localStorage from '@/../public/LocalStorage'
 import ViewFilter from '@/components/ViewFilter'
-import JString from '@/../public/String'
+// import JString from '@/../public/String'
 
 export default {
   name: 'header-bar',
@@ -77,11 +77,12 @@ export default {
       const images = await localStorage.getImagesInfo(imagesID)
       console.info('images', images)
       let updateImages = []
-      for (let item of images) {
-        console.info(item)
-        updateImages.push({id: item.id, label: item.filename, path: JString.joinPath(item.path, item.filename), thumbnail: item.thumbnail})
+      for (let idx in images) {
+        const item = images[idx]
+        updateImages.push({id: imagesID[idx], label: item.label, path: item.path, thumbnail: item.thumbnail})
       }
       this.$store.dispatch('clearImages')
+      console.info('updateImages:', updateImages)
       this.$store.dispatch('updateImageList', updateImages)
     },
     scaleChange() {

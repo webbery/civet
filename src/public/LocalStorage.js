@@ -2,6 +2,8 @@
 // import FileSync from 'lowdb/adapters/FileSync'
 import JString from '@/../public/String'
 
+// 图片ID采用5位自增式,使用0~9,a~z共36个符号
+// 增加一个回收ID表
 let instance = (() => {
   const levelup = require('levelup')
   const leveldown = require('leveldown')
@@ -9,6 +11,31 @@ let instance = (() => {
   // db.isCompacting = process.env.NODE_ENV === 'development'
   return function() {
     return db || (db = levelup(leveldown('civet.db')))
+  }
+})()
+
+const IDGenerator = (function (){
+  const val = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l',
+    'm','n','o','p','q','r','s','t','u','v','w','x','y','z']
+  // 初始化从数据库获取最后数值(10进制)
+  let startID = 0
+  const init = () => {
+    if (startID === 0) {
+      
+    }
+  }
+  // 退出时最后数值写入数据库
+  const exit = () => {}
+  // 10进制转36进制
+  const conv = (v) => {
+    return v
+  }
+  return {
+    getID: () => {
+      init()
+      startID += 1
+      return conv(startID)
+    }
   }
 })()
 
@@ -206,11 +233,12 @@ export default {
     let tagIDs = await getOptional(KEY_TAGS, {})
     let tags = {}
     const words = await getKeyword(Object.keys(tagIDs))
-    console.info('words', words)
+    // console.info('words', words, 'tags', tagIDs[1].length)
     for (let idx in words) {
       let py = JString.getFirstLetter(words[idx])
       if (tags[py[0]] === undefined) tags[py[0]] = []
-      tags[py[0]].push(words[idx] + ' ' + tagIDs[idx].length)
+      // console.info('tag idx', idx + 1, tagIDs[(parseInt(idx) + 1)])
+      tags[py[0]].push(words[idx] + ' ' + tagIDs[(parseInt(idx) + 1)].length)
     }
     console.info('tags: ', tags)
     return tags

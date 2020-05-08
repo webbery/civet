@@ -12,6 +12,7 @@ export default {
   },
   EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY: 'updateImportDirectory',
   EVENT_UPDATE_DISPLAY_IMAGE: 'updateDisplayImage',
+  EVENT_DROP_IMAGES: 'dropImages',
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
   EVENT_SELECT_IMAGE: 'selectImage',
   EVENT_UPDATE_NAV_DESCRIBTION: 'updateNavDesc',
