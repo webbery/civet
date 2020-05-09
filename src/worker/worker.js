@@ -1,6 +1,7 @@
 import JString from '../public/String'
+import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
-// import localStorage from '../public/LocalStorage'
+import localStorage from './LocalStorage'
 
 console.info('1111111111111111')
 // your background code here
@@ -17,6 +18,15 @@ const path = require('path')
 //   ipcRenderer.send('message-from-worker', process.pid + ': ' + value)
 // }
 
+const ReplyType = {
+  WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
+  IS_DIRECTORY_EXIST: 'isDirectoryExist',
+  REPLY_IMAGES_DIRECTORY: 'replyImagesWithDirectory',
+  REPLY_IMAGES_INFO: 'replyImagesInfo',
+  REPLY_IMAGE_INFO: 'replyImageInfo',
+  REPLY_ALL_TAGS: 'replyAllTags'
+}
+
 async function readImages(fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
@@ -24,13 +34,13 @@ async function readImages(fullpath) {
   } else {
     const item = path.basename(fullpath)
     if (JString.isImage(item)) {
-      let keywords = JString.getNouns(fullpath)
+      let keywords = NLP.getNouns(fullpath)
       console.info('keyword:', keywords)
       // console.info(dhash)
       const image = fs.readFileSync(fullpath)
       const tags = ExifReader.load(image)
       delete tags['MakerNote']
-      // console.info(fullpath, tags)
+      console.info(fullpath, tags, info)
       let size = info.size
       let thumbnail = null
       if (size > 5 * 1024 * 1024) {
@@ -55,7 +65,12 @@ async function readImages(fullpath) {
       } else {
         type = JString.getFormatType(tags['format'].description)
       }
-      console.info(tags)
+      let datetime = tags['DateTime']
+      if (datetime === undefined) {
+        datetime = info.atime.toString()
+      } else {
+        datetime = datetime.value[0]
+      }
       const dir = path.dirname(fullpath)
       let fileInfo = {
         hash: hash.toString(),
@@ -63,12 +78,14 @@ async function readImages(fullpath) {
         filename: item,
         keyword: keywords,
         size: info.size,
-        datetime: tags['DateTime'].value[0],
+        datetime: datetime,
         width: tags['Image Width'].value,
         height: tags['Image Height'].value,
         thumbnail: thumbnail,
         type: type
       }
+      // 更新目录窗口
+      localStorage.addImages([fileInfo])
       reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [fileInfo])
     }
   }
@@ -93,33 +110,49 @@ function reply2Renderer(type, value) {
   ipcRenderer.send('message-from-worker', {type: type, data: value})
 }
 
-const MessageType = {
-  EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY: 'updateImportDirectory',
-  EVENT_LOAD_IMAGES: 'dropImages'
+const messageProcessor = {
+  'addImagesByDirectory': readDir,
+  'addImagesByPaths': (data) => {
+    for (let fullpath of data) {
+      readImages(fullpath)
+    }
+  },
+  'hasDirectory': async (data) => {
+    let result = await localStorage.hasDirectory(data)
+    reply2Renderer(ReplyType.IS_DIRECTORY_EXIST, result)
+  },
+  'getImagesWithDirectoryFormat': async (data) => {
+    let result = await localStorage.getImagesWithDirectoryFormat()
+    reply2Renderer(ReplyType.REPLY_IMAGES_DIRECTORY, result)
+  },
+  'getImagesInfo': async (data) => {
+    let imagesIndex = []
+    if (data === undefined) {
+      // 全部图片信息
+      imagesIndex = await localStorage.getImagesIndex()
+    }
+    let images = await localStorage.getImagesInfo(imagesIndex)
+    reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
+  },
+  'getImageInfo': async (imageID) => {
+    let image = await localStorage.getImageInfo(imageID)
+    reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
+  },
+  'addTag': async (data) => {
+    await localStorage.addTag(data.imageID, data.imageID.tagName)
+  },
+  'getAllTags': async (data) => {
+    let allTags = await localStorage.getTags()
+    reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
+  }
 }
-const ReplyType = {
-  WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList'
-}
+
 // if message is received, pass it back to the renderer via the main thread
 ipcRenderer.on('message-from-main', (event, arg) => {
   console.info('==================')
   console.info('arg', arg)
   console.info('==================')
-  let data = arg.data
-  switch (arg.type) {
-    case MessageType.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY:
-      // 后台读取目录中的数据信息
-      readDir(data)
-      break
-    case MessageType.EVENT_LOAD_IMAGES:
-      readImages(data)
-      break
-    default:
-      break
-  }
-  // log('task finish')
-  // ipcRenderer.send('for-renderer', process.pid + ': reply to ' + arg)
-  // ready()
+  messageProcessor[arg.type](arg.data)
 })
 
 ready()

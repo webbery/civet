@@ -22,9 +22,8 @@
 <script>
 import { remote } from 'electron'
 import bus from './utils/Bus'
-import localStorage from '@/../public/LocalStorage'
 import ViewFilter from '@/components/ViewFilter'
-// import JString from '@/../public/String'
+import Service from '@/components/utils/Service'
 
 export default {
   name: 'header-bar',
@@ -50,9 +49,9 @@ export default {
         // this.$store.commit('updateImportDirectory', dir)
         if (data.canceled === true) return
         // 检查本地数据库中是否已经读取完当前的所有文件
-        if (await localStorage.hasDirectory(data.filePaths[0]) === false) {
+        if (await this.$ipcRenderer.get(Service.IS_DIRECTORY_EXIST, data.filePaths[0]) === false) {
           // 如果没有就发送消息继续读取
-          this.$ipcRenderer.send(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
+          this.$ipcRenderer.send(Service.ADD_IMAGES_BY_DIRECORY, data.filePaths[0])
         } else {
           // 否则发送消息进行显示
           // bus.emit(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
@@ -72,9 +71,9 @@ export default {
     async onSearch() {
       const keywords = this.keyword.split(' ')
       console.info('keywords', keywords)
-      const imagesID = await localStorage.findImageWithKeyword(keywords)
+      const imagesID = await this.$ipcRenderer.get(Service.FIND_IMAGES_BY_KEYWORD, keywords)
       console.info('imagesID', imagesID)
-      const images = await localStorage.getImagesInfo(imagesID)
+      const images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO, imagesID)
       console.info('images', images)
       let updateImages = []
       for (let idx in images) {

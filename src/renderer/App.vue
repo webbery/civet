@@ -6,15 +6,11 @@
 
 <script>
 import LandingPage from '@/components/LandingPage'
-import localStorage from '@/../public/LocalStorage'
 
 export default {
   name: 'civet',
   components: {
     LandingPage
-  },
-  beforeDestroy: async () => {
-    await localStorage.release()
   }
 }
 </script>

@@ -2,7 +2,7 @@
     <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
     <el-scrollbar style="height:96vh;">
         <div v-for="(image,idx) in imageList" :key="idx" class="image" >
-          <el-card :body-style="{ padding: '0px' }" style="position: relative">
+          <el-card :body-style="{ padding: '0px' }" style="position: relative" @dragend="dragEnd($event)">
             <!-- <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div> -->
@@ -20,19 +20,24 @@
 
 <script>
 import bus from './utils/Bus'
-import localStorage from '@/../public/LocalStorage'
-// import detection from './utils/Detection'
+// import localStorage from '@/../public/LocalStorage'
+import Service from './utils/Service'
 // import getPixes from 'get-pixels'
 
 export default {
   name: 'view-panel',
   data() {
     return {
+      firstLoad: true,
       lastSelection: null
     }
   },
   async mounted() {
-    // bus.on(bus.EVENT_UPDATE_DISPLAY_IMAGE, this.onUpdateImages)
+    console.info('mounted')
+    if (this.firstLoad === true) {
+      this.firstLoad = false
+      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, '全部')
+    }
   },
   computed: {
     imageList() {
@@ -51,10 +56,8 @@ export default {
         name = '全部'
       }
       if (to.path === '/') {
-        console.info('-------------------')
-        let imagesIndex = await localStorage.getImagesIndex()
-        let images = await localStorage.getImagesInfo(imagesIndex)
-        console.info(images)
+        let images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO)
+        // console.info(images)
         this.$store.dispatch('updateImageList', images)
       }
       bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, name)
@@ -62,7 +65,8 @@ export default {
   },
   methods: {
     async onImageClick(e, image) {
-      let imageInfo = await localStorage.getImageInfo(image.id)
+      console.info(image)
+      let imageInfo = await this.$ipcRenderer.get(Service.GET_IMAGE_INFO, image.id)
       if (imageInfo !== null) {
         imageInfo['id'] = image.id
         bus.emit(bus.EVENT_SELECT_IMAGE, imageInfo)
@@ -76,7 +80,7 @@ export default {
       this.lastSelection = e.target.parentNode
     },
     async onImageDbClick(image) {
-      let imageInfo = await localStorage.getImageInfo(image.id)
+      let imageInfo = await this.$ipcRenderer.get(Service.GET_IMAGE_INFO, image.id)
       if (imageInfo !== null) {
         imageInfo['id'] = image.id
         console.info('debug:', imageInfo)
@@ -85,12 +89,16 @@ export default {
     },
     dropFiles(event) {
       let files = event.dataTransfer.files
-      if (files.length > 0) {
-        this.$ipcRenderer.send(bus.EVENT_DROP_IMAGES, files)
+      let paths = []
+      for (let item of files) {
+        paths.push(item.path)
+      }
+      if (paths.length > 0) {
+        this.$ipcRenderer.send(bus.EVENT_DROP_IMAGES, paths)
       }
     },
-    dragEnter(event) {
-      console.info('drag enter')
+    dragEnd(event) {
+      console.info('dragEnd', event.dataTransfer)
     },
     allowDrop(e) {
       console.info('allow drop')

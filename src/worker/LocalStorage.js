@@ -1,6 +1,8 @@
 // import lowdb from 'lowdb'
 // import FileSync from 'lowdb/adapters/FileSync'
-import JString from './String'
+import JString from '../public/String'
+import NLP from '../public/NLP'
+// import logger from './Logger'
 
 // 数据库版本
 const DBVersion = 1
@@ -73,6 +75,7 @@ const IDGenerator = (function () {
     getID: async () => {
       await init()
       startID += 1
+      put(KeyID, startID)
       return conv36(startID)
     },
     release: release
@@ -167,7 +170,7 @@ function pushArray(array, data) {
 
 async function getImageInfoImpl(imageID) {
   let image = await getOptional(imageID, null)
-  // console.info('image', image, imageID)
+  console.info('image', image, imageID)
   const tagsName = await getKeyword(image.tag)
   image.tag = tagsName
   image.id = imageID
@@ -240,6 +243,7 @@ export default {
   },
   getImagesInfo: async (imagesID) => {
     let images = []
+    console.info('logger.info')
     for (let ids of imagesID) {
       let image = await getImageInfoImpl(ids)
       images.push(image)
@@ -248,6 +252,7 @@ export default {
   },
   getImagesIndex: async () => {
     let imagesIndex = await getOptional(KeyImageIndexes, [])
+    console.info('all images id', imagesIndex)
     return imagesIndex
   },
   removeImage: (imageID) => {},
@@ -286,7 +291,7 @@ export default {
     const words = await getKeyword(Object.keys(tagIDs))
     // console.info('words', words, 'tags', tagIDs[1].length)
     for (let idx in words) {
-      let py = JString.getFirstLetter(words[idx])
+      let py = NLP.getFirstLetter(words[idx])
       if (tags[py[0]] === undefined) tags[py[0]] = []
       // console.info('tag idx', idx + 1, tagIDs[(parseInt(idx) + 1)])
       tags[py[0]].push(words[idx] + ' ' + tagIDs[(parseInt(idx) + 1)].length)

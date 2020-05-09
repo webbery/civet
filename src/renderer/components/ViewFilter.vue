@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-color-picker v-model="color" size="mini"></el-color-picker>
+    <span><el-color-picker v-model="color" size="mini"></el-color-picker></span>
     <el-select v-model="value" clearable placeholder="标签" size="mini">
     <el-option
       v-for="item in options"

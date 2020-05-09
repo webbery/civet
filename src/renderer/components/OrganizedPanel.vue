@@ -20,8 +20,8 @@
 
 <script>
 import bus from './utils/Bus'
-import localStorage from '@/../public/LocalStorage'
 import JString from '@/../public/String'
+import Service from '@/components/utils/Service'
 
 export default {
   name: 'organized-panel',
@@ -66,7 +66,7 @@ export default {
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
-    this.$ipcRenderer.on(bus.WORKER_UPDATE_IMAGE_DIRECTORY, this.updateDisplayImageList)
+    this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.updateDisplayImageList)
     this.init()
   },
   methods: {
@@ -74,7 +74,8 @@ export default {
       // 从数据库中导入该文件夹中的所有图片
       console.info('----update: ', dir)
     },
-    updateDisplayImageList(appendFiles) {
+    updateDisplayImageList(error, appendFiles) {
+      if (error) console.log(error)
       // console.info('recieve from worker message:', appendFiles)
       let dirs = {}
       for (let item of appendFiles) {
@@ -99,12 +100,9 @@ export default {
       for (let k in dirs) {
         this.directoryData.push({label: k, children: dirs[k]})
       }
-      // 更新目录窗口
-      localStorage.addImages(appendFiles)
     },
     async init() {
-      this.directoryData = await localStorage.getImagesWithDirectoryFormat()
-      // console.info('init: ', this.directoryData)
+      this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)

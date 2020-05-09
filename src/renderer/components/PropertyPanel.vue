@@ -45,7 +45,7 @@
 
 <script>
 import bus from './utils/Bus'
-import localStorage from '@/../public/LocalStorage'
+import Service from './utils/Service'
 
 export default {
   name: 'property-panel',
@@ -88,7 +88,7 @@ export default {
       let inputValue = this.inputValue
       if (inputValue) {
         this.dynamicTags.push(inputValue)
-        localStorage.addTag(this.picture.id, inputValue)
+        this.$ipcRender.send(Service.ADD_TAG, {imageID: this.picture.id, tagName: inputValue})
       }
       this.inputVisible = false
       this.inputValue = ''

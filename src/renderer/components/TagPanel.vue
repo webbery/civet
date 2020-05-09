@@ -11,8 +11,8 @@
 </template>
 
 <script>
-import localStorage from '@/../public/LocalStorage'
 import bus from './utils/Bus'
+import Service from './utils/Service'
 
 export default {
   name: 'tag-page',
@@ -22,13 +22,12 @@ export default {
     }
   },
   mounted() {
-    console.info(this.$route)
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.$route.query.name)
     this.updateTags()
   },
   methods: {
     async updateTags() {
-      const tags = await localStorage.getTags()
+      const tags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS)
       let tagsInfo = []
       for (let tagIndx in tags) {
         const tag = {
