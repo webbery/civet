@@ -1,8 +1,8 @@
 <template>
     <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
     <el-scrollbar style="height:96vh;">
-        <div v-for="(image,idx) in imageList" :key="idx" class="image" >
-          <el-card :body-style="{ padding: '0px' }" style="position: relative" @dragend="dragEnd($event)">
+        <div v-for="(image,idx) in imageList" :key="idx" class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
+          <el-card :body-style="{ padding: '0px' }" style="position: relative" >
             <!-- <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div> -->
@@ -36,7 +36,7 @@ export default {
     console.info('mounted')
     if (this.firstLoad === true) {
       this.firstLoad = false
-      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, '全部')
+      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
     }
   },
   computed: {
@@ -60,7 +60,7 @@ export default {
         // console.info(images)
         this.$store.dispatch('updateImageList', images)
       }
-      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, name)
+      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
     }
   },
   methods: {
@@ -94,16 +94,21 @@ export default {
         paths.push(item.path)
       }
       if (paths.length > 0) {
-        this.$ipcRenderer.send(bus.EVENT_DROP_IMAGES, paths)
+        this.$ipcRenderer.send(Service.ADD_IMAGES_BY_PATHS, paths)
       }
+    },
+    dragStart(event) {
+      console.info('drag start')
+      event.dataTransfer.setData('my-info', 'file://F:/Image/N1NtaWlwTDRsa0xTbnpiNjlOVTVLbjNGTDR0NGRDTk9QcVl3YjVnanEvL3NlQmRaREpIbjlnPT0.jpg')
+      // event.dataTransfer.setData('application/octet-stream', 'file://F:/Image/N1NtaWlwTDRsa0xTbnpiNjlOVTVLbjNGTDR0NGRDTk9QcVl3YjVnanEvL3NlQmRaREpIbjlnPT0.jpg')
+      // event.dataTransfer.effectAllowed = 'copy'
     },
     dragEnd(event) {
       console.info('dragEnd', event.dataTransfer)
-    },
-    allowDrop(e) {
-      console.info('allow drop')
-      e.stopPropagation()
-      e.preventDefault()
+      // event.preventDefault()
+      // event.stopPropagation()
+      const url = event.dataTransfer.getData('my-info')
+      console.info('copy URI:', url)
     },
     onUpdateImages(updateImages) {
       // for (let item of updateImages) {

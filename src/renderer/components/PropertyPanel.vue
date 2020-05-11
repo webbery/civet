@@ -33,7 +33,7 @@
         <div class="name">添加日期: </div>
       </el-col>
       <el-col :span="12">
-        <div class="value">{{picture.path}}</div>
+        <div class="value"><a href="javascript:void(0);" @click="openFolder()">{{picture.path}}</a></div>
         <div class="value">{{picture.width}} X {{picture.height}}</div>
         <div class="value">{{picture.size}}</div>
         <div class="value">{{picture.type}}</div>
@@ -51,7 +51,7 @@ export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, path: '?', width: 0, height: 0, size: 0 },
+      picture: { id: null, path: '', width: 0, height: 0, size: 0 },
       dynamicTags: [],
       inputVisible: false,
       inputValue: ''
@@ -88,10 +88,16 @@ export default {
       let inputValue = this.inputValue
       if (inputValue) {
         this.dynamicTags.push(inputValue)
-        this.$ipcRender.send(Service.ADD_TAG, {imageID: this.picture.id, tagName: inputValue})
+        this.$ipcRenderer.send(Service.ADD_TAG, {imageID: this.picture.id, tagName: inputValue})
       }
       this.inputVisible = false
       this.inputValue = ''
+    },
+    openFolder() {
+      const exec = require('child_process').exec
+      const path = require('path')
+      console.info('explorer /select,' + path.resolve(this.picture.path))
+      exec('explorer /select, ' + path.resolve(this.picture.path))
     }
   }
 }

@@ -4,9 +4,11 @@
       <el-tab-pane label="资源" name="resources">
         <el-scrollbar style="height:95vh;">
           <el-tree :data="resourceData" :render-content="renderContent" @node-click="handleResourceClick"></el-tree>
-          <el-divider content-position="left">文件夹</el-divider>
+          <el-row type="flex">
+          <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类文件夹</legend></fieldset></el-col>
+          <el-col :span="2"><span class="noselection" @click="onAddFolder()">+</span></el-col>
+          </el-row>
           <el-tree :data="folders" :render-content="renderContent" @node-click="handleFolderClick"></el-tree>
-          <el-button type="primary" icon="el-icon-plus" size="mini" circle></el-button>
         </el-scrollbar>
       </el-tab-pane>
       <el-tab-pane label="本地目录" name="direcories" class="directory" >
@@ -117,15 +119,18 @@ export default {
       // console.info(node)
       switch (node.name) {
         case 'manageTag':
-          this.$router.push({path: '/tagManager', query: {name: node.label}})
+          this.$router.push({path: '/tagManager', query: {name: node.label, cmd: 'manage-tag'}})
           break
         case 'all':
-          this.$router.push({path: '/', query: {name: node.label}})
+          this.$router.push({path: '/', query: {name: node.label, cmd: 'display-all'}})
           break
         default:
-          this.$router.push({path: '/'})
+          this.$router.push({path: '/', query: {cmd: 'display-all'}})
           break
       }
+    },
+    onAddFolder() {
+      // 添加一个分类文件夹
     }
   }
 }
@@ -150,5 +155,20 @@ el-tab-pane {
 }
 .custom .is-top{
   height: 20px;
+}
+.hor-line {
+  /* font-size: 14px; */
+  color: #999;
+  border: 0;
+  border-top: 1px solid #ccc;
+  padding: 0;
+}
+.inner{
+  margin: 0 20px;
+  padding: 0 10px;
+}
+.noselection{
+  color: #999;
+  -webkit-user-select: none;
 }
 </style>

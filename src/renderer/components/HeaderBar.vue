@@ -8,8 +8,8 @@
       <el-page-header @back="goBack" :content="viewDesc"></el-page-header>
     </el-col>
     <el-col :span="9" class="custom">
-      <ViewFilter></ViewFilter>
-      <!-- <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider> -->
+      <!-- <ViewFilter></ViewFilter> -->
+      <component :is="comName"></component>
     </el-col>
     <el-col :span="5">
       <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onSearch()">
@@ -23,19 +23,22 @@
 import { remote } from 'electron'
 import bus from './utils/Bus'
 import ViewFilter from '@/components/ViewFilter'
+import ImageOperator from '@/components/ImageOperator'
 import Service from '@/components/utils/Service'
 
 export default {
   name: 'header-bar',
   data() {
     return {
+      comName: ViewFilter,
       scaleValue: 20,
       keyword: '',
       viewDesc: '全部'
     }
   },
   components: {
-    ViewFilter
+    ViewFilter,
+    ImageOperator
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
@@ -62,8 +65,18 @@ export default {
       this.viewDesc = '配置'
       this.$router.push({path: '/config'})
     },
-    onUpdateHeadNav(desc) {
-      this.viewDesc = desc
+    onUpdateHeadNav(query) {
+      this.viewDesc = query.name
+      switch (query.cmd) {
+        case 'display-all':
+          this.comName = ViewFilter
+          break
+        case 'display':
+          this.comName = ImageOperator
+          break
+        default:
+          break
+      }
     },
     goBack() {
       this.$router.back(-1)

@@ -24,7 +24,8 @@ const ReplyType = {
   REPLY_IMAGES_DIRECTORY: 'replyImagesWithDirectory',
   REPLY_IMAGES_INFO: 'replyImagesInfo',
   REPLY_IMAGE_INFO: 'replyImageInfo',
-  REPLY_ALL_TAGS: 'replyAllTags'
+  REPLY_ALL_TAGS: 'replyAllTags',
+  REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult'
 }
 
 async function readImages(fullpath) {
@@ -144,6 +145,10 @@ const messageProcessor = {
   'getAllTags': async (data) => {
     let allTags = await localStorage.getTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
+  },
+  'findImageWithKeyword': async (keywords) => {
+    let allID = await localStorage.findImageWithKeyword(keywords)
+    reply2Renderer(ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD, allID)
   }
 }
 
