@@ -177,6 +177,9 @@ async function getImageInfoImpl(imageID) {
   return image
 }
 export default {
+  generateID: async () => {
+    return IDGenerator.getID()
+  },
   addImage: (obj) => {
     // 输入：{id: dhash, path: , filename: , keyword: []}
   },
@@ -190,7 +193,7 @@ export default {
     let rewordIndx = await getOptional(KeyRewordIndex, {})
     let simhash = await getOptional(KeyHash, {})
     for (let item of objs) {
-      const k = await IDGenerator.getID()
+      const k = item.id
       // console.info('image key', k)
       const dir = JString.replaceAll(item.path, '\\\\', '/')
       const fullpath = JString.joinPath(dir, item.filename)

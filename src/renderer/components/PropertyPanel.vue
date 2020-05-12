@@ -5,6 +5,8 @@
       <!-- <el-image :src="picture.realpath" lazy></el-image> -->
     </div>
     <div class="tags">
+      <IconTag></IconTag>
+      <IconTag></IconTag>
       <el-tag
         :key="tag"
         v-for="tag in dynamicTags"
@@ -23,6 +25,18 @@
       ></el-input>
       <el-button v-else class="button-new-tag" size="mini" @click="showInput">添加标签</el-button>
     </div>
+    <div class="title">分类</div>
+    <el-popover
+      placement="top"
+      width="160"
+      v-model="visible">
+      <p>这是一段内容这是一段内容确定删除吗？</p>
+      <div style="text-align: right; margin: 0">
+        <el-button size="mini" type="text" @click="visible = false">取消</el-button>
+        <el-button type="primary" size="mini" @click="visible = false">确定</el-button>
+      </div>
+      <el-button slot="reference" size="mini">+</el-button>
+    </el-popover>
     <div class="title">基本信息</div>
     <el-row class="desc">
       <el-col :span="12">
@@ -46,6 +60,7 @@
 <script>
 import bus from './utils/Bus'
 import Service from './utils/Service'
+import IconTag from '@/components/IconTag'
 
 export default {
   name: 'property-panel',
@@ -56,6 +71,9 @@ export default {
       inputVisible: false,
       inputValue: ''
     }
+  },
+  components: {
+    IconTag
   },
   mounted() {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
@@ -89,6 +107,7 @@ export default {
       if (inputValue) {
         this.dynamicTags.push(inputValue)
         this.$ipcRenderer.send(Service.ADD_TAG, {imageID: this.picture.id, tagName: inputValue})
+        this.$store.dispatch('updateImageProperty', this.picture.id, 'tag', this.dynamicTags)
       }
       this.inputVisible = false
       this.inputValue = ''

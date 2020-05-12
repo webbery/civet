@@ -27,6 +27,14 @@ const mutations = {
   },
   clearImages(state) {
     state.imageList = []
+  },
+  updateImageProperty(state, imageID, keyName, keyValue) {
+    for (let img of state.imageList) {
+      if (img.id === imageID) {
+        img[keyName] = keyValue
+        break
+      }
+    }
   }
 }
 
@@ -40,6 +48,9 @@ const actions = {
   },
   clearImages ({ commit }) {
     commit('clearImages')
+  },
+  updateImageProperty ({ commit }, imageID, keyName, keyValue) {
+    commit('updateImageProperty', imageID, keyName, keyValue)
   }
 }
 

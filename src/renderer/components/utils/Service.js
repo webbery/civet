@@ -10,7 +10,8 @@ const replyMessageMap = {
   'getImagesWithDirectoryFormat': 'replyImagesWithDirectory',
   'getImagesInfo': 'replyImagesInfo',
   'getImageInfo': 'replyImageInfo',
-  'getAllTags': 'replyAllTags'
+  'getAllTags': 'replyAllTags',
+  'findImageWithKeyword': 'replyFindImageResult'
 }
 
 let getServiceInstance = (function() {
@@ -40,6 +41,9 @@ let getServiceInstance = (function() {
       promiseOn = util.promisify(service.on)
       service.get = async (msgType, params) => {
         service.send(msgType, params)
+        if (replyMessageMap[msgType] === undefined) {
+          console.log(msgType, ' reply is not defined')
+        }
         let result = await promiseOn(replyMessageMap[msgType])
         return result
       }

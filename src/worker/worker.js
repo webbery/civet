@@ -73,7 +73,9 @@ async function readImages(fullpath) {
         datetime = datetime.value[0]
       }
       const dir = path.dirname(fullpath)
+      const fid = await localStorage.generateID()
       let fileInfo = {
+        id: fid,
         hash: hash.toString(),
         path: dir,
         filename: item,
@@ -131,6 +133,8 @@ const messageProcessor = {
     if (data === undefined) {
       // 全部图片信息
       imagesIndex = await localStorage.getImagesIndex()
+    } else {
+      imagesIndex = data
     }
     let images = await localStorage.getImagesInfo(imagesIndex)
     reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
@@ -140,7 +144,7 @@ const messageProcessor = {
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
   'addTag': async (data) => {
-    await localStorage.addTag(data.imageID, data.imageID.tagName)
+    await localStorage.addTag(data.imageID, data.tagName)
   },
   'getAllTags': async (data) => {
     let allTags = await localStorage.getTags()
@@ -148,6 +152,7 @@ const messageProcessor = {
   },
   'findImageWithKeyword': async (keywords) => {
     let allID = await localStorage.findImageWithKeyword(keywords)
+    // console.info('reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
     reply2Renderer(ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD, allID)
   }
 }
