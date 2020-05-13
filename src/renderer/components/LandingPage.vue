@@ -23,6 +23,7 @@ import OrganizedPanel from '@/components/OrganizedPanel'
 import ViewPanel from '@/components/ViewPanel'
 import PropertyPanel from '@/components/PropertyPanel'
 import TagPanel from '@/components/TagPanel'
+import ConfigPanel from '@/components/ConfigPanel'
 
 export default {
   name: 'landing-page',
@@ -31,7 +32,8 @@ export default {
     OrganizedPanel,
     ViewPanel,
     PropertyPanel,
-    TagPanel
+    TagPanel,
+    ConfigPanel
   },
   mounted() {}
 }

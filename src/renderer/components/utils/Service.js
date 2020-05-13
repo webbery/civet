@@ -70,6 +70,7 @@ export default{
   ADD_IMAGES_BY_DIRECORY: 'addImagesByDirectory',
   ADD_IMAGES_BY_PATHS: 'addImagesByPaths',
   ADD_TAG: 'addTag',
+  REMOVE_TAG: 'removeTag',
   FIND_IMAGES_BY_KEYWORD: 'findImageWithKeyword',
   ON_IMAGE_UPDATE: 'updateImageList'
 }

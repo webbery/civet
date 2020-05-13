@@ -34,9 +34,12 @@ let instance = (() => {
   // const rocksdb = require('rocksdb')
   var db
   // let options = {'prefix_extractor': }
-  // db.isCompacting = process.env.NODE_ENV === 'development'
+  const {remote} = require('electron')
+  let userDir = remote.app.getPath('userData')
+  const dbName = (remote.app.isPackaged ? userDir + '/civet' : 'civet')
+  console.info('======', dbName, '======')
   return function() {
-    return db || (db = levelup(leveldown('civetdb')))
+    return db || (db = levelup(leveldown(dbName)))
   }
 })()
 
@@ -134,7 +137,7 @@ async function getKeywordIndx(keywords) {
     }
     wordIndx.push(keyword2index[word])
   }
-  // console.info('keyword2index', keyword2index, wordIndx)
+  console.info('keyword2index', keyword2index, wordIndx)
   if (shouldUpdate === true) {
     put(KeyWord2Index, keyword2index)
 
@@ -152,7 +155,9 @@ async function getKeyword(indexes) {
   if (indx2word === null) return null
   let words = []
   for (let idx of indexes) {
-    words.push(indx2word[idx.toString()])
+    if (idx !== null) {
+      words.push(indx2word[idx.toString()])
+    }
   }
   return words
 }
@@ -171,8 +176,10 @@ function pushArray(array, data) {
 async function getImageInfoImpl(imageID) {
   let image = await getOptional(imageID, null)
   console.info('image', image, imageID)
-  const tagsName = await getKeyword(image.tag)
-  image.tag = tagsName
+  if (image.tag !== null) {
+    const tagsName = await getKeyword(image.tag)
+    image.tag = tagsName
+  }
   image.id = imageID
   return image
 }
@@ -289,6 +296,7 @@ export default {
   },
   getTags: async () => {
     // 倒排索引 {标签: [图片ID]}
+    // console.info(KeyTag)
     let tagIDs = await getOptional(KeyTag, {})
     let tags = {}
     const words = await getKeyword(Object.keys(tagIDs))
@@ -305,15 +313,39 @@ export default {
   addTag: async (imageID, tag) => {
     let tagIDs = await getOptional(KeyTag, {})
     let indx = await getKeywordIndx([tag])
-    if (tagIDs[indx.toString()] === undefined) tagIDs[indx.toString()] = []
-    tagIDs[indx.toString()].push(imageID)
+    const tagID = indx[0]
+    // console.info('tag index:', indx)
+    if (tagIDs[tagID] === undefined) tagIDs[tagID] = []
+    tagIDs[tagID].push(imageID)
 
     let image = await getOptional(imageID, null)
-    image.tag.push(tag)
+    image.tag.push(tagID)
+    image.keyword.push(tagID)
+    // console.info('----------', image)
 
     let rewordIndex = await getOptional(KeyRewordIndex, {})
-    if (rewordIndex[tag] === undefined) rewordIndex[tag] = []
-    rewordIndex[tag].push(imageID)
+    if (rewordIndex[tagID] === undefined) rewordIndex[tagID] = []
+    rewordIndex[tagID].push(imageID)
+
+    let data = {}
+    data[KeyTag] = tagIDs
+    data[imageID] = image
+    data[KeyRewordIndex] = rewordIndex
+    batchPut(data)
+  },
+  removeTag: async (tag, imageID) => {
+    let image = await getOptional(imageID, null)
+    let indx = await getKeywordIndx([tag])
+    const tagID = indx[0]
+    // 更新tag/keyword/倒排索引
+    image.tag.splice(image.tag.findIndex(e => e === tagID, 1))
+    image.keyword.splice(image.keyword.findIndex(e => e === tagID, 1))
+    // console.info(image)
+    let rewordIndex = await getOptional(KeyRewordIndex, {})
+    rewordIndex[tagID].splice(rewordIndex[tagID].findIndex(e => e === imageID), 1)
+
+    let tagIDs = await getOptional(KeyTag, {})
+    tagIDs[tagID].splice(tagIDs[tagID].findIndex(e => e === imageID), 1)
 
     let data = {}
     data[KeyTag] = tagIDs

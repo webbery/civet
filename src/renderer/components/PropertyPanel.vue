@@ -1,9 +1,12 @@
 <template>
   <div class="property">
-    <div class="preview">
+      <el-card :body-style="{ padding: '0px' }">
+        <img :src="picture.thumbnail?('data:image/jpg;base64,'+picture.thumbnail):picture.path" class="preview" />
+        <div style="padding: 4px;" class="image-name">
+          <span >{{picture.label}}</span>
+        </div>
+      </el-card>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
-      <!-- <el-image :src="picture.realpath" lazy></el-image> -->
-    </div>
     <div class="tags">
       <IconTag></IconTag>
       <IconTag></IconTag>
@@ -30,10 +33,10 @@
       placement="top"
       width="160"
       v-model="visible">
-      <p>这是一段内容这是一段内容确定删除吗？</p>
-      <div style="text-align: right; margin: 0">
-        <el-button size="mini" type="text" @click="visible = false">取消</el-button>
-        <el-button type="primary" size="mini" @click="visible = false">确定</el-button>
+      <div>
+        <div v-for="(clazz,idx) in classes" :key="clazz">
+          <el-checkbox v-model="checkValue[idx]" :label="clazz" border></el-checkbox>
+        </div>
       </div>
       <el-button slot="reference" size="mini">+</el-button>
     </el-popover>
@@ -69,7 +72,9 @@ export default {
       picture: { id: null, path: '', width: 0, height: 0, size: 0 },
       dynamicTags: [],
       inputVisible: false,
-      inputValue: ''
+      inputValue: '',
+      classes: ['测试'],
+      checkValue: []
     }
   },
   components: {
@@ -95,6 +100,8 @@ export default {
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
+      this.$ipcRenderer.send(Service.REMOVE_TAG, {tagName: tag, imageID: this.picture.id})
+      this.$store.dispatch('updateImageProperty', this.picture.id, 'tag', this.dynamicTags)
     },
     showInput() {
       this.inputVisible = true
@@ -115,8 +122,13 @@ export default {
     openFolder() {
       const exec = require('child_process').exec
       const path = require('path')
-      console.info('explorer /select,' + path.resolve(this.picture.path))
-      exec('explorer /select, ' + path.resolve(this.picture.path))
+      const os = require('os')
+      if (os.platform() === 'win32') {
+        // console.info('explorer /select,' + path.resolve(this.picture.path))
+        exec('explorer /select, ' + path.resolve(this.picture.path))
+      } else {
+        console.info('not support os')
+      }
     }
   }
 }
@@ -126,18 +138,15 @@ export default {
 .property{
   margin: 5px 5px 2px 5px;
 }
-.preview{
-  background-color: grey;
-  border-radius: 5px;
+img{
   width: 100%;
-  height: 200px;
+  height: 250px;
 }
-.preview .image{
-  /* width: 100%; */
-  background-size: cover;
-  padding-top: 100%;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+.preview{
+  object-fit: scale-down;
+}
+.image-name{
+  text-align: center;
 }
 .title {
   font-weight: bold;

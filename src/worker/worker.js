@@ -144,7 +144,11 @@ const messageProcessor = {
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
   'addTag': async (data) => {
+    // console.info(data.tagName)
     await localStorage.addTag(data.imageID, data.tagName)
+  },
+  'removeTag': async (data) => {
+    await localStorage.removeTag(data.tagName, data.imageID)
   },
   'getAllTags': async (data) => {
     let allTags = await localStorage.getTags()
