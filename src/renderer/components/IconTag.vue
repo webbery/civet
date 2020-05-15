@@ -1,18 +1,15 @@
 <template>
   <span>
-    <i :class="iconName"></i>
-    <span class="text">{{tagValue}}</span>
+    <i :class="icon"></i>
+    <span class="text"><slot></slot></span>
     <button>×</button>
   </span>
 </template>
 <script>
 export default {
   name: 'icon-tag',
-  data() {
-    return {
-      tagValue: '这是标签',
-      iconName: ''
-    }
+  props: {
+    icon: { type: String }
   }
 }
 </script>

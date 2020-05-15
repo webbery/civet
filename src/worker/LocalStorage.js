@@ -16,6 +16,9 @@ const TableWord2Index = 'word2index'
 const TableIndex2Word = 'index2word'
 const TableRewordIndex = 'reword_index'
 const TableHash = 'hash'
+const TableCategory2Index = 'category2index'
+const TableIndex2Category = 'index2category'
+const TableCategory = 'category'
 
 // KEY
 const KeyPath = 'v' + DBVersion + '.' + TablePath
@@ -27,6 +30,9 @@ const KeyIndex2Word = 'v' + DBVersion + '.' + TableIndex2Word
 const KeyRewordIndex = 'v' + DBVersion + '.' + TableRewordIndex
 const KeyID = 'v' + DBVersion + '.id'
 const KeyHash = 'v' + DBVersion + '.' + TableHash
+const KeyCategory2Index = 'v' + DBVersion + '.' + TableCategory2Index
+const KeyIndex2Category = 'v' + DBVersion + '.' + TableIndex2Category
+const KeyCategory = 'v' + DBVersion + '.' + TableCategory
 
 let instance = (() => {
   const levelup = require('levelup')
@@ -175,7 +181,7 @@ function pushArray(array, data) {
 
 async function getImageInfoImpl(imageID) {
   let image = await getOptional(imageID, null)
-  console.info('image', image, imageID)
+  // console.info('image', image, imageID)
   if (image.tag !== null) {
     const tagsName = await getKeyword(image.tag)
     image.tag = tagsName
@@ -183,6 +189,38 @@ async function getImageInfoImpl(imageID) {
   image.id = imageID
   return image
 }
+
+async function categoryChain2code(chain) {
+  // 将文本序列编码,如：文件夹1.子文件夹 --> 3.2
+  let categoryName = chain.split('.')
+  let cate2indx = await getOptional(KeyCategory2Index, {})
+
+  let indx2cate = await getOptional(KeyIndex2Category, {})
+  let maxID = Object.keys(cate2indx).length + 1
+  let sCode = ''
+  for (let name of categoryName) {
+    if (cate2indx[name] === undefined) {
+      cate2indx[name] = maxID
+      indx2cate[maxID] = name
+      put(KeyIndex2Category, indx2cate)
+      put(KeyCategory2Index, cate2indx)
+    }
+    sCode += cate2indx[name] + '.'
+  }
+  return sCode.substr(0, sCode.length - 1)
+}
+
+// async function code2categoryChain(code) {
+//   let categoryIDs = code.split('.')
+//   let indx2cate = await getOptional(KeyIndex2Category, {})
+
+//   let chain = ''
+//   for (let idx of categoryIDs) {
+//     chain += indx2cate[idx] + '.'
+//   }
+//   return chain.substr(0, chain.length - 1)
+// }
+
 export default {
   generateID: async () => {
     return IDGenerator.getID()
@@ -216,6 +254,7 @@ export default {
         type: item.type,
         thumbnail: item.thumbnail,
         tag: kwIndx,
+        colors: item.colors,
         keyword: kwIndx
       }))
       paths[dir] = pushArray(paths[dir], k)
@@ -368,7 +407,23 @@ export default {
     console.info('imageIDs', imageIDs)
     return imageIDs
   },
-  release: async () => {
-    await IDGenerator.release()
+  addCategory: async (categoryName, categoryChain, imageID) => {
+    let data = {}
+    // 1. 生成分类码
+    const code = categoryChain2code(categoryChain + '.' + categoryName)
+    let category = await getOptional(KeyCategory, {})
+    if (category[code] === undefined) category[code] = []
+    // 2. 分类码添加到图片数据中
+    if (imageID !== undefined) {
+      let image = await getOptional(imageID, null)
+      if (image['category'] === undefined) image['category'] = []
+      image['category'].push(code)
+      // 3. 分类码表添加图片id
+      category[code].push(imageID)
+      data[imageID] = image
+    }
+
+    data[KeyCategory] = category
+    batchPut(data)
   }
 }

@@ -2,21 +2,14 @@ import JString from '../public/String'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import localStorage from './LocalStorage'
+import CV from '../public/CV'
 
-console.info('1111111111111111')
 // your background code here
 const { ipcRenderer } = require('electron')
 const fs = require('fs')
 const crypto = require('crypto')
 const sharp = require('sharp')
 const path = require('path')
-// const util = require('util')
-// const bhash = util.promisify(blockhash)
-// console.info(bhash)
-// Send logs as messages to the main thread to show on the console
-// function log(value) {
-//   ipcRenderer.send('message-from-worker', process.pid + ': ' + value)
-// }
 
 const ReplyType = {
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
@@ -47,6 +40,8 @@ async function readImages(fullpath) {
       if (size > 5 * 1024 * 1024) {
         thumbnail = tags['Thumbnail'].base64
       }
+      const orignalPixels = await sharp(fullpath).toBuffer()
+      const colors = CV.sumaryColors(orignalPixels)
       let scaleWidth = Math.ceil(tags['Image Width'].value / 5)
       if (scaleWidth < 8) scaleWidth = tags['Image Width'].value
       const scaleHeight = scaleWidth + 1
@@ -85,6 +80,7 @@ async function readImages(fullpath) {
         width: tags['Image Width'].value,
         height: tags['Image Height'].value,
         thumbnail: thumbnail,
+        colors: colors,
         type: type
       }
       // 更新目录窗口
@@ -158,6 +154,9 @@ const messageProcessor = {
     let allID = await localStorage.findImageWithKeyword(keywords)
     // console.info('reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
     reply2Renderer(ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD, allID)
+  },
+  'addCategory': async (categoryName, chain, imageID) => {
+    return localStorage.addCategory(categoryName, chain, imageID)
   }
 }
 

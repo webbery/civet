@@ -8,12 +8,12 @@
           <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类文件夹</legend></fieldset></el-col>
           <el-col :span="2"><span class="noselection" @click="onAddFolder()">+</span></el-col>
           </el-row>
-          <el-tree :data="folders" :render-content="renderContent" @node-click="handleFolderClick"></el-tree>
+          <FolderTree :data="folders"></FolderTree>
         </el-scrollbar>
       </el-tab-pane>
       <el-tab-pane label="本地目录" name="direcories" class="directory" >
         <el-scrollbar style="height:90vh;">
-          <el-tree :data="directoryData" ></el-tree>
+          <el-tree :data="directoryData"></el-tree>
         </el-scrollbar>
       </el-tab-pane>
     </el-tabs>
@@ -24,9 +24,13 @@
 import bus from './utils/Bus'
 import JString from '@/../public/String'
 import Service from '@/components/utils/Service'
+import FolderTree from '@/components/FolderTree'
 
 export default {
   name: 'organized-panel',
+  components: {
+    FolderTree
+  },
   data() {
     return {
       activeName: 'resources',
@@ -34,7 +38,7 @@ export default {
         {
           label: '全部',
           name: 'all',
-          icon: 'el-icon-folder-opened',
+          icon: 'el-icon-suitcase',
           children: []
         },
         {
@@ -57,7 +61,10 @@ export default {
         }
       ],
       directoryData: [],
-      folders: [{label: '测试', icon: 'el-icon-suitcase'}]
+      folders: [
+        {label: '测试', icon: 'el-icon-folder-opened', children: [{label: '子目录', icon: 'el-icon-folder'}]},
+        {label: '测试2', icon: 'el-icon-folder-opened', children: [{label: '子目录2', icon: 'el-icon-folder'}]}
+      ]
     }
   },
   computed: {

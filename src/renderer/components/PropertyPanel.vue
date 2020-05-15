@@ -2,14 +2,15 @@
   <div class="property">
       <el-card :body-style="{ padding: '0px' }">
         <img :src="picture.thumbnail?('data:image/jpg;base64,'+picture.thumbnail):picture.path" class="preview" />
+        <div>
+          <span v-for="color of picture.colors" :key="color"><span class="main-color" :style="{'background-color': color}" ></span></span>
+        </div>
         <div style="padding: 4px;" class="image-name">
           <span >{{picture.label}}</span>
         </div>
       </el-card>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
     <div class="tags">
-      <IconTag></IconTag>
-      <IconTag></IconTag>
       <el-tag
         :key="tag"
         v-for="tag in dynamicTags"
@@ -28,19 +29,25 @@
       ></el-input>
       <el-button v-else class="button-new-tag" size="mini" @click="showInput">添加标签</el-button>
     </div>
-    <div class="title">分类</div>
-    <el-popover
-      placement="top"
-      width="160"
-      v-model="visible">
+    <fieldset>
+      <legend class="title">分类</legend>
       <div>
-        <div v-for="(clazz,idx) in classes" :key="clazz">
-          <el-checkbox v-model="checkValue[idx]" :label="clazz" border></el-checkbox>
+        <IconTag v-for="clz in classes" :key="clz" :icon="clz.icon">{{clz.name}}</IconTag>
+      <el-popover
+        placement="left"
+        width="160"
+        v-model="visible">
+        <div>
+          <div v-for="(clazz,idx) in classes" :key="clazz">
+            <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini"></el-checkbox>
+          </div>
         </div>
+        <el-button slot="reference" size="mini">+</el-button>
+      </el-popover>
       </div>
-      <el-button slot="reference" size="mini">+</el-button>
-    </el-popover>
-    <div class="title">基本信息</div>
+    </fieldset>
+    <fieldset>
+      <legend class="title">基本信息</legend>
     <el-row class="desc">
       <el-col :span="12">
         <div class="name">路径: </div>
@@ -57,6 +64,7 @@
         <div class="value">{{picture.datetime}}</div>
       </el-col>
     </el-row>
+    </fieldset>
   </div>
 </template>
 
@@ -73,7 +81,7 @@ export default {
       dynamicTags: [],
       inputVisible: false,
       inputValue: '',
-      classes: ['测试'],
+      classes: [{name: '测试', icon: 'el-icon-suitcase'}],
       checkValue: []
     }
   },
@@ -145,6 +153,12 @@ img{
 .preview{
   object-fit: scale-down;
 }
+.main-color{
+  width: 20px;
+  height: 35px;
+  border-radius: 5px;
+  display: inline-block;
+}
 .image-name{
   text-align: center;
 }
@@ -189,5 +203,9 @@ img{
   overflow: hidden;
   display: block;
   text-align: right;
+}
+fieldset {
+  border-radius: 5px;
+  max-width: 100%;
 }
 </style>
