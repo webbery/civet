@@ -10,7 +10,7 @@
           </el-row>
           <div>
           <FolderTree :data="folders"></FolderTree>
-          <IconFolder icon="el-icon-folder" label="test" enableInput="true" v-if="newFolder"></IconFolder>
+          <IconFolder icon="el-icon-folder" enableInput="true" v-if="newFolder"></IconFolder>
           </div>
         </el-scrollbar>
       </el-tab-pane>

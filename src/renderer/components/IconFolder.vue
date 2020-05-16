@@ -23,7 +23,7 @@ export default {
   },
   methods: {
     onEdit() {
-      console.info('edit')
+      // console.info('edit')
       this.folderName = this.label
       // this.folderName = this.$slots['default'][0].text
       this.enableInput = true
@@ -35,9 +35,11 @@ export default {
     },
     onSave() {
       this.enableInput = false
+      console.info('chain:', this.parent)
       this.$ipcRenderer.send(Service.ADD_CATEGORY, this.folderName, this.parent)
       // 同时更新缓存
       this.$store.dispatch('addCategory', this.folderName, this.parent)
+      this.label = this.folderName
     }
   }
 }

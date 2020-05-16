@@ -1,7 +1,7 @@
 // 分类文件夹缓存数据
 // [{name: name, type: dir/jpg, children: []}]
 const state = {
-  category: null
+  category: []
 }
 
 const getters = {
@@ -17,19 +17,24 @@ const mutations = {
     }
   },
   addCategory(state, newName, chain) {
-    let chainNames = chain.split('.')
+    console.info(newName, chain, state.category)
+    if (state.category === null) state.category = []
     let parent = state.category
-    for (let item of chainNames) {
-      for (let child of parent) {
-        if (child.name === item && child.type === 'dir') {
-          parent = child.children
-          break
+    if (chain !== undefined) {
+      let chainNames = chain.split('.')
+      for (let item of chainNames) {
+        for (let child of parent) {
+          if (child.name === item && child.type === 'dir') {
+            parent = child.children
+            break
+          }
         }
       }
     }
     parent.push({name: newName, type: 'dir', children: []})
   },
   setCategory(state, category) {
+    console.info('set category')
     state.category = category
   }
 }
