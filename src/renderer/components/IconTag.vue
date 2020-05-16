@@ -20,6 +20,7 @@ span{
 button{
   border-radius: 10px;
   border: none;
+  outline: none;
 }
 button:hover {
   background-color: rgb(107, 107, 255);

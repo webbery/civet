@@ -6,9 +6,12 @@
           <el-tree :data="resourceData" :render-content="renderContent" @node-click="handleResourceClick"></el-tree>
           <el-row type="flex">
           <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类文件夹</legend></fieldset></el-col>
-          <el-col :span="2"><span class="noselection" @click="onAddFolder()">+</span></el-col>
+          <el-col :span="2"><button class="noselection" @click="onAddFolder()">+</button></el-col>
           </el-row>
+          <div>
           <FolderTree :data="folders"></FolderTree>
+          <IconFolder icon="el-icon-folder" label="test" enableInput="true" v-if="newFolder"></IconFolder>
+          </div>
         </el-scrollbar>
       </el-tab-pane>
       <el-tab-pane label="本地目录" name="direcories" class="directory" >
@@ -25,11 +28,13 @@ import bus from './utils/Bus'
 import JString from '@/../public/String'
 import Service from '@/components/utils/Service'
 import FolderTree from '@/components/FolderTree'
+import IconFolder from '@/components/IconFolder'
 
 export default {
   name: 'organized-panel',
   components: {
-    FolderTree
+    FolderTree,
+    IconFolder
   },
   data() {
     return {
@@ -64,7 +69,8 @@ export default {
       folders: [
         {label: '测试', icon: 'el-icon-folder-opened', children: [{label: '子目录', icon: 'el-icon-folder'}]},
         {label: '测试2', icon: 'el-icon-folder-opened', children: [{label: '子目录2', icon: 'el-icon-folder'}]}
-      ]
+      ],
+      newFolder: false
     }
   },
   computed: {
@@ -138,6 +144,7 @@ export default {
     },
     onAddFolder() {
       // 添加一个分类文件夹
+      this.newFolder = true
     }
   }
 }
@@ -177,5 +184,19 @@ el-tab-pane {
 .noselection{
   color: #999;
   -webkit-user-select: none;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+}
+.noselection:hover{
+  background-color: rgb(0, 153, 255);
+}
+.noselection:hover:after {
+  color: white;
+  position: absolute;
+  width: 100px;
+  height: 25px;
+  content: '单击添加新的分类';
+  z-index: 99999;
 }
 </style>

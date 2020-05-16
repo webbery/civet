@@ -13,11 +13,11 @@ export default {
   props: {
     icon: { type: String },
     label: { type: String },
-    parent: { type: String }
+    parent: { type: String },
+    enableInput: { type: Boolean, default: false }
   },
   data() {
     return {
-      enableInput: false,
       folderName: ''
     }
   },

@@ -164,7 +164,8 @@ img{
 .main-color{
   width: 20px;
   height: 35px;
-  border-radius: 5px;
+  margin: 1px 3px 1px 3px;
+  border-radius: 8px;
   display: inline-block;
 }
 .image-name{
