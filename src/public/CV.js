@@ -8,7 +8,7 @@ export default {
     for (let idx = 0; idx < pixels.length; idx += 3) {
       array.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]])
     }
-    let ret = SKMeans(array, 16)
+    let ret = SKMeans(array, 10)
     let counts = {
       '0': 0,
       '1': 0,
@@ -19,13 +19,7 @@ export default {
       '6': 0,
       '7': 0,
       '8': 0,
-      '9': 0,
-      '10': 0,
-      '11': 0,
-      '12': 0,
-      '13': 0,
-      '14': 0,
-      '15': 0}
+      '9': 0}
     // console.info('skmean:', ret)
     for (let idx of ret.idxs) {
       counts[idx] += 1
@@ -42,7 +36,7 @@ export default {
       const color = ret.centroids[idx]
       colors.push([Math.floor(color[0]), Math.floor(color[0]), Math.floor(color[0])])
     }
-    console.info('colors', colors)
+    // console.info('colors', colors)
     return colors
   }
 }

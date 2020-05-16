@@ -72,6 +72,7 @@
 import bus from './utils/Bus'
 import Service from './utils/Service'
 import IconTag from '@/components/IconTag'
+import JString from '@/../public/String'
 
 export default {
   name: 'property-panel',
@@ -103,6 +104,13 @@ export default {
         return parseInt(v) + unit
       }
       imageInfo.size = getSize(imageInfo.size)
+      if (imageInfo.colors) {
+        let colors = []
+        for (let color of imageInfo.colors) {
+          colors.push('#' + JString.formatColor16(color[0]) + JString.formatColor16(color[1]) + JString.formatColor16(color[2]))
+        }
+        imageInfo.colors = colors
+      }
       this.picture = imageInfo
       this.dynamicTags = imageInfo.tag
     },
