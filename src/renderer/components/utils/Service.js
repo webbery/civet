@@ -11,7 +11,8 @@ const replyMessageMap = {
   'getImagesInfo': 'replyImagesInfo',
   'getImageInfo': 'replyImageInfo',
   'getAllTags': 'replyAllTags',
-  'findImageWithKeyword': 'replyFindImageResult'
+  'findImageWithKeyword': 'replyFindImageResult',
+  'getAllCategory': 'replyAllCategory'
 }
 
 let getServiceInstance = (function() {
@@ -67,6 +68,7 @@ export default{
   GET_IMAGES_INDEXES: 'getImagesIndex',
   GET_IMAGES_DIRECTORY: 'getImagesWithDirectoryFormat',
   GET_ALL_TAGS: 'getAllTags',
+  GET_ALL_CATEGORY: 'getAllCategory',
   ADD_IMAGES_BY_DIRECORY: 'addImagesByDirectory',
   ADD_IMAGES_BY_PATHS: 'addImagesByPaths',
   ADD_TAG: 'addTag',

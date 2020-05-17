@@ -20,7 +20,7 @@ const mutations = {
     console.info(newName, chain, state.category)
     if (state.category === null) state.category = []
     let parent = state.category
-    if (chain !== undefined) {
+    if (chain) {
       let chainNames = chain.split('.')
       for (let item of chainNames) {
         for (let child of parent) {

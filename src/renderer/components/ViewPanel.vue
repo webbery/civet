@@ -55,12 +55,18 @@ export default {
       if (name === undefined) {
         name = '全部'
       }
-      if (to.path === '/') {
-        let images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO)
-        // console.info(images)
-        this.$store.dispatch('updateImageList', images)
+      switch (to.path) {
+        case '/':
+          let images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO)
+          // console.info(images)
+          this.$store.dispatch('updateImageList', images)
+          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
+          break
+        case '/uncategory':
+          break
+        default:
+          break
       }
-      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
     }
   },
   methods: {

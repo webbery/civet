@@ -94,7 +94,7 @@ export default {
         updateImages.push({id: imagesID[idx], label: item.label, path: item.path, thumbnail: item.thumbnail})
       }
       this.$store.dispatch('clearImages')
-      console.info('updateImages:', updateImages)
+      // console.info('updateImages:', updateImages)
       this.$store.dispatch('updateImageList', updateImages)
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”'}})
     },

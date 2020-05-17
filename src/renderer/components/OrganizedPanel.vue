@@ -3,7 +3,12 @@
     <el-tabs v-model="activeName" class="custom">
       <el-tab-pane label="资源" name="resources">
         <el-scrollbar style="height:95vh;">
-          <el-tree :data="resourceData" :render-content="renderContent" @node-click="handleResourceClick"></el-tree>
+          <table>
+            <tr class="item" @click="handleResourceClick(headOptions[0])"><i :class="headOptions[0].icon"></i><td>全部</td><td /></tr>
+            <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{headOptions[1].value}}</td></tr>
+            <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{headOptions[2].value}}</td></tr>
+            <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
+          </table>
           <el-row type="flex">
           <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类文件夹</legend></fieldset></el-col>
           <el-col :span="2"><button class="noselection" @click="onAddFolder()">+</button></el-col>
@@ -39,24 +44,23 @@ export default {
   data() {
     return {
       activeName: 'resources',
-      resourceData: [
+      headOptions: [
         {
           label: '全部',
           name: 'all',
-          icon: 'el-icon-suitcase',
-          children: []
+          icon: 'el-icon-suitcase'
         },
         {
           label: '未分类',
           name: 'unclass',
           icon: 'el-icon-copy-document',
-          children: []
+          value: 0
         },
         {
           label: '未标签',
           name: 'untag',
           icon: 'el-icon-collection-tag',
-          children: []
+          value: 0
         },
         {
           label: '标签管理',
@@ -66,10 +70,7 @@ export default {
         }
       ],
       directoryData: [],
-      folders: [
-        {label: '测试', icon: 'el-icon-folder-opened', children: [{label: '子目录', icon: 'el-icon-folder'}]},
-        {label: '测试2', icon: 'el-icon-folder-opened', children: [{label: '子目录2', icon: 'el-icon-folder'}]}
-      ],
+      folders: [],
       newFolder: false
     }
   },
@@ -118,6 +119,8 @@ export default {
     },
     async init() {
       this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
+      this.folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
+      this.$store.dispatch('setCategory', this.folders)
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)
@@ -198,5 +201,9 @@ el-tab-pane {
   height: 25px;
   content: '单击添加新的分类';
   z-index: 99999;
+}
+.item:hover {
+  background-color:rgb(225, 240, 250);
+  -webkit-user-select: none;
 }
 </style>

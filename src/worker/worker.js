@@ -18,7 +18,8 @@ const ReplyType = {
   REPLY_IMAGES_INFO: 'replyImagesInfo',
   REPLY_IMAGE_INFO: 'replyImageInfo',
   REPLY_ALL_TAGS: 'replyAllTags',
-  REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult'
+  REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
+  REPLAY_ALL_CATEGORY: 'replyAllCategory'
 }
 
 async function readImages(fullpath) {
@@ -128,7 +129,10 @@ const messageProcessor = {
     let imagesIndex = []
     if (data === undefined) {
       // 全部图片信息
-      imagesIndex = await localStorage.getImagesIndex()
+      let imagesSnap = await localStorage.getImagesSnap()
+      for (let imgID in imagesSnap) {
+        imagesIndex.push(imgID)
+      }
     } else {
       imagesIndex = data
     }
@@ -157,6 +161,10 @@ const messageProcessor = {
   },
   'addCategory': async (categoryName, chain, imageID) => {
     return localStorage.addCategory(categoryName, chain, imageID)
+  },
+  'getAllCategory': async () => {
+    let category = await localStorage.getAllCategory()
+    reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   }
 }
 

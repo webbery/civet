@@ -25,6 +25,10 @@ export default new Router({
       component: require('@/components/ViewPanel').default
     },
     {
+      path: '/uncategory',
+      component: require('@/components/ViewPanel').default
+    },
+    {
       path: '/',
       component: require('@/components/ViewPanel').default
     },

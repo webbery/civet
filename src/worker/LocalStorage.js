@@ -19,6 +19,7 @@ const TableHash = 'hash'
 const TableCategory2Index = 'category2index'
 const TableIndex2Category = 'index2category'
 const TableCategory = 'category'
+const TableUnCategory = 'uncategory'
 
 // KEY
 const KeyPath = 'v' + DBVersion + '.' + TablePath
@@ -33,6 +34,7 @@ const KeyHash = 'v' + DBVersion + '.' + TableHash
 const KeyCategory2Index = 'v' + DBVersion + '.' + TableCategory2Index
 const KeyIndex2Category = 'v' + DBVersion + '.' + TableIndex2Category
 const KeyCategory = 'v' + DBVersion + '.' + TableCategory
+const KeyUnCategory = 'v' + DBVersion + '.' + TableUnCategory
 
 let instance = (() => {
   const levelup = require('levelup')
@@ -192,6 +194,7 @@ async function getImageInfoImpl(imageID) {
 
 async function categoryChain2code(chain) {
   // 将文本序列编码,如：文件夹1.子文件夹 --> 3.2
+  console.info('chain', chain)
   let categoryName = chain.split('.')
   let cate2indx = await getOptional(KeyCategory2Index, {})
 
@@ -199,6 +202,8 @@ async function categoryChain2code(chain) {
   let maxID = Object.keys(cate2indx).length + 1
   let sCode = ''
   for (let name of categoryName) {
+    // console.info('add', name)
+    if (name === '') continue
     if (cate2indx[name] === undefined) {
       cate2indx[name] = maxID
       indx2cate[maxID] = name
@@ -210,16 +215,18 @@ async function categoryChain2code(chain) {
   return sCode.substr(0, sCode.length - 1)
 }
 
-// async function code2categoryChain(code) {
-//   let categoryIDs = code.split('.')
-//   let indx2cate = await getOptional(KeyIndex2Category, {})
+async function code2categoryChain(code, indx2cate) {
+  let categoryIDs = code.split('.')
+  if (!indx2cate) {
+    indx2cate = await getOptional(KeyIndex2Category, {})
+  }
 
-//   let chain = ''
-//   for (let idx of categoryIDs) {
-//     chain += indx2cate[idx] + '.'
-//   }
-//   return chain.substr(0, chain.length - 1)
-// }
+  let chain = ''
+  for (let idx of categoryIDs) {
+    chain += indx2cate[idx] + '.'
+  }
+  return chain.substr(0, chain.length - 1)
+}
 
 export default {
   generateID: async () => {
@@ -231,18 +238,20 @@ export default {
   addImages: async (objs) => {
     let paths = await getOptional(KeyPath, {})
     console.info('addImages PATH:', paths)
-    let images = await getOptional(KeyImageIndexes, [])
+    let images = await getOptional(KeyImageIndexes, {})
     // console.info('addImages IMAGE:', images)
     // 标签索引
     let tags = await getOptional(KeyTag, {})
     let rewordIndx = await getOptional(KeyRewordIndex, {})
     let simhash = await getOptional(KeyHash, {})
+    let uncategory = await getOptional(KeyUnCategory, [])
     for (let item of objs) {
       const k = item.id
       // console.info('image key', k)
       const dir = JString.replaceAll(item.path, '\\\\', '/')
       const fullpath = JString.joinPath(dir, item.filename)
-      images.push(k)
+      images[k] = item.filename
+      uncategory.push(k)
       const kwIndx = await getKeywordIndx(item.keyword)
       instance().put(k, JSON.stringify({
         label: item.filename,
@@ -268,6 +277,7 @@ export default {
     // console.info(KEY_IMAGES)
     // let imageSet = new Set(images)
     put(KeyImageIndexes, images)
+    put(KeyUnCategory, uncategory)
 
     // 路径文件排重
     for (let p in paths) {
@@ -299,10 +309,10 @@ export default {
     }
     return images
   },
-  getImagesIndex: async () => {
-    let imagesIndex = await getOptional(KeyImageIndexes, [])
-    console.info('all images id', imagesIndex)
-    return imagesIndex
+  getImagesSnap: async () => {
+    let imagesSnap = await getOptional(KeyImageIndexes, {})
+    console.info('all images snap', imagesSnap)
+    return imagesSnap
   },
   removeImage: (imageID) => {},
   updateImageTags: (imageID, tags) => {},
@@ -410,7 +420,9 @@ export default {
   addCategory: async (categoryName, categoryChain, imageID) => {
     let data = {}
     // 1. 生成分类码
-    const code = categoryChain2code(categoryChain + '.' + categoryName)
+    let chain = categoryName
+    if (categoryChain) chain = categoryChain + '.' + categoryName
+    const code = await categoryChain2code(chain)
     let category = await getOptional(KeyCategory, {})
     if (category[code] === undefined) category[code] = []
     // 2. 分类码添加到图片数据中
@@ -425,5 +437,49 @@ export default {
 
     data[KeyCategory] = category
     batchPut(data)
+  },
+  getAllCategory: async () => {
+    let data = {}
+    let category = await getOptional(KeyCategory, {})
+    // console.info(category)
+    let indx2category = await getOptional(KeyIndex2Category, {})
+    // console.info('indx2category', indx2category)
+    let imagesSnap = await getOptional(KeyImageIndexes, [])
+    // console.info('imagesSnap', imagesSnap)
+    for (let cate in category) {
+      let chains = await code2categoryChain(cate, indx2category)
+      let names = []
+      for (let imgID of category[cate]) {
+        names.push(imagesSnap[imgID])
+      }
+      data[chains] = names
+    }
+    console.info('get all category:', data)
+    let structCategory = []
+    const createChainStruct = (clz, childrenName) => {
+      // console.info(childrenName, clz)
+      if (childrenName.length === 0) return clz
+      const newName = childrenName[0]
+      clz['label'] = newName
+      childrenName.splice(0, 1)
+      // console.info('childrenName', childrenName)
+      if (childrenName.length !== 0) {
+        let t = {}
+        let child = createChainStruct(t, childrenName)
+        if (clz['children'] === undefined) clz['children'] = []
+        // console.info('child', child)
+        clz['children'].push(child)
+      }
+      return clz
+    }
+    for (let chains in data) {
+      const chain = chains.split('.')
+      let root = {}
+      console.info(chain)
+      const result = createChainStruct(root, chain)
+      structCategory.push(result)
+    }
+    console.info('structCategory', structCategory)
+    return structCategory
   }
 }
