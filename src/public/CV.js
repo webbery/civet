@@ -5,10 +5,13 @@ export default {
     // 使用聚类提取主色
     // console.info(pixels)
     let array = []
+    console.info('----1---')
     for (let idx = 0; idx < pixels.length; idx += 3) {
       array.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]])
     }
+    console.info('----2---')
     let ret = SKMeans(array, 10)
+    console.info('----3---')
     let counts = {
       '0': 0,
       '1': 0,
@@ -25,16 +28,22 @@ export default {
       counts[idx] += 1
     }
     // console.info('counts', counts)
-    let percents = {}
+    let percents = []
     for (let idx in counts) {
       let p = counts[idx] / ret.idxs.length
-      if (p > 0.05) percents[idx] = p
+      percents.push({'index': idx, 'percent': p})
     }
-    // console.info('percents', percents)
+    console.info('----4---')
+    percents.sort((a, b) => { return b.percent - a.percent })
+    console.info('percents', percents)
     let colors = []
     for (let idx in percents) {
       const color = ret.centroids[idx]
-      colors.push([Math.floor(color[0]), Math.floor(color[0]), Math.floor(color[0])])
+      if (colors.length < 4) {
+        colors.push([Math.floor(color[0]), Math.floor(color[1]), Math.floor(color[2])])
+      } else if (colors.length < 8 && percents[idx] > 0.05) {
+        colors.push([Math.floor(color[0]), Math.floor(color[1]), Math.floor(color[2])])
+      }
     }
     // console.info('colors', colors)
     return colors

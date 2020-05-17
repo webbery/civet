@@ -481,5 +481,14 @@ export default {
     }
     console.info('structCategory', structCategory)
     return structCategory
+  },
+  getUncategoryImages: async () => {
+    let imgsID = await getOptional(KeyUnCategory, [])
+    let images = []
+    for (let imgID of imgsID) {
+      let img = await getOptional(imgID, null)
+      images.push(img)
+    }
+    return images
   }
 }

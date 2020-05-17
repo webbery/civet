@@ -120,6 +120,9 @@ export default {
     async init() {
       this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
       this.folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
+      const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
+      this.headOptions[1].value = uncategoryImages.length
+      console.info(uncategoryImages)
       this.$store.dispatch('setCategory', this.folders)
     },
     renderContent(h, {node, data, store}) {

@@ -2,7 +2,7 @@ import JString from '../public/String'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import localStorage from './LocalStorage'
-import CV from '../public/CV'
+// import CV from '../public/CV'
 
 // your background code here
 const { ipcRenderer } = require('electron')
@@ -19,7 +19,8 @@ const ReplyType = {
   REPLY_IMAGE_INFO: 'replyImageInfo',
   REPLY_ALL_TAGS: 'replyAllTags',
   REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
-  REPLAY_ALL_CATEGORY: 'replyAllCategory'
+  REPLAY_ALL_CATEGORY: 'replyAllCategory',
+  REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages'
 }
 
 async function readImages(fullpath) {
@@ -41,8 +42,8 @@ async function readImages(fullpath) {
       if (size > 5 * 1024 * 1024) {
         thumbnail = tags['Thumbnail'].base64
       }
-      const orignalPixels = await sharp(fullpath).toBuffer()
-      const colors = CV.sumaryColors(orignalPixels)
+      // const orignalPixels = await sharp(fullpath).toBuffer()
+      // const colors = CV.sumaryColors(orignalPixels)
       let scaleWidth = Math.ceil(tags['Image Width'].value / 5)
       if (scaleWidth < 8) scaleWidth = tags['Image Width'].value
       const scaleHeight = scaleWidth + 1
@@ -81,7 +82,7 @@ async function readImages(fullpath) {
         width: tags['Image Width'].value,
         height: tags['Image Height'].value,
         thumbnail: thumbnail,
-        colors: colors,
+        // colors: colors,
         type: type
       }
       // 更新目录窗口
@@ -165,6 +166,10 @@ const messageProcessor = {
   'getAllCategory': async () => {
     let category = await localStorage.getAllCategory()
     reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
+  },
+  'getUncategoryImages': async () => {
+    let uncateimgs = await localStorage.getUncategoryImages()
+    reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
   }
 }
 
