@@ -1,5 +1,5 @@
 <template>
-  <span >
+  <span>
     <i :class="icon"></i>
     <span class="text" v-if="!enableInput" @dblclick="onEdit()">{{label}}</span>
     <input v-if="enableInput" @blur="onSave()" v-model="folderName" ref="folderInput"/>
@@ -21,6 +21,14 @@ export default {
       folderName: ''
     }
   },
+  mounted() {
+    if (this.enableInput) {
+      this.$nextTick(function () {
+        // console.info('#####')
+        this.$refs.folderInput.focus()
+      })
+    }
+  },
   methods: {
     onEdit() {
       // console.info('edit')
@@ -35,6 +43,8 @@ export default {
     },
     onSave() {
       this.enableInput = false
+      this.$emit('editFinish')
+      if (this.folderName.trim() === '') return
       console.info('chain:', this.parent)
       this.$ipcRenderer.send(Service.ADD_CATEGORY, this.folderName, this.parent)
       // 同时更新缓存

@@ -10,7 +10,8 @@
         </div>
       </el-card>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
-    <div class="tags">
+    <fieldset>
+      <legend class="title">标签</legend>
       <el-tag
         :key="tag"
         v-for="tag in dynamicTags"
@@ -28,18 +29,18 @@
         @blur="handleInputConfirm"
       ></el-input>
       <el-button v-else class="button-new-tag" size="mini" @click="showInput">添加标签</el-button>
-    </div>
+    </fieldset>
     <fieldset>
       <legend class="title">分类</legend>
       <div>
-        <IconTag v-for="clz in classes" :key="clz" :icon="clz.icon">{{clz.name}}</IconTag>
+        <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz.name}}</IconTag>
       <el-popover
         placement="left"
         width="160"
         v-model="visible">
         <div>
           <div v-for="(clazz,idx) in classes" :key="clazz">
-            <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini"></el-checkbox>
+            <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini" @change="onCategoryChange"></el-checkbox>
           </div>
         </div>
         <el-button slot="reference" size="mini">+</el-button>
@@ -57,7 +58,7 @@
         <div class="name">添加日期: </div>
       </el-col>
       <el-col :span="12">
-        <div class="value"><a href="javascript:void(0);" @click="openFolder()">{{picture.path}}</a></div>
+        <div ><a href="javascript:void(0);" @click="openFolder()" class="value">{{picture.path}}</a></div>
         <div class="value">{{picture.width}} X {{picture.height}}</div>
         <div class="value">{{picture.size}}</div>
         <div class="value">{{picture.type}}</div>
@@ -82,12 +83,18 @@ export default {
       dynamicTags: [],
       inputVisible: false,
       inputValue: '',
-      classes: [{name: '测试', icon: 'el-icon-suitcase'}],
-      checkValue: []
+      // classes: [{name: '测试', icon: 'el-icon-suitcase'}],
+      checkValue: [],
+      imageClasses: []
     }
   },
   components: {
     IconTag
+  },
+  computed: {
+    classes() {
+      return this.$store.getters.classesName
+    }
   },
   mounted() {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
@@ -145,6 +152,12 @@ export default {
       } else {
         console.info('not support os')
       }
+    },
+    onCategoryChange(val, idx) {
+      console.info(val, idx)
+      console.info(this.checkValue)
+      // 更新本地缓存分类
+      // 更新数据库分类
     }
   }
 }
@@ -197,16 +210,11 @@ img{
   margin-left: 10px;
   vertical-align: bottom;
 }
-.tags{
-  background-color: gray; 
-  border-style: solid;
-  border-width: 1px;
-  border-radius:5px;
-}
 .name{
   text-align: left;
 }
 .value{
+  max-width: 100px;
   text-overflow:ellipsis;
   white-space:nowrap;
   overflow: hidden;
@@ -215,6 +223,7 @@ img{
 }
 fieldset {
   border-radius: 5px;
+  border: 1px solid black;
   max-width: 100%;
 }
 </style>

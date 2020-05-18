@@ -14,8 +14,8 @@
           <el-col :span="2"><button class="noselection" @click="onAddFolder()">+</button></el-col>
           </el-row>
           <div>
-          <FolderTree :data="folders"></FolderTree>
-          <IconFolder icon="el-icon-folder" enableInput="true" v-if="newFolder"></IconFolder>
+          <FolderTree :data="category"></FolderTree>
+          <IconFolder icon="el-icon-folder" enableInput="true" v-if="newFolder" v-on:editFinish="editFinish" :label="newCategoryName"></IconFolder>
           </div>
         </el-scrollbar>
       </el-tab-pane>
@@ -65,19 +65,24 @@ export default {
         {
           label: '标签管理',
           name: 'manageTag',
-          icon: 'el-icon-collection',
-          children: []
+          icon: 'el-icon-collection'
         }
       ],
       directoryData: [],
-      folders: [],
-      newFolder: false
+      newFolder: false,
+      newCategoryName: ''
     }
   },
   computed: {
     loadDirectory() {
       console.info('computed：', this.$store.EventBus.importDirectory)
       return this.$store.EventBus.importDirectory
+    },
+    categoryName() {
+      return this.$store.getters.classesName
+    },
+    category() {
+      return this.$store.getters.category
     }
   },
   mounted() {
@@ -119,11 +124,11 @@ export default {
     },
     async init() {
       this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
-      this.folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
+      const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
       const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
       this.headOptions[1].value = uncategoryImages.length
       console.info(uncategoryImages)
-      this.$store.dispatch('setCategory', this.folders)
+      this.$store.dispatch('setCategory', folders)
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)
@@ -151,6 +156,10 @@ export default {
     onAddFolder() {
       // 添加一个分类文件夹
       this.newFolder = true
+    },
+    editFinish() {
+      this.newFolder = false
+      this.newCategoryName = ''
     }
   }
 }

@@ -192,13 +192,16 @@ async function getImageInfoImpl(imageID) {
   return image
 }
 
-async function categoryChain2code(chain) {
+async function categoryChain2code(chain, cate2indx, indx2cate) {
   // 将文本序列编码,如：文件夹1.子文件夹 --> 3.2
   console.info('chain', chain)
   let categoryName = chain.split('.')
-  let cate2indx = await getOptional(KeyCategory2Index, {})
-
-  let indx2cate = await getOptional(KeyIndex2Category, {})
+  if (!cate2indx) {
+    cate2indx = await getOptional(KeyCategory2Index, {})
+  }
+  if (!indx2cate) {
+    indx2cate = await getOptional(KeyIndex2Category, {})
+  }
   let maxID = Object.keys(cate2indx).length + 1
   let sCode = ''
   for (let name of categoryName) {
@@ -295,6 +298,31 @@ export default {
     put(KeyRewordIndex, rewordIndx)
     // 保存局部敏感hash[hash: 图像ID]
     put(KeyHash, simhash)
+  },
+  updateImageCatergory: async (imageID, category) => {
+    // 更新图像的分类
+    let img = await getOptional(imageID, null)
+    let cate2indx = await getOptional(KeyCategory2Index, {})
+    let indx2cate = await getOptional(KeyIndex2Category, {})
+    let categoryID = []
+    for (let item of category) {
+      categoryID.push(await categoryChain2code(item, cate2indx, indx2cate))
+    }
+    img.category = categoryID
+    put(imageID, img)
+    // 更新检索关键字
+    let rewordIndx = await getOptional(KeyRewordIndex, {})
+    for (let word of category) {
+      const kwIndx = await getKeywordIndx(word)
+      rewordIndx[kwIndx] = pushArray(rewordIndx[kwIndx], imageID)
+    }
+    put(KeyRewordIndex, rewordIndx)
+    // 更新分类表
+    let categoryTable = await getOptional(KeyCategory, {})
+    for (let cID of categoryID) {
+      categoryTable[cID].push(imageID)
+    }
+    put(KeyCategory, categoryTable)
   },
   getImageInfo: (imageID) => {
     console.info('imageID', imageID)

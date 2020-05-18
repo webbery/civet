@@ -170,6 +170,9 @@ const messageProcessor = {
   'getUncategoryImages': async () => {
     let uncateimgs = await localStorage.getUncategoryImages()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
+  },
+  'updateImageCategory': async (imageID, category) => {
+    await localStorage.updateImageCatergory(imageID, category)
   }
 }
 

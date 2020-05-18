@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="(item, idx) in data" :key="idx">
+    <div v-for="(item, idx) of data" :key="idx">
       <i class="el-icon-caret-right" v-if="item.children && !(expandTree[idx])" @click="onExpand(idx)"></i>
       <i class="el-icon-caret-bottom" v-if="item.children  && (expandTree[idx])" @click="onRetract(idx)"></i>
       <span class="el-icon-caret-right caret-hidden" v-if="!item.children"></span>
