@@ -8,7 +8,7 @@
         <OrganizedPanel></OrganizedPanel>
       </el-col>
       <el-col :span="16">
-        <router-view></router-view>
+        <div class="display"><router-view></router-view></div>
       </el-col>
       <el-col :span="4">
         <PropertyPanel></PropertyPanel>
@@ -45,5 +45,11 @@ export default {
   background-color: #b3c0d1;
   color: #333;
   height: 30px !important;
+}
+.display{
+  border: 1px rgb(200, 240, 247);
+  border-style: none dashed;
+  border-radius: 5px;
+  margin: 0 10px 0 10px;
 }
 </style>

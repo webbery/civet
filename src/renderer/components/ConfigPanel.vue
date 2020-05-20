@@ -20,8 +20,11 @@ export default {
   name: 'config-page',
   data() {
     return {
-      resourcePath: ''
+      resourcePath: '',
+      dbpath: ''
     }
+  },
+  mounted() {
   },
   methods: {
     onSelectResourcePath: () => {

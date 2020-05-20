@@ -46,17 +46,23 @@ function isCategoryExist(state, name, parents) {
   return false
 }
 
+function isClass(node) {
+  if (!node.type) return true
+  if (node.type === 'clz') return true
+}
 function getNode(state, parents) {
-  let root = state.category
+  let nodes = state.category
+  let node = null
   for (let item of parents) {
-    for (let child of root) {
-      if (child.name === item && child.type === 'dir') {
-        root = child.children
+    for (let child of nodes) {
+      if (child.label === item && isClass(child)) {
+        node = child
+        nodes = child.children
         break
       }
     }
   }
-  return root
+  return node
 }
 
 const mutations = {
@@ -90,11 +96,26 @@ const mutations = {
     console.info('set category', category)
     state.category = category
   },
-  addImage2Category(state, imageSnap, chain) {
-    console.info('addImage2Category', imageSnap, chain)
-    const parents = chain.split('.')
+  addImage2Category(state, data) {
+    console.info('addImage2Category', data)
+    const parents = data['parent'].split('.')
     let node = getNode(state, parents)
-    console.info('node: ', node)
+    if (node === null) return
+    if (node['children'] === undefined) node['children'] = []
+    node['children'].push({name: data.name, id: data.id, type: 'img'})
+  },
+  removeImageFromCategory(state, data) {
+    console.info('removeImageFromCategory', data)
+    const parents = data['parent'].split('.')
+    console.info(parents)
+    let node = getNode(state, parents)
+    let children = node['children']
+    for (let idx in children) {
+      if (children[idx].name === data.name && children[idx].type === 'img') {
+        children.splice(idx, 1)
+        break
+      }
+    }
   }
 }
 
@@ -108,8 +129,11 @@ const actions = {
   setCategory({ commit }, category) {
     commit('setCategory', category)
   },
-  addImage2Category({ commit }, imageSnap, parents) {
-    commit('addImage2Category', imageSnap, parents)
+  addImage2Category({ commit }, data) {
+    commit('addImage2Category', data)
+  },
+  removeImageFromCategory({ commit }, data) {
+    commit('removeImageFromCategory', data)
   }
 }
 

@@ -3,7 +3,15 @@ const state = {
 }
 
 const getters = {
-  imageList: state => state.imageList
+  imageList: state => state.imageList,
+  image: state => (imageID) => {
+    const images = state.imageList
+    let sID = imageID
+    for (let img of images) {
+      if (img.id === sID) return img
+    }
+    return null
+  }
 }
 
 const mutations = {
@@ -28,10 +36,11 @@ const mutations = {
   clearImages(state) {
     state.imageList = []
   },
-  updateImageProperty(state, imageID, keyName, keyValue) {
+  updateImageProperty(state, obj) {
     for (let img of state.imageList) {
-      if (img.id === imageID) {
-        img[keyName] = keyValue
+      if (img.id === obj.id) {
+        img[obj.key] = obj.value
+        console.info(state.imageList)
         break
       }
     }
@@ -49,8 +58,8 @@ const actions = {
   clearImages ({ commit }) {
     commit('clearImages')
   },
-  updateImageProperty ({ commit }, imageID, keyName, keyValue) {
-    commit('updateImageProperty', imageID, keyName, keyValue)
+  updateImageProperty ({ commit }, obj) {
+    commit('updateImageProperty', obj)
   }
 }
 

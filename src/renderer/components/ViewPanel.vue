@@ -71,12 +71,8 @@ export default {
   },
   methods: {
     async onImageClick(e, image) {
-      console.info(image)
-      let imageInfo = await this.$ipcRenderer.get(Service.GET_IMAGE_INFO, image.id)
-      if (imageInfo !== null) {
-        imageInfo['id'] = image.id
-        bus.emit(bus.EVENT_SELECT_IMAGE, imageInfo)
-      }
+      // console.info(image)
+      bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
 
       // 框亮显示
       if (this.lastSelection !== null) {
@@ -140,6 +136,7 @@ export default {
 }
 .image {
   max-width: 19%;
+  margin: 0 0 0 6px;
   display: inline-block;
 }
 

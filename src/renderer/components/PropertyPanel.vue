@@ -3,7 +3,7 @@
       <el-card :body-style="{ padding: '0px' }">
         <img :src="picture.thumbnail?('data:image/jpg;base64,'+picture.thumbnail):picture.path" class="preview" />
         <div>
-          <span v-for="color of picture.colors" :key="color"><span class="main-color" :style="{'background-color': color}" ></span></span>
+          <span v-for="color of picture.desccolors" :key="color"><span class="main-color" :style="{'background-color': color}" ></span></span>
         </div>
         <div style="padding: 4px;" class="image-name">
           <span >{{picture.label}}</span>
@@ -39,7 +39,7 @@
         width="160"
         v-model="visible">
         <div>
-          <div v-for="(clazz,idx) in classes" :key="clazz">
+          <div v-for="(clazz,idx) in candidateClasses" :key="clazz">
             <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini" @change="onCategoryChange"></el-checkbox>
           </div>
         </div>
@@ -60,7 +60,7 @@
       <el-col :span="12">
         <div ><a href="javascript:void(0);" @click="openFolder()" class="value">{{picture.path}}</a></div>
         <div class="value">{{picture.width}} X {{picture.height}}</div>
-        <div class="value">{{picture.size}}</div>
+        <div class="value">{{picture.descsize}}</div>
         <div class="value">{{picture.type}}</div>
         <div class="value">{{picture.datetime}}</div>
       </el-col>
@@ -83,24 +83,28 @@ export default {
       dynamicTags: [],
       inputVisible: false,
       inputValue: '',
-      // classes: [{name: '测试', icon: 'el-icon-suitcase'}],
-      checkValue: [],
-      imageClasses: []
+      checkValue: []
     }
   },
   components: {
     IconTag
   },
   computed: {
-    classes() {
+    candidateClasses() {
       return this.$store.getters.classesName
+    },
+    imageClasses() {
+      let img = this.$store.getters.image(this.picture.id)
+      if (!img) return []
+      if (!img.category) img.category = []
+      return img.category
     }
   },
   mounted() {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
   },
   methods: {
-    async displayProperty(imageInfo) {
+    async displayProperty(imageID) {
       let getSize = (sz) => {
         let v = sz / 1024
         let unit = 'Kb'
@@ -110,21 +114,40 @@ export default {
         }
         return parseInt(v) + unit
       }
-      imageInfo.size = getSize(imageInfo.size)
-      if (imageInfo.colors) {
-        let colors = []
-        for (let color of imageInfo.colors) {
+      let image = this.$store.getters.image(imageID)
+      console.info(image)
+      image.descsize = getSize(image.size)
+      let colors = []
+      if (image.colors) {
+        for (let color of image.colors) {
           colors.push('#' + JString.formatColor16(color[0]) + JString.formatColor16(color[1]) + JString.formatColor16(color[2]))
         }
-        imageInfo.colors = colors
       }
-      this.picture = imageInfo
-      this.dynamicTags = imageInfo.tag
+      const clazzName = this.$store.getters.classesName
+      // console.info('clear', clazzName)
+      for (let idx in clazzName) {
+        this.checkValue[idx] = false
+      }
+      if (image.category) {
+        for (let idx in clazzName) {
+          for (let n of image.category) {
+            // console.info(n, image.category)
+            if (n.name === clazzName[idx].name) {
+              this.checkValue[idx] = true
+              break
+            }
+          }
+        }
+      }
+      console.info(this.checkValue)
+      image.desccolors = colors
+      this.picture = image
+      this.dynamicTags = image.tag
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
       this.$ipcRenderer.send(Service.REMOVE_TAG, {tagName: tag, imageID: this.picture.id})
-      this.$store.dispatch('updateImageProperty', this.picture.id, 'tag', this.dynamicTags)
+      this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
     },
     showInput() {
       this.inputVisible = true
@@ -137,7 +160,7 @@ export default {
       if (inputValue) {
         this.dynamicTags.push(inputValue)
         this.$ipcRenderer.send(Service.ADD_TAG, {imageID: this.picture.id, tagName: inputValue})
-        this.$store.dispatch('updateImageProperty', this.picture.id, 'tag', this.dynamicTags)
+        this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
       }
       this.inputVisible = false
       this.inputValue = ''
@@ -153,10 +176,34 @@ export default {
         console.info('not support os')
       }
     },
-    onCategoryChange(val, idx) {
-      console.info(val, idx)
-      console.info(this.checkValue)
+    onCategoryChange(val) {
+      // console.info(val)
+      // console.info(this.checkValue)
       // 更新本地缓存分类
+      const img = this.$store.getters.image(this.picture.id)
+      let selClasses = img.category || []
+      const originalClz = this.$store.getters.classesName
+      for (let idx in this.checkValue) {
+        if (this.checkValue.hasOwnProperty(idx)) {
+          console.info(originalClz[idx])
+          let parent = originalClz[idx].name
+          if (originalClz[idx].parent !== '') parent = originalClz[idx].parent + '.' + parent
+          if (val === true && this.checkValue[idx] === true) {
+            this.$store.dispatch('addImage2Category', {id: this.picture.id, name: this.picture.label, parent: parent})
+            selClasses.push(originalClz[idx])
+          } else if (val === false && this.checkValue[idx] === false) {
+            for (let pos in selClasses) {
+              if (selClasses[pos].name === originalClz[idx].name && originalClz[idx].parent === selClasses[pos].parent) {
+                if (selClasses.length > 1) selClasses.splice(pos, 1)
+                else selClasses = []
+                break
+              }
+            }
+            this.$store.dispatch('removeImageFromCategory', {id: this.picture.id, name: this.picture.label, parent: parent})
+          }
+        }
+      }
+      this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'category', value: selClasses})
       // 更新数据库分类
     }
   }

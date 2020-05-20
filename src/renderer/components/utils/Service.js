@@ -77,5 +77,6 @@ export default{
   ADD_CATEGORY: 'addCategory',
   REMOVE_TAG: 'removeTag',
   FIND_IMAGES_BY_KEYWORD: 'findImageWithKeyword',
-  ON_IMAGE_UPDATE: 'updateImageList'
+  ON_IMAGE_UPDATE: 'updateImageList',
+  UPDATE_IMAGE_CATEGORY: 'updateImageCategory'
 }
