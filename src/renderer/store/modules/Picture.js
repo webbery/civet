@@ -40,7 +40,7 @@ const mutations = {
     for (let img of state.imageList) {
       if (img.id === obj.id) {
         img[obj.key] = obj.value
-        console.info(state.imageList)
+        // console.info('update ', obj)
         break
       }
     }

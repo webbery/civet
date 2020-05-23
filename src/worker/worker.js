@@ -1,15 +1,13 @@
 import JString from '../public/String'
-import NLP from '../public/NLP'
-import ExifReader from 'exifreader'
 import localStorage from './LocalStorage'
 // import CV from '../public/CV'
+import JImage from './Image'
+import { CategoryArray } from './Category'
+import { GPU, input } from 'gpu.js'
 
 // your background code here
 const { ipcRenderer } = require('electron')
 const fs = require('fs')
-const crypto = require('crypto')
-const sharp = require('sharp')
-const path = require('path')
 
 const ReplyType = {
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
@@ -28,66 +26,10 @@ async function readImages(fullpath) {
   if (info.isDirectory()) {
     readDir(fullpath)
   } else {
-    const item = path.basename(fullpath)
-    if (JString.isImage(item)) {
-      let keywords = NLP.getNouns(fullpath)
-      console.info('keyword:', keywords)
-      // console.info(dhash)
-      const image = fs.readFileSync(fullpath)
-      const tags = ExifReader.load(image)
-      delete tags['MakerNote']
-      console.info(fullpath, tags, info)
-      let size = info.size
-      let thumbnail = null
-      if (size > 5 * 1024 * 1024) {
-        thumbnail = tags['Thumbnail'].base64
-      }
-      // const orignalPixels = await sharp(fullpath).toBuffer()
-      // const colors = CV.sumaryColors(orignalPixels)
-      let scaleWidth = Math.ceil(tags['Image Width'].value / 5)
-      if (scaleWidth < 8) scaleWidth = tags['Image Width'].value
-      const scaleHeight = scaleWidth + 1
-      const pixels = await sharp(fullpath)
-        .resize(scaleWidth, scaleHeight)
-        .grayscale()
-        .toBuffer()
-      const MD5 = crypto.createHash('md5')
-      // console.info(pixels.toString())
-      const hash = MD5.update(pixels.toString()).digest('hex')
-      // const hash = JString.dhash(image, tags['Image Width'].value, tags['Image Height'].value)
-      // const hash = await imghash.hash(fullpath)
-      // const hash = '1'
-      let type = tags['format']
-      if (type === undefined) {
-        type = JString.getFormatType(item)
-      } else {
-        type = JString.getFormatType(tags['format'].description)
-      }
-      let datetime = tags['DateTime']
-      if (datetime === undefined) {
-        datetime = info.atime.toString()
-      } else {
-        datetime = datetime.value[0]
-      }
-      const dir = path.dirname(fullpath)
-      const fid = await localStorage.generateID()
-      let fileInfo = {
-        id: fid,
-        hash: hash.toString(),
-        path: dir,
-        filename: item,
-        keyword: keywords,
-        size: info.size,
-        datetime: datetime,
-        width: tags['Image Width'].value,
-        height: tags['Image Height'].value,
-        thumbnail: thumbnail,
-        // colors: colors,
-        type: type
-      }
-      // 更新目录窗口
-      localStorage.addImages([fileInfo])
-      reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [fileInfo])
+    const img = await JImage.build(fullpath, info)
+    if (img) {
+      img.saveDB()
+      reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
     }
   }
 }
@@ -102,9 +44,23 @@ function readDir(path) {
   })
 }
 
+function GPUTest() {
+  const gpu = new GPU({mode: 'cpu'})
+  const value1 = input([1, 2, 3, 4, 5, 6], [2, 1, 3])
+  console.info(value1)
+  function kernelFunction(x, y) {
+    const v = x[this.thread.z][this.thread.y][this.thread.x] + y[this.thread.z][this.thread.y][this.thread.x]
+    return v
+  }
+  const kernel = gpu.createKernel(kernelFunction, {output: [1]})
+  console.info('1111111')
+  const result = kernel(value1, value1)
+  console.info('GPU: ', result)
+}
 // let the main thread know this thread is ready to process something
 function ready() {
   ipcRenderer.send('ready')
+  GPUTest()
 }
 
 function reply2Renderer(type, value) {
@@ -137,11 +93,16 @@ const messageProcessor = {
     } else {
       imagesIndex = data
     }
-    let images = await localStorage.getImagesInfo(imagesIndex)
+    let imgs = await localStorage.getImagesInfo(imagesIndex)
+    let images = []
+    for (let img of imgs) {
+      images.push(new JImage(img))
+    }
     reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
   'getImageInfo': async (imageID) => {
-    let image = await localStorage.getImageInfo(imageID)
+    let img = await localStorage.getImageInfo(imageID)
+    let image = new JImage(img)
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
   'addTag': async (data) => {
@@ -164,15 +125,15 @@ const messageProcessor = {
     return localStorage.addCategory(categoryName, chain, imageID)
   },
   'getAllCategory': async () => {
-    let category = await localStorage.getAllCategory()
+    let category = await CategoryArray.loadFromDB()
     reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
   'getUncategoryImages': async () => {
     let uncateimgs = await localStorage.getUncategoryImages()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
   },
-  'updateImageCategory': async (imageID, category) => {
-    await localStorage.updateImageCatergory(imageID, category)
+  'updateImageCategory': async (data) => {
+    await localStorage.updateImageCatergory(data.imageID, data.category)
   }
 }
 

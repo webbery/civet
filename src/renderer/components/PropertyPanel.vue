@@ -34,17 +34,17 @@
       <legend class="title">分类</legend>
       <div>
         <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz.name}}</IconTag>
-      <el-popover
-        placement="left"
-        width="160"
-        v-model="visible">
-        <div>
-          <div v-for="(clazz,idx) in candidateClasses" :key="clazz">
-            <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini" @change="onCategoryChange"></el-checkbox>
+        <el-popover
+          placement="left"
+          width="160"
+          v-model="visible">
+          <div>
+            <div v-for="(clazz,idx) in candidateClasses" :key="clazz">
+              <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini" @change="onCategoryChange"></el-checkbox>
+            </div>
           </div>
-        </div>
-        <el-button slot="reference" size="mini">+</el-button>
-      </el-popover>
+          <el-button slot="reference" size="mini">+</el-button>
+        </el-popover>
       </div>
     </fieldset>
     <fieldset>
@@ -83,7 +83,8 @@ export default {
       dynamicTags: [],
       inputVisible: false,
       inputValue: '',
-      checkValue: []
+      checkValue: [],
+      classes: []
     }
   },
   components: {
@@ -94,10 +95,8 @@ export default {
       return this.$store.getters.classesName
     },
     imageClasses() {
-      let img = this.$store.getters.image(this.picture.id)
-      if (!img) return []
-      if (!img.category) img.category = []
-      return img.category
+      console.info('update classes')
+      return this.classes
     }
   },
   mounted() {
@@ -115,6 +114,7 @@ export default {
         return parseInt(v) + unit
       }
       let image = this.$store.getters.image(imageID)
+      this.classes = image.category
       console.info(image)
       image.descsize = getSize(image.size)
       let colors = []
@@ -176,12 +176,16 @@ export default {
         console.info('not support os')
       }
     },
-    onCategoryChange(val) {
-      // console.info(val)
-      // console.info(this.checkValue)
+    async onCategoryChange(val) {
+      const isCategoryExist = (arr, category) => {
+        for (let item of arr) {
+          if (item.name === category.name) return true
+        }
+        return false
+      }
       // 更新本地缓存分类
       const img = this.$store.getters.image(this.picture.id)
-      let selClasses = img.category || []
+      let selClasses = img.category ? img.category.slice(0) : []
       const originalClz = this.$store.getters.classesName
       for (let idx in this.checkValue) {
         if (this.checkValue.hasOwnProperty(idx)) {
@@ -189,8 +193,11 @@ export default {
           let parent = originalClz[idx].name
           if (originalClz[idx].parent !== '') parent = originalClz[idx].parent + '.' + parent
           if (val === true && this.checkValue[idx] === true) {
-            this.$store.dispatch('addImage2Category', {id: this.picture.id, name: this.picture.label, parent: parent})
-            selClasses.push(originalClz[idx])
+            this.$store.commit('addImage2Category', {id: this.picture.id, label: this.picture.label, parent: parent})
+            if (!isCategoryExist(selClasses, originalClz[idx])) {
+              // console.info('not exist', originalClz[idx])
+              selClasses.push(originalClz[idx])
+            }
           } else if (val === false && this.checkValue[idx] === false) {
             for (let pos in selClasses) {
               if (selClasses[pos].name === originalClz[idx].name && originalClz[idx].parent === selClasses[pos].parent) {
@@ -199,12 +206,15 @@ export default {
                 break
               }
             }
-            this.$store.dispatch('removeImageFromCategory', {id: this.picture.id, name: this.picture.label, parent: parent})
+            this.$store.commit('removeImageFromCategory', {id: this.picture.id, name: this.picture.label, parent: parent})
           }
         }
       }
-      this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'category', value: selClasses})
-      // 更新数据库分类
+      this.$store.commit('updateImageProperty', {id: this.picture.id, key: 'category', value: selClasses})
+      // console.info('get category', img.category)
+      this.classes = img.category
+      // console.info('get category', v)
+      this.$ipcRenderer.send(Service.UPDATE_IMAGE_CATEGORY, {imageID: this.picture.id, category: img.category})
     }
   }
 }

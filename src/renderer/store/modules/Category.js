@@ -1,3 +1,4 @@
+// import Service from '../../components/utils/Service'
 // 分类文件夹缓存数据
 // [{label: name, type: dir/jpg, children: []}]
 const state = {
@@ -5,18 +6,25 @@ const state = {
 }
 
 const getters = {
-  category: state => state.category,
+  category: state => {
+    // console.info('category', state.category)
+    return state.category
+  },
   classesName: state => {
     let names = []
     let children = state.category.slice(0)
+    console.info(children.length)
     for (let idx = 0; idx < children.length;) {
       let parent = ''
       let child = children[idx]
+      console.info('get classes: ', idx, children.length, child)
       if (child.parent !== undefined) parent = child.parent
       let classes = {name: child.label, parent: parent}
       names.push(classes)
       if (child.children !== undefined) {
-        for (let c of child.children) children.push({label: c.label, parent: child.label, children: c.children})
+        for (let c of child.children) {
+          if (!c.type || c.type === 'clz') children.push({label: c.label, parent: child.label, children: c.children})
+        }
       }
       children.shift()
     }
@@ -65,6 +73,13 @@ function getNode(state, parents) {
   return node
 }
 
+function isFileExist(nodes, data) {
+  for (let node of nodes) {
+    if (data.name === node.name) return true
+  }
+  return false
+}
+
 const mutations = {
   changeCategoryName(state, newName, chain) {
     for (let item of state.category) {
@@ -101,8 +116,12 @@ const mutations = {
     const parents = data['parent'].split('.')
     let node = getNode(state, parents)
     if (node === null) return
-    if (node['children'] === undefined) node['children'] = []
-    node['children'].push({name: data.name, id: data.id, type: 'img'})
+    if (!node['children']) node['children'] = []
+    const n = {label: data.label, id: data.id, type: 'img'}
+    if (!isFileExist(node['children'], n)) {
+      console.info('add category:', n)
+      node['children'].push(n)
+    }
   },
   removeImageFromCategory(state, data) {
     console.info('removeImageFromCategory', data)

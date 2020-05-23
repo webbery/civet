@@ -183,7 +183,7 @@ function pushArray(array, data) {
 
 async function getImageInfoImpl(imageID) {
   let image = await getOptional(imageID, null)
-  // console.info('image', image, imageID)
+  if (image === null) return null
   if (image.tag !== null) {
     const tagsName = await getKeyword(image.tag)
     image.tag = tagsName
@@ -229,6 +229,12 @@ async function code2categoryChain(code, indx2cate) {
     chain += indx2cate[idx] + '.'
   }
   return chain.substr(0, chain.length - 1)
+}
+
+function makeCategoryChain(categoryName, categoryChain) {
+  let chain = categoryName
+  if (categoryChain || categoryChain !== '') chain = categoryChain + '.' + categoryName
+  return chain
 }
 
 export default {
@@ -300,13 +306,15 @@ export default {
     put(KeyHash, simhash)
   },
   updateImageCatergory: async (imageID, category) => {
+    console.info(category)
     // 更新图像的分类
     let img = await getOptional(imageID, null)
     let cate2indx = await getOptional(KeyCategory2Index, {})
     let indx2cate = await getOptional(KeyIndex2Category, {})
     let categoryID = []
     for (let item of category) {
-      categoryID.push(await categoryChain2code(item, cate2indx, indx2cate))
+      const chain = makeCategoryChain(item.name, item.parent)
+      categoryID.push(await categoryChain2code(chain, cate2indx, indx2cate))
     }
     img.category = categoryID
     put(imageID, img)
@@ -342,6 +350,7 @@ export default {
     console.info('all images snap', imagesSnap)
     return imagesSnap
   },
+  updateImage: async (image) => {},
   removeImage: (imageID) => {},
   updateImageTags: (imageID, tags) => {},
   changeImageName: (imageID, label) => {},
@@ -448,8 +457,7 @@ export default {
   addCategory: async (categoryName, categoryChain, imageID) => {
     let data = {}
     // 1. 生成分类码
-    let chain = categoryName
-    if (categoryChain) chain = categoryChain + '.' + categoryName
+    let chain = makeCategoryChain(categoryName, categoryChain)
     const code = await categoryChain2code(chain)
     let category = await getOptional(KeyCategory, {})
     if (category[code] === undefined) category[code] = []

@@ -108,7 +108,7 @@ export default {
         this.$store.dispatch('addImage', {id: item.id, label: item.filename, path: JString.joinPath(item.path, item.filename), thumbnail: item.thumbnail})
       }
 
-      // console.info(this.directoryData)
+      console.info(this.directoryData)
       for (let item of this.directoryData) {
         // console.info('***', item.label, dirs[item.label])
         if (dirs[item.label] !== undefined) {
@@ -124,10 +124,12 @@ export default {
     },
     async init() {
       this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
+      // console.info('----', this.directoryData)
       const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
+      // console.info('get category', folders)
       const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
       this.headOptions[1].value = uncategoryImages.length
-      console.info(uncategoryImages)
+      // console.info(uncategoryImages)
       this.$store.dispatch('setCategory', folders)
     },
     renderContent(h, {node, data, store}) {
@@ -140,7 +142,6 @@ export default {
       )
     },
     handleResourceClick(node) {
-      // console.info(node)
       switch (node.name) {
         case 'manageTag':
           this.$router.push({path: '/tagManager', query: {name: node.label, cmd: 'manage-tag'}})
