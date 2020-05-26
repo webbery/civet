@@ -16,5 +16,6 @@ export default {
   EVENT_SELECT_IMAGE: 'selectImage',
   EVENT_UPDATE_NAV_DESCRIBTION: 'updateNavDesc',
   EVENT_DISPLAY_IMAGE: 'displayImage',
-  EVENT_DISPLAY_SEARCH_RESULT: 'showSearchResult'
+  EVENT_DISPLAY_SEARCH_RESULT: 'showSearchResult',
+  EVENT_UPDATE_UNCATEGORY_IMAGES: 'updateUncategoryImages'
 }

@@ -87,6 +87,7 @@ export default {
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
+    bus.on(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, this.updateUncategoryImages)
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.updateDisplayImageList)
     this.init()
   },
@@ -94,6 +95,9 @@ export default {
     updateLoadingDirectories(dir) {
       // 从数据库中导入该文件夹中的所有图片
       console.info('----update: ', dir)
+    },
+    updateUncategoryImages(updateValue) {
+      this.headOptions[1].value += updateValue
     },
     updateDisplayImageList(error, appendFiles) {
       if (error) console.log(error)

@@ -136,6 +136,7 @@ async function getKeywordIndx(keywords) {
   let wordIndx = []
   let shouldUpdate = false
   let index2word = {}
+  console.info('getKeywordIndx', keywords)
   for (let word of keywords) {
     if (keyword2index[word] === undefined) {
       keyword2index[word] = maxIndx
@@ -312,15 +313,18 @@ export default {
     let cate2indx = await getOptional(KeyCategory2Index, {})
     let indx2cate = await getOptional(KeyIndex2Category, {})
     let categoryID = []
+    let words = []
     for (let item of category) {
       const chain = makeCategoryChain(item.name, item.parent)
+      words.push(chain.split('.'))
       categoryID.push(await categoryChain2code(chain, cate2indx, indx2cate))
     }
     img.category = categoryID
     put(imageID, img)
     // 更新检索关键字
     let rewordIndx = await getOptional(KeyRewordIndex, {})
-    for (let word of category) {
+    for (let word of words) {
+      console.info(word)
       const kwIndx = await getKeywordIndx(word)
       rewordIndx[kwIndx] = pushArray(rewordIndx[kwIndx], imageID)
     }
@@ -331,6 +335,16 @@ export default {
       categoryTable[cID].push(imageID)
     }
     put(KeyCategory, categoryTable)
+    let uncategory = await getOptional(KeyUnCategory, [])
+    if (categoryID.length !== 0) {
+      for (let idx in uncategory) {
+        if (uncategory[idx] === imageID) {
+          uncategory = uncategory.splice(idx, 1)
+          put(KeyUnCategory, uncategory)
+          break
+        }
+      }
+    }
   },
   getImageInfo: (imageID) => {
     console.info('imageID', imageID)
@@ -486,25 +500,26 @@ export default {
       let chains = await code2categoryChain(cate, indx2category)
       let names = []
       for (let imgID of category[cate]) {
-        names.push(imagesSnap[imgID])
+        names.push({label: imagesSnap[imgID], id: imgID, type: 'img'})
       }
       data[chains] = names
     }
     console.info('get all category:', data)
     let structCategory = []
-    const createChainStruct = (clz, childrenName) => {
-      // console.info(childrenName, clz)
-      if (childrenName.length === 0) return clz
+    const createChainStruct = (clz, childrenName, items) => {
       const newName = childrenName[0]
       clz['label'] = newName
       childrenName.splice(0, 1)
-      // console.info('childrenName', childrenName)
+      // console.info('childrenName', childrenName, childrenName.length)
       if (childrenName.length !== 0) {
         let t = {}
-        let child = createChainStruct(t, childrenName)
+        let child = createChainStruct(t, childrenName, items)
         if (clz['children'] === undefined) clz['children'] = []
         // console.info('child', child)
         clz['children'].push(child)
+      } else {
+        if (clz['children'] === undefined) clz['children'] = items
+        else clz['children'] = clz['children'].concat(items)
       }
       return clz
     }
@@ -512,7 +527,7 @@ export default {
       const chain = chains.split('.')
       let root = {}
       console.info(chain)
-      const result = createChainStruct(root, chain)
+      const result = createChainStruct(root, chain, data[chains])
       structCategory.push(result)
     }
     console.info('structCategory', structCategory)

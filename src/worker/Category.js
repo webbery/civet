@@ -10,11 +10,7 @@ export class Category {
 
 export class CategoryArray {
   constructor(category) {
-    this.data = []
-    for (let n in category) {
-      console.info('category[n]', category[n])
-      this.data.push({'label': category[n].label, type: '', 'children': []})
-    }
+    this.data = category
   }
 
   static async loadFromDB() {

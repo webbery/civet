@@ -211,6 +211,11 @@ export default {
         }
       }
       this.$store.commit('updateImageProperty', {id: this.picture.id, key: 'category', value: selClasses})
+      if (selClasses.length === 0) {
+        bus.emit(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, -1)
+      } else if (img.category.length === 0) {
+        bus.emit(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, 1)
+      }
       // console.info('get category', img.category)
       this.classes = img.category
       // console.info('get category', v)

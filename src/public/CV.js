@@ -22,7 +22,6 @@ let getOrCreateGPU = (function () {
 
 function image2Array(image) {
   const gpu = getOrCreateGPU()
-  console.info('create kernel')
   const kernel = gpu.createKernel(function(image) {
     const pixel = image[this.thread.y][this.thread.x]
     this.color(pixel.r, pixel.g, pixel.b, pixel.a)
@@ -31,9 +30,7 @@ function image2Array(image) {
     graphical: true,
     pipeline: true
   })
-  console.info('before kernel')
   kernel(image)
-  console.info('after kernel')
   const result = kernel.getPixels(true)
   kernel.destroy()
   return result
