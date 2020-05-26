@@ -371,7 +371,8 @@ export default {
   hasDirectory: async (path) => {
     const paths = await getOptional(KeyPath, undefined)
     if (paths === undefined) return false
-    for (let p of paths) {
+    // console.info(paths)
+    for (let p in paths) {
       if (p === path) {
         return true
       }

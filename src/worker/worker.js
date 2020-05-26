@@ -37,7 +37,7 @@ async function readImages(fullpath) {
 function readDir(path) {
   fs.readdir(path, function(err, menu) {
     if (err) return
-    // let files = []
+    // console.info(menu)
     for (let item of menu) {
       readImages(JString.joinPath(path, item))
     }
@@ -75,6 +75,7 @@ const messageProcessor = {
     }
   },
   'hasDirectory': async (data) => {
+    console.info(data)
     let result = await localStorage.hasDirectory(data)
     reply2Renderer(ReplyType.IS_DIRECTORY_EXIST, result)
   },

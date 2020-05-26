@@ -50,7 +50,6 @@ export default {
   sumaryColors: async (fullpath) => {
     // 使用聚类提取主色
     const image = await loadImage(fullpath)
-    console.info('----0---')
     const array = image2Array(image)
     console.info('----1---')
     console.info(array)
