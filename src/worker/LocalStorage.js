@@ -185,11 +185,21 @@ function pushArray(array, data) {
 async function getImageInfoImpl(imageID) {
   let image = await getOptional(imageID, null)
   if (image === null) return null
+  // tag
   if (image.tag !== null) {
     const tagsName = await getKeyword(image.tag)
     image.tag = tagsName
   }
   image.id = imageID
+  // category
+  if (image.category) {
+    const indx2cate = await getOptional(KeyIndex2Category, {})
+    let category = []
+    for (let idx of image.category) {
+      category.push(indx2cate[idx])
+    }
+    image.category = category
+  }
   return image
 }
 
@@ -352,11 +362,11 @@ export default {
   },
   getImagesInfo: async (imagesID) => {
     let images = []
-    console.info('logger.info')
     for (let ids of imagesID) {
       let image = await getImageInfoImpl(ids)
       images.push(image)
     }
+    console.info('logger.info', images)
     return images
   },
   getImagesSnap: async () => {

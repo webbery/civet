@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     imageList() {
-      // console.info('+++++++++', this.$store.state.Picture.imageList[0])
+      console.info('+++++++++', this.$store.state.Picture.imageList)
       // if (this.$store.state.Picture.imageList.length > 80) {
       //   return this.$store.state.Picture.imageList.slice(0, 79)
       // }
@@ -58,7 +58,7 @@ export default {
       switch (to.path) {
         case '/':
           let images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO)
-          // console.info(images)
+          console.info('all images:', images)
           this.$store.dispatch('updateImageList', images)
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break

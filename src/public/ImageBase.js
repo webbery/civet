@@ -4,7 +4,7 @@ export default class ImageBase {
     this.hash = json.hash || ''
     this.path = json.path
     this.filename = json.filename
-    this.name = json.name || json.filename
+    this.label = json.name || json.filename || json.label
     this.keyword = json.keyword
     this.size = json.size
     this.descsize = json.descsize || ''
