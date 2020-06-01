@@ -95,7 +95,46 @@ export default class JImage extends ImageBase {
     }
   }
 
+  parseChain(fullpath) {
+    const path = require('path')
+    const f = path.parse(fullpath)
+    let fileInfo = {
+      path: f.dir,
+      filename: f.base
+    }
+    let image = new JImage(fileInfo)
+    const meta = new ImageMetaParser()
+    const text = new ImageTextParser()
+    const color = new ImageColorParser()
+    meta.nextParser(text)
+    text.nextParser(color)
+    meta.parse(image)
+  }
+
   toJson() {
     return JSON.parse(JSON.stringify(this))
   }
 }
+
+class ImageParseBase {
+  constructor() {
+    this.maxStep = 2
+  }
+
+  nextParser(parser) {
+    this.next = parser
+  }
+}
+
+class ImageMetaParser extends ImageParseBase {
+  constructor() {
+    super()
+    this.step = 0
+  }
+
+  async parse(image) {}
+}
+
+class ImageTextParser extends ImageParseBase {}
+
+class ImageColorParser extends ImageParseBase {}

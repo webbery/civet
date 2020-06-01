@@ -122,6 +122,26 @@ function sendWindowMessage(targetWindow, message, payload) {
 }
 
 app.on('ready', async () => {
+  // 检查配置数据是否存在
+  const userDir = app.getPath('userData')
+  const cfgFile = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
+  const fs = require('fs')
+  let cfg = {
+    db: {
+      path: userDir + '/civet'
+    },
+    resource: {
+      path: userDir + '/resource'
+    },
+    app: {
+      first: true
+    }
+  }
+  console.info('cfgFile', cfgFile)
+  if (!fs.existsSync(cfgFile)) {
+    fs.writeFileSync(cfgFile, JSON.stringify(cfg))
+  }
+
   createWindow()
   ipcMain.on('message-from-worker', (event, arg) => {
     // console.info('########################')

@@ -18,7 +18,8 @@ const ReplyType = {
   REPLY_ALL_TAGS: 'replyAllTags',
   REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
   REPLAY_ALL_CATEGORY: 'replyAllCategory',
-  REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages'
+  REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
+  REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
 
 async function readImages(fullpath) {
@@ -135,6 +136,10 @@ const messageProcessor = {
   },
   'updateImageCategory': async (data) => {
     await localStorage.updateImageCatergory(data.imageID, data.category)
+  },
+  'reInitDB': (data) => {
+    localStorage.reloadDB(data)
+    reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
   }
 }
 

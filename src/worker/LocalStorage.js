@@ -36,20 +36,25 @@ const KeyIndex2Category = 'v' + DBVersion + '.' + TableIndex2Category
 const KeyCategory = 'v' + DBVersion + '.' + TableCategory
 const KeyUnCategory = 'v' + DBVersion + '.' + TableUnCategory
 
-let instance = (() => {
+function initDB(dbpath) {
   const levelup = require('levelup')
   const leveldown = require('leveldown')
   // const rocksdb = require('rocksdb')
   var db
-  // let options = {'prefix_extractor': }
-  const {remote} = require('electron')
-  let userDir = remote.app.getPath('userData')
-  const dbName = (remote.app.isPackaged ? userDir + '/civet' : 'civet')
-  console.info('======', dbName, '======')
-  return function() {
-    return db || (db = levelup(leveldown(dbName)))
+  let dbname = ''
+  if (!dbpath) {
+    const {remote} = require('electron')
+    let userDir = remote.app.getPath('userData')
+    dbname = (remote.app.isPackaged ? userDir + '/civet' : 'civet')
+  } else {
+    dbname = dbpath
   }
-})()
+  console.info('======', dbname, '======')
+  return function() {
+    return db || (db = levelup(leveldown(dbname)))
+  }
+}
+let instance = initDB()
 
 // 10进制转36进制
 const conv36 = (v) => {
@@ -249,6 +254,9 @@ function makeCategoryChain(categoryName, categoryChain) {
 }
 
 export default {
+  reloadDB: (dbpath) => {
+    instance = initDB(dbpath)
+  },
   generateID: async () => {
     return IDGenerator.getID()
   },
