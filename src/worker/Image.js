@@ -4,13 +4,42 @@ import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
 import CV from '../public/CV'
+import fs from 'fs'
 
-export default class JImage extends ImageBase {
+export class ImageParser {
+  async parse(fullpath, stat, stepFinishCB) {
+    return parseChain(fullpath, stat, stepFinishCB)
+  }
+}
+
+const parseChain = async (fullpath, stat, stepFinishCB) => {
+  const path = require('path')
+  const f = path.parse(fullpath)
+  const fid = await localStorage.generateID()
+  console.info(f.dir, f.base)
+  let fileInfo = {
+    id: fid,
+    path: f.dir,
+    filename: f.base,
+    size: stat.size,
+    datetime: stat.atime.toString()
+  }
+
+  let image = new JImage(fileInfo)
+  image.stepCallback = stepFinishCB
+  const meta = new ImageMetaParser()
+  const text = new ImageTextParser()
+  const color = new ImageColorParser()
+  meta.nextParser(text)
+  text.nextParser(color)
+  await meta.parse(image)
+}
+
+export class JImage extends ImageBase {
   static async build(fullpath, stat) {
     const path = require('path')
     const crypto = require('crypto')
     const sharp = require('sharp')
-    const fs = require('fs')
     const item = path.basename(fullpath)
     if (JString.isImage(item)) {
       let keywords = NLP.getNouns(fullpath)
@@ -95,22 +124,6 @@ export default class JImage extends ImageBase {
     }
   }
 
-  parseChain(fullpath) {
-    const path = require('path')
-    const f = path.parse(fullpath)
-    let fileInfo = {
-      path: f.dir,
-      filename: f.base
-    }
-    let image = new JImage(fileInfo)
-    const meta = new ImageMetaParser()
-    const text = new ImageTextParser()
-    const color = new ImageColorParser()
-    meta.nextParser(text)
-    text.nextParser(color)
-    meta.parse(image)
-  }
-
   toJson() {
     return JSON.parse(JSON.stringify(this))
   }
@@ -132,9 +145,67 @@ class ImageMetaParser extends ImageParseBase {
     this.step = 0
   }
 
-  async parse(image) {}
+  async parse(image) {
+    const fullpath = image.path + '/' + image.filename
+    const meta = ExifReader.load(fs.readFileSync(fullpath))
+    delete meta['MakerNote']
+    let type = meta['format']
+    if (type === undefined) {
+      type = JString.getFormatType(image.filename)
+    } else {
+      type = JString.getFormatType(meta['format'].description)
+    }
+    if (meta['DateTime'] !== undefined) {
+      image.datetime = meta['DateTime'].value[0]
+    }
+    image.type = type
+    image.width = meta['Image Width'].value
+    image.height = meta['Image Height'].value
+    if (image.size > 5 * 1024 * 1024) {
+      image.thumbnail = meta['Thumbnail'].base64
+    }
+    await localStorage.addImages([image])
+    image.stepCallback(image)
+
+    if (this.next !== undefined) {
+      this.next.parse(image)
+    }
+  }
 }
 
-class ImageTextParser extends ImageParseBase {}
+class ImageTextParser extends ImageParseBase {
+  constructor() {
+    super()
+    this.step = 1
+  }
 
-class ImageColorParser extends ImageParseBase {}
+  async parse(image) {
+    const fullpath = image.path + '/' + image.filename
+    image.tag = NLP.getNouns(fullpath)
+    image.keyword = image.tag
+    // await localStorage.updateImage(image.id, 'keyword', image.keyword, this.step)
+    await localStorage.updateImageTags(image.id, image.tag)
+    await localStorage.nextStep(image.id)
+    // console.info(image)
+    image.stepCallback(image)
+
+    if (this.next !== undefined) {
+      this.next.parse(image)
+    }
+  }
+}
+
+class ImageColorParser extends ImageParseBase {
+  constructor() {
+    super()
+    this.step = 2
+  }
+
+  async parse(image) {
+    // image.stepFinishCB(image)
+
+    if (this.next !== undefined) {
+      this.next.parse(image)
+    }
+  }
+}

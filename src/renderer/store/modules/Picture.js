@@ -14,22 +14,24 @@ const getters = {
   }
 }
 
+function isImageExist(imageID, imgs) {
+  for (let img of imgs) {
+    if (imageID == img.id) return true
+  }
+  return false
+}
+
 const mutations = {
   updateImageList(state, imageList) {
     // {label: item.filename, realpath: item.path + item.filename}
     state.imageList = imageList
   },
   addImage(state, image) {
-    let newFlag = false
     if (state.imageList.length === 0) {
       state.imageList.push(image)
       return
     }
-    for (let img of state.imageList) {
-      if (img.id === image.id) continue
-      newFlag = true
-    }
-    if (newFlag === true) {
+    if (!isImageExist(image.id, state.imageList)) {
       state.imageList.push(image)
     }
   },

@@ -15,7 +15,7 @@ const TableTAG = 'tag'
 const TableWord2Index = 'word2index'
 const TableIndex2Word = 'index2word'
 const TableRewordIndex = 'reword_index'
-const TableHash = 'hash'
+// const TableHash = 'hash'
 const TableCategory2Index = 'category2index'
 const TableIndex2Category = 'index2category'
 const TableCategory = 'category'
@@ -30,7 +30,7 @@ const KeyWord2Index = 'v' + DBVersion + '.' + TableWord2Index
 const KeyIndex2Word = 'v' + DBVersion + '.' + TableIndex2Word
 const KeyRewordIndex = 'v' + DBVersion + '.' + TableRewordIndex
 const KeyID = 'v' + DBVersion + '.id'
-const KeyHash = 'v' + DBVersion + '.' + TableHash
+// const KeyHash = 'v' + DBVersion + '.' + TableHash
 const KeyCategory2Index = 'v' + DBVersion + '.' + TableCategory2Index
 const KeyIndex2Category = 'v' + DBVersion + '.' + TableIndex2Category
 const KeyCategory = 'v' + DBVersion + '.' + TableCategory
@@ -136,9 +136,10 @@ async function batchPut(data) {
 }
 
 async function getKeywordIndx(keywords) {
+  let wordIndx = []
+  if (keywords === undefined || keywords.length === 0) return wordIndx
   let keyword2index = await getOptional(KeyWord2Index, {})
   let maxIndx = Object.keys(keyword2index).length + 1
-  let wordIndx = []
   let shouldUpdate = false
   let index2word = {}
   console.info('getKeywordIndx', keywords)
@@ -269,18 +270,18 @@ export default {
     let images = await getOptional(KeyImageIndexes, {})
     // console.info('addImages IMAGE:', images)
     // 标签索引
-    let tags = await getOptional(KeyTag, {})
-    let rewordIndx = await getOptional(KeyRewordIndex, {})
-    let simhash = await getOptional(KeyHash, {})
+    // let tags = await getOptional(KeyTag, {})
+    // let rewordIndx = await getOptional(KeyRewordIndex, {})
+    // let simhash = await getOptional(KeyHash, {})
     let uncategory = await getOptional(KeyUnCategory, [])
     for (let item of objs) {
       const k = item.id
       // console.info('image key', k)
       const dir = JString.replaceAll(item.path, '\\\\', '/')
       const fullpath = JString.joinPath(dir, item.filename)
-      images[k] = item.filename
+      images[k] = {name: item.filename, step: 0}
       uncategory.push(k)
-      const kwIndx = await getKeywordIndx(item.keyword)
+      // const kwIndx = await getKeywordIndx(item.keyword)
       instance().put(k, JSON.stringify({
         label: item.filename,
         path: fullpath,
@@ -289,22 +290,19 @@ export default {
         height: item.height,
         datetime: item.datetime,
         type: item.type,
-        thumbnail: item.thumbnail,
-        tag: kwIndx,
-        colors: item.colors,
-        keyword: kwIndx
+        thumbnail: item.thumbnail
       }))
       paths[dir] = pushArray(paths[dir], k)
-      simhash[item.hash] = pushArray(simhash[item.hash], k)
-      for (let tagIndx of kwIndx) {
-        // console.info('tagIndx', tagIndx)
-        tags[tagIndx.toString()] = pushArray(tags[tagIndx.toString()], k)
-        rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], k)
-      }
+      // simhash[item.hash] = pushArray(simhash[item.hash], k)
+      // for (let tagIndx of kwIndx) {
+      //   // console.info('tagIndx', tagIndx)
+      //   tags[tagIndx.toString()] = pushArray(tags[tagIndx.toString()], k)
+      //   rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], k)
+      // }
     }
     // console.info(KEY_IMAGES)
     // let imageSet = new Set(images)
-    put(KeyImageIndexes, images)
+    await put(KeyImageIndexes, images)
     put(KeyUnCategory, uncategory)
 
     // 路径文件排重
@@ -315,14 +313,53 @@ export default {
     put(KeyPath, paths)
 
     // 添加标签到数据库
-    console.info('write tags:', tags)
-    put(KeyTag, tags)
+    // console.info('write tags:', tags)
+    // put(KeyTag, tags)
+
+    // // 构建倒排索引 [词编号: 图像ID]
+    // console.info('reword index:', rewordIndx)
+    // put(KeyRewordIndex, rewordIndx)
+    // 保存局部敏感hash[hash: 图像ID]
+    // put(KeyHash, simhash)
+  },
+  updateImageTags: async (imageID, tags) => {
+    // 标签索引
+    let img = await getOptional(imageID, null)
+    img.tag = tags
+    img.keyword = tags.concat(img.keyword)
+    put(imageID, img)
+
+    let allTags = await getOptional(KeyTag, {})
+    let rewordIndx = await getOptional(KeyRewordIndex, {})
+    const kwIndx = await getKeywordIndx(img.keyword)
+
+    for (let tagIndx of kwIndx) {
+      // console.info('tagIndx', tagIndx)
+      allTags[tagIndx.toString()] = pushArray(allTags[tagIndx.toString()], imageID)
+      rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], imageID)
+    }
+    console.info('write tags:', allTags)
+    put(KeyTag, allTags)
 
     // 构建倒排索引 [词编号: 图像ID]
     console.info('reword index:', rewordIndx)
     put(KeyRewordIndex, rewordIndx)
-    // 保存局部敏感hash[hash: 图像ID]
-    put(KeyHash, simhash)
+  },
+  nextStep: async (imageID) => {
+    let images = await getOptional(KeyImageIndexes, {})
+    // console.info('nextStep', imageID, images)
+    images[imageID].step += 1
+    put(KeyImageIndexes, images)
+  },
+  undateImage: async (imageID, name, subdata, step) => {
+    let images = await getOptional(KeyImageIndexes, {})
+    if (images[imageID].step < step) {
+      let image = await getOptional(imageID, null)
+      image[name] = subdata
+      images[imageID].step = step
+      put(KeyImageIndexes, images)
+      put(imageID, image)
+    }
   },
   updateImageCatergory: async (imageID, category) => {
     console.info(category)
@@ -384,7 +421,6 @@ export default {
   },
   updateImage: async (image) => {},
   removeImage: (imageID) => {},
-  updateImageTags: (imageID, tags) => {},
   changeImageName: (imageID, label) => {},
   hasDirectory: async (path) => {
     const paths = await getOptional(KeyPath, undefined)
@@ -519,7 +555,7 @@ export default {
       let chains = await code2categoryChain(cate, indx2category)
       let names = []
       for (let imgID of category[cate]) {
-        names.push({label: imagesSnap[imgID], id: imgID, type: 'img'})
+        names.push({label: imagesSnap[imgID].name, id: imgID, type: 'img'})
       }
       data[chains] = names
     }

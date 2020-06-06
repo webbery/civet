@@ -1,7 +1,7 @@
 import JString from '../public/String'
 import localStorage from './LocalStorage'
 // import CV from '../public/CV'
-import JImage from './Image'
+import { ImageParser, JImage } from './Image'
 import { CategoryArray } from './Category'
 import { GPU, input } from 'gpu.js'
 
@@ -27,11 +27,13 @@ async function readImages(fullpath) {
   if (info.isDirectory()) {
     readDir(fullpath)
   } else {
-    const img = await JImage.build(fullpath, info)
-    if (img) {
-      img.saveDB()
-      reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
-    }
+    // const img = await JImage.build(fullpath, info)
+    // if (img) {
+    //   img.saveDB()
+    //   reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
+    // }
+    const parser = new ImageParser()
+    parser.parse(fullpath, info, (img) => { reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()]) })
   }
 }
 
