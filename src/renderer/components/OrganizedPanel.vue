@@ -109,7 +109,8 @@ export default {
         }
         dirs[item.path].push({label: item.filename})
         // 更新视图共享数据
-        this.$store.dispatch('addImage', {id: item.id, label: item.filename, path: JString.joinPath(item.path, item.filename), thumbnail: item.thumbnail})
+        item.path = JString.joinPath(item.path, item.filename)
+        this.$store.dispatch('addImage', item)
       }
 
       console.info(this.directoryData)

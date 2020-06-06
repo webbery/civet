@@ -165,6 +165,7 @@ class ImageMetaParser extends ImageParseBase {
       image.thumbnail = meta['Thumbnail'].base64
     }
     await localStorage.addImages([image])
+    console.info('1', image)
     image.stepCallback(image)
 
     if (this.next !== undefined) {
@@ -186,7 +187,7 @@ class ImageTextParser extends ImageParseBase {
     // await localStorage.updateImage(image.id, 'keyword', image.keyword, this.step)
     await localStorage.updateImageTags(image.id, image.tag)
     await localStorage.nextStep(image.id)
-    // console.info(image)
+    console.info('2', image)
     image.stepCallback(image)
 
     if (this.next !== undefined) {

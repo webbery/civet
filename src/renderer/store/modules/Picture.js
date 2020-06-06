@@ -14,11 +14,22 @@ const getters = {
   }
 }
 
-function isImageExist(imageID, imgs) {
-  for (let img of imgs) {
-    if (imageID == img.id) return true
+// function isImageExist(imageID, imgs) {
+//   for (let img of imgs) {
+//     if (imageID == img.id) return true
+//   }
+//   return false
+// }
+
+function replaceImage(images, image) {
+  console.info('rep', image)
+  for (let img of images) {
+    if (image.id === img.id) {
+      img = image
+      return
+    }
   }
-  return false
+  images.push(image)
 }
 
 const mutations = {
@@ -31,9 +42,7 @@ const mutations = {
       state.imageList.push(image)
       return
     }
-    if (!isImageExist(image.id, state.imageList)) {
-      state.imageList.push(image)
-    }
+    replaceImage(state.imageList, image)
   },
   clearImages(state) {
     state.imageList = []

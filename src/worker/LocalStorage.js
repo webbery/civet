@@ -44,8 +44,11 @@ function initDB(dbpath) {
   let dbname = ''
   if (!dbpath) {
     const {remote} = require('electron')
-    let userDir = remote.app.getPath('userData')
-    dbname = (remote.app.isPackaged ? userDir + '/civet' : 'civet')
+    const fs = require('fs')
+    const userDir = remote.app.getPath('userData')
+    const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
+    const config = JSON.parse(fs.readFileSync(configPath))
+    dbname = config.db.path
   } else {
     dbname = dbpath
   }
