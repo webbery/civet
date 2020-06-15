@@ -101,7 +101,7 @@ export default {
     },
     updateDisplayImageList(error, appendFiles) {
       if (error) console.log(error)
-      // console.info('recieve from worker message:', appendFiles)
+      console.info('recieve from worker message:', appendFiles)
       let dirs = {}
       for (let item of appendFiles) {
         if (dirs[item.path] === undefined) {
@@ -113,7 +113,7 @@ export default {
         this.$store.dispatch('addImage', item)
       }
 
-      console.info(this.directoryData)
+      // console.info(this.directoryData)
       for (let item of this.directoryData) {
         // console.info('***', item.label, dirs[item.label])
         if (dirs[item.label] !== undefined) {
@@ -132,8 +132,8 @@ export default {
       // console.info('----', this.directoryData)
       const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
       // console.info('get category', folders)
-      const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
-      this.headOptions[1].value = uncategoryImages.length
+      // const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
+      // this.headOptions[1].value = uncategoryImages.length
       // console.info(uncategoryImages)
       this.$store.dispatch('setCategory', folders)
     },

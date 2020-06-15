@@ -5,9 +5,34 @@ import { ImageParser, JImage } from './Image'
 import { CategoryArray } from './Category'
 import { GPU, input } from 'gpu.js'
 
+const threshodMode = false
 // your background code here
 const { ipcRenderer } = require('electron')
 const fs = require('fs')
+const timer = (function () {
+  let t = null
+  return {
+    start: (func, tick) => {
+      const task = () => {
+        // 执行一次func, 然后定时执行func
+        func()
+        if (t === null) {
+          t = setInterval(func, tick)
+          console.info('start timer')
+        }
+      }
+      if (t === null) setImmediate(task)
+    },
+    stop: () => {
+      if (t !== null) {
+        clearTimeout(t)
+        t = null
+        console.info('stop timer')
+      }
+    }
+  }
+})()
+let queue = []
 
 const ReplyType = {
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
@@ -64,10 +89,32 @@ function GPUTest() {
 function ready() {
   ipcRenderer.send('ready')
   GPUTest()
+  // let sab = new SharedArrayBuffer(1024)
+  // ipcRenderer.send('shared', sab)
+  // for (let i = 0; i < 100; ++i) timer.start(() => { console.info('tick', i) }, 1000)
 }
 
 function reply2Renderer(type, value) {
-  ipcRenderer.send('message-from-worker', {type: type, data: value})
+  if (threshodMode === true) {
+    // 首先存到队列中，如果定时器关闭，启动定时器
+    queue.push({type: type, data: value})
+    // console.info('queue input ', queue.length)
+    timer.start(() => {
+      // console.info('queue task', queue.length)
+      if (queue.length === 0) {
+        timer.stop()
+        return
+      }
+      const range = queue.splice(0, queue.length)
+      // console.info(range.length)
+      for (let msg of range) {
+        // console.info('send', msg)
+        ipcRenderer.send('message-from-worker', msg)
+      }
+    }, 1000)
+  } else {
+    ipcRenderer.send('message-from-worker', {type: type, data: value})
+  }
 }
 
 const messageProcessor = {

@@ -155,21 +155,69 @@ class ImageMetaParser extends ImageParseBase {
     } else {
       type = JString.getFormatType(meta['format'].description)
     }
-    if (meta['DateTime'] !== undefined) {
+    if (meta['DateTime'] !== undefined && meta['DateTime'].value) {
       image.datetime = meta['DateTime'].value[0]
     }
-    image.type = type
-    image.width = meta['Image Width'].value
-    image.height = meta['Image Height'].value
+    image.type = this.getImageFormat(type)
+    image.width = this.getImageWidth(meta)
+    image.height = this.getImageHeight(meta)
     if (image.size > 5 * 1024 * 1024) {
-      image.thumbnail = meta['Thumbnail'].base64
+      image.thumbnail = this.getImageThumbnail(meta)
     }
-    await localStorage.addImages([image])
+    try {
+      await localStorage.addImages([image])
+    } catch (err) {
+      console.info('parse metadata error', err)
+    }
     console.info('1', image)
     image.stepCallback(image)
 
     if (this.next !== undefined) {
       this.next.parse(image)
+    }
+  }
+
+  getImageWidth(meta) {
+    if (meta['Image Width']) return meta['Image Width'].value
+    if (meta['ImageWidth']) return meta['ImageWidth'].value
+    console.info('width error', meta)
+  }
+
+  getImageHeight(meta) {
+    if (meta['Image Height']) return meta['Image Width'].value
+    if (meta['ImageLength']) return meta['ImageLength'].value
+  }
+
+  getImageTime(meta) {
+    if (meta['DateTime'] !== undefined) {
+      return meta['DateTime'].value[0]
+    }
+    console.info('image time error', meta)
+  }
+
+  getImageThumbnail(meta) {
+    if (meta['Thumbnail']) return meta['Thumbnail'].base64
+    console.info('thumbnail', meta)
+    return undefined
+  }
+
+  getImageFormat(str) {
+    console.info('format', str)
+    switch (str) {
+      case 'jpg':
+      case 'jpeg':
+        return 'jpeg'
+      case 'tif':
+      case 'tiff':
+        return 'tiff'
+      case 'bmp':
+        return 'bmp'
+      case 'gif':
+        return 'gif'
+      case 'png':
+        return 'png'
+      default:
+        return 'unknow'
     }
   }
 }
@@ -185,8 +233,12 @@ class ImageTextParser extends ImageParseBase {
     image.tag = NLP.getNouns(fullpath)
     image.keyword = image.tag
     // await localStorage.updateImage(image.id, 'keyword', image.keyword, this.step)
-    await localStorage.updateImageTags(image.id, image.tag)
-    await localStorage.nextStep(image.id)
+    try {
+      await localStorage.updateImageTags(image.id, image.tag)
+      await localStorage.nextStep(image.id)
+    } catch (err) {
+      console.info('parse text error', err)
+    }
     console.info('2', image)
     image.stepCallback(image)
 

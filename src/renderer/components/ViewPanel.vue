@@ -6,7 +6,7 @@
             <!-- <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div> -->
-          <el-image :src="image.thumbnail?('data:image/jpg;base64,'+image.thumbnail):image.path" lazy class="preview" @click="onImageClick($event, image)" @dblclick="onImageDbClick(image)">
+          <el-image :src="getImage(image)" lazy class="preview" @click="onImageClick($event, image)" @dblclick="onImageDbClick(image)">
           </el-image>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
@@ -116,6 +116,17 @@ export default {
       // for (let item of updateImages) {
       //   images.push(item.realpath)
       // }
+    },
+    getImage(image) {
+      console.info(image)
+      switch (image.type) {
+        case 'jpeg':
+          return image.thumbnail ? ('data:image/jpg;base64,' + image.thumbnail) : image.path
+        case 'tiff':
+          return ''
+        default:
+          return image.thumbnail ? ('data:image/jpg;base64,' + image.thumbnail) : image.path
+      }
     }
   }
 }

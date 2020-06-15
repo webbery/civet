@@ -1,17 +1,21 @@
 <template>
   <div>
     <el-scrollbar style="height:96vh;">
-      <el-card :body-style="{ padding: '0px' }">
+      <JImage :src="image.path"></JImage>
+      <!-- <el-card :body-style="{ padding: '0px' }">
         <el-image :src="image.path" lazy class="preview" @click="onImageClick($event, image)"/>
-      </el-card>
+      </el-card> -->
     </el-scrollbar>
   </div>
 </template>
 
 <script>
 import bus from './utils/Bus'
+import JImage from './JImage'
+
 export default {
   name: 'image-panel',
+  components: { JImage },
   data() {
     return {
       image: null

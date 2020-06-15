@@ -5,7 +5,15 @@
 </template>
 <script>
 export default {
-  name: 'image-operator'
+  name: 'image-operator',
+  data() {
+    return {
+      scaleValue: 1
+    }
+  },
+  methods: {
+    scaleChange() {}
+  }
 }
 </script>
 

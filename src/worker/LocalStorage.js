@@ -49,6 +49,10 @@ function initDB(dbpath) {
     const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
     const config = JSON.parse(fs.readFileSync(configPath))
     dbname = config.db.path
+    if (config.db.version !== undefined) {
+      // 检查是否需要升级数据库
+      if (DBVersion > config.db.version) {}
+    }
   } else {
     dbname = dbpath
   }
@@ -285,7 +289,7 @@ export default {
       images[k] = {name: item.filename, step: 0}
       uncategory.push(k)
       // const kwIndx = await getKeywordIndx(item.keyword)
-      instance().put(k, JSON.stringify({
+      await instance().put(k, JSON.stringify({
         label: item.filename,
         path: fullpath,
         size: item.size,
@@ -306,14 +310,14 @@ export default {
     // console.info(KEY_IMAGES)
     // let imageSet = new Set(images)
     await put(KeyImageIndexes, images)
-    put(KeyUnCategory, uncategory)
+    await put(KeyUnCategory, uncategory)
 
     // 路径文件排重
     for (let p in paths) {
       let files = new Set(paths[p])
       paths[p] = files
     }
-    put(KeyPath, paths)
+    await put(KeyPath, paths)
 
     // 添加标签到数据库
     // console.info('write tags:', tags)
@@ -330,7 +334,7 @@ export default {
     let img = await getOptional(imageID, null)
     img.tag = tags
     img.keyword = tags.concat(img.keyword)
-    put(imageID, img)
+    await put(imageID, img)
 
     let allTags = await getOptional(KeyTag, {})
     let rewordIndx = await getOptional(KeyRewordIndex, {})
@@ -342,17 +346,17 @@ export default {
       rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], imageID)
     }
     console.info('write tags:', allTags)
-    put(KeyTag, allTags)
+    await put(KeyTag, allTags)
 
     // 构建倒排索引 [词编号: 图像ID]
     console.info('reword index:', rewordIndx)
-    put(KeyRewordIndex, rewordIndx)
+    await put(KeyRewordIndex, rewordIndx)
   },
   nextStep: async (imageID) => {
     let images = await getOptional(KeyImageIndexes, {})
     // console.info('nextStep', imageID, images)
     images[imageID].step += 1
-    put(KeyImageIndexes, images)
+    await put(KeyImageIndexes, images)
   },
   undateImage: async (imageID, name, subdata, step) => {
     let images = await getOptional(KeyImageIndexes, {})
