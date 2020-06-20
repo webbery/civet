@@ -3,7 +3,7 @@
 import JString from '../public/String'
 import NLP from '../public/NLP'
 // import logger from './Logger'
-
+console.info('load success')
 // 数据库版本
 const DBVersion = 1
 
@@ -267,9 +267,6 @@ export default {
   },
   generateID: async () => {
     return IDGenerator.getID()
-  },
-  addImage: (obj) => {
-    // 输入：{id: dhash, path: , filename: , keyword: []}
   },
   addImages: async (objs) => {
     let paths = await getOptional(KeyPath, {})

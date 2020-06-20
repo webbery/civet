@@ -1,6 +1,6 @@
 'use strict'
 
-process.env.BABEL_ENV = 'renderer'
+process.env.BABEL_ENV = 'worker'
 
 const path = require('path')
 const { dependencies } = require('../package.json')
@@ -21,10 +21,10 @@ const { VueLoaderPlugin } = require('vue-loader')
  */
 let whiteListedModules = ['vue']
 
-let rendererConfig = {
+let workerConfig = {
   devtool: '#cheap-module-eval-source-map',
   entry: {
-    renderer: path.join(__dirname, '../src/renderer/main.js')
+    worker: path.join(__dirname, '../src/worker/worker.js')
   },
   externals: [
     ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
@@ -123,9 +123,9 @@ let rendererConfig = {
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({filename: 'styles.css'}),
     new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: path.resolve(__dirname, '../src/index.ejs'),
-      chunks: ['renderer', 'vendor'],
+      filename: 'worker.html',
+      template: path.resolve(__dirname, '../src/worker.ejs'),
+      chunks: ['worker', 'vendor'],
       minify: {
         collapseWhitespace: true,
         removeAttributeQuotes: true,
@@ -157,7 +157,7 @@ let rendererConfig = {
   },
   resolve: {
     alias: {
-      '@': path.join(__dirname, '../src/renderer'),
+      '@': path.join(__dirname, '../src/worker'),
       'vue$': 'vue/dist/vue.esm.js'
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node']
@@ -166,10 +166,10 @@ let rendererConfig = {
 }
 
 /**
- * Adjust rendererConfig for development settings
+ * Adjust workerConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
-  rendererConfig.plugins.push(
+  workerConfig.plugins.push(
     new webpack.DefinePlugin({
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
     })
@@ -177,12 +177,12 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 /**
- * Adjust rendererConfig for production settings
+ * Adjust workerConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-  rendererConfig.devtool = ''
+  workerConfig.devtool = ''
 
-  rendererConfig.plugins.push(
+  workerConfig.plugins.push(
     new MinifyPlugin(),
     new CopyWebpackPlugin([
       {
@@ -200,4 +200,4 @@ if (process.env.NODE_ENV === 'production') {
   )
 }
 
-module.exports = rendererConfig
+module.exports = workerConfig

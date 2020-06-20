@@ -10,8 +10,6 @@ import 'element-ui/lib/theme-chalk/index.css'
 
 import Service from './components/utils/Service'
 
-// const { ipcRenderer } = require('electron')
-
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false

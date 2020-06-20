@@ -17,6 +17,7 @@
 import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 import bus from './utils/Bus'
+import log from '@/../public/Logger'
 
 export default {
   name: 'JImage',
@@ -69,10 +70,10 @@ export default {
       this.context = this.canvas.getContext('2d')
       // console.info(src)
       if (typeof src === 'string') {
-        let {data, info} = await sharp(src).ensureAlpha()
+        let {data, info} = await sharp(src).jpeg({force: true}).ensureAlpha()
           .raw().toBuffer({ resolveWithObject: true })
         // this.$store.dispatch('updateThumbnail', {path: this.src, thumbnail: data})
-        console.info('image:', info)
+        log.info(info)
         this.originWidth = info.width
         this.originHeight = info.height
         this.imagewidth = info.width
@@ -117,7 +118,7 @@ export default {
       let curHeight = this.imageheight * scale
       let startX = (this.box.offsetWidth - curWidth) / 2
       let startY = (this.box.offsetHeight - curHeight) / 2
-      console.info(startX, startY)
+      log.info(startX, startY)
       this.context.clearRect(0, 0, this.box.offsetWidth, this.box.offsetHeight)
       this.context.drawImage(this.image, startX, startY, curWidth, curHeight)
     },

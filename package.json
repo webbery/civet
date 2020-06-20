@@ -68,7 +68,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "crypto": "^1.0.1",
-    "electron-log": "^4.2.0",
+    "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",
     "element-ui": "^2.13.0",
     "exifreader": "^3.9.0",
