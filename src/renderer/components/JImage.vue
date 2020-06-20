@@ -25,15 +25,7 @@ export default {
       type: Boolean,
       default: true
     },
-    src: null,
-    id: {
-      type: String,
-      default: uuidv4()
-    },
-    boxid: {
-      type: String,
-      default: uuidv4()
-    }
+    src: null
   },
   data() {
     return {
@@ -54,9 +46,12 @@ export default {
   watch: {
     src: function (newSrc) {
       if (newSrc === '') return
-      console.info('new src:', newSrc)
       this.loadImage(newSrc)
     }
+  },
+  beforeCreate() {
+    this.id = uuidv4()
+    this.boxid = uuidv4()
   },
   async mounted() {
     if (this.src === '') return
@@ -109,8 +104,9 @@ export default {
         this.originHeight = this.box.offsetHeight
         startX = (this.box.offsetWidth - this.originWidth) / 2
       }
-      console.info(startX, startY, this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight)
+      // console.info(startX, startY, this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight)
       // this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
+      // this.context.drawImage(this.image, startX - startX, startY - startY, this.originWidth, this.originHeight)
       this.context.drawImage(this.image, startX, startY, this.originWidth, this.originHeight)
     },
     moveViewport() {},
@@ -168,7 +164,7 @@ export default {
 
 <style scoped>
 .image-container {
-  border: solid black;
+  height: 100%;
   text-align:center;
 }
 canvas {

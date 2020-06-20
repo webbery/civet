@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="image-panel">
       <JImage :src="image.path"></JImage>
       <!-- <el-card :body-style="{ padding: '0px' }">
         <el-image :src="image.path" lazy class="preview" @click="onImageClick($event, image)"/>
@@ -29,3 +29,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.image-panel{
+  height: 85vh;
+  text-align:center;
+}
+</style>
