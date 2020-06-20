@@ -6,8 +6,8 @@
             <!-- <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div> -->
-          <el-image :src="getImage(image)" lazy class="preview" @click="onImageClick($event, image)" @dblclick="onImageDbClick(image)">
-          </el-image>
+          <JImage :src="getImage(image)" :interact="false" class="preview" @click.native="onImageClick($event, image)" @dblclick.native="onImageDbClick(image)">
+          </JImage>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
           </div>
@@ -20,12 +20,15 @@
 
 <script>
 import bus from './utils/Bus'
-// import localStorage from '@/../public/LocalStorage'
 import Service from './utils/Service'
-// import getPixes from 'get-pixels'
+import JImage from './JImage'
+import ImgTool from './utils/ImgTool'
 
 export default {
   name: 'view-panel',
+  components: {
+    JImage
+  },
   data() {
     return {
       firstLoad: true,
@@ -41,7 +44,7 @@ export default {
   },
   computed: {
     imageList() {
-      console.info('+++++++++', this.$store.state.Picture.imageList)
+      // console.info('+++++++++', this.$store.state.Picture.imageList)
       // if (this.$store.state.Picture.imageList.length > 80) {
       //   return this.$store.state.Picture.imageList.slice(0, 79)
       // }
@@ -71,7 +74,7 @@ export default {
   },
   methods: {
     async onImageClick(e, image) {
-      // console.info(image)
+      // console.info(this.$chilidren)
       bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
 
       // 框亮显示
@@ -118,15 +121,7 @@ export default {
       // }
     },
     getImage(image) {
-      console.info(image)
-      switch (image.type) {
-        case 'jpeg':
-          return image.thumbnail ? ('data:image/jpg;base64,' + image.thumbnail) : image.path
-        case 'tiff':
-          return ''
-        default:
-          return image.thumbnail ? ('data:image/jpg;base64,' + image.thumbnail) : image.path
-      }
+      return ImgTool.getSrc(image)
     }
   }
 }

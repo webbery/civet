@@ -1,11 +1,9 @@
 <template>
   <div>
-    <el-scrollbar style="height:96vh;">
       <JImage :src="image.path"></JImage>
       <!-- <el-card :body-style="{ padding: '0px' }">
         <el-image :src="image.path" lazy class="preview" @click="onImageClick($event, image)"/>
       </el-card> -->
-    </el-scrollbar>
   </div>
 </template>
 

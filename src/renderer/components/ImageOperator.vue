@@ -4,15 +4,20 @@
   </div>
 </template>
 <script>
+import bus from './utils/Bus'
+
 export default {
   name: 'image-operator',
   data() {
     return {
-      scaleValue: 1
+      scaleValue: 50
     }
   },
   methods: {
-    scaleChange() {}
+    scaleChange() {
+      // 0.2~2
+      bus.emit(bus.EVENT_SCALE_IMAGE, this.scaleValue * 1.8 / 100 + 0.2)
+    }
   }
 }
 </script>

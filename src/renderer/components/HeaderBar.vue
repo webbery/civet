@@ -8,7 +8,6 @@
       <el-page-header @back="goBack" :content="viewDesc"></el-page-header>
     </el-col>
     <el-col :span="9" class="custom">
-      <!-- <ViewFilter></ViewFilter> -->
       <component :is="comName"></component>
     </el-col>
     <el-col :span="5">
@@ -97,9 +96,6 @@ export default {
       // console.info('updateImages:', updateImages)
       this.$store.dispatch('updateImageList', updateImages)
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”'}})
-    },
-    scaleChange() {
-      console.info(this.scaleValue)
     }
   }
 }

@@ -55,6 +55,14 @@ const mutations = {
         break
       }
     }
+  },
+  updateThumbnail(state, obj) {
+    for (let img of state.imageList) {
+      if (obj.path === img.path && !img['thumbnail']) {
+        img['thumbnail'] = obj.thumbnail
+        break
+      }
+    }
   }
 }
 
@@ -71,6 +79,9 @@ const actions = {
   },
   updateImageProperty ({ commit }, obj) {
     commit('updateImageProperty', obj)
+  },
+  updateThumbnail ({ commit }, obj) {
+    commit('updateThumbnail', obj)
   }
 }
 

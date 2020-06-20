@@ -1,7 +1,7 @@
 <template>
   <div class="property">
       <el-card :body-style="{ padding: '0px' }">
-        <img :src="picture.thumbnail?('data:image/jpg;base64,'+picture.thumbnail):picture.path" class="preview" />
+        <JImage :src="imagepath" :interact="false"></JImage>
         <div>
           <span v-for="color of picture.desccolors" :key="color"><span class="main-color" :style="{'background-color': color}" ></span></span>
         </div>
@@ -74,12 +74,15 @@ import bus from './utils/Bus'
 import Service from './utils/Service'
 import IconTag from '@/components/IconTag'
 import JString from '@/../public/String'
+import JImage from './JImage'
+import ImgTool from './utils/ImgTool'
 
 export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, path: '', width: 0, height: 0, size: 0 },
+      picture: { id: null, path: '', width: 0, height: 0, size: 0, colors: [] },
+      imagepath: '',
       dynamicTags: [],
       inputVisible: false,
       inputValue: '',
@@ -88,7 +91,7 @@ export default {
     }
   },
   components: {
-    IconTag
+    IconTag, JImage
   },
   computed: {
     candidateClasses() {
@@ -115,13 +118,14 @@ export default {
       }
       let image = this.$store.getters.image(imageID)
       this.classes = image.category
-      console.info(image)
-      image.descsize = getSize(image.size)
+      console.info('PropertyPanel', image)
+      this.picture.descsize = getSize(image.size)
       let colors = []
       if (image.colors) {
         for (let color of image.colors) {
           colors.push('#' + JString.formatColor16(color[0]) + JString.formatColor16(color[1]) + JString.formatColor16(color[2]))
         }
+        this.picture.colors = colors
       }
       const clazzName = this.$store.getters.classesName
       // console.info('clear', clazzName)
@@ -140,8 +144,12 @@ export default {
         }
       }
       console.info(this.checkValue)
-      image.desccolors = colors
-      this.picture = image
+      // image.desccolors = colors
+      this.picture.id = image.id
+      this.imagepath = image.path
+      this.picture.width = image.width
+      this.picture.height = image.height
+      this.picture.datetime = image.datetime
       this.dynamicTags = image.tag
     },
     handleClose(tag) {
@@ -220,6 +228,10 @@ export default {
       this.classes = img.category
       // console.info('get category', v)
       this.$ipcRenderer.send(Service.UPDATE_IMAGE_CATEGORY, {imageID: this.picture.id, category: img.category})
+    },
+    getSrc(image) {
+      console.info('++++++++', ImgTool.getSrc(image))
+      return ImgTool.getSrc(image)
     }
   }
 }
@@ -233,9 +245,9 @@ img{
   width: 100%;
   height: 250px;
 }
-.preview{
+/* .preview{
   object-fit: scale-down;
-}
+} */
 .main-color{
   width: 20px;
   height: 35px;

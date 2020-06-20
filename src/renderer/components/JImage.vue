@@ -1,12 +1,22 @@
 <template>
-  <div class="image" @mouseleave="onMouseLeave" @mouseover="onMouseOver" @mousemove="onMouseMove" @mousedown="onMouseDown">
-    <canvas :id="id"></canvas>
+  <div :id="boxid" class="image-container" :class="interact?activeClasses[activeIndex]:''"
+    @mouseleave="interact&&onMouseLeave" @mouseover="interact&&onMouseOver" @mousemove="interact&&onMouseMove"
+    @mousedown="interact&&onMouseDown" @mouseup="interact&&onMouseUp" @mousewheel="interact&&onMouseWheel">
+    <div v-if="scale>1">
+      <el-scrollbar >
+      <canvas :id="id" ></canvas>
+    </el-scrollbar>
+  </div>
+  <div v-else>
+    <canvas :id="id" ></canvas>
+  </div>
   </div>
 </template>
 
 <script>
 import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
+import bus from './utils/Bus'
 
 export default {
   name: 'JImage',
@@ -15,59 +25,166 @@ export default {
       type: Boolean,
       default: true
     },
-    src: {
-      type: String,
-      default: ''
-    },
+    src: null,
     id: {
+      type: String,
+      default: uuidv4()
+    },
+    boxid: {
       type: String,
       default: uuidv4()
     }
   },
   data() {
     return {
+      canvas: null,
       context: null,
-      imageData: null,
-      meta: null
+      activeIndex: 0,
+      activeClasses: ['grab', 'grabbing', 'bigger', 'smaller'],
+      image: null,
+      originWidth: 0,
+      originHeight: 0,
+      imagewidth: 0,
+      imageheight: 0,
+      box: null,
+      scale: 1,
+      mouseStatus: 0 // 0-悬浮,1-按下,
     }
   },
-  async created() {
+  watch: {
+    src: function (newSrc) {
+      if (newSrc === '') return
+      console.info('new src:', newSrc)
+      this.loadImage(newSrc)
+    }
   },
   async mounted() {
-    await this.readSource()
-    let img = this.context.createImageData(this.meta.width, this.meta.height)
-    img.data.set(this.imageData)
-    this.context.putImageData(img, 0, 0, 0, 0, this.meta.width, this.meta.height)
+    if (this.src === '') return
+    await this.loadImage(this.src)
+    if (this.interact === true) {
+      bus.on(bus.EVENT_SCALE_IMAGE, this.scaleImage)
+    }
   },
   methods: {
-    async readSource() {
-      if (this.src.indexOf('base64') > 0) {
-      } else {
-        let {data, info} = await sharp(this.src).ensureAlpha()
+    async readSource(src) {
+      this.box = document.getElementById(this.boxid)
+      this.canvas = document.getElementById(this.id)
+      this.canvas.width = this.box.offsetWidth
+      this.canvas.height = this.box.offsetHeight
+      this.context = this.canvas.getContext('2d')
+      // console.info(src)
+      if (typeof src === 'string') {
+        let {data, info} = await sharp(src).ensureAlpha()
           .raw().toBuffer({ resolveWithObject: true })
-        console.info('image info', info, data, this.src)
-        this.meta = info
-        this.imageData = data
-        const canvas = document.getElementById(this.id)
-        this.context = canvas.getContext('2d')
-        // this.imageData = this.context.getImageData(0, 0, this.width, this.height)
+        // this.$store.dispatch('updateThumbnail', {path: this.src, thumbnail: data})
+        console.info('image:', info)
+        this.originWidth = info.width
+        this.originHeight = info.height
+        this.imagewidth = info.width
+        this.imageheight = info.height
+        // console.info(data)
+        let img = new ImageData(new Uint8ClampedArray(data), info.width, info.height)
+        this.image = await createImageBitmap(img)
+      } else {
+        // console.info('object', this.imagewidth, this.imageheight)
+        // let img = new ImageData(new Uint8ClampedArray(this.src), this.imagewidth, this.imageheight)
+        // this.image = await createImageBitmap(img)
+        // return this.src
       }
     },
-    onMouseLeave() {},
-    onMouseOver() {},
-    onMouseMove() {},
-    onMouseDown() {}
+    async loadImage(src) {
+      await this.readSource(src)
+      // console.info(this.originWidth, this.box.offsetWidth)
+      let aspect = this.imagewidth / this.imageheight
+      let windowAspect = this.box.offsetWidth / this.box.offsetHeight
+      let startX = 0
+      let startY = 0
+      if (aspect > windowAspect) {
+        // 扁图
+        this.originWidth = this.box.offsetWidth
+        this.originHeight = this.box.offsetHeight / aspect
+        startY = (this.box.offsetHeight - this.originHeight) / 2
+      } else {
+        this.originWidth = this.box.offsetWidth * aspect
+        this.originHeight = this.box.offsetHeight
+        startX = (this.box.offsetWidth - this.originWidth) / 2
+      }
+      console.info(startX, startY, this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight)
+      // this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
+      this.context.drawImage(this.image, startX, startY, this.originWidth, this.originHeight)
+    },
+    moveViewport() {},
+    scaleImage(scale) {
+      if (scale < 0.2) scale = 0.2
+      if (scale > 2) scale = 2
+      let curWidth = this.imagewidth * scale
+      let curHeight = this.imageheight * scale
+      let startX = (this.box.offsetWidth - curWidth) / 2
+      let startY = (this.box.offsetHeight - curHeight) / 2
+      console.info(startX, startY)
+      this.context.clearRect(0, 0, this.box.offsetWidth, this.box.offsetHeight)
+      this.context.drawImage(this.image, startX, startY, curWidth, curHeight)
+    },
+    resetViewport() {},
+    onMouseLeave() {
+      this.mouseStatus = 0
+    },
+    onMouseOver() {
+      if (this.mouseStatus === 0) {
+        this.activeIndex = 0
+      }
+    },
+    onMouseMove() {
+      if (this.mouseStatus === 1) {
+        this.activeIndex = 1
+      }
+    },
+    onMouseUp() {
+      this.activeIndex = 0
+      this.mouseStatus = 0
+    },
+    onMouseDown() {
+      if (this.scale === 1) return
+      this.activeIndex = 1
+      this.mouseStatus = 1
+      console.info(window.getComputedStyle(this.$refs.container).height)
+    },
+    onMouseWheel(ev) {
+      // let widthOffset = 0.05 * this.originWidth
+      // let heightOffset = 0.05 * this.originHeight
+      // console.info(ev.deltaY, this.scale)
+      if (ev.deltaY > 0) {
+        // 缩小
+        // this.scaleViewport(-widthOffset, -heightOffset)
+      } else {
+        // this.scaleViewport(widthOffset, heightOffset)
+        // this.scaleViewport()
+      }
+      // this.context.scale(this.scale, this.scale)
+    }
   }
 }
 </script>
 
 <style scoped>
-.image {
+.image-container {
   border: solid black;
+  text-align:center;
 }
 canvas {
-  width: 99%;
   height: inherit;
-  border: solid green;
+  /* border: solid green; */
+}
+.grab {
+  cursor: grab;
+}
+.grabbing {
+  cursor: grabbing;
+}
+.bigger {
+  cursor: zoom-in;
+}
+.smaller {
+  cursor: zoom-out;
 }
 </style>
