@@ -1,3 +1,5 @@
+import log from '../../../public/Logger'
+
 const state = {
   imageList: []
 }
@@ -11,6 +13,15 @@ const getters = {
       if (img.id === sID) return img
     }
     return null
+  },
+  allTags: state => {
+    const images = state.imageList
+    let tags = []
+    for (let img of images) {
+      tags = tags.concat(img.tag)
+    }
+    log.info('TAGS', tags)
+    return Array.from(new Set(tags))
   }
 }
 

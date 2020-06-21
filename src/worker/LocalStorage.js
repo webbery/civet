@@ -2,8 +2,8 @@
 // import FileSync from 'lowdb/adapters/FileSync'
 import JString from '../public/String'
 import NLP from '../public/NLP'
-// import logger from './Logger'
-console.info('load success')
+// import log from '../public/Logger'
+
 // 数据库版本
 const DBVersion = 1
 
@@ -329,6 +329,7 @@ export default {
   updateImageTags: async (imageID, tags) => {
     // 标签索引
     let img = await getOptional(imageID, null)
+    console.info('update tags', tags)
     img.tag = tags
     img.keyword = tags.concat(img.keyword)
     await put(imageID, img)
@@ -473,7 +474,7 @@ export default {
     let tagIDs = await getOptional(KeyTag, {})
     let indx = await getKeywordIndx([tag])
     const tagID = indx[0]
-    // console.info('tag index:', indx)
+    // log.info('tag index', tagIDs)
     if (tagIDs[tagID] === undefined) tagIDs[tagID] = []
     tagIDs[tagID].push(imageID)
 

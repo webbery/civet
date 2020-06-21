@@ -98,7 +98,6 @@ export default {
       return this.$store.getters.classesName
     },
     imageClasses() {
-      console.info('update classes')
       return this.classes
     }
   },
@@ -150,7 +149,7 @@ export default {
       this.picture.width = image.width
       this.picture.height = image.height
       this.picture.datetime = image.datetime
-      this.dynamicTags = image.tag
+      this.dynamicTags = image.tag ? image.tag.slice(0) : []
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)

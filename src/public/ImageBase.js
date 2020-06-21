@@ -15,5 +15,6 @@ export default class ImageBase {
     this.category = json.category || []
     this.type = json.type
     this.colors = json.colors || []
+    this.tag = json.tag || []
   }
 }

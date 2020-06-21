@@ -159,6 +159,7 @@ const messageProcessor = {
       imagesIndex = data
     }
     let imgs = await localStorage.getImagesInfo(imagesIndex)
+    // console.info('getImagesInfo', imgs)
     let images = []
     for (let img of imgs) {
       images.push(new JImage(img))
