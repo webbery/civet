@@ -4,19 +4,19 @@
     <span class="custom">
     <el-select v-model="tags" @change="onTagSelectChanged" @click.native="onLoadTags" clearable placeholder="标签" size="mini">
     <el-option
-      v-for="item in options"
-      :key="item.value"
-      :label="item.label"
-      :value="item.value">
+      v-for="(item, idx) in tags"
+      :key="idx"
+      :label="item"
+      :value="item">
     </el-option>
   </el-select>
   </span>
-  <el-select v-model="value" clearable placeholder="尺寸" size="mini">
+  <el-select v-model="clazz" clearable placeholder="分类" size="mini">
     <el-option
-      v-for="item in options"
-      :key="item.value"
-      :label="item.label"
-      :value="item.value">
+      v-for="(item, idx) in clazz"
+      :key="idx"
+      :label="item"
+      :value="item">
     </el-option>
   </el-select>
   </div>
@@ -30,7 +30,8 @@ export default {
   data() {
     return {
       color: '#409EFF',
-      tags: []
+      tags: [],
+      clazz: []
     }
   },
   methods: {
@@ -38,8 +39,9 @@ export default {
       this.tags = this.$store.getters.allTags
       log.info(this.tags)
     },
-    onTagSelectChanged() {
-      log.info('onTagSelectChanged')
+    onTagSelectChanged(item) {
+      log.info('onTagSelectChanged', item)
+      this.$router.push({path: '/query', query: {name: '标签“' + item + '”', type: 'tag'}})
     }
   }
 }
