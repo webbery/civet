@@ -45,6 +45,10 @@
         }
       ]
     },
+    "mac": {
+      "icon": "build/icons/icon.ico",
+      "target": "nsis"
+    },
     "win": {
       "icon": "build/icons/icon.ico",
       "target": "nsis"
