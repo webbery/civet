@@ -3,7 +3,7 @@ import localStorage from './LocalStorage'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 import { CategoryArray } from './Category'
-import { GPU, input } from 'gpu.js'
+// import { GPU, input } from 'gpu.js'
 
 import Vue from 'vue'
 import App from './App'
@@ -86,23 +86,26 @@ function readDir(path) {
   })
 }
 
-function GPUTest() {
-  const gpu = new GPU({mode: 'cpu'})
-  const value1 = input([1, 2, 3, 4, 5, 6], [2, 1, 3])
-  console.info(value1)
-  function kernelFunction(x, y) {
-    const v = x[this.thread.z][this.thread.y][this.thread.x] + y[this.thread.z][this.thread.y][this.thread.x]
-    return v
-  }
-  const kernel = gpu.createKernel(kernelFunction, {output: [1]})
-  console.info('1111111')
-  const result = kernel(value1, value1)
-  console.info('GPU: ', result)
-}
+// function GPUTest() {
+//   console.info('gpu test')
+//   const gpu = new GPU({mode: 'cpu'})
+//   console.info('new gpu')
+//   const value1 = input([1, 2, 3, 4, 5, 6], [2, 1, 3])
+//   console.info(value1)
+//   function kernelFunction(x, y) {
+//     const v = x[this.thread.z][this.thread.y][this.thread.x] + y[this.thread.z][this.thread.y][this.thread.x]
+//     return v
+//   }
+//   const kernel = gpu.createKernel(kernelFunction, {output: [1]})
+//   console.info('1111111')
+//   const result = kernel(value1, value1)
+//   console.info('GPU: ', result)
+// }
 // let the main thread know this thread is ready to process something
 function ready() {
+  console.debug('111111222')
   ipcRenderer.send('ready')
-  GPUTest()
+  // GPUTest()
   // let sab = new SharedArrayBuffer(1024)
   // ipcRenderer.send('shared', sab)
   // for (let i = 0; i < 100; ++i) timer.start(() => { console.info('tick', i) }, 1000)

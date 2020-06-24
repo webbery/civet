@@ -5,6 +5,7 @@
   "description": "An electron-vue project",
   "license": "MIT",
   "main": "./dist/electron/main.js",
+  "appId": "org.picstation.electron-vue",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
@@ -46,8 +47,8 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.ico",
-      "target": "nsis"
+      "icon": "build/icons/icon.icns",
+      "target": "dmg"
     },
     "win": {
       "icon": "build/icons/icon.ico",
