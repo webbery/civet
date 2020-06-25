@@ -407,7 +407,6 @@ export default {
     }
   },
   getImageInfo: (imageID) => {
-    console.info('imageID', imageID)
     return getImageInfoImpl(imageID)
   },
   getImagesInfo: async (imagesID) => {
@@ -421,7 +420,6 @@ export default {
   },
   getImagesSnap: async () => {
     let imagesSnap = await getOptional(KeyImageIndexes, {})
-    console.info('all images snap', imagesSnap)
     return imagesSnap
   },
   updateImage: async (image) => {},

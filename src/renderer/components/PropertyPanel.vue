@@ -113,7 +113,7 @@ export default {
           unit = 'Mb'
           v = v / 1024
         }
-        return parseInt(v) + unit
+        return v.toFixed(1) + unit
       }
       let image = this.$store.getters.image(imageID)
       this.classes = image.category

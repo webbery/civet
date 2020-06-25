@@ -5,10 +5,11 @@ import { ImageParser, JImage } from './Image'
 import { CategoryArray } from './Category'
 import { GPU, input } from 'gpu.js'
 
+/* ************************ ↓↓↓↓↓↓发布时注释掉该部分↓↓↓↓↓↓ ********************** */
 import Vue from 'vue'
 import App from './App'
 import ElementUI from 'element-ui'
-
+import 'element-ui/lib/theme-chalk/index.css'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
 Vue.use(ElementUI)
@@ -18,6 +19,7 @@ new Vue({
   components: { App },
   template: '<App/>'
 }).$mount('#app')
+/* ************************ ↑↑↑↑↑发布时注释掉该部分↑↑↑↑↑ ********************** */
 
 const threshodMode = false
 // your background code here
