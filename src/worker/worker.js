@@ -74,7 +74,7 @@ async function readImages(fullpath) {
     //   reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
     // }
     const parser = new ImageParser()
-    parser.parse(fullpath, info, (img) => { reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()]) })
+    parser.parse(fullpath, info, (err, img) => { reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()]) })
   }
 }
 
