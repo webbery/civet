@@ -21,6 +21,13 @@ new Vue({
 }).$mount('#app')
 /* ************************ ↑↑↑↑↑发布时注释掉该部分↑↑↑↑↑ ********************** */
 
+Array.prototype.remove = function (val) {
+  let index = this.indexOf(val)
+  if (index > -1) {
+    this.splice(index, 1)
+  }
+}
+
 const threshodMode = false
 // your background code here
 const { ipcRenderer } = require('electron')
@@ -60,6 +67,7 @@ const ReplyType = {
   REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
   REPLAY_ALL_CATEGORY: 'replyAllCategory',
   REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
+  REPLY_UNTAG_IMAGES: 'replyUntagImages',
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
 
@@ -74,7 +82,8 @@ async function readImages(fullpath) {
     //   reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
     // }
     const parser = new ImageParser()
-    parser.parse(fullpath, info, (err, img) => { reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()]) })
+    let img = await parser.parse(fullpath, info)
+    reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
 }
 
@@ -199,6 +208,10 @@ const messageProcessor = {
   'getUncategoryImages': async () => {
     let uncateimgs = await localStorage.getUncategoryImages()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
+  },
+  'getUntagImages': async () => {
+    let untagimgs = await localStorage.getUntagImages()
+    reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
   },
   'updateImageCategory': async (data) => {
     await localStorage.updateImageCatergory(data.imageID, data.category)

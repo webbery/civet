@@ -10,7 +10,7 @@
       label="ID"
       width="30">
       <template slot-scope="scope">
-        <el-checkbox v-model="checked"></el-checkbox>
+        <el-checkbox @change="(val)=>{onSelectChange(val, scope.row)}"></el-checkbox>
       </template>
     </el-table-column>
     <el-table-column
@@ -40,7 +40,8 @@
     </el-table-column>
     <el-table-column
       prop="type"
-      label="类型">
+      label="类型"
+      width="90">
     </el-table-column>
   </el-table>
   <el-button @click="loadImages()" type="primary" round>load</el-button>
@@ -63,13 +64,14 @@ import util from 'util'
 export default {
   data() {
     return {
-      msg: 'error:',
+      msg: '',
       tableData: [],
-      testImagesID: [5]
+      testImagesID: []
     }
   },
   async mounted() {
     await this.loadImages()
+    await this.loadOtherDisplayInfo()
   },
   methods: {
     convert(arr) {
@@ -82,7 +84,7 @@ export default {
       }
       return result.toString()
     },
-    arrayAssert(arr, msg) {
+    arrayValidate(arr, msg) {
       for (let val of arr) {
         if (val === null) {
           this.msg = msg + ' :\t array contain null element'
@@ -94,6 +96,18 @@ export default {
         }
       }
     },
+    arrayAssert(condition, msg) {
+      if (condition) return
+      this.msg = msg
+      throw new Error(this.msg)
+    },
+    onSelectChange(val, row) {
+      if (val === true) {
+        this.testImagesID.push(row.imageid)
+      } else {
+        this.testImagesID.remove(row.imageid)
+      }
+    },
     async loadImages() {
       let snaps = await localStorage.getImagesSnap()
       let data = []
@@ -103,7 +117,7 @@ export default {
         console.info(info)
         img.tag = this.convert(info.tag)
         img.keyword = this.convert(info.keyword)
-        img.clazz = this.convert(info.clazz)
+        img.clazz = this.convert(info.category)
         img.fullpath = info.path
         img.size = info.size
         img.box = 'width: ' + info.width + ', height: ' + info.height
@@ -111,6 +125,15 @@ export default {
         data.push(img)
       }
       this.tableData = data
+    },
+    async loadOtherDisplayInfo() {
+      let unclazzImages = await localStorage.getUncategoryImages()
+      let untagImages = await localStorage.getUntagImages()
+      this.msg = '未分类: ' + unclazzImages.length + '\n未标签: ' + untagImages.length
+    },
+    async testCorrection() {
+      await this.testAddTag('标签测试')
+      await this.testRemoveTag('标签测试')
     },
     async testAddImage() {
       const fs = require('fs')
@@ -122,8 +145,6 @@ export default {
         const img = await parse(fullpath, info)
         console.info(img)
         this.testImagesID.push(img.id)
-        this.arrayAssert(img.tag, 'img.tag')
-        this.arrayAssert(img.keyword, 'img.keyword')
       } catch (err) {
       }
       await this.loadImages()
@@ -135,17 +156,54 @@ export default {
       }
       await this.loadImages()
     },
-    async testAddTag() {},
-    async testRemoveTag() {}
+    async testAddTag(tag) {
+      if (!this.testImagesID.length) return
+      for (let idx of this.testImagesID) {
+        await localStorage.addTag(idx, tag)
+        const img = await localStorage.getImageInfo(idx)
+        this.arrayValidate(img.tag, img.label + ' tag error')
+        this.arrayAssert(img.tag.indexOf(tag) > -1, this.testImagesID[idx] + ' add tag fail')
+      }
+      await this.loadImages()
+    },
+    async testRemoveTag(tag) {
+      if (!this.testImagesID.length) return
+      for (let idx of this.testImagesID) {
+        await localStorage.removeTag(tag, idx)
+        const img = await localStorage.getImageInfo(idx)
+        this.arrayValidate(img.tag, img.label + ' tag error')
+        this.arrayAssert(img.tag.indexOf(tag) < 0, this.testImagesID[idx] + ' remove tag fail')
+      }
+      await this.loadImages()
+    },
+    async testAddClazz() {
+      if (!this.testImagesID.length) return
+      await localStorage.addCategory('分类测试', '')
+      for (let idx of this.testImagesID) {
+        await localStorage.addCategory('分类测试', '', idx)
+        await localStorage.addCategory('子分类', '父分类', idx)
+        await localStorage.addCategory('三级分类', '一级分类/二级分类', idx)
+        const img = await localStorage.getImageInfo(idx)
+        this.arrayValidate(img.category, img.label + ' tag error')
+      }
+      await this.loadImages()
+      await this.loadOtherDisplayInfo()
+    },
+    async testRemoveClazz() {
+      await localStorage.removeCategory('分类测试', '')
+      await this.loadImages()
+      await this.loadOtherDisplayInfo()
+    }
   }
 }
 </script>
 
 <style scoped>
 .console {
+  margin: 5px;
   border: solid 1px black;
   color: brown;
   border-radius: 5px;
-  height: 10vh;
+  height: 5vh;
 }
 </style>
