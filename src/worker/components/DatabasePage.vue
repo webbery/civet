@@ -186,6 +186,8 @@ export default {
         const img = await localStorage.getImageInfo(idx)
         this.arrayValidate(img.category, img.label + ' tag error')
       }
+      let allCate = await localStorage.getAllCategory()
+      console.info('display all category', allCate)
       await this.loadImages()
       await this.loadOtherDisplayInfo()
     },

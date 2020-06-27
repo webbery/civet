@@ -170,13 +170,13 @@ async function getKeywordIndx(keywords) {
   }
   console.info('keyword2index', keyword2index, wordIndx)
   if (shouldUpdate === true) {
-    put(KeyWord2Index, keyword2index)
+    await put(KeyWord2Index, keyword2index)
 
     let index2keyword = await getOptional(KeyIndex2Word, {})
     for (let k in index2word) {
       index2keyword[k] = index2word[k]
     }
-    put(KeyIndex2Word, index2keyword)
+    await put(KeyIndex2Word, index2keyword)
   }
   return wordIndx
 }
@@ -220,9 +220,11 @@ async function getImageInfoImpl(imageID) {
   // category
   if (image.category) {
     const indx2cate = await getOptional(KeyIndex2Category, {})
+    // console.info('KeyIndex2Category', indx2cate, image.category)
     let category = []
-    for (let idx of image.category) {
-      category.push(indx2cate[idx])
+    for (let code of image.category) {
+      const chain = await code2categoryChain(code, indx2cate)
+      category.push(chain)
     }
     image.category = category
   }
@@ -231,11 +233,12 @@ async function getImageInfoImpl(imageID) {
 
 async function categoryChain2code(chain, cate2indx, indx2cate) {
   // 将文本序列编码,如：文件夹1.子文件夹 --> 3.2
-  console.info('chain', chain)
+  // console.info('chain', chain)
   let categoryName = chain.split('/')
   if (!cate2indx) {
     cate2indx = await getOptional(KeyCategory2Index, {})
   }
+  // console.info('cate2indx', cate2indx)
   if (!indx2cate) {
     indx2cate = await getOptional(KeyIndex2Category, {})
   }
@@ -247,8 +250,9 @@ async function categoryChain2code(chain, cate2indx, indx2cate) {
     if (cate2indx[name] === undefined) {
       cate2indx[name] = maxID
       indx2cate[maxID] = name
-      put(KeyIndex2Category, indx2cate)
-      put(KeyCategory2Index, cate2indx)
+      await put(KeyIndex2Category, indx2cate)
+      await put(KeyCategory2Index, cate2indx)
+      maxID += 1
     }
     sCode += cate2indx[name] + '/'
   }
@@ -283,7 +287,6 @@ export default {
   },
   addImages: async (objs) => {
     let paths = await getOptional(KeyPath, {})
-    // console.info('addImages PATH:', paths)
     let images = await getOptional(KeyImageIndexes, {})
     // console.info('addImages IMAGE:', images)
     // 标签索引
@@ -336,6 +339,7 @@ export default {
     let img = await getOptional(imageID, null)
     // console.info('update tags', tags)
     const tagIndxes = await getKeywordIndx(tags)
+    console.info('tagIndexes', tagIndxes)
     img.tag = tagIndxes
     img.keyword = tagIndxes.concat(img.keyword)
     await put(imageID, img)
@@ -344,6 +348,7 @@ export default {
     let unTags = await getOptional(KeyUnTag, [])
     let rewordIndx = await getOptional(KeyRewordIndex, {})
 
+    console.info('img.keyword', img.keyword)
     for (let tagIndx of img.keyword) {
       // console.info('tagIndx', tagIndx)
       allTags[tagIndx.toString()] = pushArray(allTags[tagIndx.toString()], imageID)
@@ -568,6 +573,7 @@ export default {
     // 1. 生成分类码
     let chain = makeCategoryChain(categoryName, categoryChain)
     const code = await categoryChain2code(chain)
+    console.info('code', code)
     let category = await getOptional(KeyCategory, {})
     if (category[code] === undefined) category[code] = []
     // 2. 分类码添加到图片数据中
