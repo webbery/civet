@@ -3,12 +3,13 @@ import localStorage from './LocalStorage'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 import { CategoryArray } from './Category'
-import { GPU, input } from 'gpu.js'
+// import { GPU, input } from 'gpu.js'
 
+/* ************************ ↓↓↓↓↓↓发布时注释掉该部分↓↓↓↓↓↓ ********************** */
 import Vue from 'vue'
 import App from './App'
 import ElementUI from 'element-ui'
-
+import 'element-ui/lib/theme-chalk/index.css'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
 Vue.use(ElementUI)
@@ -18,6 +19,14 @@ new Vue({
   components: { App },
   template: '<App/>'
 }).$mount('#app')
+/* ************************ ↑↑↑↑↑发布时注释掉该部分↑↑↑↑↑ ********************** */
+
+Array.prototype.remove = function (val) {
+  let index = this.indexOf(val)
+  if (index > -1) {
+    this.splice(index, 1)
+  }
+}
 
 const threshodMode = false
 // your background code here
@@ -58,6 +67,7 @@ const ReplyType = {
   REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
   REPLAY_ALL_CATEGORY: 'replyAllCategory',
   REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
+  REPLY_UNTAG_IMAGES: 'replyUntagImages',
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
 
@@ -72,7 +82,8 @@ async function readImages(fullpath) {
     //   reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
     // }
     const parser = new ImageParser()
-    parser.parse(fullpath, info, (img) => { reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()]) })
+    let img = await parser.parse(fullpath, info)
+    reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
 }
 
@@ -86,23 +97,26 @@ function readDir(path) {
   })
 }
 
-function GPUTest() {
-  const gpu = new GPU({mode: 'cpu'})
-  const value1 = input([1, 2, 3, 4, 5, 6], [2, 1, 3])
-  console.info(value1)
-  function kernelFunction(x, y) {
-    const v = x[this.thread.z][this.thread.y][this.thread.x] + y[this.thread.z][this.thread.y][this.thread.x]
-    return v
-  }
-  const kernel = gpu.createKernel(kernelFunction, {output: [1]})
-  console.info('1111111')
-  const result = kernel(value1, value1)
-  console.info('GPU: ', result)
-}
+// function GPUTest() {
+//   console.info('gpu test')
+//   const gpu = new GPU({mode: 'cpu'})
+//   console.info('new gpu')
+//   const value1 = input([1, 2, 3, 4, 5, 6], [2, 1, 3])
+//   console.info(value1)
+//   function kernelFunction(x, y) {
+//     const v = x[this.thread.z][this.thread.y][this.thread.x] + y[this.thread.z][this.thread.y][this.thread.x]
+//     return v
+//   }
+//   const kernel = gpu.createKernel(kernelFunction, {output: [1]})
+//   console.info('1111111')
+//   const result = kernel(value1, value1)
+//   console.info('GPU: ', result)
+// }
 // let the main thread know this thread is ready to process something
 function ready() {
+  console.debug('111111222')
   ipcRenderer.send('ready')
-  GPUTest()
+  // GPUTest()
   // let sab = new SharedArrayBuffer(1024)
   // ipcRenderer.send('shared', sab)
   // for (let i = 0; i < 100; ++i) timer.start(() => { console.info('tick', i) }, 1000)
@@ -197,6 +211,10 @@ const messageProcessor = {
   'getUncategoryImages': async () => {
     let uncateimgs = await localStorage.getUncategoryImages()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
+  },
+  'getUntagImages': async () => {
+    let untagimgs = await localStorage.getUntagImages()
+    reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
   },
   'updateImageCategory': async (data) => {
     await localStorage.updateImageCatergory(data.imageID, data.category)

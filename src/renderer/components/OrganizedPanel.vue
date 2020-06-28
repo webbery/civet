@@ -132,8 +132,10 @@ export default {
       // console.info('----', this.directoryData)
       const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
       // console.info('get category', folders)
-      // const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
-      // this.headOptions[1].value = uncategoryImages.length
+      const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
+      this.headOptions[1].value = uncategoryImages.length
+      const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
+      this.headOptions[2].value = untagImages.length
       // console.info(uncategoryImages)
       this.$store.dispatch('setCategory', folders)
     },

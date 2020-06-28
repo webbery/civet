@@ -5,6 +5,7 @@
   "description": "An electron-vue project",
   "license": "MIT",
   "main": "./dist/electron/main.js",
+  "appId": "org.picstation.electron-vue",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
@@ -45,6 +46,10 @@
         }
       ]
     },
+    "mac": {
+      "icon": "build/icons/icon.icns",
+      "target": "dmg"
+    },
     "win": {
       "icon": "build/icons/icon.ico",
       "target": "nsis"
@@ -77,6 +82,7 @@
     "levelup": "^4.4.0",
     "node-uuid": "^1.4.8",
     "pinyin": "^2.9.1",
+    "psd": "^3.2.0",
     "segment": "^0.1.3",
     "sharp": "^0.25.4",
     "skmeans": "^0.11.3",

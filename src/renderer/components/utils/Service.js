@@ -14,6 +14,7 @@ const replyMessageMap = {
   'findImageWithKeyword': 'replyFindImageResult',
   'getAllCategory': 'replyAllCategory',
   'getUncategoryImages': 'replyUncategoryImages',
+  'getUntagImages': 'replyUntagImages',
   'reInitDB': 'replyReloadDBStatus'
 }
 
@@ -72,6 +73,7 @@ export default{
   GET_ALL_TAGS: 'getAllTags',
   GET_ALL_CATEGORY: 'getAllCategory',
   GET_UNCATEGORY_IMAGES: 'getUncategoryImages',
+  GET_UNTAG_IMAGES: 'getUntagImages',
   ADD_IMAGES_BY_DIRECORY: 'addImagesByDirectory',
   ADD_IMAGES_BY_PATHS: 'addImagesByPaths',
   ADD_TAG: 'addTag',
