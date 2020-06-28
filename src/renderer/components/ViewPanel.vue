@@ -67,6 +67,15 @@ export default {
           break
         case '/uncategory':
           break
+        case '/query':
+          switch (to.query.type) {
+            case 'tag':
+              bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-tag'})
+              break
+            default:
+              break
+          }
+          break
         default:
           break
       }

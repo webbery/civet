@@ -6,7 +6,7 @@
     border
     style="width: 100%">
     <el-table-column
-      fixed="right"
+      fixed="left"
       label="ID"
       width="30">
       <template slot-scope="scope">
@@ -42,6 +42,10 @@
       prop="type"
       label="类型"
       width="90">
+    </el-table-column>
+    <el-table-column
+      prop="fullpath"
+      label="文件路径">
     </el-table-column>
   </el-table>
   <el-button @click="loadImages()" type="primary" round>load</el-button>
@@ -184,7 +188,7 @@ export default {
         await localStorage.addCategory('子分类', '父分类', idx)
         await localStorage.addCategory('三级分类', '一级分类/二级分类', idx)
         const img = await localStorage.getImageInfo(idx)
-        this.arrayValidate(img.category, img.label + ' tag error')
+        this.arrayValidate(img.category, img.label + ' class error')
       }
       let allCate = await localStorage.getAllCategory()
       console.info('display all category', allCate)
