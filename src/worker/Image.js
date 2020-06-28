@@ -3,7 +3,7 @@ import localStorage from './LocalStorage'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
-import CV from '../public/CV'
+// import CV from '../public/CV'
 import fs from 'fs'
 
 export class ImageParser {
@@ -36,82 +36,6 @@ const parseChain = async (fullpath, stat, stepFinishCB) => {
 }
 
 export class JImage extends ImageBase {
-  static async build(fullpath, stat) {
-    const path = require('path')
-    const crypto = require('crypto')
-    const sharp = require('sharp')
-    const item = path.basename(fullpath)
-    if (JString.isImage(item)) {
-      let keywords = NLP.getNouns(fullpath)
-      console.info('keyword:', keywords)
-      // console.info(dhash)
-      const image = fs.readFileSync(fullpath)
-      const tags = ExifReader.load(image)
-      delete tags['MakerNote']
-      console.info(fullpath, tags, stat)
-      let size = stat.size
-      let thumbnail = null
-      if (size > 5 * 1024 * 1024) {
-        thumbnail = tags['Thumbnail'].base64
-      }
-      const logger = require('electron-log')
-      // logger.log('START 1')
-      // for (let i = 0; i < 100; ++i) {
-      //   await sharp(fullpath).toBuffer()
-      // }
-      // logger.log('END 1')
-      logger.log('START 2')
-      await CV.sumaryColors(fullpath)
-      logger.log('END 2')
-      // const colors = CV.sumaryColors(orignalPixels)
-      let scaleWidth = Math.ceil(tags['Image Width'].value / 5)
-      if (scaleWidth < 8) scaleWidth = tags['Image Width'].value
-      const scaleHeight = scaleWidth + 1
-      const pixels = await sharp(fullpath)
-        .resize(scaleWidth, scaleHeight)
-        .grayscale()
-        .toBuffer()
-      const MD5 = crypto.createHash('md5')
-      // console.info(pixels.toString())
-      const hash = MD5.update(pixels.toString()).digest('hex')
-      // const hash = JString.dhash(image, tags['Image Width'].value, tags['Image Height'].value)
-      // const hash = await imghash.hash(fullpath)
-      // const hash = '1'
-      let type = tags['format']
-      if (type === undefined) {
-        type = JString.getFormatType(item)
-      } else {
-        type = JString.getFormatType(tags['format'].description)
-      }
-      let datetime = tags['DateTime']
-      if (datetime === undefined) {
-        datetime = stat.atime.toString()
-      } else {
-        datetime = datetime.value[0]
-      }
-      const dir = path.dirname(fullpath)
-      const fid = await localStorage.generateID()
-      let fileInfo = {
-        id: fid,
-        hash: hash.toString(),
-        path: dir,
-        filename: item,
-        keyword: keywords,
-        size: stat.size,
-        datetime: datetime,
-        width: tags['Image Width'].value,
-        height: tags['Image Height'].value,
-        thumbnail: thumbnail,
-        category: [],
-        // colors: colors,
-        type: type
-      }
-      const img = new JImage(fileInfo)
-      return img
-    }
-    return null
-  }
-
   static async loadFromDB() {
   }
 
@@ -170,7 +94,7 @@ class ImageMetaParser extends ImageParseBase {
       console.info('parse metadata error', err)
     }
     console.info('1', image)
-    image.stepCallback(image)
+    image.stepCallback(undefined, image)
 
     if (this.next !== undefined) {
       this.next.parse(image)
@@ -240,7 +164,7 @@ class ImageTextParser extends ImageParseBase {
       console.info('parse text error', err)
     }
     console.info('2', image)
-    image.stepCallback(image)
+    image.stepCallback(undefined, image)
 
     if (this.next !== undefined) {
       this.next.parse(image)

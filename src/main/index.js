@@ -17,6 +17,7 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 const workerURL = process.env.NODE_ENV === 'development'
+  // ? `http://localhost:9081`
   ? `worker.html`
   : `file://${__dirname}/worker.html`
 function createWindow () {

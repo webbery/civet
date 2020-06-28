@@ -20,12 +20,14 @@ const TableCategory2Index = 'category2index'
 const TableIndex2Category = 'index2category'
 const TableCategory = 'category'
 const TableUnCategory = 'uncategory'
+const TableUnTag = 'untag'
 
 // KEY
 const KeyPath = 'v' + DBVersion + '.' + TablePath
 // const KeyImage = 'v' + DBVersion + '.' + TableImage
 const KeyImageIndexes = 'v' + DBVersion + '.' + TableImageIndexes
 const KeyTag = 'v' + DBVersion + '.' + TableTAG
+const KeyUnTag = 'v' + DBVersion + '.' + TableUnTag
 const KeyWord2Index = 'v' + DBVersion + '.' + TableWord2Index
 const KeyIndex2Word = 'v' + DBVersion + '.' + TableIndex2Word
 const KeyRewordIndex = 'v' + DBVersion + '.' + TableRewordIndex
@@ -142,6 +144,13 @@ async function batchPut(data) {
   }
 }
 
+async function del(key) {
+  try {
+    await instance().del(key)
+  } catch (err) {
+    console.log(err)
+  }
+}
 async function getKeywordIndx(keywords) {
   let wordIndx = []
   if (keywords === undefined || keywords.length === 0) return wordIndx
@@ -161,13 +170,13 @@ async function getKeywordIndx(keywords) {
   }
   console.info('keyword2index', keyword2index, wordIndx)
   if (shouldUpdate === true) {
-    put(KeyWord2Index, keyword2index)
+    await put(KeyWord2Index, keyword2index)
 
     let index2keyword = await getOptional(KeyIndex2Word, {})
     for (let k in index2word) {
       index2keyword[k] = index2word[k]
     }
-    put(KeyIndex2Word, index2keyword)
+    await put(KeyIndex2Word, index2keyword)
   }
   return wordIndx
 }
@@ -203,13 +212,19 @@ async function getImageInfoImpl(imageID) {
     const tagsName = await getKeyword(image.tag)
     image.tag = tagsName
   }
+  if (image.keyword !== null) {
+    const keywords = await getKeyword(image.keyword)
+    image.keyword = keywords
+  }
   image.id = imageID
   // category
   if (image.category) {
     const indx2cate = await getOptional(KeyIndex2Category, {})
+    // console.info('KeyIndex2Category', indx2cate, image.category)
     let category = []
-    for (let idx of image.category) {
-      category.push(indx2cate[idx])
+    for (let code of image.category) {
+      const chain = await code2categoryChain(code, indx2cate)
+      category.push(chain)
     }
     image.category = category
   }
@@ -218,11 +233,12 @@ async function getImageInfoImpl(imageID) {
 
 async function categoryChain2code(chain, cate2indx, indx2cate) {
   // 将文本序列编码,如：文件夹1.子文件夹 --> 3.2
-  console.info('chain', chain)
-  let categoryName = chain.split('.')
+  // console.info('chain', chain)
+  let categoryName = chain.split('/')
   if (!cate2indx) {
     cate2indx = await getOptional(KeyCategory2Index, {})
   }
+  // console.info('cate2indx', cate2indx)
   if (!indx2cate) {
     indx2cate = await getOptional(KeyIndex2Category, {})
   }
@@ -234,30 +250,31 @@ async function categoryChain2code(chain, cate2indx, indx2cate) {
     if (cate2indx[name] === undefined) {
       cate2indx[name] = maxID
       indx2cate[maxID] = name
-      put(KeyIndex2Category, indx2cate)
-      put(KeyCategory2Index, cate2indx)
+      await put(KeyIndex2Category, indx2cate)
+      await put(KeyCategory2Index, cate2indx)
+      maxID += 1
     }
-    sCode += cate2indx[name] + '.'
+    sCode += cate2indx[name] + '/'
   }
   return sCode.substr(0, sCode.length - 1)
 }
 
 async function code2categoryChain(code, indx2cate) {
-  let categoryIDs = code.split('.')
+  let categoryIDs = code.split('/')
   if (!indx2cate) {
     indx2cate = await getOptional(KeyIndex2Category, {})
   }
 
   let chain = ''
   for (let idx of categoryIDs) {
-    chain += indx2cate[idx] + '.'
+    chain += indx2cate[idx] + '/'
   }
   return chain.substr(0, chain.length - 1)
 }
 
 function makeCategoryChain(categoryName, categoryChain) {
   let chain = categoryName
-  if (categoryChain || categoryChain !== '') chain = categoryChain + '.' + categoryName
+  if (categoryChain || categoryChain !== '') chain = categoryChain + '/' + categoryName
   return chain
 }
 
@@ -270,7 +287,6 @@ export default {
   },
   addImages: async (objs) => {
     let paths = await getOptional(KeyPath, {})
-    console.info('addImages PATH:', paths)
     let images = await getOptional(KeyImageIndexes, {})
     // console.info('addImages IMAGE:', images)
     // 标签索引
@@ -278,6 +294,7 @@ export default {
     // let rewordIndx = await getOptional(KeyRewordIndex, {})
     // let simhash = await getOptional(KeyHash, {})
     let uncategory = await getOptional(KeyUnCategory, [])
+    let untags = await getOptional(KeyUnTag, [])
     for (let item of objs) {
       const k = item.id
       // console.info('image key', k)
@@ -285,7 +302,7 @@ export default {
       const fullpath = JString.joinPath(dir, item.filename)
       images[k] = {name: item.filename, step: 0}
       uncategory.push(k)
-      // const kwIndx = await getKeywordIndx(item.keyword)
+      untags.push(k)
       await instance().put(k, JSON.stringify({
         label: item.filename,
         path: fullpath,
@@ -308,6 +325,7 @@ export default {
     // let imageSet = new Set(images)
     await put(KeyImageIndexes, images)
     await put(KeyUnCategory, uncategory)
+    await put(KeyUnTag, untags)
 
     // 路径文件排重
     for (let p in paths) {
@@ -315,37 +333,30 @@ export default {
       paths[p] = files
     }
     await put(KeyPath, paths)
-
-    // 添加标签到数据库
-    // console.info('write tags:', tags)
-    // put(KeyTag, tags)
-
-    // // 构建倒排索引 [词编号: 图像ID]
-    // console.info('reword index:', rewordIndx)
-    // put(KeyRewordIndex, rewordIndx)
-    // 保存局部敏感hash[hash: 图像ID]
-    // put(KeyHash, simhash)
   },
   updateImageTags: async (imageID, tags) => {
     // 标签索引
     let img = await getOptional(imageID, null)
-    console.info('update tags', tags)
-    img.tag = tags
-    img.keyword = tags.concat(img.keyword)
+    // console.info('update tags', tags)
+    const tagIndxes = await getKeywordIndx(tags)
+    console.info('tagIndexes', tagIndxes)
+    img.tag = tagIndxes
+    img.keyword = tagIndxes.concat(img.keyword)
     await put(imageID, img)
 
     let allTags = await getOptional(KeyTag, {})
+    let unTags = await getOptional(KeyUnTag, [])
     let rewordIndx = await getOptional(KeyRewordIndex, {})
-    const kwIndx = await getKeywordIndx(img.keyword)
 
-    for (let tagIndx of kwIndx) {
+    console.info('img.keyword', img.keyword)
+    for (let tagIndx of img.keyword) {
       // console.info('tagIndx', tagIndx)
       allTags[tagIndx.toString()] = pushArray(allTags[tagIndx.toString()], imageID)
       rewordIndx[tagIndx.toString()] = pushArray(rewordIndx[tagIndx.toString()], imageID)
     }
-    console.info('write tags:', allTags)
     await put(KeyTag, allTags)
-
+    unTags.remove(imageID)
+    await put(KeyUnTag, unTags)
     // 构建倒排索引 [词编号: 图像ID]
     console.info('reword index:', rewordIndx)
     await put(KeyRewordIndex, rewordIndx)
@@ -376,7 +387,7 @@ export default {
     let words = []
     for (let item of category) {
       const chain = makeCategoryChain(item.name, item.parent)
-      words.push(chain.split('.'))
+      words.push(chain.split('/'))
       categoryID.push(await categoryChain2code(chain, cate2indx, indx2cate))
     }
     img.category = categoryID
@@ -407,7 +418,6 @@ export default {
     }
   },
   getImageInfo: (imageID) => {
-    console.info('imageID', imageID)
     return getImageInfoImpl(imageID)
   },
   getImagesInfo: async (imagesID) => {
@@ -421,11 +431,38 @@ export default {
   },
   getImagesSnap: async () => {
     let imagesSnap = await getOptional(KeyImageIndexes, {})
-    console.info('all images snap', imagesSnap)
     return imagesSnap
   },
   updateImage: async (image) => {},
-  removeImage: (imageID) => {},
+  removeImage: async (imageID) => {
+    let snaps = await getOptional(KeyImageIndexes, {})
+    delete snaps[imageID]
+    await put(KeyImageIndexes, snaps)
+    let image = await getOptional(imageID, {})
+    let allTags = await getOptional(KeyTag, {})
+    const keywords = image.keyword
+    // 移除keyword索引
+    let rewordIndx = await getOptional(KeyRewordIndex, {})
+    for (let word of keywords) {
+      console.info('keyword', word, rewordIndx)
+      rewordIndx[word].remove(imageID)
+      if (rewordIndx[word].length === 0) delete rewordIndx[word]
+      console.info('keyword 2', word)
+      allTags[word].remove(imageID)
+      if (allTags[word].length === 0) delete allTags[word]
+    }
+    await put(KeyRewordIndex, rewordIndx)
+    // 移除分类记录
+    const category = image.category
+    let categoryTable = await getOptional(KeyCategory, {})
+    for (let c of category) {
+      categoryTable[c].remove(imageID)
+      if (categoryTable[c].length === 0) delete categoryTable[c]
+    }
+    await put(KeyCategory, categoryTable)
+    // 移除图像记录
+    await del(imageID)
+  },
   changeImageName: (imageID, label) => {},
   hasDirectory: async (path) => {
     const paths = await getOptional(KeyPath, undefined)
@@ -451,7 +488,7 @@ export default {
       }
       directories.push({label: p, children: children})
     }
-    console.info(directories)
+    // console.info(directories)
     return directories
   },
   getTags: async () => {
@@ -472,6 +509,7 @@ export default {
   },
   addTag: async (imageID, tag) => {
     let tagIDs = await getOptional(KeyTag, {})
+    let untags = await getOptional(KeyUnTag, [])
     let indx = await getKeywordIndx([tag])
     const tagID = indx[0]
     // log.info('tag index', tagIDs)
@@ -486,12 +524,14 @@ export default {
     let rewordIndex = await getOptional(KeyRewordIndex, {})
     if (rewordIndex[tagID] === undefined) rewordIndex[tagID] = []
     rewordIndex[tagID].push(imageID)
+    untags.remove(imageID)
 
     let data = {}
     data[KeyTag] = tagIDs
     data[imageID] = image
     data[KeyRewordIndex] = rewordIndex
-    batchPut(data)
+    data[KeyUnTag] = untags
+    await batchPut(data)
   },
   removeTag: async (tag, imageID) => {
     let image = await getOptional(imageID, null)
@@ -533,20 +573,48 @@ export default {
     // 1. 生成分类码
     let chain = makeCategoryChain(categoryName, categoryChain)
     const code = await categoryChain2code(chain)
+    console.info('code', code)
     let category = await getOptional(KeyCategory, {})
     if (category[code] === undefined) category[code] = []
     // 2. 分类码添加到图片数据中
     if (imageID !== undefined) {
       let image = await getOptional(imageID, null)
       if (image['category'] === undefined) image['category'] = []
+      if (image['category'].length === 0) {
+        // 从未分类中移除
+        let unclazz = await getOptional(KeyUnCategory, [])
+        unclazz.remove(imageID)
+        await put(KeyUnCategory, unclazz)
+      }
       image['category'].push(code)
       // 3. 分类码表添加图片id
       category[code].push(imageID)
       data[imageID] = image
     }
-
     data[KeyCategory] = category
-    batchPut(data)
+    await batchPut(data)
+  },
+  removeCategory: async (categoryName, categoryChain) => {
+    let chain = makeCategoryChain(categoryName, categoryChain)
+    const code = await categoryChain2code(chain)
+    let category = await getOptional(KeyCategory, {})
+    if (category[code] === undefined) return
+    let uncategory = []
+    for (let iid of category[code]) {
+      let image = await getOptional(iid, null)
+      image['category'].remove(code)
+      if (image['category'].length === 0) {
+        uncategory.push(iid)
+      }
+      await put(iid, image)
+    }
+    if (uncategory.length) {
+      let uc = await getOptional(KeyUnCategory, [])
+      uc.concat(uncategory)
+      await put(KeyUnCategory, uc)
+    }
+    delete category[code]
+    await put(KeyCategory, category)
   },
   getAllCategory: async () => {
     let data = {}
@@ -584,7 +652,7 @@ export default {
       return clz
     }
     for (let chains in data) {
-      const chain = chains.split('.')
+      const chain = chains.split('/')
       let root = {}
       console.info(chain)
       const result = createChainStruct(root, chain, data[chains])
@@ -593,8 +661,19 @@ export default {
     console.info('structCategory', structCategory)
     return structCategory
   },
-  getUncategoryImages: async () => {
+  getUncategoryImages: async (retrieveLength) => {
     let imgsID = await getOptional(KeyUnCategory, [])
+    if (retrieveLength) return imgsID.length
+    let images = []
+    for (let imgID of imgsID) {
+      let img = await getOptional(imgID, null)
+      images.push(img)
+    }
+    return images
+  },
+  getUntagImages: async (retrieveLength) => {
+    let imgsID = await getOptional(KeyUnTag, [])
+    if (retrieveLength) return imgsID.length
     let images = []
     for (let imgID of imgsID) {
       let img = await getOptional(imgID, null)
