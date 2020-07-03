@@ -51,8 +51,10 @@ function createWindow () {
   workerWindow.on('closed', () => {
     console.log('background window closed')
   })
-  workerWindow.loadFile(workerURL)
-  // workerWindow.loadFile(workerURL)
+  if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
+  else workerWindow.loadURL(workerURL)
+  // mainWindow.openDevTools()
+  // workerWindow.openDevTools()
 }
 
 app.on('window-all-closed', async () => {

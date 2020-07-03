@@ -74,6 +74,14 @@ export default {
     }
   },
   async mounted() {
+    // const adapter = await navigator.gpu.requestAdapter()
+    // if (adapter === undefined) {
+    //   console.log('not support webgpu: 1')
+    // }
+    // const device = await adapter.requestDevice()
+    // if (device === undefined) {
+    //   console.log('not support webgpu: 2')
+    // }
     await this.loadImages()
     await this.loadOtherDisplayInfo()
   },

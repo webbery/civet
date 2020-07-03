@@ -43,6 +43,13 @@ function replaceImage(images, image) {
   images.push(image)
 }
 
+function isContain(arr, val) {
+  for (let item of arr) {
+    if (item === val) return true
+  }
+  return false
+}
+
 const mutations = {
   updateImageList(state, imageList) {
     // {label: item.filename, realpath: item.path + item.filename}
@@ -74,6 +81,16 @@ const mutations = {
         break
       }
     }
+  },
+  siftByTag(state, tag) {
+    let images = state.imageList
+    console.info('before siftByTag', images.length)
+    for (let idx = images.length - 1; idx >= 0; idx--) {
+      if (!images[idx].tag || !isContain(images[idx].tag, tag)) {
+        images.splice(idx, 1)
+      }
+    }
+    console.info('after siftByTag', images.length)
   }
 }
 
@@ -93,6 +110,9 @@ const actions = {
   },
   updateThumbnail ({ commit }, obj) {
     commit('updateThumbnail', obj)
+  },
+  siftByTag ({commit}, tag) {
+    commit('siftByTag', tag)
   }
 }
 
