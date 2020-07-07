@@ -19,9 +19,9 @@
 
 <script>
 import HeaderBar from '@/components/HeaderBar'
-import OrganizedPanel from '@/components/OrganizedPanel'
+import OrganizedPanel from '@/components/Panel/OrganizedPanel'
 import ViewPanel from '@/components/ViewPanel'
-import PropertyPanel from '@/components/PropertyPanel'
+import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/TagPanel'
 import ConfigPanel from '@/components/ConfigPanel'
 

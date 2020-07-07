@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import bus from './utils/Bus'
+import bus from '../utils/Bus'
 import JString from '@/../public/String'
 import Service from '@/components/utils/Service'
 import FolderTree from '@/components/FolderTree'

@@ -70,12 +70,12 @@
 </template>
 
 <script>
-import bus from './utils/Bus'
-import Service from './utils/Service'
+import bus from '../utils/Bus'
+import Service from '../utils/Service'
 import IconTag from '@/components/IconTag'
 import JString from '@/../public/String'
-import JImage from './JImage'
-import ImgTool from './utils/ImgTool'
+import JImage from '../JImage'
+import ImgTool from '../utils/ImgTool'
 import log from '@/../public/Logger'
 
 export default {
