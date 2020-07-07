@@ -1,13 +1,16 @@
 import SKMeans from 'skmeans'
-// import { GPU } from 'gpu.js'
+import { GPU } from 'gpu.js'
 
-// let getOrCreateGPU = (function () {
-//   let gpu
-//   return function () {
-//     return gpu || (gpu = new GPU())
-//   }
-// })()
+let getOrCreateGPU = (function () {
+  let gpu
+  return function () {
+    return gpu || (gpu = new GPU())
+  }
+})()
 
+const kernelRotate = getOrCreateGPU().createKernel(function(image, angle) {
+  return image
+})
 // function kmeans_gpu(data, k) {
 //   const length = data.length
 //   const findCentriod = getOrCreateGPU().createKernel(function (point, rest) {
@@ -101,5 +104,9 @@ export default {
     }
     // console.info('colors', colors)
     return colors
+  },
+  rotate: (image, angle, isCanvas) => {
+    const result = kernelRotate(image, angle)
+    return result
   }
 }
