@@ -67,6 +67,7 @@ export default {
     onUpdateHeadNav(query) {
       this.viewDesc = query.name
       switch (query.cmd) {
+        case 'display-tag':
         case 'display-all':
           this.comName = ViewFilter
           break

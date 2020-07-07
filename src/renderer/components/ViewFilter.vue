@@ -40,7 +40,7 @@ export default {
       log.info(this.tags)
     },
     onTagSelectChanged(item) {
-      log.info('onTagSelectChanged', item)
+      this.$store.dispatch('siftByTag', item)
       this.$router.push({path: '/query', query: {name: '标签“' + item + '”', type: 'tag'}})
     }
   }

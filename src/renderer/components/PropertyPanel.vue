@@ -33,7 +33,7 @@
     <fieldset>
       <legend class="title">分类</legend>
       <div>
-        <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz.name}}</IconTag>
+        <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz}}</IconTag>
         <el-popover
           placement="left"
           width="160"
@@ -58,7 +58,7 @@
         <div class="name">添加日期: </div>
       </el-col>
       <el-col :span="12">
-        <div ><a href="javascript:void(0);" @click="openFolder()" class="value">{{picture.path}}</a></div>
+        <div ><a href="javascript:void(0);" @click="openFolder()" class="value">{{imagepath}}</a></div>
         <div class="value">{{picture.width}} X {{picture.height}}</div>
         <div class="value">{{picture.descsize}}</div>
         <div class="value">{{picture.type}}</div>
@@ -76,12 +76,13 @@ import IconTag from '@/components/IconTag'
 import JString from '@/../public/String'
 import JImage from './JImage'
 import ImgTool from './utils/ImgTool'
+import log from '@/../public/Logger'
 
 export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, path: '', width: 0, height: 0, size: 0, colors: [] },
+      picture: { id: null, width: 0, height: 0, size: 0, colors: [] },
       imagepath: '',
       dynamicTags: [],
       inputVisible: false,
@@ -116,8 +117,11 @@ export default {
         return v.toFixed(1) + unit
       }
       let image = this.$store.getters.image(imageID)
-      this.classes = image.category
-      console.info('PropertyPanel', image)
+      this.classes.length = 0
+      for (let c of image.category) {
+        this.classes.push(c)
+      }
+      log.info('PropertyPanel', image)
       this.picture.descsize = getSize(image.size)
       let colors = []
       if (image.colors) {
@@ -142,13 +146,14 @@ export default {
           }
         }
       }
-      console.info(this.checkValue)
       // image.desccolors = colors
       this.picture.id = image.id
       this.imagepath = image.path
       this.picture.width = image.width
       this.picture.height = image.height
       this.picture.datetime = image.datetime
+      this.picture.type = image.type
+      this.picture.label = image.label
       this.dynamicTags = image.tag ? image.tag.slice(0) : []
     },
     handleClose(tag) {

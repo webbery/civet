@@ -6,7 +6,7 @@
     border
     style="width: 100%">
     <el-table-column
-      fixed="right"
+      fixed="left"
       label="ID"
       width="30">
       <template slot-scope="scope">
@@ -43,6 +43,10 @@
       label="类型"
       width="90">
     </el-table-column>
+    <el-table-column
+      prop="fullpath"
+      label="文件路径">
+    </el-table-column>
   </el-table>
   <el-button @click="loadImages()" type="primary" round>load</el-button>
   <el-button @click="testCorrection()" type="danger" round>testCorrection</el-button>
@@ -70,6 +74,14 @@ export default {
     }
   },
   async mounted() {
+    // const adapter = await navigator.gpu.requestAdapter()
+    // if (adapter === undefined) {
+    //   console.log('not support webgpu: 1')
+    // }
+    // const device = await adapter.requestDevice()
+    // if (device === undefined) {
+    //   console.log('not support webgpu: 2')
+    // }
     await this.loadImages()
     await this.loadOtherDisplayInfo()
   },
@@ -184,7 +196,7 @@ export default {
         await localStorage.addCategory('子分类', '父分类', idx)
         await localStorage.addCategory('三级分类', '一级分类/二级分类', idx)
         const img = await localStorage.getImageInfo(idx)
-        this.arrayValidate(img.category, img.label + ' tag error')
+        this.arrayValidate(img.category, img.label + ' class error')
       }
       let allCate = await localStorage.getAllCategory()
       console.info('display all category', allCate)
