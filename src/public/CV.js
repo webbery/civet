@@ -8,9 +8,10 @@ let getOrCreateGPU = (function () {
   }
 })()
 
-const kernelRotate = getOrCreateGPU().createKernel(function(image, angle) {
-  return image
-})
+const rotateKernel = function(input, width) {	
+	return input[width - this.thread.x - 1][this.thread.y];
+}
+
 // function kmeans_gpu(data, k) {
 //   const length = data.length
 //   const findCentriod = getOrCreateGPU().createKernel(function (point, rest) {
@@ -105,8 +106,9 @@ export default {
     // console.info('colors', colors)
     return colors
   },
-  rotate: (image, angle, isCanvas) => {
-    const result = kernelRotate(image, angle)
+  rotate: (image, width, height, isCanvas) => {
+    const kernel = getOrCreateGPU().createKernel(rotateKernel).setOutput(width, height)
+    kernel(image, width)
     return result
   }
 }
