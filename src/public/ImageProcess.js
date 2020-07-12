@@ -8,8 +8,8 @@ let getOrCreateGPU = (function () {
   }
 })()
 
-const rotateKernel = function(input, width) {	
-	return input[width - this.thread.x - 1][this.thread.y];
+const rotateKernel = function(input, width) {
+  return input[width - this.thread.x - 1][this.thread.y]
 }
 
 // function kmeans_gpu(data, k) {
@@ -107,8 +107,12 @@ export default {
     return colors
   },
   rotate: (image, width, height, isCanvas) => {
-    const kernel = getOrCreateGPU().createKernel(rotateKernel).setOutput(width, height)
-    kernel(image, width)
+    let kernel = getOrCreateGPU().createKernel(rotateKernel).setOutput(width, height, 3)// .setGraphical(true)
+    // if (isCanvas) {
+    //   kernel = kernel.setGraphical(true)
+    // }
+    const result = kernel(image, width)
+    console.info(result)
     return result
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="image-panel">
-      <JImage :src="image.path"></JImage>
+      <JImage :src="image.path" ref="display"></JImage>
       <div>
         <button @click="onRoate90">Rotate90</button>
       </div>
@@ -28,7 +28,9 @@ export default {
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '图片显示', cmd: 'display'})
   },
   methods: {
-    onRoate90() {}
+    onRoate90() {
+      this.$refs.display.rotateClockwise()
+    }
   }
 }
 </script>

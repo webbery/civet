@@ -32,8 +32,8 @@
 import bus from '../utils/Bus'
 import JString from '@/../public/String'
 import Service from '@/components/utils/Service'
-import FolderTree from '@/components/FolderTree'
-import IconFolder from '@/components/IconFolder'
+import FolderTree from '@/components/Control/FolderTree'
+import IconFolder from '@/components/Control/IconFolder'
 
 export default {
   name: 'organized-panel',
@@ -82,6 +82,7 @@ export default {
       return this.$store.getters.classesName
     },
     category() {
+      console.info('classes', this.$store.getters.category)
       return this.$store.getters.category
     }
   },

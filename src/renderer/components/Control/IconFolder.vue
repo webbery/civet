@@ -6,14 +6,10 @@
   </span>
 </template>
 <script>
-import Service from './utils/Service'
-import ClassFolderMenu from './Menu/ClassFolderMenu'
+import Service from '../utils/Service'
 
 export default {
   name: 'icon-folder',
-  components: {
-    ClassFolderMenu
-  },
   props: {
     icon: { type: String },
     label: { type: String },

@@ -96,7 +96,7 @@ const mutations = {
       let chainNames = chain.split('.')
       for (let item of chainNames) {
         for (let child of parent) {
-          if (child.name === item && child.type === 'dir') {
+          if (child.name === item && child.type === 'clz') {
             parent = child.children
             break
           }
@@ -104,7 +104,7 @@ const mutations = {
       }
     }
     if (!isCategoryExist(state, newName, chain)) {
-      parent.push({label: newName, type: 'dir'})
+      parent.push({label: newName, type: 'clz'})
     }
   },
   setCategory(state, category) {

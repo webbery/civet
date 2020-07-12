@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div @contextmenu="onPopMenu($event,$root)">
+    <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu"></PopMenu>
     <div v-for="(item, idx) of data" :key="idx">
       <!-- {{item}} -->
       <span v-if="item.type && item.type!='clz'" class="img-name">{{item.label}}</span>
@@ -15,11 +16,12 @@
 </template>
 <script>
 import IconFolder from './IconFolder'
+import PopMenu from '@/components/Menu/PopMenu'
 
 export default {
   name: 'FolderTree',
   components: {
-    IconFolder
+    IconFolder, PopMenu
   },
   data() {
     let expandTree = []
@@ -28,7 +30,8 @@ export default {
     }
     // console.info('folder length:', this.data.length)
     return {
-      expandTree: expandTree
+      expandTree: expandTree,
+      menus: [{text: '添加子类'}, {text: '删除'}]
     }
   },
   props: {
@@ -44,6 +47,19 @@ export default {
     onRetract: function(idx) {
       this.$set(this.expandTree, idx, false)
       // this.expandTree[idx] = false
+    },
+    onPopMenu: function(event, root, tag) {
+      console.info('pop menu:', event, root)
+      event.stopPropagation()
+      event.preventDefault()
+      root.$emit('easyAxis', {
+        tag: tag,
+        x: event.clientX,
+        y: event.clientY
+      })
+    },
+    onSelectMenu: function (indexList) {
+      console.info(indexList)
     }
   }
 }
