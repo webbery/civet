@@ -108,7 +108,7 @@ export default {
   },
   rotate: (image, width, height, isCanvas) => {
     const kernel = getOrCreateGPU().createKernel(rotateKernel).setOutput([width, height, 3])
-    kernel(image, width, height)
+    const result = kernel(image, width, height)
     console.info(result)
     return result
   }
