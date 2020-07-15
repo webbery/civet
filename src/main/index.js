@@ -34,9 +34,11 @@ function createWindow () {
     allowRunningInsecureContent: true,
     height: 563,
     useContentSize: true,
-    width: 1000
+    width: 1000,
+    show: false
   })
 
+  mainWindow.maximize()
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
@@ -55,6 +57,7 @@ function createWindow () {
   else workerWindow.loadURL(workerURL)
   // mainWindow.openDevTools()
   // workerWindow.openDevTools()
+  mainWindow.show()
 }
 
 app.on('window-all-closed', async () => {

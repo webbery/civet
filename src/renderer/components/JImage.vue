@@ -18,6 +18,7 @@ import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 import bus from './utils/Bus'
 import log from '@/../public/Logger'
+import ImageProcess from '@/../public/ImageProcess'
 
 export default {
   name: 'JImage',
@@ -158,6 +159,13 @@ export default {
         // this.scaleViewport()
       }
       // this.context.scale(this.scale, this.scale)
+    },
+    rotateClockwise() {
+      // const img = document.getElementById(this.id)
+      let test = [[[0, 0, 0], [1, 1, 1], [2, 2, 2]],
+        [[3, 3, 3], [4, 4, 4], [5, 5, 5]],
+        [[6, 6, 6], [7, 7, 7], [8, 8, 8]]]
+      ImageProcess.rotate(test, 3, 3, true)
     }
   }
 }

@@ -1,12 +1,12 @@
 <template>
   <span>
     <i :class="icon"></i>
-    <span class="text" v-if="!enableInput" @dblclick="onEdit()">{{label}}</span>
+    <span class="text" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick">{{label}}</span>
     <input v-if="enableInput" @blur="onSave()" v-model="folderName" ref="folderInput"/>
   </span>
 </template>
 <script>
-import Service from './utils/Service'
+import Service from '../utils/Service'
 
 export default {
   name: 'icon-folder',
@@ -50,6 +50,9 @@ export default {
       // 同时更新缓存
       this.$store.dispatch('addCategory', this.folderName, this.parent)
       this.label = this.folderName
+    },
+    onRightClick(event) {
+      console.info('right menu click', event)
     }
   }
 }
