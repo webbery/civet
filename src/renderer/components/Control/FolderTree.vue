@@ -31,7 +31,11 @@ export default {
     // console.info('folder length:', this.data.length)
     return {
       expandTree: expandTree,
-      menus: [{text: '添加子类'}, {text: '删除'}]
+      menus: [
+        {text: '添加子类', cb: this.onAddClass},
+        {text: '删除', cb: this.onDeleteClass}
+      ],
+      selection: null
     }
   },
   props: {
@@ -49,7 +53,8 @@ export default {
       // this.expandTree[idx] = false
     },
     onPopMenu: function(event, root, tag) {
-      console.info('pop menu:', event, root)
+      this.selection = event.toElement
+      console.info('pop menu:', this.selection)
       event.stopPropagation()
       event.preventDefault()
       root.$emit('easyAxis', {
@@ -60,6 +65,12 @@ export default {
     },
     onSelectMenu: function (indexList) {
       console.info(indexList)
+    },
+    onAddClass: function (name) {
+      console.info(name)
+    },
+    onDeleteClass: function (root) {
+      console.info(root)
     }
   }
 }
@@ -77,5 +88,8 @@ export default {
   text-overflow:ellipsis;
   white-space: nowrap;
   display: block;
+}
+.img-name:active {
+  background-color: dodgerblue;
 }
 </style>

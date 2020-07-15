@@ -13,7 +13,7 @@
 | :----: | :----:   |  :----: | :----: | :----: | :----: | :----: | :----: |
 | Civet  | Electron | LevelDB |  | 暂无 | 暂无 | 暂无 | 开源MIT
 | Eagle  | Electron | Json + 图片拷贝 |  | 有 | | | 私有
-| Billfish  | Qt | Sqlite + 图片拷贝 |  | 暂无 | | | 私有
+| Billfish  | Qt | Sqlite + 图片拷贝/索引 |  | 暂无 | | | 私有
 
 ### 目录
 
