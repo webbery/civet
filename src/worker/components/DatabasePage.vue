@@ -190,6 +190,7 @@ export default {
     },
     async testAddClazz() {
       if (!this.testImagesID.length) return
+      await localStorage.addCategory('undefined测试')
       await localStorage.addCategory('分类测试', '')
       for (let idx of this.testImagesID) {
         await localStorage.addCategory('分类测试', '', idx)
@@ -204,6 +205,7 @@ export default {
       await this.loadOtherDisplayInfo()
     },
     async testRemoveClazz() {
+      await localStorage.removeCategory('分类测试')
       await localStorage.removeCategory('分类测试', '')
       await this.loadImages()
       await this.loadOtherDisplayInfo()

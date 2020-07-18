@@ -1,4 +1,5 @@
 import util from 'util'
+import Log from '@/../public/Logger'
 
 const { ipcRenderer } = require('electron')
 
@@ -28,7 +29,7 @@ let getServiceInstance = (function() {
       hasInited = true
       service = {
         send: (msgType, msgData) => {
-          console.info('message-from-renderer: type=' + msgType + ', data=' + msgData)
+          Log.info('message-from-renderer: type=' + msgType + ', data', msgData)
           ipcRenderer.send('message-from-renderer', {
             type: msgType,
             data: msgData

@@ -99,10 +99,10 @@ export default {
       if (aspect > windowAspect) {
         // 扁图
         this.originWidth = this.box.offsetWidth
-        this.originHeight = this.box.offsetHeight / aspect
+        this.originHeight = Math.ceil(this.box.offsetHeight / aspect)
         startY = (this.box.offsetHeight - this.originHeight) / 2
       } else {
-        this.originWidth = this.box.offsetWidth * aspect
+        this.originWidth = Math.ceil(this.box.offsetWidth * aspect)
         this.originHeight = this.box.offsetHeight
         startX = (this.box.offsetWidth - this.originWidth) / 2
       }
@@ -161,11 +161,16 @@ export default {
       // this.context.scale(this.scale, this.scale)
     },
     rotateClockwise() {
-      // const img = document.getElementById(this.id)
-      let test = [[[0, 0, 0], [1, 1, 1], [2, 2, 2]],
-        [[3, 3, 3], [4, 4, 4], [5, 5, 5]],
-        [[6, 6, 6], [7, 7, 7], [8, 8, 8]]]
-      ImageProcess.rotate(test, 3, 3, true)
+      const img = document.getElementById(this.id)
+      console.info(this.originWidth, this.originHeight)
+      // let test = [[[0, 0, 0], [1, 1, 1], [2, 2, 2]],
+      //   [[3, 3, 3], [4, 4, 4], [5, 5, 5]],
+      //   [[6, 6, 6], [7, 7, 7], [8, 8, 8]]]
+      const data = ImageProcess.rotate(img, this.originWidth, this.originHeight, true)
+      // console.info(typeof (data))
+      // this.canvas.src = data.src
+      img.appendChild(data)
+      // this.context.drawImage(data, 0, 0)
     }
   }
 }

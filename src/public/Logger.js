@@ -1,7 +1,7 @@
 import log from 'electron-log'
 
 log.transports.console.format = '{h}:{i}:{s} [{level}] {text}'
-let logLevel = ['debug', 'info', 'warn', 'error']
+let logLevel = ['verb', 'debug', 'info', 'warn', 'error']
 let JLog = {}
 for (let level of logLevel) {
   JLog[level] = function() {

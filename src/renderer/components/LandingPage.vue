@@ -42,8 +42,8 @@ export default {
 <style scoped>
 .el-header {
   display: block;
-  background-color: #b3c0d1;
-  color: #333;
+  background-color: #333b46;
+  color: rgb(248, 241, 241);
   height: 30px !important;
 }
 .display{

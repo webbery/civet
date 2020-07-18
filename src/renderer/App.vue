@@ -14,10 +14,3 @@ export default {
   }
 }
 </script>
-
-<style>
-  /* CSS */
-.el-scrollbar__wrap {
-  overflow-x: hidden;
-}
-</style>

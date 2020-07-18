@@ -233,7 +233,7 @@ async function getImageInfoImpl(imageID) {
 
 async function categoryChain2code(chain, cate2indx, indx2cate) {
   // 将文本序列编码,如：文件夹1.子文件夹 --> 3.2
-  // console.info('chain', chain)
+  console.info('chain', chain)
   let categoryName = chain.split('/')
   if (!cate2indx) {
     cate2indx = await getOptional(KeyCategory2Index, {})
@@ -246,7 +246,7 @@ async function categoryChain2code(chain, cate2indx, indx2cate) {
   let sCode = ''
   for (let name of categoryName) {
     // console.info('add', name)
-    if (name === '') continue
+    if (!name || name === '') continue
     if (cate2indx[name] === undefined) {
       cate2indx[name] = maxID
       indx2cate[maxID] = name
@@ -274,7 +274,7 @@ async function code2categoryChain(code, indx2cate) {
 
 function makeCategoryChain(categoryName, categoryChain) {
   let chain = categoryName
-  if (categoryChain || categoryChain !== '') chain = categoryChain + '/' + categoryName
+  if (categoryChain !== undefined && categoryChain !== '') chain = categoryChain + '/' + categoryName
   return chain
 }
 

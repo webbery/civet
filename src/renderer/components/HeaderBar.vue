@@ -125,4 +125,20 @@ export default {
 .input-with-select .el-input-group__prepend {
   background-color: #fff;
 }
+.el-page-header__left {
+  display:inline;
+  padding-right: 5px;
+}
+.el-page-header__title {
+  display:inline;
+}
+.el-page-header__content {
+  display:inline;
+  font-size: large;
+  border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+  border-left-style: solid;
+  padding-left: 10px;
+}
 </style>
