@@ -9,6 +9,7 @@ let getOrCreateGPU = (function () {
 })()
 
 const rotateKernel = function(colors, width, height) {
+  // return colors[height - this.thread.y - 1][this.thread.z][width - this.thread.x - 1]
   const pixel = colors[width - this.thread.x - 1][this.thread.y]
   this.color(pixel[0] / 256, pixel[1] / 256, pixel[2] / 256, 1)
   // const pixel = colors[height - this.thread.y - 1][this.thread.z][width - this.thread.x - 1]

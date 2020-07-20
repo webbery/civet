@@ -60,6 +60,7 @@ function startRenderer () {
       logStats('Renderer', stats)
     })
 
+    console.info('[[[[', path.join(__dirname, '../'))
     const server = new WebpackDevServer(
       compiler,
       {
@@ -99,6 +100,7 @@ function startWorker () {
       logStats('Worker', stats)
     })
 
+    console.info('[[WORKER[[', path.join(__dirname, '../'))
     const server = new WebpackDevServer(
       compiler,
       {
