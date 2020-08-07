@@ -30,10 +30,10 @@
       ></el-input>
       <el-button v-else class="button-new-tag" size="mini" @click="showInput">添加标签</el-button>
     </fieldset>
-    <fieldset>
+    <!-- <fieldset>
       <legend class="title">分类</legend>
       <div>
-        <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz}}</IconTag>
+        <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz.name}}</IconTag>
         <el-popover
           placement="left"
           width="160"
@@ -46,7 +46,7 @@
           <el-button slot="reference" size="mini">+</el-button>
         </el-popover>
       </div>
-    </fieldset>
+    </fieldset> -->
     <fieldset>
       <legend class="title">基本信息</legend>
     <el-row class="desc">

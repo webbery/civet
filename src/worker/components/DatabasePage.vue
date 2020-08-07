@@ -126,7 +126,7 @@ export default {
       for (let snapIdx in snaps) {
         let img = {imageid: snapIdx, step: snaps[snapIdx].step, name: snaps[snapIdx].name}
         let info = await localStorage.getImageInfo(snapIdx)
-        console.info(info)
+        console.info('loadImages', info)
         img.tag = this.convert(info.tag)
         img.keyword = this.convert(info.keyword)
         img.clazz = this.convert(info.category)
@@ -149,8 +149,13 @@ export default {
     },
     async testAddImage() {
       const fs = require('fs')
+      const os = require('os')
       try {
         let fullpath = 'F:/Image/熔岩/jr-korpa-Ud32uVNR23g-unsplash.jpg'
+        console.info('plateform', os.platform())
+        if (os.platform() === 'darwin') {
+          fullpath = '/Users/v_yuanwenbin/Pictures/照片图库.photoslibrary/resources/proxies/derivatives/00/00/3/UNADJUSTEDNONRAW_thumb_3.jpg'
+        }
         const info = fs.statSync(fullpath)
         const parser = new ImageParser()
         let parse = util.promisify(parser.parse)

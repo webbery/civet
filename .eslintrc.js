@@ -25,6 +25,7 @@ module.exports = {
     'new-cap': 0,
     'no-extend-native': ["error", { "exceptions": ["Array"] }],
     // allow debugger during development
+    'no-eq-null': 0,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
   }
 }

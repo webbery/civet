@@ -208,11 +208,11 @@ async function getImageInfoImpl(imageID) {
   let image = await getOptional(imageID, null)
   if (image === null) return null
   // tag
-  if (image.tag !== null) {
+  if (image.tag != null) {
     const tagsName = await getKeyword(image.tag)
     image.tag = tagsName
   }
-  if (image.keyword !== null) {
+  if (image.keyword != null) {
     const keywords = await getKeyword(image.keyword)
     image.keyword = keywords
   }
@@ -339,9 +339,13 @@ export default {
     let img = await getOptional(imageID, null)
     // console.info('update tags', tags)
     const tagIndxes = await getKeywordIndx(tags)
-    console.info('tagIndexes', tagIndxes)
+    console.info('tagIndexes', tagIndxes, img.keyword)
     img.tag = tagIndxes
-    img.keyword = tagIndxes.concat(img.keyword)
+    if (img.keyword !== undefined) {
+      img.keyword = tagIndxes.concat(img.keyword)
+    } else {
+      img.keyword = tagIndxes
+    }
     await put(imageID, img)
 
     let allTags = await getOptional(KeyTag, {})
@@ -431,6 +435,7 @@ export default {
   },
   getImagesSnap: async () => {
     let imagesSnap = await getOptional(KeyImageIndexes, {})
+    console.info('getImagesSnap', imagesSnap)
     return imagesSnap
   },
   updateImage: async (image) => {},
@@ -439,27 +444,32 @@ export default {
     delete snaps[imageID]
     await put(KeyImageIndexes, snaps)
     let image = await getOptional(imageID, {})
+    console.info('removeImage', image)
     let allTags = await getOptional(KeyTag, {})
     const keywords = image.keyword
-    // 移除keyword索引
-    let rewordIndx = await getOptional(KeyRewordIndex, {})
-    for (let word of keywords) {
-      console.info('keyword', word, rewordIndx)
-      rewordIndx[word].remove(imageID)
-      if (rewordIndx[word].length === 0) delete rewordIndx[word]
-      console.info('keyword 2', word)
-      allTags[word].remove(imageID)
-      if (allTags[word].length === 0) delete allTags[word]
+    if (keywords != null && keywords.length !== 0) {
+      // 移除keyword索引
+      let rewordIndx = await getOptional(KeyRewordIndex, {})
+      for (let word of keywords) {
+        console.info('keyword', word, rewordIndx)
+        rewordIndx[word].remove(imageID)
+        if (rewordIndx[word].length === 0) delete rewordIndx[word]
+        console.info('keyword 2', word)
+        allTags[word].remove(imageID)
+        if (allTags[word].length === 0) delete allTags[word]
+      }
+      await put(KeyRewordIndex, rewordIndx)
     }
-    await put(KeyRewordIndex, rewordIndx)
     // 移除分类记录
     const category = image.category
-    let categoryTable = await getOptional(KeyCategory, {})
-    for (let c of category) {
-      categoryTable[c].remove(imageID)
-      if (categoryTable[c].length === 0) delete categoryTable[c]
+    if (category != null) {
+      let categoryTable = await getOptional(KeyCategory, {})
+      for (let c of category) {
+        categoryTable[c].remove(imageID)
+        if (categoryTable[c].length === 0) delete categoryTable[c]
+      }
+      await put(KeyCategory, categoryTable)
     }
-    await put(KeyCategory, categoryTable)
     // 移除图像记录
     await del(imageID)
   },
