@@ -1,7 +1,7 @@
 <template>
   <span>
     <i :class="icon"></i>
-    <span class="text" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick">{{label}}</span>
+    <span class="class-name" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick">{{label}}</span>
     <input v-if="enableInput" @blur="onSave()" v-model="folderName" ref="folderInput"/>
   </span>
 </template>

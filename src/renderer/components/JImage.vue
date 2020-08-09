@@ -1,15 +1,10 @@
 <template>
   <div :id="boxid" class="image-container" :class="interact?activeClasses[activeIndex]:''"
-    @mouseleave="interact&&onMouseLeave" @mouseover="interact&&onMouseOver" @mousemove="interact&&onMouseMove"
-    @mousedown="interact&&onMouseDown" @mouseup="interact&&onMouseUp" @mousewheel="interact&&onMouseWheel">
-    <div v-if="scale>1">
+    @mouseleave="onMouseLeave" @mouseover="onMouseOver" @mousemove="onMouseMove"
+    @mousedown="onMouseDown" @mouseup="onMouseUp" @mousewheel="onMouseWheel">
       <el-scrollbar >
       <canvas :id="id" ></canvas>
-    </el-scrollbar>
-  </div>
-  <div v-else>
-    <canvas :id="id" ></canvas>
-  </div>
+      </el-scrollbar>
   </div>
 </template>
 
@@ -41,7 +36,10 @@ export default {
       imagewidth: 0,
       imageheight: 0,
       box: null,
-      scale: 1,
+      scaleValue: 1,
+      centerX: 0,
+      centerY: 0,
+      roateValue: 0,
       mouseStatus: 0 // 0-悬浮,1-按下,
     }
   },
@@ -94,8 +92,7 @@ export default {
       // console.info(this.originWidth, this.box.offsetWidth)
       let aspect = this.imagewidth / this.imageheight
       let windowAspect = this.box.offsetWidth / this.box.offsetHeight
-      let startX = 0
-      let startY = 0
+      let [startX, startY] = [0, 0]
       if (aspect > windowAspect) {
         // 扁图
         this.originWidth = this.box.offsetWidth
@@ -106,51 +103,74 @@ export default {
         this.originHeight = this.box.offsetHeight
         startX = (this.box.offsetWidth - this.originWidth) / 2
       }
+      this.centerX = this.box.offsetWidth / 2
+      this.centerY = this.box.offsetHeight / 2
       // console.info(startX, startY, this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight)
+      this.context.translate(startX, startY)
       // this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
-      // this.context.drawImage(this.image, startX - startX, startY - startY, this.originWidth, this.originHeight)
-      this.context.drawImage(this.image, startX, startY, this.originWidth, this.originHeight)
+      this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
+      this.context.setTransform(1, 0, 0, 1, 0, 0)
+    },
+    makeTransform() {
+      const theta = this.roateValue * Math.PI / 180
+      const dsin = Math.sin(theta)
+      const dcos = Math.cos(theta)
+      let dx = this.centerX - this.originWidth * this.scaleValue / 2
+      let dy = this.centerY - this.originHeight * this.scaleValue / 2
+      this.context.setTransform(
+        this.scaleValue * dcos, -dsin,
+        dsin, this.scaleValue * dcos,
+        (1 - dcos) * this.centerX + dsin * this.centerY + dx, (1 - dcos) * this.centerY - dsin * this.centerX + dy)
     },
     moveViewport() {},
     scaleImage(scale) {
       if (scale < 0.2) scale = 0.2
       if (scale > 2) scale = 2
-      let curWidth = this.imagewidth * scale
-      let curHeight = this.imageheight * scale
-      let startX = (this.box.offsetWidth - curWidth) / 2
-      let startY = (this.box.offsetHeight - curHeight) / 2
-      log.info(startX, startY)
+      this.scaleValue = scale
       this.context.clearRect(0, 0, this.box.offsetWidth, this.box.offsetHeight)
-      this.context.drawImage(this.image, startX, startY, curWidth, curHeight)
+
+      this.makeTransform()
+      this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
     },
     resetViewport() {},
     onMouseLeave() {
+      if (this.interact === false) return
       this.mouseStatus = 0
     },
     onMouseOver() {
+      if (this.interact === false) return
       if (this.mouseStatus === 0) {
         this.activeIndex = 0
       }
     },
-    onMouseMove() {
+    onMouseMove(ev) {
+      if (this.interact === false) return
       if (this.mouseStatus === 1) {
         this.activeIndex = 1
+        if (this.scaleValue > 1) {
+          this.context.clearRect(0, 0, this.box.offsetWidth, this.box.offsetHeight)
+          this.context.translate(ev.movementX, ev.movementY)
+          this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
+          console.info(this.context.transform)
+        }
       }
     },
     onMouseUp() {
+      if (this.interact === false) return
       this.activeIndex = 0
       this.mouseStatus = 0
     },
     onMouseDown() {
-      if (this.scale === 1) return
+      if (this.interact === false) return
       this.activeIndex = 1
       this.mouseStatus = 1
-      console.info(window.getComputedStyle(this.$refs.container).height)
+      // console.info(window.getComputedStyle(this.$refs.container).height)
     },
     onMouseWheel(ev) {
       // let widthOffset = 0.05 * this.originWidth
       // let heightOffset = 0.05 * this.originHeight
-      // console.info(ev.deltaY, this.scale)
+      if (this.interact === false) return
+      console.info(ev.deltaY, this.scaleValue)
       if (ev.deltaY > 0) {
         // 缩小
         // this.scaleViewport(-widthOffset, -heightOffset)
@@ -162,13 +182,26 @@ export default {
     },
     rotateClockwise() {
       // const img = document.getElementById(this.id)
-      console.info(this.originWidth, this.originHeight)
       // let test = [[[0, 0, 0], [1, 1, 1], [2, 2, 2]],
       //   [[3, 3, 3], [4, 4, 4], [5, 5, 5]],
       //   [[6, 6, 6], [7, 7, 7], [8, 8, 8]]]
-      this.context.rotate(Math.PI / 2)
+      // const theta = 2 * Math.PI / 180
+      // const dsin = Math.sin(theta)
+      // const dcos = Math.cos(theta)
+      this.roateValue = 20
+      this.makeTransform()
+      this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
+      // console.info('rotateClockwise', this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight, dx, dy)
+      // this.box.offsetWidth = this.box.offsetWidth ^ this.box.offsetHeight
+      // this.box.offsetHeight = this.box.offsetWidth ^ this.box.offsetHeight
       // const data = ImageProcess.rotate(img, this.originWidth, this.originHeight, true)
       // console.info(typeof (data))
+      // let [ a1, a2 ] = [this.box.offsetWidth, this.box.offsetHeight]
+      // this.box.offsetWidth = a2
+      // this.box.offsetHeight = a1
+      // let [ b1, b2 ] = [this.originWidth, this.originHeight]
+      // this.originWidth = b2
+      // this.originHeight = b1
       // this.canvas.src = data.src
       // img.appendChild(data)
       // this.context.drawImage(data, 0, 0)

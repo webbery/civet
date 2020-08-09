@@ -2,10 +2,12 @@ module.exports = {
   root: true,
   parser: 'babel-eslint',
   parserOptions: {
+    ecmaVersion: 6,
     sourceType: 'module'
   },
   env: {
     browser: true,
+    es6: true,
     node: true
   },
   extends: 'standard',
@@ -26,6 +28,16 @@ module.exports = {
     'no-extend-native': ["error", { "exceptions": ["Array"] }],
     // allow debugger during development
     'no-eq-null': 0,
+    "prefer-destructuring": ["warn", {
+      "VariableDeclarator": {
+        "array": true,
+        "object": false
+      },
+      "AssignmentExpression": {
+        "array": true,
+        "object": false
+      }
+    }],
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
   }
 }

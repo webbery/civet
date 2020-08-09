@@ -9,7 +9,7 @@
       <span class="el-icon-caret-right caret-hidden" v-if="(!item.type || item.type==='clz') && !item.children"></span>
       <IconFolder v-if="!item.type || item.type==='clz'" :icon="item.icon?item.icon:'el-icon-folder'" :label="item.label" :parent="chain"></IconFolder>
       <div v-if="item.children && (expandTree[idx])" class="children">
-        <FolderTree :data="item.children" :chain="chain + '.' +item.label"></FolderTree>
+        <FolderTree :data="item.children" :parent="(parent===undefined ? item.label : parent + '/' +item.label)"></FolderTree>
       </div>
     </div>
   </div>
@@ -40,7 +40,7 @@ export default {
   },
   props: {
     data: Array,
-    chain: String
+    parent: String
   },
   methods: {
     onExpand: function(idx) {
@@ -53,7 +53,8 @@ export default {
       // this.expandTree[idx] = false
     },
     onPopMenu: function(event, root, tag) {
-      this.selection = event.toElement
+      this.selection = event.toElement.innerText
+      console.info(this.parent)
       console.info('pop menu:', this.selection)
       event.stopPropagation()
       event.preventDefault()
@@ -69,8 +70,13 @@ export default {
     onAddClass: function (name) {
       console.info(name)
     },
-    onDeleteClass: function (root) {
-      console.info(root)
+    onDeleteClass: function (name) {
+      let chain = this.selection
+      if (this.parent !== undefined) {
+        chain = this.parent + '/' + this.selection
+      }
+      console.info('delete', chain)
+      this.$store.dispatch('removeCategory', chain)
     }
   }
 }

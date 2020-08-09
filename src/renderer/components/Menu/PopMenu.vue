@@ -177,7 +177,6 @@
       },
       callback (indexList) {
         // this.$emit('ecmcb', indexList)
-        console.info(indexList)
         const idx = indexList[0]
         const item = this.list[idx]
         item.cb(item.text)

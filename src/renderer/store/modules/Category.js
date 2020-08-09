@@ -35,7 +35,7 @@ const getters = {
 function isCategoryExist(state, name, parents) {
   let aParents = []
   if (parents) {
-    aParents = parents.split('.')
+    aParents = parents.split('/')
   }
   let children = state.category
   for (let childName of aParents) {
@@ -93,7 +93,7 @@ const mutations = {
     if (state.category === null) state.category = []
     let parent = state.category
     if (chain) {
-      let chainNames = chain.split('.')
+      let chainNames = chain.split('/')
       for (let item of chainNames) {
         for (let child of parent) {
           if (child.name === item && child.type === 'clz') {
@@ -113,7 +113,7 @@ const mutations = {
   },
   addImage2Category(state, data) {
     console.info('addImage2Category', data)
-    const parents = data['parent'].split('.')
+    const parents = data['parent'].split('/')
     let node = getNode(state, parents)
     if (node === null) return
     if (!node['children']) node['children'] = []
@@ -125,7 +125,7 @@ const mutations = {
   },
   removeImageFromCategory(state, data) {
     console.info('removeImageFromCategory', data)
-    const parents = data['parent'].split('.')
+    const parents = data['parent'].split('/')
     console.info(parents)
     let node = getNode(state, parents)
     let children = node['children']
@@ -135,6 +135,19 @@ const mutations = {
         break
       }
     }
+  },
+  removeCategory(state, chain) {
+    const parents = chain.split('/')
+    let node = getNode(state, parents)
+    console.info('remove category', node)
+    // let children = node['children']
+    // 查看分类下面是否有图片，有就将它们对应的分类移除
+    // for (let idx = children.length; idx >= 0; idx--) {
+    //   if (children[idx].name === data.name && children[idx].type === 'img') {
+    //     children.splice(idx, 1)
+    //   }
+    // }
+    // 最后移除所有分类
   }
 }
 
@@ -153,6 +166,9 @@ const actions = {
   },
   removeImageFromCategory({ commit }, data) {
     commit('removeImageFromCategory', data)
+  },
+  removeCategory({ commit }, chain) {
+    commit('removeCategory', chain)
   }
 }
 
