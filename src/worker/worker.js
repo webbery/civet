@@ -64,6 +64,7 @@ const ReplyType = {
   REPLY_IMAGES_INFO: 'replyImagesInfo',
   REPLY_IMAGE_INFO: 'replyImageInfo',
   REPLY_ALL_TAGS: 'replyAllTags',
+  REPLY_ALL_TAGS_WITH_IMAGES: 'replyAllTagsWithImages',
   REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
   REPLAY_ALL_CATEGORY: 'replyAllCategory',
   REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
@@ -186,6 +187,11 @@ const messageProcessor = {
   'getAllTags': async (data) => {
     let allTags = await localStorage.getTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
+  },
+  'getAllTagsWithImages': async (data) => {
+    let allTags = await localStorage.getTagsWithImages()
+    console.info('allTags', allTags)
+    reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
   'findImageWithKeyword': async (keywords) => {
     let allID = await localStorage.findImageWithKeyword(keywords)

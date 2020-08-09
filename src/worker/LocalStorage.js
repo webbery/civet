@@ -517,6 +517,16 @@ export default {
     console.info('tags: ', tags)
     return tags
   },
+  getTagsWithImages: async () => {
+    let tagIDs = await getOptional(KeyTag, {})
+    let tags = []
+    const words = await getKeyword(Object.keys(tagIDs))
+    for (let idx = 0; idx < words.length; ++idx) {
+      const item = {label: words[idx], id: tagIDs[idx], type: 'tag'}
+      tags.push(item)
+    }
+    return tags
+  },
   addTag: async (imageID, tag) => {
     let tagIDs = await getOptional(KeyTag, {})
     let untags = await getOptional(KeyUnTag, [])

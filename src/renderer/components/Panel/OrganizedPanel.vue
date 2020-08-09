@@ -86,6 +86,7 @@ export default {
       return this.$store.getters.category
     },
     tags() {
+      console.info('1 comupted tags: ', this.$store.getters.tags)
       return this.$store.getters.tags
     }
   },
@@ -134,14 +135,16 @@ export default {
     async init() {
       this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
       // console.info('----', this.directoryData)
-      const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
-      // console.info('get category', folders)
-      const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
-      this.headOptions[1].value = uncategoryImages.length
+      // const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
+      // // console.info('get category', folders)
+      // const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
+      // this.headOptions[1].value = uncategoryImages.length
       const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
       this.headOptions[2].value = untagImages.length
-      // console.info(uncategoryImages)
-      this.$store.dispatch('setCategory', folders)
+      const allTags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS_WITH_IMAGES)
+      console.info('all tag', allTags)
+      // this.$store.dispatch('setCategory', allTags)
+      this.$store.dispatch('setTags', allTags)
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)

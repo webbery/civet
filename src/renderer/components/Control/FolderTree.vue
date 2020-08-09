@@ -32,8 +32,9 @@ export default {
     return {
       expandTree: expandTree,
       menus: [
-        {text: '添加子类', cb: this.onAddClass},
-        {text: '删除', cb: this.onDeleteClass}
+        // {text: '添加子类', cb: this.onAddClass},
+        {text: '重命名', cb: this.onChangeName},
+        {text: '删除', cb: this.onDeleteItem}
       ],
       selection: null
     }
@@ -70,13 +71,17 @@ export default {
     onAddClass: function (name) {
       console.info(name)
     },
-    onDeleteClass: function (name) {
+    onDeleteItem: function (name) {
       let chain = this.selection
       if (this.parent !== undefined) {
         chain = this.parent + '/' + this.selection
       }
       console.info('delete', chain)
-      this.$store.dispatch('removeCategory', chain)
+      this.$store.dispatch('removeTags', chain)
+      // this.$store.dispatch('removeCategory', chain)
+    },
+    onChangeName: function (newName) {
+      console.info(newName)
     }
   }
 }
