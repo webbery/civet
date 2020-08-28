@@ -6,24 +6,12 @@
 
 ### 下载
 
-开发进度
-```mermaid
-gantt
-title 进度
-dateFormat  YYYY-MM-DD
-section 导入模块
-导入文件夹     :a1, 2020-05-16, 150d
-导入文件     :after a1, 30d
-section 标签模块
-标签管理     :a1, 2019-01-01, 150d
-添加标签     :after a1, 30d
-section 搜索模块
-关键字搜索     :a1, 2019-01-01, 150d
-色彩搜索     :after a1, 30d
-section 预览模块
-图像预览     :a1, 2019-01-01, 150d
-图像缩放/移动/旋转     :after a1, 30d
-```
+开发进度  
+![80%](https://progress-bar.dev/85/?title=导入模块)
+![50%](https://progress-bar.dev/65/?title=标签模块)
+![50%](https://progress-bar.dev/32/?title=搜索模块)
+![50%](https://progress-bar.dev/73/?title=预览模块)
+![50%](https://progress-bar.dev/70/?title=存储模块)
 
 ### 类似软件对比
 |  软件   | 开发平台  | 本地存储  | 图片支持 | Web插件 | 云盘支持 | 智能检索 | 协议 |
