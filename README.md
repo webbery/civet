@@ -6,14 +6,31 @@
 
 ### 下载
 
-开发中
+开发进度
+```mermaid
+gantt
+title 进度
+dateFormat  YYYY-MM-DD
+section 导入模块
+导入文件夹     :a1, 2020-05-16, 150d
+导入文件     :after a1, 30d
+section 标签模块
+标签管理     :a1, 2019-01-01, 150d
+添加标签     :after a1, 30d
+section 搜索模块
+关键字搜索     :a1, 2019-01-01, 150d
+色彩搜索     :after a1, 30d
+section 预览模块
+图像预览     :a1, 2019-01-01, 150d
+图像缩放/移动/旋转     :after a1, 30d
+```
 
 ### 类似软件对比
 |  软件   | 开发平台  | 本地存储  | 图片支持 | Web插件 | 云盘支持 | 智能检索 | 协议 |
 | :----: | :----:   |  :----: | :----: | :----: | :----: | :----: | :----: |
 | Civet  | Electron | LevelDB |  | 暂无 | 暂无 | 暂无 | 开源MIT
 | Eagle  | Electron | Json + 图片拷贝 |  | 有 | | | 私有
-| Billfish  | Qt | Sqlite + 图片拷贝/索引 |  | 暂无 | | | 私有
+| Billfish  | Qt | Sqlite + 图片拷贝/索引 |  | Chrome | | | 私有
 
 ### 目录
 
@@ -40,6 +57,10 @@
 
 如有任何使用上的问题或建议请反馈到 https://github.com/webbery/civet/issues
 
+### 后续计划
+#### 1. 底层缩略图预览优化
+#### 2. 图片读取功能插件化
+#### 3. 检索模块插件化
 ---
 
 开发者名单：webberg
