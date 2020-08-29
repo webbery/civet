@@ -7,10 +7,10 @@
   "main": "./dist/electron/main.js",
   "appId": "org.picstation.electron-vue",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder",
+    "build": "npm run build:emscripten && node .electron-vue/build.js && electron-builder",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
-    "build:emscripten": "./caxios.sh",
+    "build:emscripten": "node ./caxios/build.js",
     "dev": "node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && mocha test/e2e",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src test",

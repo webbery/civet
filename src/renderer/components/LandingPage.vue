@@ -24,6 +24,7 @@ import ViewPanel from '@/components/ViewPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/TagPanel'
 import ConfigPanel from '@/components/ConfigPanel'
+import caxios from '@/../generated/caxios'
 
 export default {
   name: 'landing-page',
@@ -35,7 +36,10 @@ export default {
     TagPanel,
     ConfigPanel
   },
-  mounted() {}
+  async mounted() {
+    const instance = await caxios()
+    instance.sayHello()
+  }
 }
 </script>
 
