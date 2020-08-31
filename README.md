@@ -7,11 +7,11 @@
 ### 下载
 
 开发进度  
-![80%](https://progress-bar.dev/85/?title=导入模块)
-![50%](https://progress-bar.dev/65/?title=标签模块)
-![50%](https://progress-bar.dev/32/?title=搜索模块)
-![50%](https://progress-bar.dev/73/?title=预览模块)
-![50%](https://progress-bar.dev/70/?title=存储模块)
+![85%](https://progress-bar.dev/85/?title=导入模块)
+![65%](https://progress-bar.dev/65/?title=标签模块)
+![32%](https://progress-bar.dev/32/?title=搜索模块)
+![73%](https://progress-bar.dev/73/?title=预览模块)
+![70%](https://progress-bar.dev/70/?title=存储模块)
 
 ### 类似软件对比
 |  软件   | 开发平台  | 本地存储  | 图片支持 | Web插件 | 云盘支持 | 智能检索 | 协议 |
