@@ -22,6 +22,7 @@ const cmd = COMPILER + ' ' + OPTIMIZE + ' ' +
             '-s EXPORT_ES6=1' + ' ' + 
             '-s MODULARIZE=1' + ' ' + 
             '-s USE_ES6_IMPORT_META=0' + ' ' + 
+            '-s USE_BOOST_HEADERS=1' + ' ' + 
             '--no-entry' + ' ' + 
             '-o ' + DIST + OBJS + ' ' + SRC
 

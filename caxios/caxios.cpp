@@ -1,4 +1,5 @@
 #include <emscripten/bind.h>
+#include "memory/SharedMemory.h"
 
 using namespace emscripten;
 
