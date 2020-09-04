@@ -140,14 +140,15 @@ const mutations = {
     const parents = chain.split('/')
     let node = getNode(state, parents)
     console.info('remove category', node)
-    // let children = node['children']
+    let children = node['children']
     // 查看分类下面是否有图片，有就将它们对应的分类移除
-    // for (let idx = children.length; idx >= 0; idx--) {
-    //   if (children[idx].name === data.name && children[idx].type === 'img') {
-    //     children.splice(idx, 1)
-    //   }
-    // }
+    for (let idx = children.length - 1; idx >= 0; idx--) {
+      if (children[idx].type === 'img') {
+        children.splice(idx, 1)
+      }
+    }
     // 最后移除所有分类
+    // delete node
   }
 }
 

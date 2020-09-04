@@ -636,6 +636,9 @@ export default {
     delete category[code]
     await put(KeyCategory, category)
   },
+  changeCategoryName: async (oldName, newName) => {
+    console.info('oldName:', oldName, ', newName:', newName)
+  },
   getAllCategory: async () => {
     let data = {}
     let category = await getOptional(KeyCategory, {})

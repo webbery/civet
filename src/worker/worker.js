@@ -216,6 +216,9 @@ const messageProcessor = {
   'updateImageCategory': async (data) => {
     await localStorage.updateImageCatergory(data.imageID, data.category)
   },
+  'updateCategoryName': async (oldName, newName) => {
+    await localStorage.changeCategoryName(oldName, newName)
+  },
   'reInitDB': (data) => {
     localStorage.reloadDB(data)
     reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)

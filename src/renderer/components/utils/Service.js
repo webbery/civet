@@ -85,5 +85,6 @@ export default{
   FIND_IMAGES_BY_KEYWORD: 'findImageWithKeyword',
   ON_IMAGE_UPDATE: 'updateImageList',
   UPDATE_IMAGE_CATEGORY: 'updateImageCategory',
+  UPDATE_CATEGORY_NAME: 'updateCategoryName',
   REINIT_DB: 'reInitDB'
 }

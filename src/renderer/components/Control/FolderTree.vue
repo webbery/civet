@@ -1,6 +1,11 @@
 <template>
   <div @contextmenu="onPopMenu($event,$root)">
     <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu"></PopMenu>
+    <!-- <ul id="mytable">
+    <li data-depth="0" class="collapse level0">
+        <span class="toggle collapse"></span><span>Item 1</span>
+    </li>
+    </ul> -->
     <div v-for="(item, idx) of data" :key="idx">
       <!-- {{item}} -->
       <span v-if="item.type && item.type!='clz'" class="img-name">{{item.label}}</span>
@@ -17,6 +22,7 @@
 <script>
 import IconFolder from './IconFolder'
 import PopMenu from '@/components/Menu/PopMenu'
+import Service from '@/components/utils/Service'
 
 export default {
   name: 'FolderTree',
@@ -77,11 +83,12 @@ export default {
         chain = this.parent + '/' + this.selection
       }
       console.info('delete', chain)
-      this.$store.dispatch('removeTags', chain)
-      // this.$store.dispatch('removeCategory', chain)
+      // this.$store.dispatch('removeTags', chain)
+      this.$store.dispatch('removeCategory', chain)
     },
     onChangeName: function (newName) {
-      console.info(newName)
+      console.info(this.selection, newName)
+      this.$ipcRenderer.send(Service.UPDATE_CATEGORY_NAME, {oldname: this.selection, newname: newName})
     }
   }
 }

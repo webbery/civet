@@ -5,13 +5,13 @@
         <el-scrollbar style="height:95vh;">
           <table>
             <tr class="item" @click="handleResourceClick(headOptions[0])"><i :class="headOptions[0].icon"></i><td>全部</td><td /></tr>
-            <!-- <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{headOptions[1].value}}</td></tr> -->
+            <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{headOptions[1].value}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{headOptions[2].value}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
           </table>
           <el-row type="flex">
-          <el-col :span="22"><fieldset class="hor-line"><legend class="inner">标签</legend></fieldset></el-col>
-          <!-- <el-col :span="2"><button class="noselection" @click="onAddFolder()">+</button></el-col> -->
+          <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类</legend></fieldset></el-col>
+          <el-col :span="2"><button class="noselection" @click="onAddFolder()">+</button></el-col>
           </el-row>
           <div>
           <FolderTree :data="category"></FolderTree>
@@ -135,16 +135,16 @@ export default {
     async init() {
       this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
       // console.info('----', this.directoryData)
-      // const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
+      const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
       // // console.info('get category', folders)
-      // const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
-      // this.headOptions[1].value = uncategoryImages.length
+      const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
+      this.headOptions[1].value = uncategoryImages.length
       const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
       this.headOptions[2].value = untagImages.length
-      const allTags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS_WITH_IMAGES)
-      console.info('all tag', allTags)
-      // this.$store.dispatch('setCategory', allTags)
-      this.$store.dispatch('setTags', allTags)
+      // const allTags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS_WITH_IMAGES)
+      // console.info('all tag', allTags)
+      this.$store.dispatch('setCategory', folders)
+      // this.$store.dispatch('setTags', allTags)
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)
