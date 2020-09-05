@@ -25,3 +25,9 @@ new Vue({
   store,
   template: '<App/>'
 }).$mount('#app')
+
+global.invoke_from_c = function (msg, val) {
+  console.info('======== INVOKE FROM C BEGIN ========')
+  console.info(msg, val)
+  console.info('======== INVOKE FROM C END ========')
+}

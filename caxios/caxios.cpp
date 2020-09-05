@@ -1,13 +1,16 @@
-#include <emscripten/bind.h>
-#include "memory/SharedMemory.h"
+#include "caxios.h"
+#include <iostream>
 
-using namespace emscripten;
+namespace caxios {
+  CAxios::CAxios() {
+    std::cout<< "CAxios()"<<std::endl;
+  }
 
-int say_hello() {
-  printf("Hello from your wasm module\n");
-  return 0;
-}
+  CAxios::~CAxios() {
+    std::cout<< "~CAxios()"<<std::endl;
+  }
 
-EMSCRIPTEN_BINDINGS(caxios) {
-  function("sayHello", &say_hello);
+  void CAxios::Release() {
+    std::cout<< "CAxios::Release()"<<std::endl;
+  }
 }
