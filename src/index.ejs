@@ -9,11 +9,6 @@
         require('module').globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
       </script>
     <% } %>
-    <style>
-      .el-scrollbar__wrap {
-        overflow-x: hidden;
-      }
-    </style>
   </head>
   <body style="overflow:hidden">
     <div id="app"></div>
@@ -25,5 +20,10 @@
     <% } %>
 
     <!-- webpack builds are automatically injected -->
+    <style>
+      .el-scrollbar__wrap {
+        overflow-x: hidden;
+      }
+      </style>
   </body>
 </html>

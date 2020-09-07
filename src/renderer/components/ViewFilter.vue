@@ -11,14 +11,14 @@
     </el-option>
   </el-select>
   </span>
-  <el-select v-model="clazz" clearable placeholder="分类" size="mini">
+  <!-- <el-select v-model="clazz" clearable placeholder="分类" size="mini">
     <el-option
       v-for="(item, idx) in clazz"
       :key="idx"
       :label="item"
       :value="item">
     </el-option>
-  </el-select>
+  </el-select> -->
   </div>
 </template>
 
@@ -40,7 +40,7 @@ export default {
       log.info(this.tags)
     },
     onTagSelectChanged(item) {
-      log.info('onTagSelectChanged', item)
+      this.$store.dispatch('siftByTag', item)
       this.$router.push({path: '/query', query: {name: '标签“' + item + '”', type: 'tag'}})
     }
   }

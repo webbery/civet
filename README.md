@@ -6,14 +6,19 @@
 
 ### 下载
 
-开发中
+开发进度  
+![85%](https://progress-bar.dev/85/?title=导入模块)
+![65%](https://progress-bar.dev/65/?title=标签模块)
+![32%](https://progress-bar.dev/32/?title=搜索模块)
+![73%](https://progress-bar.dev/73/?title=预览模块)
+![70%](https://progress-bar.dev/70/?title=存储模块)
 
 ### 类似软件对比
 |  软件   | 开发平台  | 本地存储  | 图片支持 | Web插件 | 云盘支持 | 智能检索 | 协议 |
 | :----: | :----:   |  :----: | :----: | :----: | :----: | :----: | :----: |
 | Civet  | Electron | LevelDB |  | 暂无 | 暂无 | 暂无 | 开源MIT
 | Eagle  | Electron | Json + 图片拷贝 |  | 有 | | | 私有
-| Billfish  | Qt | Sqlite + 图片拷贝 |  | 暂无 | | | 私有
+| Billfish  | Qt | Sqlite + 图片拷贝/索引 |  | Chrome | | | 私有
 
 ### 目录
 
@@ -40,6 +45,10 @@
 
 如有任何使用上的问题或建议请反馈到 https://github.com/webbery/civet/issues
 
+### 后续计划
+#### 1. 底层缩略图预览优化
+#### 2. 图片读取功能插件化
+#### 3. 检索模块插件化
 ---
 
 开发者名单：webberg

@@ -1,4 +1,5 @@
 import util from 'util'
+import Log from '@/../public/Logger'
 
 const { ipcRenderer } = require('electron')
 
@@ -11,6 +12,7 @@ const replyMessageMap = {
   'getImagesInfo': 'replyImagesInfo',
   'getImageInfo': 'replyImageInfo',
   'getAllTags': 'replyAllTags',
+  'getAllTagsWithImages': 'replyAllTagsWithImages',
   'findImageWithKeyword': 'replyFindImageResult',
   'getAllCategory': 'replyAllCategory',
   'getUncategoryImages': 'replyUncategoryImages',
@@ -28,7 +30,7 @@ let getServiceInstance = (function() {
       hasInited = true
       service = {
         send: (msgType, msgData) => {
-          console.info('message-from-renderer: type=' + msgType + ', data=' + msgData)
+          Log.info('message-from-renderer: type=' + msgType + ', data', msgData)
           ipcRenderer.send('message-from-renderer', {
             type: msgType,
             data: msgData
@@ -71,6 +73,7 @@ export default{
   GET_IMAGES_INDEXES: 'getImagesIndex',
   GET_IMAGES_DIRECTORY: 'getImagesWithDirectoryFormat',
   GET_ALL_TAGS: 'getAllTags',
+  GET_ALL_TAGS_WITH_IMAGES: 'getAllTagsWithImages',
   GET_ALL_CATEGORY: 'getAllCategory',
   GET_UNCATEGORY_IMAGES: 'getUncategoryImages',
   GET_UNTAG_IMAGES: 'getUntagImages',
@@ -82,5 +85,6 @@ export default{
   FIND_IMAGES_BY_KEYWORD: 'findImageWithKeyword',
   ON_IMAGE_UPDATE: 'updateImageList',
   UPDATE_IMAGE_CATEGORY: 'updateImageCategory',
+  UPDATE_CATEGORY_NAME: 'updateCategoryName',
   REINIT_DB: 'reInitDB'
 }

@@ -10,7 +10,7 @@
             <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
           </table>
           <el-row type="flex">
-          <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类文件夹</legend></fieldset></el-col>
+          <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类</legend></fieldset></el-col>
           <el-col :span="2"><button class="noselection" @click="onAddFolder()">+</button></el-col>
           </el-row>
           <div>
@@ -19,21 +19,21 @@
           </div>
         </el-scrollbar>
       </el-tab-pane>
-      <el-tab-pane label="本地目录" name="direcories" class="directory" >
+      <!-- <el-tab-pane label="本地目录" name="direcories" class="directory" >
         <el-scrollbar style="height:90vh;">
           <el-tree :data="directoryData"></el-tree>
         </el-scrollbar>
-      </el-tab-pane>
+      </el-tab-pane> -->
     </el-tabs>
   </div>
 </template>
 
 <script>
-import bus from './utils/Bus'
+import bus from '../utils/Bus'
 import JString from '@/../public/String'
 import Service from '@/components/utils/Service'
-import FolderTree from '@/components/FolderTree'
-import IconFolder from '@/components/IconFolder'
+import FolderTree from '@/components/Control/FolderTree'
+import IconFolder from '@/components/Control/IconFolder'
 
 export default {
   name: 'organized-panel',
@@ -82,7 +82,12 @@ export default {
       return this.$store.getters.classesName
     },
     category() {
+      console.info('classes', this.$store.getters.category)
       return this.$store.getters.category
+    },
+    tags() {
+      console.info('1 comupted tags: ', this.$store.getters.tags)
+      return this.$store.getters.tags
     }
   },
   mounted() {
@@ -131,13 +136,15 @@ export default {
       this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
       // console.info('----', this.directoryData)
       const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
-      // console.info('get category', folders)
+      // // console.info('get category', folders)
       const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
       this.headOptions[1].value = uncategoryImages.length
       const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
       this.headOptions[2].value = untagImages.length
-      // console.info(uncategoryImages)
+      // const allTags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS_WITH_IMAGES)
+      // console.info('all tag', allTags)
       this.$store.dispatch('setCategory', folders)
+      // this.$store.dispatch('setTags', allTags)
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)

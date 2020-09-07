@@ -34,9 +34,11 @@ function createWindow () {
     allowRunningInsecureContent: true,
     height: 563,
     useContentSize: true,
-    width: 1000
+    width: 1000,
+    show: false
   })
 
+  mainWindow.maximize()
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
@@ -51,8 +53,11 @@ function createWindow () {
   workerWindow.on('closed', () => {
     console.log('background window closed')
   })
-  workerWindow.loadFile(workerURL)
-  // workerWindow.loadFile(workerURL)
+  if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
+  else workerWindow.loadURL(workerURL)
+  // mainWindow.openDevTools()
+  // workerWindow.openDevTools()
+  mainWindow.show()
 }
 
 app.on('window-all-closed', async () => {

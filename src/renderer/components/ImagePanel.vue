@@ -1,9 +1,9 @@
 <template>
   <div class="image-panel">
-      <JImage :src="image.path"></JImage>
-      <!-- <el-card :body-style="{ padding: '0px' }">
-        <el-image :src="image.path" lazy class="preview" @click="onImageClick($event, image)"/>
-      </el-card> -->
+      <JImage :src="image.path" ref="display"></JImage>
+      <div>
+        <button @click="onRoate90">Rotate90</button>
+      </div>
   </div>
 </template>
 
@@ -26,6 +26,11 @@ export default {
   mounted() {
     this.image = this.$route.params
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '图片显示', cmd: 'display'})
+  },
+  methods: {
+    onRoate90() {
+      this.$refs.display.rotateClockwise()
+    }
   }
 }
 </script>

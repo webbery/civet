@@ -6,7 +6,7 @@
     border
     style="width: 100%">
     <el-table-column
-      fixed="right"
+      fixed="left"
       label="ID"
       width="30">
       <template slot-scope="scope">
@@ -43,6 +43,10 @@
       label="类型"
       width="90">
     </el-table-column>
+    <el-table-column
+      prop="fullpath"
+      label="文件路径">
+    </el-table-column>
   </el-table>
   <el-button @click="loadImages()" type="primary" round>load</el-button>
   <el-button @click="testCorrection()" type="danger" round>testCorrection</el-button>
@@ -70,6 +74,14 @@ export default {
     }
   },
   async mounted() {
+    // const adapter = await navigator.gpu.requestAdapter()
+    // if (adapter === undefined) {
+    //   console.log('not support webgpu: 1')
+    // }
+    // const device = await adapter.requestDevice()
+    // if (device === undefined) {
+    //   console.log('not support webgpu: 2')
+    // }
     await this.loadImages()
     await this.loadOtherDisplayInfo()
   },
@@ -114,7 +126,7 @@ export default {
       for (let snapIdx in snaps) {
         let img = {imageid: snapIdx, step: snaps[snapIdx].step, name: snaps[snapIdx].name}
         let info = await localStorage.getImageInfo(snapIdx)
-        console.info(info)
+        console.info('loadImages', info)
         img.tag = this.convert(info.tag)
         img.keyword = this.convert(info.keyword)
         img.clazz = this.convert(info.category)
@@ -137,8 +149,13 @@ export default {
     },
     async testAddImage() {
       const fs = require('fs')
+      const os = require('os')
       try {
         let fullpath = 'F:/Image/熔岩/jr-korpa-Ud32uVNR23g-unsplash.jpg'
+        console.info('plateform', os.platform())
+        if (os.platform() === 'darwin') {
+          fullpath = '/Users/v_yuanwenbin/Pictures/照片图库.photoslibrary/resources/proxies/derivatives/00/00/3/UNADJUSTEDNONRAW_thumb_3.jpg'
+        }
         const info = fs.statSync(fullpath)
         const parser = new ImageParser()
         let parse = util.promisify(parser.parse)
@@ -178,13 +195,14 @@ export default {
     },
     async testAddClazz() {
       if (!this.testImagesID.length) return
+      await localStorage.addCategory('undefined测试')
       await localStorage.addCategory('分类测试', '')
       for (let idx of this.testImagesID) {
         await localStorage.addCategory('分类测试', '', idx)
         await localStorage.addCategory('子分类', '父分类', idx)
         await localStorage.addCategory('三级分类', '一级分类/二级分类', idx)
         const img = await localStorage.getImageInfo(idx)
-        this.arrayValidate(img.category, img.label + ' tag error')
+        this.arrayValidate(img.category, img.label + ' class error')
       }
       let allCate = await localStorage.getAllCategory()
       console.info('display all category', allCate)
@@ -192,6 +210,7 @@ export default {
       await this.loadOtherDisplayInfo()
     },
     async testRemoveClazz() {
+      await localStorage.removeCategory('分类测试')
       await localStorage.removeCategory('分类测试', '')
       await this.loadImages()
       await this.loadOtherDisplayInfo()

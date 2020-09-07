@@ -25,4 +25,7 @@ button{
 button:hover {
   background-color: rgb(107, 107, 255);
 }
+.text {
+  font-size: 12px;
+}
 </style>

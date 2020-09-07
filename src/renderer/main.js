@@ -6,7 +6,8 @@ import router from './router'
 import store from './store'
 
 import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
+// import 'element-ui/lib/theme-chalk/index.css'
+import 'element-theme-dark'
 
 import Service from './components/utils/Service'
 
@@ -24,3 +25,9 @@ new Vue({
   store,
   template: '<App/>'
 }).$mount('#app')
+
+global.invoke_from_c = function (msg, val) {
+  console.info('======== INVOKE FROM C BEGIN ========')
+  console.info(msg, val)
+  console.info('======== INVOKE FROM C END ========')
+}

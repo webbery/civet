@@ -9,7 +9,7 @@ import { CategoryArray } from './Category'
 import Vue from 'vue'
 import App from './App'
 import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
+import 'element-theme-dark'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
 Vue.use(ElementUI)
@@ -64,6 +64,7 @@ const ReplyType = {
   REPLY_IMAGES_INFO: 'replyImagesInfo',
   REPLY_IMAGE_INFO: 'replyImageInfo',
   REPLY_ALL_TAGS: 'replyAllTags',
+  REPLY_ALL_TAGS_WITH_IMAGES: 'replyAllTagsWithImages',
   REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
   REPLAY_ALL_CATEGORY: 'replyAllCategory',
   REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
@@ -76,11 +77,6 @@ async function readImages(fullpath) {
   if (info.isDirectory()) {
     readDir(fullpath)
   } else {
-    // const img = await JImage.build(fullpath, info)
-    // if (img) {
-    //   img.saveDB()
-    //   reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
-    // }
     const parser = new ImageParser()
     let img = await parser.parse(fullpath, info)
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
@@ -114,12 +110,8 @@ function readDir(path) {
 // }
 // let the main thread know this thread is ready to process something
 function ready() {
-  console.debug('111111222')
   ipcRenderer.send('ready')
   // GPUTest()
-  // let sab = new SharedArrayBuffer(1024)
-  // ipcRenderer.send('shared', sab)
-  // for (let i = 0; i < 100; ++i) timer.start(() => { console.info('tick', i) }, 1000)
 }
 
 function reply2Renderer(type, value) {
@@ -196,6 +188,11 @@ const messageProcessor = {
     let allTags = await localStorage.getTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
   },
+  'getAllTagsWithImages': async (data) => {
+    let allTags = await localStorage.getTagsWithImages()
+    console.info('allTags', allTags)
+    reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
+  },
   'findImageWithKeyword': async (keywords) => {
     let allID = await localStorage.findImageWithKeyword(keywords)
     // console.info('reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
@@ -218,6 +215,9 @@ const messageProcessor = {
   },
   'updateImageCategory': async (data) => {
     await localStorage.updateImageCatergory(data.imageID, data.category)
+  },
+  'updateCategoryName': async (oldName, newName) => {
+    await localStorage.changeCategoryName(oldName, newName)
   },
   'reInitDB': (data) => {
     localStorage.reloadDB(data)
