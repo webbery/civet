@@ -638,6 +638,10 @@ export default {
   },
   changeCategoryName: async (oldName, newName) => {
     console.info('oldName:', oldName, ', newName:', newName)
+    let chain = makeCategoryChain(oldName)
+    const code = await categoryChain2code(chain)
+    let category = await getOptional(KeyCategory, {})
+    if (category[code] === undefined) return
   },
   getAllCategory: async () => {
     let data = {}
