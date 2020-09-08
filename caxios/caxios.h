@@ -1,6 +1,5 @@
 #ifndef _CAXIOS_H_
 #define _CAXIOS_H_
-#include "memory/SharedMemory.h"
 
 namespace caxios {
   class CAxios {
@@ -14,7 +13,6 @@ namespace caxios {
 
 
   private:
-    CSharedMemory* m_pSharedMemory = nullptr;
   };
 }
 
