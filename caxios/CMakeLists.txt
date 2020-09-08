@@ -2,9 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
 
 project(caxios)
 
-add_subdirectory(lmdb)
-
-inlcude_directories(.
+include_directories(.
   lmdb
 )
 
