@@ -19,7 +19,7 @@ int say_hello() {
 
 EMSCRIPTEN_BINDINGS(caxios) {
   function("sayHello", &say_hello);
-  class_<caxios::CAxios>("caxios")
+  class_<caxios::CAxios>("Caxios")
     .constructor<>()
     .function("addOrUpdateClass", &caxios::CAxios::AddOrUpdateClass)
     .function("release", &caxios::CAxios::Release);

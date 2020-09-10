@@ -15,26 +15,31 @@
       <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
     </div>
   <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button>
-  <div>
-    插件配置
-    <div>格式支持
-      <el-checkbox v-model="checked">jpg/bmp</el-checkbox>
-    </div>
-    <div>检索支持
-      <div>
-        <el-checkbox v-model="checked">关键字</el-checkbox>
-        <el-dropdown split-button type="mini">
-          信息抽取模型
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>黄金糕</el-dropdown-item>
-            <el-dropdown-item>狮子头</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
-      <el-checkbox v-model="checked">主色彩</el-checkbox>
-      <el-checkbox v-model="checked">子图</el-checkbox>
-    </div>
-    <div>深度学习模型</div>
+  <div class="modules">
+    <el-divider content-position="left">插件配置</el-divider>
+    <el-collapse v-model="activeNames" @change="handleChange">
+      <el-collapse-item title="格式支持" name="1">
+        <el-checkbox v-model="checked">jpg/bmp</el-checkbox>
+      </el-collapse-item>
+      <el-collapse-item title="检索支持" name="2">
+        <div>
+          <el-checkbox v-model="checked">关键字</el-checkbox>
+          <el-dropdown split-button type="mini">
+            信息抽取模型
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>黄金糕</el-dropdown-item>
+              <el-dropdown-item>狮子头</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
+        <div>
+          <el-checkbox v-model="checked">主色彩</el-checkbox>
+        </div>
+        <div>
+          <el-checkbox v-model="checked">子图</el-checkbox>
+        </div>
+      </el-collapse-item>
+    </el-collapse>
   </div>
   </div>
 </template>
@@ -60,6 +65,10 @@ export default {
       config: {
         resource: {},
         db: {}
+      },
+      plugins: {
+        format: {},
+        search: {}
       }
     }
   },
@@ -116,5 +125,8 @@ export default {
 label {
   font-size: 12px;
   color: dimgrey;
+}
+.modules {
+  margin-top: 25px;
 }
 </style>

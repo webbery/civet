@@ -1,6 +1,8 @@
 #ifndef _CAXIOS_H_
 #define _CAXIOS_H_
 #include <string>
+#include <thread>
+#include "lmdb/lmdb.h"
 
 namespace caxios {
   class CAxios {
@@ -27,9 +29,11 @@ namespace caxios {
     void GetTopFiles();
 
   private:
-
+    void Run();
 
   private:
+    MDB_env* m_pDBEnv = nullptr;
+    std::thread* m_pWorker = nullptr;
   };
 }
 

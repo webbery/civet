@@ -642,6 +642,7 @@ export default {
     const code = await categoryChain2code(chain)
     let category = await getOptional(KeyCategory, {})
     if (category[code] === undefined) return
+    await put(KeyCategory, category)
   },
   getAllCategory: async () => {
     let data = {}
