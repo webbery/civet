@@ -21,5 +21,6 @@ EMSCRIPTEN_BINDINGS(caxios) {
   function("sayHello", &say_hello);
   class_<caxios::CAxios>("caxios")
     .constructor<>()
+    .function("addOrUpdateClass", &caxios::CAxios::AddOrUpdateClass)
     .function("release", &caxios::CAxios::Release);
 }

@@ -1,20 +1,41 @@
 <template>
   <div class="config">
     <div style="margin-top: 15px;">
-    <el-input placeholder="请输入内容" v-model="config.resource.path" class="input-with-select" :disabled="true">
-      <template slot="prepend">资源库路径：</template>
-        <el-button slot="append" icon="el-icon-more" @click="onSelectResourcePath()"></el-button>
-    </el-input>
-    <label>提示：资源库仅保存本地没有的副本，如果本地文件存在，不会在资源库中额外存储一份。如果被删除掉，会导致某些文件无法正确加载</label>
-  </div>
-  <div style="margin-top: 15px;">
-    <el-input placeholder="请输入内容" v-model="config.db.path" class="input-with-select" :disabled="true">
-      <template slot="prepend">数据库路径：</template>
-      <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()"></el-button>
-    </el-input>
-    <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
-  </div>
+      <el-input placeholder="请输入内容" v-model="config.resource.path" class="input-with-select" :disabled="true">
+        <template slot="prepend">资源库路径：</template>
+          <el-button slot="append" icon="el-icon-more" @click="onSelectResourcePath()"></el-button>
+      </el-input>
+      <label>提示：资源库只保存文件的硬链接，不会占用额外的空间</label>
+    </div>
+    <div style="margin-top: 15px;">
+      <el-input placeholder="请输入内容" v-model="config.db.path" class="input-with-select" :disabled="true">
+        <template slot="prepend">数据库路径：</template>
+        <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()"></el-button>
+      </el-input>
+      <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
+    </div>
   <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button>
+  <div>
+    插件配置
+    <div>格式支持
+      <el-checkbox v-model="checked">jpg/bmp</el-checkbox>
+    </div>
+    <div>检索支持
+      <div>
+        <el-checkbox v-model="checked">关键字</el-checkbox>
+        <el-dropdown split-button type="mini">
+          信息抽取模型
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>黄金糕</el-dropdown-item>
+            <el-dropdown-item>狮子头</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
+      <el-checkbox v-model="checked">主色彩</el-checkbox>
+      <el-checkbox v-model="checked">子图</el-checkbox>
+    </div>
+    <div>深度学习模型</div>
+  </div>
   </div>
 </template>
 
