@@ -2,9 +2,15 @@
 #include <iostream>
 
 namespace caxios {
-  CAxios::CAxios() {
+  CAxios::CAxios(const std::string& dbpath) {
     std::cout<< "CAxios()"<<std::endl;
-    // mdb_env_create(&m_pDBEnv);
+    mdb_env_create(&m_pDBEnv);
+    if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), MDB_NOTLS | MDB_RDONLY, 0664)) {
+      //Error
+    }
+    if (const int rc = mdb_txn_begin(m_pDBEnv, parentTransaction, 0, &transaction)) {
+        //Error
+    }
     m_pWorker = new std::thread(&CAxios::Run, this);
   }
 
@@ -14,8 +20,11 @@ namespace caxios {
 
   void CAxios::Release() {
     std::cout<< "CAxios::Release()"<<std::endl;
-    m_pWorker->join();
-    delete m_pWorker; m_pWorker = nullptr;
+    if (m_pWorker) {
+      m_pWorker->join();
+      delete m_pWorker;
+      m_pWorker = nullptr;
+    }
   }
 
   bool CAxios::AddOrUpdateClass(const std::string&) {

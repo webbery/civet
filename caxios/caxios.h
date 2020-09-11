@@ -7,7 +7,7 @@
 namespace caxios {
   class CAxios {
   public:
-    CAxios();
+    CAxios(const std::string& dbpath);
     ~CAxios();
 
     void Release();
@@ -33,6 +33,8 @@ namespace caxios {
 
   private:
     MDB_env* m_pDBEnv = nullptr;
+    MDB_txn *parentTransaction = nullptr;
+    MDB_txn *transaction;
     std::thread* m_pWorker = nullptr;
   };
 }
