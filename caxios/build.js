@@ -4,8 +4,8 @@ const iconv = require('iconv-lite');
 var process = require('child_process');
 const path = require('path')
 const fs = require('fs')
-const tmp = require('tmp');
-const expect = require('chai').expect;
+// const tmp = require('tmp');
+// const expect = require('chai').expect;
 
 const OPTIMIZE="-Os"
 const LDFLAGS="${OPTIMIZE}"
@@ -21,7 +21,9 @@ const CXXFLAGS = CFLAGS +
               '-s USE_BOOST_HEADERS=1' + ' ' +
               '-s EXPORT_ES6=1' + ' ' + 
               '-s USE_ES6_IMPORT_META=0' + ' ' + 
-              '-s WASM=1' + ' ' + 
+              '-s WASM=1' + ' ' +
+              // '-s ASSERTIONS=1'+ ' ' +
+              // '-s USE_PTHREADS=1'+ ' ' +
               '-L./caxios -llmdb' + ' '
 
 const COMPILER = {'.cpp': 'em++', '.c':'emcc'};

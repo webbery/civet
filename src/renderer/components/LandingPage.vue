@@ -37,11 +37,16 @@ export default {
     ConfigPanel
   },
   async mounted() {
-    // const instance = await caxios()
+    const {remote} = require('electron')
+    const fs = require('fs')
+    const userDir = remote.app.getPath('userData')
+    const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
+    const config = JSON.parse(fs.readFileSync(configPath))
+    dbname = config.db.path
+    const instance = await Caxios()
     // instance.sayHello()
-    console.info(Caxios)
-    const instance = await new Caxios.Caxios()
-    instance.release()
+    const caxios = new instance.Caxios(dbname + '.mdb')
+    caxios.release()
   }
 }
 </script>

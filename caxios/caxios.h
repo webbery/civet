@@ -1,13 +1,13 @@
 #ifndef _CAXIOS_H_
 #define _CAXIOS_H_
 #include <string>
-#include <thread>
+// #include <thread>
 #include "lmdb/lmdb.h"
 
 namespace caxios {
   class CAxios {
   public:
-    CAxios(const std::string& dbpath);
+    CAxios(std::string dbpath);
     ~CAxios();
 
     void Release();
@@ -35,7 +35,7 @@ namespace caxios {
     MDB_env* m_pDBEnv = nullptr;
     MDB_txn *parentTransaction = nullptr;
     MDB_txn *transaction;
-    std::thread* m_pWorker = nullptr;
+    MDB_dbi dbi;
   };
 }
 

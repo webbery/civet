@@ -7,7 +7,7 @@
   "main": "./dist/electron/main.js",
   "appId": "org.picstation.electron-vue",
   "scripts": {
-    "build": "npm run build:emscripten && node .electron-vue/build.js && electron-builder",
+    "build": "node .electron-vue/build.js && electron-builder",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:emscripten": "node ./caxios/build.js",

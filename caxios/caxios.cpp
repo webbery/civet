@@ -2,16 +2,22 @@
 #include <iostream>
 
 namespace caxios {
-  CAxios::CAxios(const std::string& dbpath) {
+  CAxios::CAxios(std::string dbpath) {
     std::cout<< "CAxios()"<<std::endl;
     mdb_env_create(&m_pDBEnv);
+#define MAX_EXPAND_DB_SIZE  50*1024*1024
+    if (const int rc = mdb_env_set_mapsize(m_pDBEnv, MAX_EXPAND_DB_SIZE)) {
+      std::cout << "mdb_env_set_mapsize fail: " << rc << std::endl;
+    }
     if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), MDB_NOTLS | MDB_RDONLY, 0664)) {
-      //Error
+      std::cout << "mdb_env_open fail: " << rc << std::endl;
     }
     if (const int rc = mdb_txn_begin(m_pDBEnv, parentTransaction, 0, &transaction)) {
-        //Error
+      std::cout << "mdb_txn_begin fail: " << rc << std::endl;
     }
-    m_pWorker = new std::thread(&CAxios::Run, this);
+    if (const int rc = mdb_dbi_open(transaction, nullptr, 0, &dbi)) {
+      std::cout << "mdb_dbi_open fail: " << rc << std::endl;
+    }
   }
 
   CAxios::~CAxios() {
@@ -20,11 +26,8 @@ namespace caxios {
 
   void CAxios::Release() {
     std::cout<< "CAxios::Release()"<<std::endl;
-    if (m_pWorker) {
-      m_pWorker->join();
-      delete m_pWorker;
-      m_pWorker = nullptr;
-    }
+    mdb_dbi_close(m_pDBEnv, dbi);
+    mdb_env_close(m_pDBEnv);
   }
 
   bool CAxios::AddOrUpdateClass(const std::string&) {
@@ -32,11 +35,12 @@ namespace caxios {
   }
 
   void CAxios::Run() {
-    int idx = 0;
-    while(idx < 60) {
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-      std::cout<<"---------work----------\n";
-      idx ++;
-    }
+    // int idx = 0;
+    // std::cout<<"---------Run----------\n";
+    // while(idx < 60) {
+    //   std::this_thread::sleep_for(std::chrono::seconds(1));
+    //   std::cout<<"---------work----------\n";
+    //   idx++;
+    // }
   }
 }

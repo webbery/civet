@@ -20,7 +20,7 @@ int say_hello() {
 EMSCRIPTEN_BINDINGS(caxios) {
   function("sayHello", &say_hello);
   class_<caxios::CAxios>("Caxios")
-    .constructor<>(const std::string& dbpath)
+    .constructor<std::string>()
     .function("addOrUpdateClass", &caxios::CAxios::AddOrUpdateClass)
     .function("release", &caxios::CAxios::Release);
 }
