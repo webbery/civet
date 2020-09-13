@@ -24,7 +24,7 @@ import ViewPanel from '@/components/ViewPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/TagPanel'
 import ConfigPanel from '@/components/ConfigPanel'
-import Caxios from '@/../generated/caxios'
+import Jaxios from '@/../public/Jaxios'
 
 export default {
   name: 'landing-page',
@@ -37,16 +37,7 @@ export default {
     ConfigPanel
   },
   async mounted() {
-    const {remote} = require('electron')
-    const fs = require('fs')
-    const userDir = remote.app.getPath('userData')
-    const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-    const config = JSON.parse(fs.readFileSync(configPath))
-    dbname = config.db.path
-    const instance = await Caxios()
-    // instance.sayHello()
-    const caxios = new instance.Caxios(dbname + '.mdb')
-    caxios.release()
+    Jaxios.method()
   }
 }
 </script>

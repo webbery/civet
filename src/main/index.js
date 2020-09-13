@@ -3,7 +3,6 @@
 import { app, BrowserWindow, Menu, ipcMain } from 'electron'
 import '../renderer/store'
 // const cpus = require('os').cpus().length
-
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -21,6 +20,7 @@ const workerURL = process.env.NODE_ENV === 'development'
   ? `worker.html`
   : `file://${__dirname}/worker.html`
 function createWindow () {
+  console.info('====================')
   Menu.setApplicationMenu(null)
   /**
    * Initial window options
@@ -42,6 +42,7 @@ function createWindow () {
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {
+    console.info('---------close------------')
     workerWindow.close()
     mainWindow = null
   })
@@ -61,6 +62,7 @@ function createWindow () {
 }
 
 app.on('window-all-closed', async () => {
+  console.info('---------close 2------------')
   if (process.platform !== 'darwin') {
     app.quit()
   }
@@ -128,6 +130,8 @@ function sendWindowMessage(targetWindow, message, payload) {
 }
 
 app.on('ready', async () => {
+  console.info('====================')
+
   // 检查配置数据是否存在
   const userDir = app.getPath('userData')
   const cfgFile = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')

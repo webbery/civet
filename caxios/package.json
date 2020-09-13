@@ -1,0 +1,23 @@
+{
+    "name": "civetkern",
+    "version": "0.0.5",
+    "description": "",
+    "scripts": {
+        "install": "prebuild-install || node-gyp rebuild",
+        "prebuild": "prebuild --all --strip",
+        "rebuild": "node-gyp rebuild --verbose"
+    },
+    "main": "index.js",
+    "keywords": [
+        "nodejs",
+        "c++",
+        "civetkern",
+        "addon"
+    ],
+    "gypfile": true,
+    "author": "webberg",
+    "license": "MIT",
+    "dependencies": {
+        "nan": "^2.14.1"
+    }
+}

@@ -73,23 +73,23 @@ export default {
       newCategoryName: ''
     }
   },
-  computed: {
-    loadDirectory() {
-      console.info('computed：', this.$store.EventBus.importDirectory)
-      return this.$store.EventBus.importDirectory
-    },
-    categoryName() {
-      return this.$store.getters.classesName
-    },
-    category() {
-      console.info('classes', this.$store.getters.category)
-      return this.$store.getters.category
-    },
-    tags() {
-      console.info('1 comupted tags: ', this.$store.getters.tags)
-      return this.$store.getters.tags
-    }
-  },
+  // computed: {
+  //   loadDirectory() {
+  //     console.info('computed：', this.$store.EventBus.importDirectory)
+  //     return this.$store.EventBus.importDirectory
+  //   },
+  //   categoryName() {
+  //     return this.$store.getters.classesName
+  //   },
+  //   category() {
+  //     console.info('classes', this.$store.getters.category)
+  //     return this.$store.getters.category
+  //   },
+  //   tags() {
+  //     console.info('1 comupted tags: ', this.$store.getters.tags)
+  //     return this.$store.getters.tags
+  //   }
+  // },
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
     bus.on(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, this.updateUncategoryImages)
@@ -133,17 +133,17 @@ export default {
       }
     },
     async init() {
-      this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
+      // this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
       // console.info('----', this.directoryData)
-      const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
+      // const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
       // // console.info('get category', folders)
-      const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
-      this.headOptions[1].value = uncategoryImages.length
-      const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
-      this.headOptions[2].value = untagImages.length
+      // const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
+      // this.headOptions[1].value = uncategoryImages.length
+      // const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
+      // this.headOptions[2].value = untagImages.length
       // const allTags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS_WITH_IMAGES)
       // console.info('all tag', allTags)
-      this.$store.dispatch('setCategory', folders)
+      // this.$store.dispatch('setCategory', folders)
       // this.$store.dispatch('setTags', allTags)
     },
     renderContent(h, {node, data, store}) {
