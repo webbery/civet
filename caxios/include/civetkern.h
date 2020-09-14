@@ -19,7 +19,9 @@ namespace caxios{
 
     static void Release(void* data);
 
-    bool AddOrUpdateClass(const Nan::FunctionCallbackInfo<v8::Value>& info);
+    static bool AddOrUpdateFiles(const Nan::FunctionCallbackInfo<v8::Value>& info);
+
+    static bool AddOrUpdateClass(const Nan::FunctionCallbackInfo<v8::Value>& info);
     bool DeleteClass(const Nan::FunctionCallbackInfo<v8::Value>& info);
     static void GetClass(const Nan::FunctionCallbackInfo<v8::Value>& info);
     void GetNoClassifyFiles(const Nan::FunctionCallbackInfo<v8::Value>& info);

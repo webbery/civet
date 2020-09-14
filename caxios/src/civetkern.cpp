@@ -83,6 +83,10 @@ namespace caxios {
     std::cout << "Finish CAxios::Release()" << std::endl;
   }
 
+  bool CAxios::AddOrUpdateFiles(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+    return true;
+  }
+
   bool CAxios::AddOrUpdateClass(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     return true;
   }

@@ -11,7 +11,10 @@ using v8::String;
 using v8::Value;
 
 namespace caxios {
-  static void Method(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  static void AddOrUpdateFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    std::cout << "AddOrUpdateFiles" << std::endl;
+  }
+  static void GetClass(const v8::FunctionCallbackInfo<v8::Value>& info) {
     std::cout << "method" << std::endl;
   }
 	//void Init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
@@ -28,7 +31,11 @@ NODE_MODULE_INIT() {
   Local<v8::External> external = v8::External::New(isolate, data);
 
   exports->Set(context,
-    String::NewFromUtf8(isolate, "method", v8::NewStringType::kNormal).ToLocalChecked(),
-    v8::FunctionTemplate::New(isolate, &caxios::Method, external)
-    ->GetFunction(context).ToLocalChecked()).FromJust();
+    String::NewFromUtf8(isolate, "getClasss", v8::NewStringType::kNormal).ToLocalChecked(),
+    v8::FunctionTemplate::New(isolate, &caxios::GetClass, external)
+      ->GetFunction(context).ToLocalChecked()).FromJust();
+  exports->Set(context,
+    String::NewFromUtf8(isolate, "addOrUpdateFiles", v8::NewStringType::kNormal).ToLocalChecked(),
+    v8::FunctionTemplate::New(isolate, &caxios::AddOrUpdateFiles, external)
+      ->GetFunction(context).ToLocalChecked()).FromJust();
 }

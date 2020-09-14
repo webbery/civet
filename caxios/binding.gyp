@@ -10,7 +10,7 @@
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",
-        "node_modules/nan"
+        "../nan"
       ],
       "cflags!": [],
       "cflags_cc!": []
