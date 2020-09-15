@@ -24,7 +24,6 @@ import ViewPanel from '@/components/ViewPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/TagPanel'
 import ConfigPanel from '@/components/ConfigPanel'
-import Jaxios from '@/../public/Jaxios'
 
 export default {
   name: 'landing-page',
@@ -36,9 +35,7 @@ export default {
     TagPanel,
     ConfigPanel
   },
-  async mounted() {
-    Jaxios.method()
-  }
+  mounted() {}
 }
 </script>
 

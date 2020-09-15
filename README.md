@@ -16,8 +16,8 @@
 ### 类似软件对比
 |  软件   | 开发平台  | 本地存储  | 图片支持 | Web插件 | 云盘支持 | 智能检索 | 协议 |
 | :----: | :----:   |  :----: | :----: | :----: | :----: | :----: | :----: |
-| Civet  | Electron | LevelDB |  | 暂无 | 暂无 | 暂无 | 开源MIT
-| Eagle  | Electron | Json + 图片拷贝 |  | 有 | | | 私有
+| Civet  | Electron/C++ | lmdb/硬链接 | 插件 | 暂无 | 暂无 | 暂无 | 开源MIT
+| Eagle  | Electron | Json/图片拷贝 |  | 有 | | | 私有
 | Billfish  | Qt | Sqlite + 图片拷贝/索引 |  | Chrome | | | 私有
 
 ### 目录

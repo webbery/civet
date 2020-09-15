@@ -9,13 +9,16 @@
 namespace caxios{
   class CAxios : public Nan::ObjectWrap {
   public:
-    explicit CAxios(v8::Isolate* isolate);
-    //static void Init(v8::Local<v8::Object> exports);
+    static Nan::Persistent<v8::Function> constructor;
+
+  public:
+    explicit CAxios(std::string str);
+    ~CAxios();
+    void Init(v8::Local<v8::Object> exports);
 
   private:
 	//static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
-    ~CAxios();
 
     static void Release(void* data);
 
@@ -41,7 +44,6 @@ namespace caxios{
     void Run();
 
   private:
-	  static Nan::Persistent<v8::Function> constructor;
   };
 }
 

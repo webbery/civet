@@ -1,4 +1,4 @@
-const jaxios = (function () {
+const kernel = (function () {
   // const {remote} = require('electron')
   // const fs = require('fs')
   // const userDir = remote.app.getPath('userData')
@@ -6,11 +6,10 @@ const jaxios = (function () {
   // const config = JSON.parse(fs.readFileSync(configPath))
   // const dbname = config.db.path
   const instance = require('civetkern')
-  // instance.sayHello()
-  console.info(instance)
   return instance.civetkern
 })()
 
 export default {
-  method: jaxios.method()
+  init: (cfg) => { return kernel.init(cfg) },
+  addOrUpdateFiles: (src) => { return kernel.addOrUpdateFiles(src) }
 }

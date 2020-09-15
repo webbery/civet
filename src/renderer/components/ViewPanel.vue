@@ -108,7 +108,8 @@ export default {
         paths.push(item.path)
       }
       if (paths.length > 0) {
-        this.$ipcRenderer.send(Service.ADD_IMAGES_BY_PATHS, paths)
+        this.$kernel.addOrCreateFiles(paths)
+        // this.$ipcRenderer.send(Service.ADD_IMAGES_BY_PATHS, paths)
       }
     },
     dragStart(event) {

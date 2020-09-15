@@ -20,7 +20,6 @@ const workerURL = process.env.NODE_ENV === 'development'
   ? `worker.html`
   : `file://${__dirname}/worker.html`
 function createWindow () {
-  console.info('====================')
   Menu.setApplicationMenu(null)
   /**
    * Initial window options
@@ -130,7 +129,7 @@ function sendWindowMessage(targetWindow, message, payload) {
 }
 
 app.on('ready', async () => {
-  console.info('====================')
+  console.info('****************************')
 
   // 检查配置数据是否存在
   const userDir = app.getPath('userData')

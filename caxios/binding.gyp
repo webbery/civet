@@ -10,7 +10,7 @@
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",
-        "../nan"
+        "<!(node -e \"require('nan')\")"
       ],
       "cflags!": [],
       "cflags_cc!": []

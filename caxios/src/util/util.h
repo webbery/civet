@@ -4,7 +4,7 @@
 #include <node.h>
 
 namespace caxios {
-  std::string ConvertToString(const v8::Local<v8::String>& value);
+  std::string ConvertToString(v8::Isolate* isolate, const v8::Local<v8::String>& value);
 }
 
 #endif

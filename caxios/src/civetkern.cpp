@@ -7,7 +7,6 @@
 using namespace v8;
 
 namespace caxios {
-  Nan::Persistent<v8::Function> CAxios::constructor;
 
 	//void CAxios::Init(v8::Local<v8::Object> exports)
 	//{
@@ -28,9 +27,9 @@ namespace caxios {
 	//		tpl->GetFunction(context).ToLocalChecked());
 	//}
 
-	CAxios::CAxios(v8::Isolate* isolate) {
+	CAxios::CAxios(std::string str) {
     std::cout<< "CAxios()"<<std::endl;
-    node::AddEnvironmentCleanupHook(isolate, Release, nullptr);
+    //node::AddEnvironmentCleanupHook(isolate, Release, nullptr);
 //    mdb_env_create(&m_pDBEnv);
 //#define MAX_EXPAND_DB_SIZE  50*1024*1024
 //    if (const int rc = mdb_env_set_mapsize(m_pDBEnv, MAX_EXPAND_DB_SIZE)) {
@@ -47,7 +46,12 @@ namespace caxios {
 //    }
   }
 
-	//void CAxios::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
+  void CAxios::Init(v8::Local<v8::Object> exports)
+  {
+    this->Wrap(exports);
+  }
+
+  //void CAxios::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
 	//{
 	//	v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
 	//	if (info.IsConstructCall()) {
