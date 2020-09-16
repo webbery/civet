@@ -12,8 +12,15 @@
         "include",
         "<!(node -e \"require('nan')\")"
       ],
-      "cflags!": [],
-      "cflags_cc!": []
+      'cflags_cc': [
+        '-std=c++17'
+      ],
+      "cflags!": [
+        '-fno-exceptions'
+      ],
+      "cflags_cc!": [
+        '-fno-exceptions'
+      ]
     }
   ]
 }

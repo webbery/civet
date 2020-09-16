@@ -4,6 +4,7 @@
 #include "util/util.h"
 #include <iostream>
 
+// https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
 using v8::FunctionCallbackInfo;
 using v8::Isolate;
 using v8::Local;

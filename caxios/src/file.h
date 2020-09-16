@@ -4,6 +4,7 @@
 namespace caxios {
   class CFile {
   public:
+    CFile(const std::string& src);
   };
 }
 
