@@ -28,6 +28,7 @@ function createWindow () {
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
+      enableRemoteModule: true,
       webSecurity: false
     },
     allowRunningInsecureContent: true,
@@ -48,7 +49,10 @@ function createWindow () {
 
   workerWindow = new BrowserWindow({
     show: process.env.NODE_ENV === 'development',
-    webPreferences: { nodeIntegration: true }
+    webPreferences: {
+      nodeIntegration: true,
+      enableRemoteModule: true
+    }
   })
   workerWindow.on('closed', () => {
     console.log('background window closed')

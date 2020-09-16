@@ -23,21 +23,21 @@ namespace caxios {
   class Addon {
   public:
     Addon(Isolate* isolate, Local<Object> exports) {
-      // ½«´Î¶ÔÏóµÄÊµÀı¹Òµ½ exports ÉÏ¡£
+      // å°†æ¬¡å¯¹è±¡çš„å®ä¾‹æŒ‚åˆ° exports ä¸Šã€‚
       exports_.Reset(isolate, exports);
       exports_.SetWeak(this, DeleteMe, v8::WeakCallbackType::kParameter);
     }
 
     ~Addon() {
       if (!exports_.IsEmpty()) {
-        // ÖØĞÂÉèÖÃÒıÓÃÒÔ±ÜÃâÊı¾İĞ¹Â¶¡£
+        // é‡æ–°è®¾ç½®å¼•ç”¨ä»¥é¿å…æ•°æ®æ³„éœ²ã€‚
         exports_.ClearWeak();
         exports_.Reset();
       }
     }
 
   private:
-    // µ¼³ö¼´½«±»»ØÊÕÊ±µ÷ÓÃµÄ·½·¨¡£
+    // å¯¼å‡ºå³å°†è¢«å›æ”¶æ—¶è°ƒç”¨çš„æ–¹æ³•ã€‚
     static void DeleteMe(const v8::WeakCallbackInfo<Addon>& info) {
       if (m_pCaxios) {
         delete m_pCaxios;
@@ -46,17 +46,17 @@ namespace caxios {
       delete info.GetParameter();
     }
 
-    // µ¼³ö¶ÔÏóÈõ¾ä±ú¡£¸ÃÀàµÄÊµÀı½«ÓëÆäÈô°ó¶¨µÄ exports ¶ÔÏóÒ»ÆğÏú»Ù¡£
+    // å¯¼å‡ºå¯¹è±¡å¼±å¥æŸ„ã€‚è¯¥ç±»çš„å®ä¾‹å°†ä¸å…¶è‹¥ç»‘å®šçš„ exports å¯¹è±¡ä¸€èµ·é”€æ¯ã€‚
     v8::Persistent<v8::Object> exports_;
 
   public:
-    // Ã¿¸ö²å¼şµÄÊı¾İ
+    // æ¯ä¸ªæ’ä»¶çš„æ•°æ®
     static CAxios* m_pCaxios;
   };
 
   CAxios* Addon::m_pCaxios = nullptr;
   
-  void Init(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  void init(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios == nullptr) {
       auto curContext = Nan::GetCurrentContext();
       v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
@@ -71,21 +71,62 @@ namespace caxios {
     }
   }
 
+  void addFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
+  }
+
+  void addTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void addClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  // void addAnotation(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  // void addKeyword(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+
+  void updateFile(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+
+  void updateFileTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void updateFileClass(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void updateClassName(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+
+  void getFilesInfo(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getFilesSnap(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getAllTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getUnTagFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getUnClassifyFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getAllClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getTagsOfImages(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+
+  void removeFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void removeTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void removeClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+
+  void searchFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+
 }
 
 NODE_MODULE_INIT() {
   Isolate* isolate = context->GetIsolate();
 
-  // Îª¸ÃÀ©Õ¹ÊµÀıµÄAddonData´´½¨Ò»¸öĞÂµÄÊµÀı
+  // ä¸ºè¯¥æ‰©å±•å®ä¾‹çš„AddonDataåˆ›å»ºä¸€ä¸ªæ–°çš„å®ä¾‹
   caxios::Addon* data = new caxios::Addon(isolate, exports);
-  // ÔÚ v8::External ÖĞ°ü¹üÊı¾İ£¬ÕâÑùÎÒÃÇ¾Í¿ÉÒÔ½«Ëü´«µİ¸øÎÒÃÇ±©Â¶µÄ·½·¨¡£
+  // åœ¨ v8::External ä¸­åŒ…è£¹æ•°æ®ï¼Œè¿™æ ·æˆ‘ä»¬å°±å¯ä»¥å°†å®ƒä¼ é€’ç»™æˆ‘ä»¬æš´éœ²çš„æ–¹æ³•ã€‚
   Local<v8::External> external = v8::External::New(isolate, data);
 
+  EXPORT_JS_FUNCTION(init);
   EXPORT_JS_FUNCTION(generateFilesID);
-
-  exports->Set(context,
-    String::NewFromUtf8(isolate, "civetkern", v8::NewStringType::kNormal)
-    .ToLocalChecked(),
-    v8::FunctionTemplate::New(isolate, caxios::Init, external)
-    ->GetFunction(context).ToLocalChecked()).FromJust();
+  EXPORT_JS_FUNCTION(addFiles);
+  EXPORT_JS_FUNCTION(addTags);
+  EXPORT_JS_FUNCTION(addClasses);
+  EXPORT_JS_FUNCTION(updateFile);
+  EXPORT_JS_FUNCTION(updateFileTags);
+  EXPORT_JS_FUNCTION(updateFileClass);
+  EXPORT_JS_FUNCTION(updateClassName);
+  EXPORT_JS_FUNCTION(getFilesInfo);
+  EXPORT_JS_FUNCTION(getFilesSnap);
+  EXPORT_JS_FUNCTION(getAllTags);
+  EXPORT_JS_FUNCTION(getUnTagFiles);
+  EXPORT_JS_FUNCTION(getUnClassifyFiles);
+  EXPORT_JS_FUNCTION(getAllClasses);
+  EXPORT_JS_FUNCTION(getTagsOfImages);
+  EXPORT_JS_FUNCTION(removeFiles);
+  EXPORT_JS_FUNCTION(removeTags);
+  EXPORT_JS_FUNCTION(removeClasses);
+  EXPORT_JS_FUNCTION(searchFiles);
 }

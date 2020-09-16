@@ -5,10 +5,11 @@ plugin.type: three of `loader`, `extracter` or `searcher`
 if it is `loader`, it will be used when file matched is load.
 
 type
-  |-- loader
-        |-- filetype: jpg, bmp...
+  |-- file
+        |-- name: jpg, bmp...
         |-- ext: jpg, jpeg, ...
         |-- init()
+        |-- load(src)
         |-- release()
         |-- draw()
         |-- render()
@@ -17,15 +18,16 @@ type
         |-- meta: {name: xxx, author: xxx, ...}
         |-- extracter:
         |-- searcher:
-  |-- extracter
-  |-- searcher
+  |-- extract
+  |-- search
 help
 
 */
 const path = require('path')
 const fs = require('fs')
 
-const thirdModules = (function(plgDir) {
+let thirdModules = null
+function init(plgDir) {
   let modules = {}
 
   function loadModule(moduleName, fullpath) {
@@ -48,8 +50,21 @@ const thirdModules = (function(plgDir) {
     }
     return modules
   }
-})('plugins')
+}
 
 export default {
-  modules: thirdModules
+  getModuleByExt: (ext) => {
+    if (thirdModules === null) {
+      const app = require('electron')
+      const root = app.getAppPath()
+      console.info('plugin dir:', root)
+      thirdModules = init(root + 'plugins')
+    }
+    for (let module of thirdModules) {
+      if (module['type'] === 'file' && module['ext'].indexOf(ext) > -1) {
+        return module
+      }
+    }
+    return null
+  }
 }

@@ -31,5 +31,8 @@ namespace caxios {
     mdb_env_close(m_pDBEnv);
   }
 
-  CV_UINT CDatabase::GenerateNextFilesID(int cnt) {}
+  std::vector<CV_UINT> CDatabase::GenerateNextFilesID(int cnt) {
+    std::vector<CV_UINT> filesID;
+    return std::move(filesID);
+  }
 }

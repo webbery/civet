@@ -2,6 +2,7 @@
 #define _CAXIOS_DATABASE_H_
 #include "lmdb/lmdb.h"
 #include <string>
+#include <vector>
 
 namespace caxios{
 
@@ -12,7 +13,7 @@ namespace caxios{
     CDatabase(const std::string& dbpath);
     ~CDatabase();
 
-    CV_UINT GenerateNextFilesID(int cnt = 1);
+    std::vector<CV_UINT> GenerateNextFilesID(int cnt = 1);
 
   private:
     MDB_env* m_pDBEnv = nullptr;

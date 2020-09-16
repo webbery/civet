@@ -12,6 +12,7 @@
 // import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 import bus from './utils/Bus'
+import Plugin from '@/../public/Plugin'
 // import log from '@/../public/Logger'
 // import ImageProcess from '@/../public/ImageProcess'
 
@@ -61,7 +62,11 @@ export default {
     }
   },
   methods: {
-    readSource(src) {
+    async readSource(src) {
+      const path = require('path')
+      const ext = path.extname(src)
+      this.loader = Plugin.getModuleByExt(ext)
+      await this.loader.load(src)
       // this.box = document.getElementById(this.boxid)
       // this.canvas = document.getElementById(this.id)
       // this.canvas.width = this.box.offsetWidth
