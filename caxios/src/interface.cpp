@@ -12,6 +12,13 @@ using v8::Object;
 using v8::String;
 using v8::Value;
 
+#define EXPORT_JS_FUNCTION(name) \
+  exports->Set(context, \
+    String::NewFromUtf8(isolate, #name, v8::NewStringType::kNormal) \
+    .ToLocalChecked(), \
+    v8::FunctionTemplate::New(isolate, caxios::name, external) \
+    ->GetFunction(context).ToLocalChecked()).FromJust()
+
 namespace caxios {
   class Addon {
   public:
@@ -49,10 +56,7 @@ namespace caxios {
 
   CAxios* Addon::m_pCaxios = nullptr;
   
-  static void Init(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    // 恢复每个插件实例的数据。
-    Addon* data =
-      reinterpret_cast<Addon*>(info.Data().As<v8::External>()->Value());
+  void Init(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios == nullptr) {
       auto curContext = Nan::GetCurrentContext();
       v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
@@ -60,6 +64,13 @@ namespace caxios {
     }
     //info.GetReturnValue().Set((CAxios*)data->m_pCaxios);
   }
+
+  void generateFilesID(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (Addon::m_pCaxios == nullptr) {
+      Addon::m_pCaxios->GenNextFilesID();
+    }
+  }
+
 }
 
 NODE_MODULE_INIT() {
@@ -70,9 +81,10 @@ NODE_MODULE_INIT() {
   // 在 v8::External 中包裹数据，这样我们就可以将它传递给我们暴露的方法。
   Local<v8::External> external = v8::External::New(isolate, data);
 
-  // 把 "Method" 方法暴露给 JavaScript，并确保其接收我们通过把 `external` 作为 FunctionTemplate 构造函数第三个参数时创建的每个插件实例的数据。
+  EXPORT_JS_FUNCTION(generateFilesID);
+
   exports->Set(context,
-    String::NewFromUtf8(isolate, "instance", v8::NewStringType::kNormal)
+    String::NewFromUtf8(isolate, "civetkern", v8::NewStringType::kNormal)
     .ToLocalChecked(),
     v8::FunctionTemplate::New(isolate, caxios::Init, external)
     ->GetFunction(context).ToLocalChecked()).FromJust();

@@ -4,6 +4,7 @@
 #include <node_object_wrap.h>
 #include <nan.h>
 #include <string>
+#include "database.h"
 // #include <thread>
 
 namespace caxios{
@@ -16,9 +17,9 @@ namespace caxios{
     ~CAxios();
     void Init(v8::Local<v8::Object> exports);
 
-  private:
-	//static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
+    CV_UINT GenNextFilesID(int cnt = 1);
 
+  private:
 
     static void Release(void* data);
 
@@ -44,6 +45,7 @@ namespace caxios{
     void Run();
 
   private:
+    CDatabase* m_pDatabase = nullptr;
   };
 }
 

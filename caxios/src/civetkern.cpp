@@ -28,27 +28,21 @@ namespace caxios {
 	//}
 
 	CAxios::CAxios(std::string str) {
-    std::cout<< "CAxios()"<<std::endl;
+    std::cout<< "CAxios("<< str <<")"<<std::endl;
     //node::AddEnvironmentCleanupHook(isolate, Release, nullptr);
-//    mdb_env_create(&m_pDBEnv);
-//#define MAX_EXPAND_DB_SIZE  50*1024*1024
-//    if (const int rc = mdb_env_set_mapsize(m_pDBEnv, MAX_EXPAND_DB_SIZE)) {
-//      std::cout << "mdb_env_set_mapsize fail: " << rc << std::endl;
-//    }
-//    if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), MDB_NOTLS | MDB_RDONLY, 0664)) {
-//      std::cout << "mdb_env_open fail: " << rc << std::endl;
-//    }
-//    if (const int rc = mdb_txn_begin(m_pDBEnv, parentTransaction, 0, &transaction)) {
-//      std::cout << "mdb_txn_begin fail: " << rc << std::endl;
-//    }
-//    if (const int rc = mdb_dbi_open(transaction, nullptr, 0, &dbi)) {
-//      std::cout << "mdb_dbi_open fail: " << rc << std::endl;
-//    }
+    if (m_pDatabase == nullptr) {
+      m_pDatabase = new CDatabase(str);
+    }
   }
 
   void CAxios::Init(v8::Local<v8::Object> exports)
   {
     this->Wrap(exports);
+  }
+
+  CV_UINT CAxios::GenNextFilesID(int cnt)
+  {
+    return 0;
   }
 
   //void CAxios::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
@@ -77,12 +71,14 @@ namespace caxios {
 
 	CAxios::~CAxios() {
     std::cout<< "~CAxios()"<<std::endl;
+    if (m_pDatabase) {
+      delete m_pDatabase;
+      m_pDatabase = nullptr;
+    }
   }
 
   void CAxios::Release(void* data) {
     std::cout<< "Begin CAxios::Release()"<<std::endl;
-    //mdb_dbi_close(m_pDBEnv, dbi);
-    //mdb_env_close(m_pDBEnv);
     delete static_cast<CAxios*>(data);
     std::cout << "Finish CAxios::Release()" << std::endl;
   }
