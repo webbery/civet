@@ -11,7 +11,7 @@
     "keywords": [
         "nodejs",
         "c++",
-        "civetkern",
+        "civetk",
         "addon"
     ],
     "gypfile": true,

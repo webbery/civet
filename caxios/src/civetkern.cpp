@@ -29,7 +29,6 @@ namespace caxios {
 
 	CAxios::CAxios(std::string str) {
     std::cout<< "CAxios("<< str <<")"<<std::endl;
-    //node::AddEnvironmentCleanupHook(isolate, Release, nullptr);
     if (m_pDatabase == nullptr) {
       m_pDatabase = new CDatabase(str);
     }
@@ -79,7 +78,7 @@ namespace caxios {
 
   void CAxios::Release(void* data) {
     std::cout<< "Begin CAxios::Release()"<<std::endl;
-    delete static_cast<CAxios*>(data);
+    // delete static_cast<CAxios*>(data);
     std::cout << "Finish CAxios::Release()" << std::endl;
   }
 

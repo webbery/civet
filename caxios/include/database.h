@@ -15,11 +15,14 @@ namespace caxios{
 
     std::vector<CV_UINT> GenerateNextFilesID(int cnt = 1);
 
+    bool Put(const std::string& key);
+
   private:
     MDB_env* m_pDBEnv = nullptr;
     MDB_txn* parentTransaction = nullptr;
     MDB_txn* transaction = nullptr;
     MDB_dbi dbi;
+    MDB_cursor *cursor = nullptr;
   };
 }
 

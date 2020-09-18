@@ -39,6 +39,7 @@ namespace caxios {
   private:
     // 导出即将被回收时调用的方法。
     static void DeleteMe(const v8::WeakCallbackInfo<Addon>& info) {
+      std::cout<<"Delete Me" <<std::endl;
       if (m_pCaxios) {
         delete m_pCaxios;
         m_pCaxios = nullptr;
@@ -56,11 +57,18 @@ namespace caxios {
 
   CAxios* Addon::m_pCaxios = nullptr;
   
+  void release(void* pAxios){
+    if (pAxios) {
+      delete static_cast<CAxios*>(pAxios);
+      pAxios = nullptr;
+    }
+  }
   void init(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios == nullptr) {
       auto curContext = Nan::GetCurrentContext();
       v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
       Addon::m_pCaxios = new caxios::CAxios(ConvertToString(curContext->GetIsolate(), value));
+      node::AddEnvironmentCleanupHook(curContext->GetIsolate(), caxios::release, Addon::m_pCaxios);
     }
     //info.GetReturnValue().Set((CAxios*)data->m_pCaxios);
   }
