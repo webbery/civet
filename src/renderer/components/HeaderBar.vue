@@ -1,6 +1,7 @@
 <template>
   <el-row >
       <el-col :span="4">
+        <el-button @click="onClickResource" size="mini" round>资源库</el-button>
         <el-button @click="onClickImport" size="mini" round>导入</el-button>
         <el-button @click="onClickConfig" size="mini" round>配置</el-button>
         </el-col>
@@ -43,6 +44,7 @@ export default {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
   },
   methods: {
+    onClickResource() {},
     onClickImport() {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
         properties: ['openDirectory', 'openFile']

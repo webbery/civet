@@ -4,6 +4,7 @@ import localStorage from './LocalStorage'
 import { ImageParser, JImage } from './Image'
 import { CategoryArray } from './Category'
 // import { GPU, input } from 'gpu.js'
+import Kernel from '../public/Kernel'
 
 /* ************************ ↓↓↓↓↓↓发布时注释掉该部分↓↓↓↓↓↓ ********************** */
 import Vue from 'vue'

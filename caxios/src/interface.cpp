@@ -85,7 +85,11 @@ namespace caxios {
     if (Addon::m_pCaxios != nullptr) {
       int cnt = 0;
       if (info[0]->IsInt32()) {
+#if V8_MAJOR_VERSION == 7
         cnt = info[0]->ToInt32(v8::Isolate::GetCurrent())->Value();
+#elif V8_MAJOR_VERSION == 8
+        info[0]->Int32Value(Nan::GetCurrentContext()).To(&cnt);
+#endif
       }
       if (cnt <= 0) return;
       auto result = Addon::m_pCaxios->GenNextFilesID(cnt);
@@ -93,7 +97,11 @@ namespace caxios {
         v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), cnt * sizeof(int32_t)), 0, cnt);
       for (int idx = 0; idx < result.size(); ++idx) {
         auto v = v8::Int32::New(v8::Isolate::GetCurrent(), result[idx]);
+#if V8_MAJOR_VERSION == 7
         arr->Set(idx, v);
+#elif V8_MAJOR_VERSION == 8
+        arr->Set(Nan::GetCurrentContext(), idx, v);
+#endif
       }
       info.GetReturnValue().Set(arr);
     }
