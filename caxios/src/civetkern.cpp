@@ -27,7 +27,7 @@ namespace caxios {
 	//		tpl->GetFunction(context).ToLocalChecked());
 	//}
 
-	CAxios::CAxios(std::string str) {
+	CAxios::CAxios(const std::string& str) {
     std::cout<< "CAxios("<< str <<")"<<std::endl;
     if (m_pDatabase == nullptr) {
       m_pDatabase = new CDatabase(str);
@@ -39,9 +39,14 @@ namespace caxios {
     this->Wrap(exports);
   }
 
-  CV_UINT CAxios::GenNextFilesID(int cnt)
+  std::vector<CV_UINT> CAxios::GenNextFilesID(int cnt)
   {
-    return 0;
+    return m_pDatabase->GenerateNextFilesID(cnt);
+  }
+
+  bool CAxios::SwitchDatabase(const std::string& dbname)
+  {
+    return m_pDatabase->SwitchDatabase(dbname);
   }
 
   //void CAxios::New(const Nan::FunctionCallbackInfo<v8::Value>& info)

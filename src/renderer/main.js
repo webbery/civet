@@ -26,7 +26,8 @@ const kernel = (function () {
   const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
   const fs = require('fs')
   const config = JSON.parse(fs.readFileSync(configPath))
-  if (!Kernel.init(config)) {
+  console.info(config)
+  if (!Kernel.init(config, 1)) {
     console.error('init kernel fail')
   }
   return Kernel

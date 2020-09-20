@@ -1,4 +1,5 @@
 #include "log.h"
+#include "lmdb/lmdb.h"
 
 namespace caxios {
   std::string err2str(int err) {
@@ -6,7 +7,7 @@ namespace caxios {
       return strerror(err);
     }
     else {
-      return "??";
+      return mdb_strerror(err);
     }
   }
 }

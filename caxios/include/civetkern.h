@@ -13,11 +13,12 @@ namespace caxios{
     static Nan::Persistent<v8::Function> constructor;
 
   public:
-    explicit CAxios(std::string str);
+    explicit CAxios(const std::string& str);
     ~CAxios();
     void Init(v8::Local<v8::Object> exports);
 
-    CV_UINT GenNextFilesID(int cnt = 1);
+    std::vector<CV_UINT> GenNextFilesID(int cnt = 1);
+    bool SwitchDatabase(const std::string& dbname);
 
   private:
 

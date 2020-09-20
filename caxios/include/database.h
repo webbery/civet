@@ -8,21 +8,30 @@ namespace caxios{
 
   typedef unsigned int CV_UINT;
 
+  enum DATABASE_OPERATOR {
+    NORMAL = 0,     // 未操作状态
+    TRANSACTION,    // 有数据写入, 待提交
+  };
+
   class CDatabase {
   public:
     CDatabase(const std::string& dbpath);
     ~CDatabase();
 
     std::vector<CV_UINT> GenerateNextFilesID(int cnt = 1);
+    bool SwitchDatabase(const std::string& dbname);
 
-    bool Put(const std::string& key);
+  private:
+    bool Put(size_t key, void* pData, size_t len, int flag);
+    bool Get(size_t key, void*& pData, size_t& len);
+    bool Commit();
 
   private:
     MDB_env* m_pDBEnv = nullptr;
-    MDB_txn* parentTransaction = nullptr;
-    MDB_txn* transaction = nullptr;
-    MDB_dbi dbi;
-    MDB_cursor *cursor = nullptr;
+    MDB_txn* m_pParentTransaction = nullptr;
+    MDB_txn* m_pTransaction = nullptr;
+    MDB_dbi dbi = -1;
+    DATABASE_OPERATOR m_dOperator = NORMAL;
   };
 }
 

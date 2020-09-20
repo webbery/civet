@@ -1,5 +1,5 @@
 import ImageBase from '../public/ImageBase'
-import localStorage from './LocalStorage'
+import Storage from '../public/Kernel'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
@@ -15,7 +15,7 @@ export class ImageParser {
 const parseChain = async (fullpath, stat, stepFinishCB) => {
   const path = require('path')
   const f = path.parse(fullpath)
-  const fid = await localStorage.generateID()
+  const fid = await Storage.generateFilesID()
   console.info(f.dir, f.base)
   let fileInfo = {
     id: fid,

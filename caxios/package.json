@@ -1,6 +1,6 @@
 {
     "name": "civetkern",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "",
     "scripts": {
         "install": "prebuild-install || node-gyp rebuild",
@@ -11,7 +11,7 @@
     "keywords": [
         "nodejs",
         "c++",
-        "civetk",
+        "civet",
         "addon"
     ],
     "gypfile": true,

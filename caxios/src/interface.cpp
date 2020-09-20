@@ -67,15 +67,35 @@ namespace caxios {
     if (Addon::m_pCaxios == nullptr) {
       auto curContext = Nan::GetCurrentContext();
       v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
-      Addon::m_pCaxios = new caxios::CAxios(ConvertToString(curContext->GetIsolate(), value));
-      node::AddEnvironmentCleanupHook(curContext->GetIsolate(), caxios::release, Addon::m_pCaxios);
+      Addon::m_pCaxios = new caxios::CAxios(ConvertToString(v8::Isolate::GetCurrent(), value));
+      node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
     }
     //info.GetReturnValue().Set((CAxios*)data->m_pCaxios);
   }
 
+  void switchDatabase(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (Addon::m_pCaxios == nullptr) return;
+    auto curContext = Nan::GetCurrentContext();
+    v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
+    bool res = Addon::m_pCaxios->SwitchDatabase(ConvertToString(v8::Isolate::GetCurrent(), value));
+    info.GetReturnValue().Set(res);
+  }
+
   void generateFilesID(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios == nullptr) {
-      Addon::m_pCaxios->GenNextFilesID();
+    if (Addon::m_pCaxios != nullptr) {
+      int cnt = 0;
+      if (info[0]->IsInt32()) {
+        cnt = info[0]->ToInt32(v8::Isolate::GetCurrent())->Value();
+      }
+      if (cnt <= 0) return;
+      auto result = Addon::m_pCaxios->GenNextFilesID(cnt);
+      Local<v8::Int32Array> arr = v8::Int32Array::New(
+        v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), cnt * sizeof(int32_t)), 0, cnt);
+      for (int idx = 0; idx < result.size(); ++idx) {
+        auto v = v8::Int32::New(v8::Isolate::GetCurrent(), result[idx]);
+        arr->Set(idx, v);
+      }
+      info.GetReturnValue().Set(arr);
     }
   }
 
@@ -118,6 +138,7 @@ NODE_MODULE_INIT() {
   Local<v8::External> external = v8::External::New(isolate, data);
 
   EXPORT_JS_FUNCTION(init);
+  EXPORT_JS_FUNCTION(switchDatabase);
   EXPORT_JS_FUNCTION(generateFilesID);
   EXPORT_JS_FUNCTION(addFiles);
   EXPORT_JS_FUNCTION(addTags);
