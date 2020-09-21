@@ -13,6 +13,8 @@
 ![73%](https://progress-bar.dev/73/?title=预览模块)
 ![70%](https://progress-bar.dev/70/?title=存储模块)
 
+项目讨论区(https://www.yuque.com/g/webberg/dacstu/docs)  
+
 ### 类似软件对比
 |  软件   | 开发平台  | 本地存储  | 图片支持 | Web插件 | 云盘支持 | 智能检索 | 协议 |
 | :----: | :----:   |  :----: | :----: | :----: | :----: | :----: | :----: |

@@ -48,7 +48,8 @@ export default {
       // if (this.$store.state.Picture.imageList.length > 80) {
       //   return this.$store.state.Picture.imageList.slice(0, 79)
       // }
-      return this.$store.state.Picture.imageList
+      // return this.$store.state.Picture.imageList
+      return []
     }
   },
   watch: {

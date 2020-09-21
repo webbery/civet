@@ -67,10 +67,17 @@ namespace caxios {
     if (Addon::m_pCaxios == nullptr) {
       auto curContext = Nan::GetCurrentContext();
       if (info[0]->IsObject()) {
-        v8::Local<v8::Object> obj = info[0]->ToObject();
-        v8::Local<v8::Array> props = obj->GetPropertyNames();
-        v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
-        Addon::m_pCaxios = new caxios::CAxios(ConvertToString(v8::Isolate::GetCurrent(), value));
+        v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent());
+        auto t = StringToValue(std::string("db.path"));
+        Local<v8::Array> props = obj->GetOwnPropertyNames(curContext).ToLocalChecked();
+        for (int i = 0, l = props->Length(); i < l; i++) {
+          Local<Value> localKey = props->Get(i);
+          Local<Value> localVal = obj->Get(curContext, localKey).ToLocalChecked();
+          std::string key = ConvertToString(localKey->ToString(v8::Isolate::GetCurrent()));
+          std::string val = ConvertToString(localVal->ToString(v8::Isolate::GetCurrent()));
+          std::cout << key << ":" << val << std::endl;
+        }
+        //Addon::m_pCaxios = new caxios::CAxios(value);
         node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
       }
     }
@@ -81,20 +88,13 @@ namespace caxios {
     if (Addon::m_pCaxios == nullptr) return;
     auto curContext = Nan::GetCurrentContext();
     v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
-    bool res = Addon::m_pCaxios->SwitchDatabase(ConvertToString(v8::Isolate::GetCurrent(), value));
+    bool res = Addon::m_pCaxios->SwitchDatabase(ConvertToString(value));
     info.GetReturnValue().Set(res);
   }
 
   void generateFilesID(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios != nullptr) {
-      int cnt = 0;
-      if (info[0]->IsInt32()) {
-#if V8_MAJOR_VERSION == 7
-        cnt = info[0]->ToInt32(v8::Isolate::GetCurrent())->Value();
-#elif V8_MAJOR_VERSION == 8
-        info[0]->Int32Value(Nan::GetCurrentContext()).To(&cnt);
-#endif
-      }
+      int cnt = ConvertToInt32(info[0]);
       if (cnt <= 0) return;
       auto result = Addon::m_pCaxios->GenNextFilesID(cnt);
       Local<v8::Int32Array> arr = v8::Int32Array::New(

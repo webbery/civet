@@ -4,7 +4,14 @@
 #include <node.h>
 
 namespace caxios {
-  std::string ConvertToString(v8::Isolate* isolate, const v8::Local<v8::String>& value);
+  std::string ConvertToString(const v8::Local<v8::String>& value);
+  int32_t ConvertToInt32(const v8::Local<v8::Value>& value);
+  template<typename Ret>
+  Ret GetValueFromObject(const v8::Local<v8::Object>& obj, const std::string& key) {
+    
+  }
+
+  v8::Local<v8::String> StringToValue(const std::string& str);
 }
 
 #endif

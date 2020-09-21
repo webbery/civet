@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, Menu, ipcMain } from 'electron'
-import '../renderer/store'
+// import '../renderer/store'
 // const cpus = require('os').cpus().length
 /**
  * Set `__static` path to static files in production
@@ -133,8 +133,6 @@ function sendWindowMessage(targetWindow, message, payload) {
 }
 
 app.on('ready', async () => {
-  console.info('****************************')
-
   // 检查配置数据是否存在
   const userDir = app.getPath('userData')
   const cfgFile = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')

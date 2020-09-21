@@ -24,6 +24,7 @@ namespace caxios{
   private:
     bool Put(size_t key, void* pData, size_t len, int flag);
     bool Get(size_t key, void*& pData, size_t& len);
+    bool Del(size_t key);
     bool Commit();
 
   private:

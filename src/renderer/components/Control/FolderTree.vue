@@ -31,8 +31,10 @@ export default {
   },
   data() {
     let expandTree = []
-    for (let idx = 0; idx < this.data.length; ++idx) {
-      expandTree.push(false)
+    if (this.data) {
+      for (let idx = 0; idx < this.data.length; ++idx) {
+        expandTree.push(false)
+      }
     }
     // console.info('folder length:', this.data.length)
     return {

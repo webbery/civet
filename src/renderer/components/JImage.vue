@@ -9,11 +9,11 @@
 </template>
 
 <script>
-// import sharp from 'sharp'
+import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 import bus from './utils/Bus'
-import Plugin from '@/../public/Plugin'
-// import log from '@/../public/Logger'
+// import Plugin from '@/../public/Plugin'
+import log from '@/../public/Logger'
 // import ImageProcess from '@/../public/ImageProcess'
 
 export default {
@@ -63,34 +63,34 @@ export default {
   },
   methods: {
     async readSource(src) {
-      const path = require('path')
-      const ext = path.extname(src)
-      this.loader = Plugin.getModuleByExt(ext)
-      await this.loader.load(src)
-      // this.box = document.getElementById(this.boxid)
-      // this.canvas = document.getElementById(this.id)
-      // this.canvas.width = this.box.offsetWidth
-      // this.canvas.height = this.box.offsetHeight
-      // this.context = this.canvas.getContext('2d')
-      // // console.info(src)
-      // if (typeof src === 'string') {
-      //   let {data, info} = await sharp(src).jpeg({force: true}).ensureAlpha()
-      //     .raw().toBuffer({ resolveWithObject: true })
-      //   // this.$store.dispatch('updateThumbnail', {path: this.src, thumbnail: data})
-      //   log.info(info)
-      //   this.originWidth = info.width
-      //   this.originHeight = info.height
-      //   this.imagewidth = info.width
-      //   this.imageheight = info.height
-      //   // console.info(data)
-      //   let img = new ImageData(new Uint8ClampedArray(data), info.width, info.height)
-      //   this.image = await createImageBitmap(img)
-      // } else {
-      //   // console.info('object', this.imagewidth, this.imageheight)
-      //   // let img = new ImageData(new Uint8ClampedArray(this.src), this.imagewidth, this.imageheight)
-      //   // this.image = await createImageBitmap(img)
-      //   // return this.src
-      // }
+      // const path = require('path')
+      // const ext = path.extname(src)
+      // this.loader = Plugin.getModuleByExt(ext)
+      // await this.loader.load(src)
+      this.box = document.getElementById(this.boxid)
+      this.canvas = document.getElementById(this.id)
+      this.canvas.width = this.box.offsetWidth
+      this.canvas.height = this.box.offsetHeight
+      this.context = this.canvas.getContext('2d')
+      // console.info(src)
+      if (typeof src === 'string') {
+        let {data, info} = await sharp(src).jpeg({force: true}).ensureAlpha()
+          .raw().toBuffer({ resolveWithObject: true })
+        // this.$store.dispatch('updateThumbnail', {path: this.src, thumbnail: data})
+        log.info(info)
+        this.originWidth = info.width
+        this.originHeight = info.height
+        this.imagewidth = info.width
+        this.imageheight = info.height
+        // console.info(data)
+        let img = new ImageData(new Uint8ClampedArray(data), info.width, info.height)
+        this.image = await createImageBitmap(img)
+      } else {
+        // console.info('object', this.imagewidth, this.imageheight)
+        // let img = new ImageData(new Uint8ClampedArray(this.src), this.imagewidth, this.imageheight)
+        // this.image = await createImageBitmap(img)
+        // return this.src
+      }
     },
     async loadImage(src) {
       await this.readSource(src)
@@ -183,7 +183,7 @@ export default {
         // this.scaleViewport(widthOffset, heightOffset)
         // this.scaleViewport()
       }
-      // this.context.scale(this.scale, this.scale)
+      this.context.scale(this.scale, this.scale)
     },
     rotateClockwise() {
       // const img = document.getElementById(this.id)

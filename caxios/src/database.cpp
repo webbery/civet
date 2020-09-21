@@ -132,6 +132,11 @@ namespace caxios {
     return true;
   }
 
+  bool CDatabase::Del(size_t key)
+  {
+    return true;
+  }
+
   bool CDatabase::Commit()
   {
     if (m_dOperator == NORMAL) return true;
