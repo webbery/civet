@@ -12,7 +12,7 @@ export default {
     load: async function (src) {
       let {data, info} = await sharp(src).jpeg({force: true}).ensureAlpha()
           .raw().toBuffer({ resolveWithObject: true })
-      console.info(info)
+      console.info('plugin jpg load')
       return [data, info.width, info.height]
     }
   }

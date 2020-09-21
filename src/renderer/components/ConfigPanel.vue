@@ -16,8 +16,18 @@
     </div>
   <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button>
   <div class="modules">
+    <el-divider content-position="left">可用插件</el-divider>
+    <el-collapse v-model="valiablePlugins" @change="handlePluginChange">
+      <div v-for="(item, idx) of valiablePlugins" :key="idx">
+      <el-collapse-item :title="item.name" :name="idx">
+        <div>
+          <el-checkbox v-model="item.valid"></el-checkbox>
+        </div>
+      </el-collapse-item>
+      </div>
+    </el-collapse>
     <el-divider content-position="left">插件配置</el-divider>
-    <el-collapse v-model="activeNames" @change="handleChange">
+    <el-collapse v-model="activeNames" @change="handleFormatChange">
       <el-collapse-item title="格式支持" name="1">
         <el-checkbox v-model="checked">jpg/bmp</el-checkbox>
       </el-collapse-item>
@@ -50,6 +60,7 @@ import { remote } from 'electron'
 import Service from './utils/Service'
 import Folder from './utils/Folder'
 import fs from 'fs'
+import Plugins from '@/../public/Plugin'
 
 export default {
   name: 'config-page',
@@ -66,6 +77,9 @@ export default {
         resource: {},
         db: {}
       },
+      valiablePlugins: [
+        {path: '', name: 'image', version: '0.0.1', valid: true}
+      ],
       plugins: {
         format: {},
         search: {}
@@ -78,8 +92,17 @@ export default {
     this.configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
     this.config = JSON.parse(fs.readFileSync(this.configPath))
     this.oldConfig = JSON.parse(JSON.stringify(this.config))
+    this.loadPlugins()
   },
   methods: {
+    loadPlugins: () => {
+      this.valiablePlugins = []
+      const modules = Plugins.load()
+      for (let plg of modules) {
+        let item = {path: '', name: plg.name, version: plg.version, valid: true}
+        this.valiablePlugins.push(item)
+      }
+    },
     onSelectResourcePath: () => {
       console.info('select resource Path')
     },

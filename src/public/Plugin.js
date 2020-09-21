@@ -52,14 +52,19 @@ function init(plgDir) {
   }
 }
 
+function load() {
+  if (thirdModules === null) {
+    const app = require('electron')
+    const root = app.getAppPath()
+    console.info('plugin dir:', root)
+    thirdModules = init(root + 'plugins')
+  }
+  return thirdModules
+}
 export default {
+  load: load,
   getModuleByExt: (ext) => {
-    if (thirdModules === null) {
-      const app = require('electron')
-      const root = app.getAppPath()
-      console.info('plugin dir:', root)
-      thirdModules = init(root + 'plugins')
-    }
+    load()
     for (let module of thirdModules) {
       if (module['type'] === 'file' && module['ext'].indexOf(ext) > -1) {
         return module

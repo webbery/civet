@@ -145,6 +145,9 @@ const messageProcessor = {
       readImages(fullpath)
     }
   },
+  'switchResource': (res) => {
+    Kernel.switchDatabase(res)
+  },
   'hasDirectory': async (data) => {
     console.info(data)
     let result = await localStorage.hasDirectory(data)

@@ -27,7 +27,7 @@ const kernel = (function () {
   const fs = require('fs')
   const config = JSON.parse(fs.readFileSync(configPath))
   console.info(config)
-  if (!Kernel.init(config, 1)) {
+  if (!Kernel.init(config)) {
     console.error('init kernel fail')
   }
   return Kernel

@@ -66,9 +66,13 @@ namespace caxios {
   void init(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios == nullptr) {
       auto curContext = Nan::GetCurrentContext();
-      v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
-      Addon::m_pCaxios = new caxios::CAxios(ConvertToString(v8::Isolate::GetCurrent(), value));
-      node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
+      if (info[0]->IsObject()) {
+        v8::Local<v8::Object> obj = info[0]->ToObject();
+        v8::Local<v8::Array> props = obj->GetPropertyNames();
+        v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
+        Addon::m_pCaxios = new caxios::CAxios(ConvertToString(v8::Isolate::GetCurrent(), value));
+        node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
+      }
     }
     //info.GetReturnValue().Set((CAxios*)data->m_pCaxios);
   }
@@ -134,6 +138,7 @@ namespace caxios {
   void removeClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
   void searchFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void findFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
 }
 
@@ -166,4 +171,5 @@ NODE_MODULE_INIT() {
   EXPORT_JS_FUNCTION(removeTags);
   EXPORT_JS_FUNCTION(removeClasses);
   EXPORT_JS_FUNCTION(searchFiles);
+  EXPORT_JS_FUNCTION(findFiles);
 }
