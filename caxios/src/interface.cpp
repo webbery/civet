@@ -68,16 +68,9 @@ namespace caxios {
       auto curContext = Nan::GetCurrentContext();
       if (info[0]->IsObject()) {
         v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent());
-        auto t = StringToValue(std::string("db.path"));
-        Local<v8::Array> props = obj->GetOwnPropertyNames(curContext).ToLocalChecked();
-        for (int i = 0, l = props->Length(); i < l; i++) {
-          Local<Value> localKey = props->Get(i);
-          Local<Value> localVal = obj->Get(curContext, localKey).ToLocalChecked();
-          std::string key = ConvertToString(localKey->ToString(v8::Isolate::GetCurrent()));
-          std::string val = ConvertToString(localVal->ToString(v8::Isolate::GetCurrent()));
-          std::cout << key << ":" << val << std::endl;
-        }
-        //Addon::m_pCaxios = new caxios::CAxios(value);
+        Local<Value> localVal = GetValueFromObject(obj, "db.path");
+        std::string val = ConvertToString(localVal->ToString(v8::Isolate::GetCurrent()));
+        Addon::m_pCaxios = new caxios::CAxios(val);
         node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
       }
     }
@@ -111,7 +104,26 @@ namespace caxios {
     }
   }
 
+  /**
+   * @brief
+   * @param info json looks like this:
+                 [{
+                    fileid: ,
+                    filename:'',
+                    fullpath:'file:// or http://',
+                    filetype:'',
+                    thumbnail:'base64',
+                    meta: {
+                      size: {type: 'value', value: 1024},
+                      create_time: {type: 'time', value: 1024}
+                    },
+                 }]
+                 meta数据可以被用来精确查询,因此需要利用B+树，使用值做key，meta的属性作为不同的表，
+                 fileid和作为存储的值， 同时文件表存储的meta数据是属性表编号及值ID
+   */
   void addFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (Addon::m_pCaxios != nullptr) {
+    }
   }
 
   void addTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
