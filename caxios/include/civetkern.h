@@ -5,7 +5,6 @@
 #include <nan.h>
 #include <string>
 #include "database.h"
-// #include <thread>
 
 namespace caxios{
   class CAxios : public Nan::ObjectWrap {

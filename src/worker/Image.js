@@ -36,17 +36,17 @@ const parseChain = async (fullpath, stat, stepFinishCB) => {
 }
 
 export class JImage extends ImageBase {
-  static async loadFromDB() {
-  }
+  // static async loadFromDB() {
+  // }
 
-  async saveDB() {
-    let image = await localStorage.getImageInfo(this.id)
-    if (image) {
-      console.info('update image')
-    } else {
-      localStorage.addImages([this])
-    }
-  }
+  // async saveDB() {
+  //   let image = await localStorage.getImageInfo(this.id)
+  //   if (image) {
+  //     console.info('update image')
+  //   } else {
+  //     localStorage.addImages([this])
+  //   }
+  // }
 
   toJson() {
     return JSON.parse(JSON.stringify(this))
@@ -89,7 +89,8 @@ class ImageMetaParser extends ImageParseBase {
       image.thumbnail = this.getImageThumbnail(meta)
     }
     try {
-      await localStorage.addImages([image])
+      await Storage.addFiles([image])
+      // await localStorage.addImages([image])
     } catch (err) {
       console.info('parse metadata error', err)
     }
@@ -158,8 +159,9 @@ class ImageTextParser extends ImageParseBase {
     image.keyword = image.tag
     // await localStorage.updateImage(image.id, 'keyword', image.keyword, this.step)
     try {
-      await localStorage.updateImageTags(image.id, image.tag)
-      await localStorage.nextStep(image.id)
+      await Storage.updateFileTags(image.id, image.tag)
+      // await localStorage.updateImageTags(image.id, image.tag)
+      // await localStorage.nextStep(image.id)
     } catch (err) {
       console.info('parse text error', err)
     }

@@ -11,5 +11,5 @@ const kernel = (function () {
 
 export default {
   init: (cfg) => { return kernel.init(cfg) },
-  addOrUpdateFiles: (src) => { return kernel.addOrUpdateFiles(src) }
+  addFiles: (src) => { return kernel.addFiles(src) }
 }

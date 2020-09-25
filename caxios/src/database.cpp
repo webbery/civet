@@ -64,7 +64,7 @@ namespace caxios {
       lastID += 1;
       filesID.emplace_back(lastID);
     }
-    if (!this->Put(TABLE_FILEID, &lastID, sizeof(CV_UINT), MDB_APPENDDUP)) {
+    if (!this->Put(TABLE_FILEID, &lastID, sizeof(CV_UINT))) {
     }
     return std::move(filesID);
   }
@@ -82,7 +82,7 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Put(size_t k, void* pData, size_t len, int flag) {
+  bool CDatabase::Put(size_t k, void* pData, size_t len) {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
     if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
