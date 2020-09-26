@@ -3,6 +3,7 @@
 import JString from '../public/String'
 import NLP from '../public/NLP'
 // import log from '../public/Logger'
+import Storage from '../public/Kernel'
 
 // 数据库版本
 const DBVersion = 1
@@ -39,8 +40,8 @@ const KeyCategory = 'v' + DBVersion + '.' + TableCategory
 const KeyUnCategory = 'v' + DBVersion + '.' + TableUnCategory
 
 function initDB(dbpath) {
-  const levelup = require('levelup')
-  const leveldown = require('leveldown')
+  // const levelup = require('levelup')
+  // const leveldown = require('leveldown')
   // const rocksdb = require('rocksdb')
   var db
   let dbname = ''
@@ -58,9 +59,11 @@ function initDB(dbpath) {
   } else {
     dbname = dbpath
   }
+  Storage.init(config)
   console.info('======', dbname, '======')
   return function() {
-    return db || (db = levelup(leveldown(dbname)))
+    return Storage
+    // return db || (db = levelup(leveldown(dbname)))
   }
 }
 let instance = initDB()

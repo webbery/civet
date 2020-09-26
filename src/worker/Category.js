@@ -1,4 +1,5 @@
-import localStorage from './LocalStorage'
+// import localStorage from './LocalStorage'
+import Kernel from '../public/Kernel'
 
 export class Category {
   constructor(json) {
@@ -14,7 +15,7 @@ export class CategoryArray {
   }
 
   static async loadFromDB() {
-    let category = await localStorage.getAllCategory()
+    let category = await Kernel.getAllClasses()
     let allCategory = new CategoryArray(category)
     return allCategory.data
   }

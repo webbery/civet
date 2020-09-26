@@ -1,5 +1,5 @@
 import JString from '../public/String'
-import localStorage from './LocalStorage'
+// import localStorage from './LocalStorage'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 import { CategoryArray } from './Category'
@@ -7,19 +7,19 @@ import { CategoryArray } from './Category'
 import Kernel from '../public/Kernel'
 
 /* ************************ ↓↓↓↓↓↓发布时注释掉该部分↓↓↓↓↓↓ ********************** */
-import Vue from 'vue'
-import App from './App'
-import ElementUI from 'element-ui'
-import 'element-theme-dark'
-if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
-Vue.config.productionTip = false
-Vue.use(ElementUI)
+// import Vue from 'vue'
+// import App from './App'
+// import ElementUI from 'element-ui'
+// import 'element-theme-dark'
+// if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
+// Vue.config.productionTip = false
+// Vue.use(ElementUI)
 
-/* eslint-disable no-new */
-new Vue({
-  components: { App },
-  template: '<App/>'
-}).$mount('#app')
+// /* eslint-disable no-new */
+// new Vue({
+//   components: { App },
+//   template: '<App/>'
+// }).$mount('#app')
 /* ************************ ↑↑↑↑↑发布时注释掉该部分↑↑↑↑↑ ********************** */
 
 Array.prototype.remove = function (val) {
@@ -148,84 +148,75 @@ const messageProcessor = {
   'switchResource': (res) => {
     Kernel.switchDatabase(res)
   },
-  'hasDirectory': async (data) => {
-    console.info(data)
-    let result = await localStorage.hasDirectory(data)
-    reply2Renderer(ReplyType.IS_DIRECTORY_EXIST, result)
-  },
-  'getImagesWithDirectoryFormat': async (data) => {
-    let result = await localStorage.getImagesWithDirectoryFormat()
-    reply2Renderer(ReplyType.REPLY_IMAGES_DIRECTORY, result)
-  },
   'getImagesInfo': async (data) => {
-    let imagesIndex = []
-    if (data === undefined) {
-      // 全部图片信息
-      let imagesSnap = await localStorage.getImagesSnap()
-      for (let imgID in imagesSnap) {
-        imagesIndex.push(imgID)
-      }
-    } else {
-      imagesIndex = data
-    }
-    let imgs = await localStorage.getImagesInfo(imagesIndex)
-    // console.info('getImagesInfo', imgs)
-    let images = []
-    for (let img of imgs) {
-      images.push(new JImage(img))
-    }
-    reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
+    // let imagesIndex = []
+    // if (data === undefined) {
+    //   // 全部图片信息
+    //   let imagesSnap = await localStorage.getImagesSnap()
+    //   for (let imgID in imagesSnap) {
+    //     imagesIndex.push(imgID)
+    //   }
+    // } else {
+    //   imagesIndex = data
+    // }
+    // let imgs = await localStorage.getImagesInfo(imagesIndex)
+    // // console.info('getImagesInfo', imgs)
+    // let images = []
+    // for (let img of imgs) {
+    //   images.push(new JImage(img))
+    // }
+    // reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
   'getImageInfo': async (imageID) => {
-    let img = await localStorage.getImageInfo(imageID)
+    let img = await localStorage.getFilesInfo(imageID)
     let image = new JImage(img)
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
   'addTag': async (data) => {
     // console.info(data.tagName)
-    await localStorage.addTag(data.imageID, data.tagName)
+    await Kernel.addTags(data.imageID, data.tagName)
   },
   'removeTag': async (data) => {
-    await localStorage.removeTag(data.tagName, data.imageID)
+    await Kernel.removeTags(data.tagName, data.imageID)
   },
   'getAllTags': async (data) => {
-    let allTags = await localStorage.getTags()
+    let allTags = await Kernel.getTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
   },
   'getAllTagsWithImages': async (data) => {
-    let allTags = await localStorage.getTagsWithImages()
+    let allTags = await Kernel.getTagsOfFiles()
     console.info('allTags', allTags)
     reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
   'findImageWithKeyword': async (keywords) => {
-    let allID = await localStorage.findImageWithKeyword(keywords)
+    let allID = await Kernel.searchFiles(keywords)
     // console.info('reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
     reply2Renderer(ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD, allID)
   },
   'addCategory': async (categoryName, chain, imageID) => {
-    return localStorage.addCategory(categoryName, chain, imageID)
+    return Kernel.addClasses(categoryName, chain, imageID)
   },
   'getAllCategory': async () => {
     let category = await CategoryArray.loadFromDB()
     reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
   'getUncategoryImages': async () => {
-    let uncateimgs = await localStorage.getUncategoryImages()
+    let uncateimgs = await Kernel.getUnClassifyFiles()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
   },
   'getUntagImages': async () => {
-    let untagimgs = await localStorage.getUntagImages()
+    let untagimgs = await Kernel.getUnTagFiles()
     reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
   },
   'updateImageCategory': async (data) => {
-    await localStorage.updateImageCatergory(data.imageID, data.category)
+    await localStorage.updateFileClass(data.imageID, data.category)
   },
   'updateCategoryName': async (oldName, newName) => {
-    await localStorage.changeCategoryName(oldName, newName)
+    await localStorage.updateClassName(oldName, newName)
   },
   'reInitDB': (data) => {
-    localStorage.reloadDB(data)
-    reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
+    // localStorage.reloadDB(data)
+    // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
   }
 }
 

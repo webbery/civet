@@ -74,11 +74,11 @@ namespace caxios {
 	//}
 
 	CAxios::~CAxios() {
-    std::cout<< "~CAxios()"<<std::endl;
     if (m_pDatabase) {
       delete m_pDatabase;
       m_pDatabase = nullptr;
     }
+    std::cout << "~CAxios()" << std::endl;
   }
 
   void CAxios::Release(void* data) {

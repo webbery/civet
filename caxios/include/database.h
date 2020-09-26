@@ -22,8 +22,7 @@ namespace caxios{
     bool SwitchDatabase(const std::string& dbname);
 
   private:
-    bool Put(size_t key, void* pData, size_t len);
-    bool Add(size_t key, void* pData, size_t len);
+    bool Put(size_t key, void* pData, size_t len, int flag = MDB_CURRENT);
     bool Get(size_t key, void*& pData, size_t& len);
     bool Del(size_t key);
     bool Commit();

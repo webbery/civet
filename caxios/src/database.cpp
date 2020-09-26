@@ -82,7 +82,7 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Put(size_t k, void* pData, size_t len) {
+  bool CDatabase::Put(size_t k, void* pData, size_t len, int flag) {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
     if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
@@ -95,23 +95,16 @@ namespace caxios {
     MDB_val key, datum;
     key.mv_data = reinterpret_cast<void*>(&k);
     key.mv_size = sizeof(size_t);
-    if (falg == MDB_CURRENT) { // update value of key
+    int cursor_flag = 0;
+    if (flag == MDB_CURRENT) { // update value of key
       rc = mdb_cursor_get(cursor, &key, &datum, MDB_FIRST);
-      datum.mv_data = pData;
-      datum.mv_size = len;
-      int cursor_flag = 0;
       if (rc != MDB_NOTFOUND) {
         cursor_flag = MDB_CURRENT;
       }
-      if (int rc = mdb_cursor_put(cursor, &key, &datum, cursor_flag)) {
-        std::cout << "mdb_put fail: " << err2str(rc) << std::endl;
-        m_dOperator = NORMAL;
-        mdb_cursor_close(cursor);
-        return false;
-      }
     }
-    // append value to key
-    if (int rc = mdb_cursor_put(cursor, &key, &datum, 0)) {
+    datum.mv_data = pData;
+    datum.mv_size = len;
+    if (int rc = mdb_cursor_put(cursor, &key, &datum, cursor_flag)) {
       std::cout << "mdb_put fail: " << err2str(rc) << std::endl;
       m_dOperator = NORMAL;
       mdb_cursor_close(cursor);

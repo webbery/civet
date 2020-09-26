@@ -188,7 +188,7 @@ namespace caxios {
       if (info[0]->IsObject()) {
         v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent());
         Local<Value> localVal = GetValueFromObject(obj, "db.path");
-        std::string val = ConvertToString(localVal->ToString(v8::Isolate::GetCurrent()));
+        std::string val = ConvertToString(localVal);
         Addon::m_pCaxios = new caxios::CAxios(val);
         node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
         info.GetReturnValue().Set(true);
@@ -241,37 +241,49 @@ namespace caxios {
         std::vector<unsigned int> _gid;
       };
       Nan::AsyncQueueWorker(new PromiseWorker(callback, cnt));
-
-      
     }
   }
 
   /**
    * @brief
-   * @param info json looks like this:
-                 [{
-                    fileid: ,
-                    filename:'',
-                    fullpath:'file:// or http://',
-                    filetype:'',
-                    thumbnail:'base64',
-                    meta: {
-                      size: {type: 'value', value: 1024},
-                      create_time: {type: 'time', value: 1024}
-                    },
-                 }]
-                 meta数据可以被用来精确查询,因此需要利用B+树，使用值做key，meta的属性作为不同的表，
-                 fileid和作为存储的值， 同时文件表存储的meta数据是属性表编号及值ID
+   * @param info describe here: https://www.yuque.com/webberg/dacstu/gi9q59#comment-880091
    */
   void addFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    using json = nlohmann::json;
     if (Addon::m_pCaxios != nullptr) {
-      if (info[0]->IsArray()) {
-        v8::Local<v8::Array> arr = info[0].As<v8::Array>();
-        json cj;
-        for (int i = 0, l = arr->Length(); i < l; i++)
-        {
+      class PromiseWorker : public Nan::AsyncWorker {
+      public:
+        PromiseWorker(Nan::Callback* cb, const v8::Local<v8::Array>& files)
+          :Nan::AsyncWorker(cb), _files(files) {}
+
+        void Execute() {
+          std::cout << "Begin addFiles Execute\n";
+          Nan::HandleScope scope;
+          std::cout << "Begin addFiles Execute\n";
+          for (int i = 0, l = _files->Length(); i < l; i++)
+          {
+            v8::Local<v8::Value> localItem = _files->Get(i);
+            if (localItem->IsObject()) {
+              ForeachObject(localItem, [&](const v8::Local<v8::Value>& k, const v8::Local<v8::Value>& v) {
+                std::cout << ConvertToString(k) << std::endl;
+              });
+            }
+          }
+          std::cout << "addFiles Execute\n";
         }
+
+        void HandleOKCallback() {
+          Nan::HandleScope scope;
+          v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(true);
+          Local<Value> argv[] = { Nan::Null(), result };
+          callback->Call(2, argv);
+        }
+      private:
+        v8::Local<v8::Array> _files;
+      };
+      if (info[0]->IsArray()) {
+        Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
+        v8::Local<v8::Array> arr = info[0].As<v8::Array>();
+        Nan::AsyncQueueWorker(new PromiseWorker(callback, arr));
       }
     }
   }
@@ -293,7 +305,7 @@ namespace caxios {
   void getUnTagFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void getUnClassifyFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void getAllClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void getTagsOfImages(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getTagsOfFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
   void removeFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void removeTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
@@ -328,7 +340,7 @@ NODE_MODULE_INIT() {
   EXPORT_JS_FUNCTION(getUnTagFiles);
   EXPORT_JS_FUNCTION(getUnClassifyFiles);
   EXPORT_JS_FUNCTION(getAllClasses);
-  EXPORT_JS_FUNCTION(getTagsOfImages);
+  EXPORT_JS_FUNCTION(getTagsOfFiles);
   EXPORT_JS_FUNCTION(removeFiles);
   EXPORT_JS_FUNCTION(removeTags);
   EXPORT_JS_FUNCTION(removeClasses);

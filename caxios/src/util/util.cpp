@@ -16,6 +16,11 @@ namespace caxios {
     return std::move(str);
   }
 
+  std::string ConvertToString(const v8::Local<v8::Value>& value)
+  {
+    return ConvertToString(value->ToString(v8::Isolate::GetCurrent()));
+  }
+
   int32_t ConvertToInt32(const v8::Local<v8::Value>& value)
   {
     int32_t cnt = 0;
@@ -58,6 +63,18 @@ namespace caxios {
       }
     }
     return ret;
+  }
+
+  void ForeachObject(const v8::Local<v8::Value>& obj, std::function<void(const v8::Local<v8::Value>&, const v8::Local<v8::Value>&)> func)
+  {
+    auto item = v8::Local<v8::Object>::Cast(obj);
+    v8::Local<v8::Array> props = item->GetOwnPropertyNames(Nan::GetCurrentContext()).ToLocalChecked();
+    for (int i = 0, l = props->Length(); i < l; i++) {
+      v8::Local<v8::Value> key = props->Get(i);
+      std::string propName = ConvertToString(key->ToString(v8::Isolate::GetCurrent()));
+      v8::Local<v8::Value> value = item->Get(Nan::GetCurrentContext(), key).ToLocalChecked();
+      func(key, value);
+    }
   }
 
   v8::Local<v8::String> StringToValue(const std::string& str)
