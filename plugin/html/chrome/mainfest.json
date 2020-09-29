@@ -1,0 +1,30 @@
+{
+  "name": "civet-web-plugin",
+  "version": "0.1",
+  "description": "保存当前网页文本信息到civet",
+  "manifest_version": 2,
+  "icons": {
+    "16": "apple-touch-icon.png",
+    "32": "apple-touch-icon.png",
+    "48": "apple-touch-icon.png",
+    "128": "apple-touch-icon.png"
+  },
+  "browser_action": {
+    "default_icon": "apple-touch-icon.png",
+    "default_popup": "popup.html"
+  },
+  "commands": {
+    "toggle-tags": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "mac": "MacCtrl+S"
+      },
+      "description": "Toggle Tags"
+    }
+  },
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  }
+}
