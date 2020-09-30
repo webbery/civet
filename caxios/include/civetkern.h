@@ -4,7 +4,8 @@
 #include <node_object_wrap.h>
 #include <nan.h>
 #include <string>
-#include "database.h"
+#include "db_manager.h"
+#include "datum_type.h"
 
 namespace caxios{
   class CAxios : public Nan::ObjectWrap {
@@ -16,14 +17,12 @@ namespace caxios{
     ~CAxios();
     void Init(v8::Local<v8::Object> exports);
 
-    std::vector<CV_UINT> GenNextFilesID(int cnt = 1);
-    bool SwitchDatabase(const std::string& dbname);
+    std::vector<FileID> GenNextFilesID(int cnt = 1);
+    bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files);
 
   private:
 
     static void Release(void* data);
-
-    static bool AddOrUpdateFiles(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
     static bool AddOrUpdateClass(const Nan::FunctionCallbackInfo<v8::Value>& info);
     bool DeleteClass(const Nan::FunctionCallbackInfo<v8::Value>& info);
@@ -45,7 +44,7 @@ namespace caxios{
     void Run();
 
   private:
-    CDatabase* m_pDatabase = nullptr;
+    DBManager* m_pDBManager = nullptr;
   };
 }
 

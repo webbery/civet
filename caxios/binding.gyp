@@ -8,6 +8,7 @@
         "src/util/util.cpp",
         "src/interface.cpp",
         "src/database.cpp",
+        "src/db_manager.cpp",
         "src/log.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [

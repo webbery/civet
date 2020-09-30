@@ -3,10 +3,11 @@
 #include "lmdb/lmdb.h"
 #include <string>
 #include <vector>
+#include <map>
+#include <functional>
+#include "datum_type.h"
 
 namespace caxios{
-
-  typedef unsigned int CV_UINT;
 
   enum DATABASE_OPERATOR {
     NORMAL = 0,     // Î´²Ù×÷×´Ì¬
@@ -18,20 +19,19 @@ namespace caxios{
     CDatabase(const std::string& dbpath);
     ~CDatabase();
 
-    std::vector<CV_UINT> GenerateNextFilesID(int cnt = 1);
-    bool SwitchDatabase(const std::string& dbname);
+    MDB_dbi OpenDatabase(const std::string& dbname);
+    void CloseDatabase(MDB_dbi);
 
-  private:
-    bool Put(size_t key, void* pData, size_t len, int flag = MDB_CURRENT);
-    bool Get(size_t key, void*& pData, size_t& len);
-    bool Del(size_t key);
+    bool Put(MDB_dbi dbi, size_t key, void* pData, size_t len, int flag = MDB_CURRENT);
+    bool Get(MDB_dbi dbi, size_t key, void*& pData, size_t& len);
+    bool Each(MDB_dbi dbi, std::function<void(size_t key, void* pData, size_t len)> cb);
+    bool Del(MDB_dbi dbi, size_t key);
     bool Commit();
 
   private:
     MDB_env* m_pDBEnv = nullptr;
     MDB_txn* m_pParentTransaction = nullptr;
     MDB_txn* m_pTransaction = nullptr;
-    MDB_dbi dbi = -1;
     DATABASE_OPERATOR m_dOperator = NORMAL;
   };
 }

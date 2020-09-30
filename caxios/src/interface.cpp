@@ -23,122 +23,6 @@ using v8::Value;
 
 namespace caxios {
 
-  typedef struct
-  {
-    int32_t x;
-    int32_t y;
-    int32_t PrimeCount;
-
-    int asynchronous_action_status;
-    napi_deferred deferred;
-    napi_async_work work;
-  } prom_data_ex_t;
-
-  void ExecutePromise(napi_env env, void* data) {
-    prom_data_ex_t* promDataEx = (prom_data_ex_t*)data;
-
-    // run function
-    //
-    promDataEx->asynchronous_action_status = 0;
-  }
-
-  void CompletePromise(napi_env env, napi_status status, void* data) {
-    napi_value rcValue;
-    prom_data_ex_t* promDataEx = (prom_data_ex_t*)data;
-
-    napi_create_int32(env, promDataEx->PrimeCount, &rcValue);
-
-    if (promDataEx->asynchronous_action_status == 0) // Success
-    {
-      status = napi_resolve_deferred(env, promDataEx->deferred, rcValue);
-    }
-    else
-    {
-      napi_value undefined;
-
-      status = napi_get_undefined(env, &undefined);
-      status = napi_reject_deferred(env, promDataEx->deferred, undefined);
-    }
-    if (status != napi_ok)
-    {
-      napi_throw_error(env, NULL, "Unable to create promise result.");
-    }
-
-    napi_delete_async_work(env, promDataEx->work);
-    free(promDataEx);
-  }
-
-  napi_value PromiseFunc(napi_env env, napi_callback_info info)
-  {
-    napi_value promise;
-    napi_status status;
-    napi_value argv[2];
-
-    // [in-out] argc: Specifies the size of  argv array and receives the actual count of arguments
-    size_t argc = 2;
-    status = napi_get_cb_info(env, info, &argc, argv, NULL, NULL);
-    if (status != napi_ok || argc != 2)
-    {
-      napi_throw_error(env, "EINVAL", "arguments missmatch or Unable to get javacript data");
-      return NULL;
-    }
-
-    // Allocate storage space for passing informaiton to the Async operation
-    prom_data_ex_t* promDataEx = (prom_data_ex_t*)malloc(sizeof(prom_data_ex_t));
-    if (promDataEx == NULL)
-    {
-      napi_throw_error(env, NULL, "Memory allocation error");
-      return NULL;
-    }
-
-    promDataEx->asynchronous_action_status = 1;
-
-
-    if ((status = napi_get_value_int32(env, argv[0], &promDataEx->x)) != napi_ok)
-    {
-      napi_throw_error(env, "EINVAL", "parm 1: int32 expected");
-      return NULL;
-    }
-
-    if ((status = napi_get_value_int32(env, argv[1], &promDataEx->y)) != napi_ok)
-    {
-      napi_throw_error(env, "EINVAL", "parm 2: int32 expected");
-      return NULL;
-    }
-
-    // Create a promise object.
-    status = napi_create_promise(env, &promDataEx->deferred, &promise);
-    if (status != napi_ok)
-    {
-      napi_throw_error(env, NULL, "Unable to create promise.");
-    }
-
-    napi_valuetype x_type;
-    napi_valuetype y_type;
-
-    napi_typeof(env, argv[0], &x_type);
-    napi_typeof(env, argv[1], &y_type);
-    // Check for the correct calling of the function.
-    if (x_type != napi_number || y_type != napi_number)
-    {
-      // Reject the promise (at least one of the param is not a number)
-      napi_value str;
-      napi_create_string_utf8(env, "Promise rejected: Argument not a number.", NAPI_AUTO_LENGTH, &str);
-      napi_reject_deferred(env, promDataEx->deferred, str);
-      free(promDataEx);
-    }
-    else
-    {
-      // Create the async function.
-      napi_value resource_name;
-      napi_create_string_utf8(env, "PromiseFunc", -1, &resource_name);
-      napi_create_async_work(env, NULL, resource_name, ExecutePromise, CompletePromise, promDataEx, &promDataEx->work);
-      napi_queue_async_work(env, promDataEx->work);
-    }
-
-    return promise;
-  }
-
   class Addon {
   public:
     Addon(Isolate* isolate, Local<Object> exports) {
@@ -198,22 +82,13 @@ namespace caxios {
     info.GetReturnValue().Set(false);
   }
 
-  void switchDatabase(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios == nullptr) return;
-    auto curContext = Nan::GetCurrentContext();
-    v8::Local<v8::String> value(info[0]->ToString(curContext).FromMaybe(v8::Local<v8::String>()));
-    bool res = Addon::m_pCaxios->SwitchDatabase(ConvertToString(value));
-    info.GetReturnValue().Set(res);
-  }
-
   void generateFilesID(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    Nan::HandleScope scope;
     if (Addon::m_pCaxios != nullptr) {
       int cnt = ConvertToInt32(info[0]);
       if (cnt <= 0) return;
       Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
 
-      class PromiseWorker : public Nan::AsyncWorker {
+      class PromiseWorker final : public Nan::AsyncWorker {
       public:
         PromiseWorker(Nan::Callback* cb, int cnt)
           :Nan::AsyncWorker(cb), _cnt(cnt) {}
@@ -250,41 +125,65 @@ namespace caxios {
    */
   void addFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios != nullptr) {
-      class PromiseWorker : public Nan::AsyncWorker {
+      class PromiseWorker final : public Nan::AsyncWorker {
       public:
-        PromiseWorker(Nan::Callback* cb, const v8::Local<v8::Array>& files)
-          :Nan::AsyncWorker(cb), _files(files) {}
+        PromiseWorker(Nan::Callback* cb, const std::vector <std::tuple< FileID, MetaItems, Keywords >>& vFiles)
+          :Nan::AsyncWorker(cb), _vFiles(vFiles) {}
 
         void Execute() {
-          std::cout << "Begin addFiles Execute\n";
-          Nan::HandleScope scope;
-          std::cout << "Begin addFiles Execute\n";
-          for (int i = 0, l = _files->Length(); i < l; i++)
-          {
-            v8::Local<v8::Value> localItem = _files->Get(i);
-            if (localItem->IsObject()) {
-              ForeachObject(localItem, [&](const v8::Local<v8::Value>& k, const v8::Local<v8::Value>& v) {
-                std::cout << ConvertToString(k) << std::endl;
-              });
-            }
-          }
-          std::cout << "addFiles Execute\n";
+          _result = Addon::m_pCaxios->AddFiles(_vFiles);
         }
 
         void HandleOKCallback() {
           Nan::HandleScope scope;
-          v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(true);
+          v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(_result);
           Local<Value> argv[] = { Nan::Null(), result };
           callback->Call(2, argv);
         }
       private:
-        v8::Local<v8::Array> _files;
+        bool _result;
+        std::vector <std::tuple< FileID, MetaItems, Keywords >> _vFiles;
       };
-      if (info[0]->IsArray()) {
-        Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
-        v8::Local<v8::Array> arr = info[0].As<v8::Array>();
-        Nan::AsyncQueueWorker(new PromiseWorker(callback, arr));
-      }
+      std::vector <std::tuple< FileID, MetaItems, Keywords >> vFiles;
+      FileID fileID = 0;
+      MetaItems metaItems;
+      Keywords keywords;
+      std::map<std::string, std::function<void(const v8::Local<v8::Value>&)> > mMetaProccess;
+      mMetaProccess["fileid"] = [&fileID](const v8::Local<v8::Value>& v) {
+        fileID = ConvertToUInt32(v);
+      };
+      mMetaProccess["meta"] = [&metaItems](const v8::Local<v8::Value>& v) {
+        if (v->IsArray()) {
+          ForeachArray(v, [&metaItems](const v8::Local<v8::Value>& item) {
+            if (item->IsObject()) {
+              MetaItem meta;
+              ForeachObject(item, [&meta](const v8::Local<v8::Value>& k, const v8::Local<v8::Value>& v) {
+                std::string sKey = ConvertToString(k);
+                std::string sVal = ConvertToString(v);
+                meta[sKey] = sVal;
+                //std::cout << sKey << ": " << sVal << std::endl;
+              });
+              metaItems.emplace_back(meta);
+            }
+          });
+        }
+      };
+      mMetaProccess["keyword"] = [](const v8::Local<v8::Value>& v) {
+      };
+      ForeachArray(info[0], [&vFiles, &fileID, &metaItems, &keywords, &mMetaProccess](const v8::Local<v8::Value>& item) {
+        if (item->IsObject()) {
+          ForeachObject(item, [&](const v8::Local<v8::Value>& k, const v8::Local<v8::Value>& v) {
+            std::string sKey = ConvertToString(k);
+            if (mMetaProccess.find(sKey) != mMetaProccess.end()) mMetaProccess[sKey](v);
+            else {
+              std::cout << "Key [" << sKey << "] callback not exist.\n";
+            }
+          });
+          vFiles.emplace_back(std::make_tuple(fileID, metaItems,keywords));
+        }
+      });
+      Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
+      Nan::AsyncQueueWorker(new PromiseWorker(callback, vFiles));
     }
   }
 
@@ -299,15 +198,24 @@ namespace caxios {
   void updateFileClass(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void updateClassName(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
-  void getFilesInfo(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void getFilesSnap(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void getFilesInfo(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (Addon::m_pCaxios != nullptr) {
+    }
+  }
+  void getFilesSnap(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (Addon::m_pCaxios != nullptr) {
+    }
+  }
   void getAllTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void getUnTagFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void getUnClassifyFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void getAllClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void getTagsOfFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
-  void removeFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void removeFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (Addon::m_pCaxios != nullptr) {
+    }
+  }
   void removeTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void removeClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
@@ -325,7 +233,6 @@ NODE_MODULE_INIT() {
   Local<v8::External> external = v8::External::New(isolate, data);
 
   EXPORT_JS_FUNCTION(init);
-  EXPORT_JS_FUNCTION(switchDatabase);
   EXPORT_JS_FUNCTION(generateFilesID);
   EXPORT_JS_FUNCTION(addFiles);
   EXPORT_JS_FUNCTION(addTags);

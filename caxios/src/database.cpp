@@ -8,17 +8,20 @@
 #endif
 #include "log.h"
 
-#define MAX_NUM_DATABASE  4
-
-#define TABLE_FILEID     32   // "file_cur_id"
-#define TABLE_FILESNAP   33   // "file_snap"
+#define MAX_NUM_DATABASE  32
 
 namespace caxios {
+  enum MetaType {
+    BT_BINARY,
+    BT_STRING,
+    BT_VALUE
+  };
 
   CDatabase::CDatabase(const std::string& dbpath) {
 #ifdef __APPLE__
     int status = mkdir(dbpath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #else
+    T_LOG("log test");
     namespace fs = std::filesystem;
     if (!fs::exists(dbpath)) {
       fs::create_directory(dbpath);
@@ -44,45 +47,28 @@ namespace caxios {
     }
   }
   CDatabase::~CDatabase() {
-    mdb_txn_commit(m_pTransaction);
-    mdb_close(m_pDBEnv, dbi);
-    mdb_env_close(m_pDBEnv);
+
     std::cout<<"~CDatabase()\n";
   }
 
-  std::vector<CV_UINT> CDatabase::GenerateNextFilesID(int cnt) {
-    std::vector<CV_UINT> filesID;
-    void* pData = nullptr;
-    CV_UINT lastID = 0;
-    size_t len = 0;
-    if (this->Get(TABLE_FILEID, pData, len)) {
-      if (pData != nullptr) {
-        lastID = *(CV_UINT*)pData;
-      }
-    }
-    for (int idx = 0; idx < cnt; ++idx) {
-      lastID += 1;
-      filesID.emplace_back(lastID);
-    }
-    if (!this->Put(TABLE_FILEID, &lastID, sizeof(CV_UINT))) {
-    }
-    return std::move(filesID);
-  }
-
-  bool CDatabase::SwitchDatabase(const std::string& dbname)
+  MDB_dbi CDatabase::OpenDatabase(const std::string& dbname)
   {
-    if (dbi != -1) {
-      mdb_txn_commit(m_pTransaction);
-      mdb_dbi_close(m_pDBEnv, dbi);
-    }
+    MDB_dbi dbi = -1;
     if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), MDB_CREATE | MDB_INTEGERKEY | MDB_DUPSORT, &dbi)) {
       std::cout << "mdb_dbi_open fail: " << err2str(rc) << ", dbname: "<< dbname<< std::endl;
-      return false;
+      return -1;
     }
-    return true;
+    return dbi;
   }
 
-  bool CDatabase::Put(size_t k, void* pData, size_t len, int flag) {
+  void CDatabase::CloseDatabase(MDB_dbi dbi)
+  {
+    this->Commit();
+    mdb_close(m_pDBEnv, dbi);
+    mdb_env_close(m_pDBEnv);
+  }
+
+  bool CDatabase::Put(MDB_dbi dbi, size_t k, void* pData, size_t len, int flag) {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
     if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
@@ -114,7 +100,7 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Get(size_t k, void*& pData, size_t& len)
+  bool CDatabase::Get(MDB_dbi dbi, size_t k, void*& pData, size_t& len)
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
@@ -141,7 +127,18 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Del(size_t key)
+  bool CDatabase::Each(MDB_dbi dbi, std::function<void(size_t key, void* pData, size_t len)> cb)
+  {
+    MDB_cursor* cursor = nullptr;
+    int rc = 0;
+    if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
+      std::cout << "mdb_cursor_open fail: " << err2str(rc) << std::endl;
+      return false;
+    }
+    return true;
+  }
+
+  bool CDatabase::Del(MDB_dbi dbi, size_t key)
   {
     return true;
   }

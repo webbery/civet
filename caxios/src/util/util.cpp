@@ -34,6 +34,19 @@ namespace caxios {
     return cnt;
   }
 
+  uint32_t ConvertToUInt32(const v8::Local<v8::Value>& value)
+  {
+    uint32_t cnt = 0;
+    if (value->IsUint32()) {
+//#if V8_MAJOR_VERSION == 7
+//      cnt = value->ToUint32(Nan::GetCurrentContext())->Value();
+//#elif V8_MAJOR_VERSION == 8
+      value->Uint32Value(Nan::GetCurrentContext()).To(&cnt);
+//#endif
+    }
+    return cnt;
+  }
+
   v8::Local<v8::Value> GetValueFromValue(const v8::Local<v8::Value>& value, const std::string& key)
   {
     if (!key.empty()) {
@@ -74,6 +87,18 @@ namespace caxios {
       std::string propName = ConvertToString(key->ToString(v8::Isolate::GetCurrent()));
       v8::Local<v8::Value> value = item->Get(Nan::GetCurrentContext(), key).ToLocalChecked();
       func(key, value);
+    }
+  }
+
+  void ForeachArray(const v8::Local<v8::Value>& arr, std::function<void(const v8::Local<v8::Value>&)> func)
+  {
+    if (arr->IsArray()) {
+      v8::Local<v8::Array> lArr = arr.As<v8::Array>();
+      for (int i = 0, l = lArr->Length(); i < l; i++)
+      {
+        v8::Local<v8::Value> localItem = lArr->Get(i);
+        func(localItem);
+      }
     }
   }
 

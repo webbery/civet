@@ -1,36 +1,16 @@
 #include "civetkern.h"
 #include <iostream>
 #include "util/util.h"
-
 #define JS_CLASS_NAME  "Caxios"
 
 using namespace v8;
 
 namespace caxios {
 
-	//void CAxios::Init(v8::Local<v8::Object> exports)
-	//{
-	//	v8::Local<v8::Context> context = exports->CreationContext();
-	//	Nan::HandleScope scope;
-
-	//	// Prepare constructor template
-	//	v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
-	//	tpl->SetClassName(Nan::New(JS_CLASS_NAME).ToLocalChecked());
-	//	tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-	//	// Prototype
-	//	//Nan::SetPrototypeMethod(tpl, "release", Release);
-
-	//	constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
-	//	exports->Set(context,
-	//		Nan::New(JS_CLASS_NAME).ToLocalChecked(),
-	//		tpl->GetFunction(context).ToLocalChecked());
-	//}
-
 	CAxios::CAxios(const std::string& str) {
     std::cout<< "CAxios("<< str <<")"<<std::endl;
-    if (m_pDatabase == nullptr) {
-      m_pDatabase = new CDatabase(str);
+    if (m_pDBManager == nullptr) {
+      m_pDBManager = new DBManager(str);
     }
   }
 
@@ -39,44 +19,20 @@ namespace caxios {
     this->Wrap(exports);
   }
 
-  std::vector<CV_UINT> CAxios::GenNextFilesID(int cnt)
+  std::vector<FileID> CAxios::GenNextFilesID(int cnt)
   {
-    return m_pDatabase->GenerateNextFilesID(cnt);
+    return m_pDBManager->GenerateNextFilesID(cnt);
   }
 
-  bool CAxios::SwitchDatabase(const std::string& dbname)
+  bool CAxios::AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files)
   {
-    return m_pDatabase->SwitchDatabase(dbname);
+    return m_pDBManager->AddFiles(files);
   }
-
-  //void CAxios::New(const Nan::FunctionCallbackInfo<v8::Value>& info)
-	//{
-	//	v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
-	//	if (info.IsConstructCall()) {
-	//		// Invoked as constructor: `new MyObject(...)`
- //     if (info[0]->IsString()) {
- //       v8::Local<v8::String> value(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
- //       CAxios* obj = new CAxios(ConvertToString(value));
- //       obj->Wrap(info.This());
- //       info.GetReturnValue().Set(info.This());
- //       return;
- //     }
- //     std::cout << "wrong params" << std::endl;
- //   }
-	//	else {
-	//		// Invoked as plain function `MyObject(...)`, turn into construct call.
-	//		const int argc = 1;
-	//		v8::Local<v8::Value> argv[argc] = { info[0] };
-	//		v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-	//		info.GetReturnValue().Set(
-	//			cons->NewInstance(context, argc, argv).ToLocalChecked());
-	//	}
-	//}
 
 	CAxios::~CAxios() {
-    if (m_pDatabase) {
-      delete m_pDatabase;
-      m_pDatabase = nullptr;
+    if (m_pDBManager) {
+      delete m_pDBManager;
+      m_pDBManager = nullptr;
     }
     std::cout << "~CAxios()" << std::endl;
   }
@@ -85,10 +41,6 @@ namespace caxios {
     std::cout<< "Begin CAxios::Release()"<<std::endl;
     // delete static_cast<CAxios*>(data);
     std::cout << "Finish CAxios::Release()" << std::endl;
-  }
-
-  bool CAxios::AddOrUpdateFiles(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    return true;
   }
 
   bool CAxios::AddOrUpdateClass(const Nan::FunctionCallbackInfo<v8::Value>& info) {
