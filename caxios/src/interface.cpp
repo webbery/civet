@@ -5,6 +5,7 @@
 #include <iostream>
 #include <node_api.h>
 #include <functional>
+#include "log.h"
 
 // https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
 using v8::FunctionCallbackInfo;
@@ -99,21 +100,13 @@ namespace caxios {
 
         void HandleOKCallback() {
           Nan::HandleScope scope;
-
-          v8::Local<v8::Array> results = Nan::New<v8::Array>(_gid.size());
-          int i = 0;
-          for_each(_gid.begin(), _gid.end(),
-            [&](int value) {
-              Nan::Set(results, i, Nan::New<v8::Uint32>(value));
-              i++;
-            });
-
+          v8::Local<v8::Array> results = ConvertFromArray(_gid);
           Local<Value> argv[] = { Nan::Null(), results };
           callback->Call(2, argv);
         }
       private:
         int _cnt;
-        std::vector<unsigned int> _gid;
+        std::vector<FileID> _gid;
       };
       Nan::AsyncQueueWorker(new PromiseWorker(callback, cnt));
     }
@@ -204,6 +197,29 @@ namespace caxios {
   }
   void getFilesSnap(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios != nullptr) {
+      class PromiseWorker final : public Nan::AsyncWorker {
+      public:
+        PromiseWorker(Nan::Callback* cb)
+          :Nan::AsyncWorker(cb) {}
+
+        void Execute() {
+          //_result = Addon::m_pCaxios->AddFiles(_vFiles);
+        }
+
+        void HandleOKCallback() {
+          T_LOG("getFilesSnap 3");
+          Nan::HandleScope scope;
+          v8::Local<v8::Array> result = ConvertFromArray(_snaps);
+          T_LOG("getFilesSnap 2");
+          Local<Value> argv[] = { Nan::Null(), result };
+          callback->Call(2, argv);
+          T_LOG("getFilesSnap 1");
+        }
+      private:
+        std::vector<Snap> _snaps;
+      };
+      Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
+      Nan::AsyncQueueWorker(new PromiseWorker(callback));
     }
   }
   void getAllTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}

@@ -1,6 +1,7 @@
 #include "util.h"
 #include <nan.h>
 #include <iostream>
+#include "log.h"
 
 namespace caxios {
   
@@ -45,6 +46,16 @@ namespace caxios {
 //#endif
     }
     return cnt;
+  }
+
+  void SetArrayValue(v8::Local<v8::Array>& arr, int idx, const Snap& val)
+  {
+    auto obj = Nan::New<v8_traits<Snap>::type>();
+    obj->Set(Nan::New("fileid").ToLocalChecked(), Nan::New<v8_traits<FileID>::type>(std::get<0>(val)));
+    obj->Set(Nan::New("display").ToLocalChecked(), Nan::New(std::get<1>(val).c_str()).ToLocalChecked());
+    obj->Set(Nan::New("step").ToLocalChecked(), Nan::New<v8_traits<char>::type>(std::get<2>(val)));
+    T_LOG("fileid: %d, display %s, step %d", std::get<0>(val), std::get<1>(val).c_str(), std::get<2>(val));
+    arr->Set(idx, obj);
   }
 
   v8::Local<v8::Value> GetValueFromValue(const v8::Local<v8::Value>& value, const std::string& key)
