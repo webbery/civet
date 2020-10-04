@@ -6,8 +6,8 @@
   printf("[%s] [%s:%d] [%u] [%s] "##fmt "\n",\
     caxios::current().c_str(),\
     caxios::get_file_name(__FILE__).c_str(),\
-    caxios::threadid(),\
     __LINE__,\
+    caxios::threadid(),\
     __FUNCTION__,\
     __VA_ARGS__)
 

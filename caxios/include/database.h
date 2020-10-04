@@ -8,6 +8,7 @@
 #include "datum_type.h"
 
 namespace caxios{
+  typedef std::pair<MDB_dbi, MDB_txn*> DBHandle;
 
   enum DATABASE_OPERATOR {
     NORMAL = 0,     // Î´²Ù×÷×´Ì¬
@@ -20,17 +21,18 @@ namespace caxios{
     ~CDatabase();
 
     MDB_dbi OpenDatabase(const std::string& dbname);
-    void CloseDatabase(MDB_dbi);
+    void CloseDatabase(MDB_dbi dbi);
 
-    bool Put(MDB_dbi dbi, size_t key, void* pData, size_t len, int flag = MDB_CURRENT);
-    bool Get(MDB_dbi dbi, size_t key, void*& pData, size_t& len);
-    bool Each(MDB_dbi dbi, std::function<void(size_t key, void* pData, size_t len)> cb);
-    bool Del(MDB_dbi dbi, size_t key);
-    bool Commit();
+    bool Put(MDB_dbi dbi, uint32_t key, void* pData, uint32_t len, int flag = MDB_CURRENT);
+    bool Get(MDB_dbi dbi, uint32_t key, void*& pData, uint32_t& len);
+    bool Each(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb);
+    bool Del(MDB_dbi dbi, uint32_t key);
+    MDB_txn* Begin();
+    bool Commit(MDB_txn*);
 
   private:
     MDB_env* m_pDBEnv = nullptr;
-    MDB_txn* m_pParentTransaction = nullptr;
+    //MDB_txn* m_pRootTransaction = nullptr;
     MDB_txn* m_pTransaction = nullptr;
     DATABASE_OPERATOR m_dOperator = NORMAL;
   };

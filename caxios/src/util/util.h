@@ -51,6 +51,8 @@ namespace caxios {
   void ForeachArray(const v8::Local<v8::Value>& arr, std::function<void(const v8::Local<v8::Value>&)> func);
 
   v8::Local<v8::String> StringToValue(const std::string& str);
+
+  std::string trunc(const std::string& elm);
 }
 
 #endif

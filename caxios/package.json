@@ -1,6 +1,6 @@
 {
     "name": "civetkern",
-    "version": "0.0.10",
+    "version": "0.0.11",
     "description": "",
     "scripts": {
         "install": "prebuild-install || node-gyp rebuild",
@@ -17,7 +17,7 @@
     "gypfile": true,
     "author": "webberg",
     "license": "MIT",
-    "dependencies": {
-        "nan": "^2.14.1"
-    }
+  "dependencies": {
+    "nan": "^2.14.1"
+  }
 }

@@ -1,7 +1,7 @@
 #include "util.h"
-#include <nan.h>
 #include <iostream>
 #include "log.h"
+#include <nan.h>
 
 namespace caxios {
   
@@ -29,7 +29,7 @@ namespace caxios {
 #if V8_MAJOR_VERSION == 7
       cnt = value->ToInt32(v8::Isolate::GetCurrent())->Value();
 #elif V8_MAJOR_VERSION == 8
-      value->Int32Value(Nan::GetCurrentContext()).To(&cnt);
+      value->Int32Value(v8::Isolate::GetCurrent()->GetCurrentContext()).To(&cnt);
 #endif
     }
     return cnt;
@@ -42,7 +42,7 @@ namespace caxios {
 //#if V8_MAJOR_VERSION == 7
 //      cnt = value->ToUint32(Nan::GetCurrentContext())->Value();
 //#elif V8_MAJOR_VERSION == 8
-      value->Uint32Value(Nan::GetCurrentContext()).To(&cnt);
+      value->Uint32Value(v8::Isolate::GetCurrent()->GetCurrentContext()).To(&cnt);
 //#endif
     }
     return cnt;
@@ -76,12 +76,12 @@ namespace caxios {
     if (!key.empty()) {
       size_t pos = key.find_first_of(".");
       auto k = key.substr(0, pos);
-      v8::Local<v8::Array> props = obj->GetOwnPropertyNames(Nan::GetCurrentContext()).ToLocalChecked();
+      v8::Local<v8::Array> props = obj->GetOwnPropertyNames(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked();
       for (int i = 0, l = props->Length(); i < l; i++) {
         v8::Local<v8::Value> localKey = props->Get(i);
         std::string propName = ConvertToString(localKey->ToString(v8::Isolate::GetCurrent()));
         if (propName == k) {
-          ret = obj->Get(Nan::GetCurrentContext(), localKey).ToLocalChecked();
+          ret = obj->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), localKey).ToLocalChecked();
           return GetValueFromValue(ret, key.substr(pos + 1));
         }
       }
@@ -92,11 +92,11 @@ namespace caxios {
   void ForeachObject(const v8::Local<v8::Value>& obj, std::function<void(const v8::Local<v8::Value>&, const v8::Local<v8::Value>&)> func)
   {
     auto item = v8::Local<v8::Object>::Cast(obj);
-    v8::Local<v8::Array> props = item->GetOwnPropertyNames(Nan::GetCurrentContext()).ToLocalChecked();
+    v8::Local<v8::Array> props = item->GetOwnPropertyNames(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked();
     for (int i = 0, l = props->Length(); i < l; i++) {
       v8::Local<v8::Value> key = props->Get(i);
       std::string propName = ConvertToString(key->ToString(v8::Isolate::GetCurrent()));
-      v8::Local<v8::Value> value = item->Get(Nan::GetCurrentContext(), key).ToLocalChecked();
+      v8::Local<v8::Value> value = item->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), key).ToLocalChecked();
       func(key, value);
     }
   }
@@ -117,6 +117,19 @@ namespace caxios {
   {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
     return v8::String::NewFromUtf8(isolate, str.c_str(), v8::String::kNormalString);
+  }
+
+  std::string trunc(const std::string& elm)
+  {
+    size_t start = 0;
+    size_t end = elm.size();
+    if (elm[0] == '"') {
+      start += 1;
+    }
+    if (elm[elm.size() - 1] == '"') {
+      end -= 1;
+    }
+    return elm.substr(start, end - start);
   }
 
 }

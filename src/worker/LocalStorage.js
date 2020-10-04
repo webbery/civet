@@ -39,25 +39,20 @@ const KeyIndex2Category = 'v' + DBVersion + '.' + TableIndex2Category
 const KeyCategory = 'v' + DBVersion + '.' + TableCategory
 const KeyUnCategory = 'v' + DBVersion + '.' + TableUnCategory
 
-function initDB(dbpath) {
+function initDB() {
   // const levelup = require('levelup')
   // const leveldown = require('leveldown')
   // const rocksdb = require('rocksdb')
-  var db
-  let dbname = ''
-  if (!dbpath) {
-    const {remote} = require('electron')
-    const fs = require('fs')
-    const userDir = remote.app.getPath('userData')
-    const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-    const config = JSON.parse(fs.readFileSync(configPath))
-    dbname = config.db.path
-    if (config.db.version !== undefined) {
-      // 检查是否需要升级数据库
-      if (DBVersion > config.db.version) {}
-    }
-  } else {
-    dbname = dbpath
+  // var db
+  const {remote} = require('electron')
+  const fs = require('fs')
+  const userDir = remote.app.getPath('userData')
+  const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
+  config = JSON.parse(fs.readFileSync(configPath))
+  dbname = config.db.path
+  if (config.db.version !== undefined) {
+    // 检查是否需要升级数据库
+    if (DBVersion > config.db.version) {}
   }
   Storage.init(config)
   console.info('======', dbname, '======')

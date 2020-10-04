@@ -29,12 +29,23 @@ namespace caxios {
     return m_pDBManager->AddFiles(files);
   }
 
-	CAxios::~CAxios() {
+  bool CAxios::GetFilesSnap(std::vector<Snap>& snaps)
+  {
+    return m_pDBManager->GetFilesSnap(snaps);
+  }
+
+  bool CAxios::RemoveFiles(const std::vector<FileID>& files)
+  {
+    return true;
+  }
+
+  CAxios::~CAxios() {
+    std::cout << "~CAxios(1)" << std::endl;
     if (m_pDBManager) {
       delete m_pDBManager;
       m_pDBManager = nullptr;
     }
-    std::cout << "~CAxios()" << std::endl;
+    std::cout << "~CAxios(2)" << std::endl;
   }
 
   void CAxios::Release(void* data) {

@@ -4,6 +4,7 @@
 #include "util/util.h"
 #include <iostream>
 #include <node_api.h>
+//#include <napi.h>
 #include <functional>
 #include "log.h"
 
@@ -15,11 +16,18 @@ using v8::Object;
 using v8::String;
 using v8::Value;
 
-#define EXPORT_JS_FUNCTION(name) \
+#define EXPORT_JS_FUNCTION_PARAM(name) \
   exports->Set(context, \
     String::NewFromUtf8(isolate, #name, v8::NewStringType::kNormal) \
     .ToLocalChecked(), \
     v8::FunctionTemplate::New(isolate, caxios::name, external) \
+    ->GetFunction(context).ToLocalChecked()).FromJust()
+
+#define EXPORT_JS_FUNCTION(name) \
+  exports->Set(context, \
+    String::NewFromUtf8(isolate, #name, v8::NewStringType::kNormal) \
+    .ToLocalChecked(), \
+    v8::FunctionTemplate::New(isolate, caxios::name) \
     ->GetFunction(context).ToLocalChecked()).FromJust()
 
 namespace caxios {
@@ -89,26 +97,29 @@ namespace caxios {
       if (cnt <= 0) return;
       Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
 
-      class PromiseWorker final : public Nan::AsyncWorker {
-      public:
-        PromiseWorker(Nan::Callback* cb, int cnt)
-          :Nan::AsyncWorker(cb), _cnt(cnt) {}
+      //class PromiseWorker final : public Nan::AsyncWorker {
+      //public:
+      //  PromiseWorker(Nan::Callback* cb, int cnt)
+      //    :Nan::AsyncWorker(cb), _cnt(cnt) {}
 
-        void Execute() {
-          _gid = Addon::m_pCaxios->GenNextFilesID(_cnt);
-        }
+      //  void Execute() {
+      //    _gid = Addon::m_pCaxios->GenNextFilesID(_cnt);
+      //  }
 
-        void HandleOKCallback() {
-          Nan::HandleScope scope;
-          v8::Local<v8::Array> results = ConvertFromArray(_gid);
-          Local<Value> argv[] = { Nan::Null(), results };
-          callback->Call(2, argv);
-        }
-      private:
-        int _cnt;
-        std::vector<FileID> _gid;
-      };
-      Nan::AsyncQueueWorker(new PromiseWorker(callback, cnt));
+      //  void HandleOKCallback() {
+      //    Nan::HandleScope scope;
+      //    v8::Local<v8::Array> results = ConvertFromArray(_gid);
+      //    Local<Value> argv[] = { Nan::Null(), results };
+      //    callback->Call(2, argv);
+      //  }
+      //private:
+      //  int _cnt;
+      //  std::vector<FileID> _gid;
+      //};
+      std::vector<FileID> gid = Addon::m_pCaxios->GenNextFilesID(cnt);
+      v8::Local<v8::Array> results = ConvertFromArray(gid);
+      info.GetReturnValue().Set(results);
+      //Nan::AsyncQueueWorker(new PromiseWorker(callback, cnt));
     }
   }
 
@@ -118,25 +129,6 @@ namespace caxios {
    */
   void addFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios != nullptr) {
-      class PromiseWorker final : public Nan::AsyncWorker {
-      public:
-        PromiseWorker(Nan::Callback* cb, const std::vector <std::tuple< FileID, MetaItems, Keywords >>& vFiles)
-          :Nan::AsyncWorker(cb), _vFiles(vFiles) {}
-
-        void Execute() {
-          _result = Addon::m_pCaxios->AddFiles(_vFiles);
-        }
-
-        void HandleOKCallback() {
-          Nan::HandleScope scope;
-          v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(_result);
-          Local<Value> argv[] = { Nan::Null(), result };
-          callback->Call(2, argv);
-        }
-      private:
-        bool _result;
-        std::vector <std::tuple< FileID, MetaItems, Keywords >> _vFiles;
-      };
       std::vector <std::tuple< FileID, MetaItems, Keywords >> vFiles;
       FileID fileID = 0;
       MetaItems metaItems;
@@ -175,8 +167,12 @@ namespace caxios {
           vFiles.emplace_back(std::make_tuple(fileID, metaItems,keywords));
         }
       });
-      Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
-      Nan::AsyncQueueWorker(new PromiseWorker(callback, vFiles));
+      if (!Addon::m_pCaxios->AddFiles(vFiles)) {
+        T_LOG("addFiles fail");
+        info.GetReturnValue().Set(false);
+        return;
+      }
+      info.GetReturnValue().Set(true);
     }
   }
 
@@ -197,29 +193,10 @@ namespace caxios {
   }
   void getFilesSnap(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios != nullptr) {
-      class PromiseWorker final : public Nan::AsyncWorker {
-      public:
-        PromiseWorker(Nan::Callback* cb)
-          :Nan::AsyncWorker(cb) {}
-
-        void Execute() {
-          //_result = Addon::m_pCaxios->AddFiles(_vFiles);
-        }
-
-        void HandleOKCallback() {
-          T_LOG("getFilesSnap 3");
-          Nan::HandleScope scope;
-          v8::Local<v8::Array> result = ConvertFromArray(_snaps);
-          T_LOG("getFilesSnap 2");
-          Local<Value> argv[] = { Nan::Null(), result };
-          callback->Call(2, argv);
-          T_LOG("getFilesSnap 1");
-        }
-      private:
-        std::vector<Snap> _snaps;
-      };
-      Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
-      Nan::AsyncQueueWorker(new PromiseWorker(callback));
+      std::vector<Snap> snaps;
+      Addon::m_pCaxios->GetFilesSnap(snaps);
+      v8::Local<v8::Array> arr = ConvertFromArray(snaps);
+      info.GetReturnValue().Set(arr);
     }
   }
   void getAllTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
@@ -248,25 +225,25 @@ NODE_MODULE_INIT() {
   // 在 v8::External 中包裹数据，这样我们就可以将它传递给我们暴露的方法。
   Local<v8::External> external = v8::External::New(isolate, data);
 
-  EXPORT_JS_FUNCTION(init);
-  EXPORT_JS_FUNCTION(generateFilesID);
-  EXPORT_JS_FUNCTION(addFiles);
-  EXPORT_JS_FUNCTION(addTags);
-  EXPORT_JS_FUNCTION(addClasses);
-  EXPORT_JS_FUNCTION(updateFile);
-  EXPORT_JS_FUNCTION(updateFileTags);
-  EXPORT_JS_FUNCTION(updateFileClass);
-  EXPORT_JS_FUNCTION(updateClassName);
-  EXPORT_JS_FUNCTION(getFilesInfo);
+  EXPORT_JS_FUNCTION_PARAM(init);
+  EXPORT_JS_FUNCTION_PARAM(generateFilesID);
+  EXPORT_JS_FUNCTION_PARAM(addFiles);
+  EXPORT_JS_FUNCTION_PARAM(addTags);
+  EXPORT_JS_FUNCTION_PARAM(addClasses);
+  EXPORT_JS_FUNCTION_PARAM(updateFile);
+  EXPORT_JS_FUNCTION_PARAM(updateFileTags);
+  EXPORT_JS_FUNCTION_PARAM(updateFileClass);
+  EXPORT_JS_FUNCTION_PARAM(updateClassName);
+  EXPORT_JS_FUNCTION_PARAM(getFilesInfo);
   EXPORT_JS_FUNCTION(getFilesSnap);
   EXPORT_JS_FUNCTION(getAllTags);
   EXPORT_JS_FUNCTION(getUnTagFiles);
   EXPORT_JS_FUNCTION(getUnClassifyFiles);
   EXPORT_JS_FUNCTION(getAllClasses);
-  EXPORT_JS_FUNCTION(getTagsOfFiles);
-  EXPORT_JS_FUNCTION(removeFiles);
-  EXPORT_JS_FUNCTION(removeTags);
-  EXPORT_JS_FUNCTION(removeClasses);
-  EXPORT_JS_FUNCTION(searchFiles);
-  EXPORT_JS_FUNCTION(findFiles);
+  EXPORT_JS_FUNCTION_PARAM(getTagsOfFiles);
+  EXPORT_JS_FUNCTION_PARAM(removeFiles);
+  EXPORT_JS_FUNCTION_PARAM(removeTags);
+  EXPORT_JS_FUNCTION_PARAM(removeClasses);
+  EXPORT_JS_FUNCTION_PARAM(searchFiles);
+  EXPORT_JS_FUNCTION_PARAM(findFiles);
 }

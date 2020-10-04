@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const { spawn } = require('child_process')
 const path = require('path')
 const fs = require('fs')
 
@@ -17,7 +17,7 @@ function init(plgDir) {
         })
         const actions = background.action
         for (let action in actions) {
-            child.on(action, require(actions[action]))
+          child.on(action, require(actions[action]))
         }
       }
       console.info('load plugin: ', moduleName)

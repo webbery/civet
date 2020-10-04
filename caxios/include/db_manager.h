@@ -36,6 +36,6 @@ namespace caxios {
 
   private:
     CDatabase* m_pDatabase = nullptr;
-    std::map<std::string, MDB_dbi> m_mDBs;
+    std::map<std::string, MDB_dbi > m_mDBs;
   };
 }

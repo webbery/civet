@@ -1,6 +1,8 @@
 #include "db_manager.h"
 #include <iostream>
 #include "json.hpp"
+#include "log.h"
+#include "util/util.h"
 
 namespace caxios {
   const char* g_tables[] = {
@@ -30,7 +32,6 @@ namespace caxios {
       MDB_dbi dbi = m_pDatabase->OpenDatabase(g_tables[idx]);
       if (dbi >= 0) {
         m_mDBs[g_tables[idx]] = dbi;
-        std::cout << " Open: " << g_tables[idx] << std::endl;
       }
       else {
         std::cerr << "Fail Open DB: " << g_tables[idx] << std::endl;
@@ -44,7 +45,9 @@ namespace caxios {
       for (auto item : m_mDBs) {
         m_pDatabase->CloseDatabase(item.second);
       }
+      m_mDBs.clear();
       delete m_pDatabase;
+      m_pDatabase = nullptr;
     }
   }
 
@@ -53,10 +56,11 @@ namespace caxios {
     std::vector<FileID> filesID;
     void* pData = nullptr;
     FileID lastID = 0;
-    size_t len = 0;
+    uint32_t len = 0;
     if (m_pDatabase->Get(m_mDBs[TABLE_FILESNAP], 0, pData, len)) {
       if (pData != nullptr) {
         lastID = *(FileID*)pData;
+        T_LOG("val: %u, L: %d, %d", lastID, len, sizeof(uint32_t));
       }
     }
     for (int idx = 0; idx < cnt; ++idx) {
@@ -75,13 +79,33 @@ namespace caxios {
         return false;
       }
     }
-    m_pDatabase->Commit();
+    //m_pDatabase->Each(m_mDBs[TABLE_FILESNAP], [](uint32_t k, void* pData, uint32_t len) -> bool {
+    //  return false;
+    //});
+    //m_pDatabase->Commit(m_mDBs[TABLE_FILE_META].second);
     return true;
   }
 
   bool DBManager::GetFilesSnap(std::vector< Snap >& snaps)
   {
-    //m_pDatabase->Get(m_mDBs[TABLE_FILESNAP], )
+    m_pDatabase->Each(m_mDBs[TABLE_FILESNAP], [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
+      if (k == 0) return false;
+      using namespace nlohmann;
+      std::string js((char*)pData, len);
+      json file=json::parse(js);
+      T_LOG("GetFilesSnap: %s", js.c_str());
+      try {
+        std::string display = trunc(to_string(file["display"]));
+        std::cout << display << std::endl;
+        int step = atoi(file["step"].dump().c_str());
+        Snap snap = { k, display, step };
+        snaps.emplace_back(snap);
+      }catch(json::exception& e){
+        T_LOG("ERR: %s", e.what());
+      }
+      
+      return false;
+    });
     return true;
   }
 
@@ -91,16 +115,23 @@ namespace caxios {
     json files;
     files["meta"] = meta;
     std::string value = to_string(files);
-    //std::cout << files << std::endl;
     if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, value.data(), value.size())) {
+      T_LOG("Put TABLE_FILE_META Fail %s", value.c_str());
       return false;
     }
     //snap
     json snaps;
-    snaps["display"] = "";
+    for (MetaItem m: meta)
+    {
+      if (m["name"] == "title"){
+        snaps["display"] = m["display"];
+        break;
+      }
+    }
     snaps["step"] = (char)0x1;
     value = to_string(snaps);
     if (!m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileid, value.data(), value.size())) {
+      T_LOG("Put TABLE_FILESNAP Fail %s", value.c_str());
       return false;
     }
     return true;

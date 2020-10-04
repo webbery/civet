@@ -21,7 +21,6 @@ namespace caxios {
 #ifdef __APPLE__
     int status = mkdir(dbpath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #else
-    T_LOG("log test");
     namespace fs = std::filesystem;
     if (!fs::exists(dbpath)) {
       fs::create_directory(dbpath);
@@ -42,92 +41,65 @@ namespace caxios {
     if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), 0, 0664)) {
       std::cout << "mdb_env_open fail: " << err2str(rc) << std::endl;
     }
-    if (const int rc = mdb_txn_begin(m_pDBEnv, m_pParentTransaction, 0, &m_pTransaction)) {
+    if (const int rc = mdb_txn_begin(m_pDBEnv, 0, 0, &m_pTransaction)) {
       std::cout << "mdb_txn_begin fail: " << err2str(rc) << std::endl;
     }
   }
   CDatabase::~CDatabase() {
-
-    std::cout<<"~CDatabase()\n";
+    mdb_env_close(m_pDBEnv);
+    T_LOG("~CDatabase()");
   }
 
   MDB_dbi CDatabase::OpenDatabase(const std::string& dbname)
   {
     MDB_dbi dbi = -1;
-    if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), MDB_CREATE | MDB_INTEGERKEY | MDB_DUPSORT, &dbi)) {
-      std::cout << "mdb_dbi_open fail: " << err2str(rc) << ", dbname: "<< dbname<< std::endl;
-      return -1;
+    if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), MDB_CREATE | MDB_INTEGERKEY, &dbi)) {
+      T_LOG("mdb_dbi_open %s fail %s", dbname.c_str(), err2str(rc).c_str());
+      return dbi;
     }
+    T_LOG("mdb_dbi_open %d, %s", dbi, dbname.c_str());
     return dbi;
   }
 
   void CDatabase::CloseDatabase(MDB_dbi dbi)
   {
-    this->Commit();
-    mdb_close(m_pDBEnv, dbi);
-    mdb_env_close(m_pDBEnv);
+    this->Commit(m_pTransaction);
+    T_LOG("mdb_close %d", dbi);
+    //mdb_close(m_pDBEnv, dbi);
   }
 
-  bool CDatabase::Put(MDB_dbi dbi, size_t k, void* pData, size_t len, int flag) {
-    MDB_cursor* cursor = nullptr;
-    int rc = 0;
-    if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
-      std::cout << "mdb_cursor_open fail: " << err2str(rc) << std::endl;
+  bool CDatabase::Put(MDB_dbi dbi, uint32_t k, void* pData, uint32_t len, int flag) {
+    MDB_val key, datum;
+    key.mv_data = reinterpret_cast<void*>(&k);
+    key.mv_size = sizeof(uint32_t);
+    datum.mv_data = pData;
+    datum.mv_size = len;
+    if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
+      T_LOG("mdb_put fail: %d, key: %u", err2str(rc).c_str(), k);
       return false;
     }
     if (m_dOperator == NORMAL) {
       m_dOperator = TRANSACTION;
     }
-    MDB_val key, datum;
-    key.mv_data = reinterpret_cast<void*>(&k);
-    key.mv_size = sizeof(size_t);
-    int cursor_flag = 0;
-    if (flag == MDB_CURRENT) { // update value of key
-      rc = mdb_cursor_get(cursor, &key, &datum, MDB_FIRST);
-      if (rc != MDB_NOTFOUND) {
-        cursor_flag = MDB_CURRENT;
-      }
-    }
-    datum.mv_data = pData;
-    datum.mv_size = len;
-    if (int rc = mdb_cursor_put(cursor, &key, &datum, cursor_flag)) {
-      std::cout << "mdb_put fail: " << err2str(rc) << std::endl;
-      m_dOperator = NORMAL;
-      mdb_cursor_close(cursor);
-      return false;
-    }
-    mdb_cursor_close(cursor);
+    T_LOG("mdb_cursor_put %d, key: %u", dbi, k);
     return true;
   }
 
-  bool CDatabase::Get(MDB_dbi dbi, size_t k, void*& pData, size_t& len)
+  bool CDatabase::Get(MDB_dbi dbi, uint32_t k, void*& pData, uint32_t& len)
   {
-    MDB_cursor* cursor = nullptr;
-    int rc = 0;
-    if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
-      std::cout << "mdb_cursor_open fail: " << err2str(rc) << std::endl;
-      return false;
-    }
-    MDB_val key, datum;
+    MDB_val key, datum = { 0 };
     key.mv_data = reinterpret_cast<void*>(&k);
-    key.mv_size = sizeof(size_t);
-    //while ((rc = )==0) {
-    //  printf("key: %p %.*s, data: %p %.*s\n",
-    //    key.mv_data, (int)key.mv_size, (char*)key.mv_data,
-    //    datum.mv_data, (int)datum.mv_size, (char*)datum.mv_data);
-    //}
-    if (rc = mdb_cursor_get(cursor, &key, &datum, MDB_LAST)) {
-      std::cout << "mdb_get fail: " << err2str(rc) << std::endl;
-      mdb_cursor_close(cursor);
+    key.mv_size = sizeof(uint32_t);
+    if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
+      T_LOG("mdb_get fail: %s", err2str(rc).c_str());
       return false;
     }
     len = datum.mv_size;
     pData = datum.mv_data;
-    mdb_cursor_close(cursor);
     return true;
   }
 
-  bool CDatabase::Each(MDB_dbi dbi, std::function<void(size_t key, void* pData, size_t len)> cb)
+  bool CDatabase::Each(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb)
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
@@ -135,21 +107,43 @@ namespace caxios {
       std::cout << "mdb_cursor_open fail: " << err2str(rc) << std::endl;
       return false;
     }
+
+    MDB_val key, datum = { 0 };
+    while ((rc = mdb_cursor_get(cursor, &key, &datum, MDB_NEXT)) == 0) {
+      //printf("key: %u, data: %d %s\n",
+      //  *(uint32_t*)(key.mv_data),
+      //  (int)datum.mv_size, (char*)datum.mv_data);
+      if (cb(*(uint32_t*)(key.mv_data), datum.mv_data, datum.mv_size)) {
+        break;
+      }
+    }
+    mdb_cursor_close(cursor);
     return true;
   }
 
-  bool CDatabase::Del(MDB_dbi dbi, size_t key)
+  bool CDatabase::Del(MDB_dbi dbi, uint32_t key)
   {
     return true;
   }
 
-  bool CDatabase::Commit()
+  MDB_txn* CDatabase::Begin()
+  {
+    MDB_txn* pTxn = nullptr;
+    if (int rc = mdb_txn_begin(m_pDBEnv, 0, MDB_NOSYNC, &pTxn)) {
+      T_LOG("mdb_txn_begin: %s", err2str(rc).c_str());
+      return nullptr;
+    }
+    return pTxn;
+  }
+
+  bool CDatabase::Commit(MDB_txn* pTxn)
   {
     if (m_dOperator == NORMAL) return true;
-    if (int rc = mdb_txn_commit(m_pTransaction)){
-      std::cout << "mdb_txn_commit fail: " << rc << std::endl;
+    if (int rc = mdb_txn_commit(pTxn)) {
+      T_LOG("mdb_txn_commit: %s", err2str(rc).c_str());
       return false;
     }
+    T_LOG("mdb_txn_commit");
     m_dOperator = NORMAL;
     return true;
   }

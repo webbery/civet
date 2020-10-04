@@ -19,6 +19,8 @@ namespace caxios{
 
     std::vector<FileID> GenNextFilesID(int cnt = 1);
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files);
+    bool GetFilesSnap(std::vector<Snap>& snaps);
+    bool RemoveFiles(const std::vector<FileID>& files);
 
   private:
 
