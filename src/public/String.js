@@ -41,5 +41,19 @@ export default {
     let s = parseInt(val).toString(16)
     if (s.length === 1) s = '0' + s
     return s
+  },
+  i18n: (en) => {
+    switch (en) {
+      case 'path': return '路径'
+      case 'filename': return '文件名'
+      case 'size': return '大小'
+      case 'datetime': return '创建时间'
+      case 'specs': return '尺寸'
+      case 'author': return '作者'
+      case 'tag': return '标签'
+      case 'anno': return '批注'
+      case 'keyword': return '关键字'
+      default: return '其他'
+    }
   }
 }

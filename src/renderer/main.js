@@ -20,24 +20,12 @@ Vue.use(ElementUI)
 
 Vue.prototype.$ipcRenderer = Service.getServiceInstance()
 
-const kernel = (function () {
-  const remote = require('electron').remote
-  const userDir = remote.app.getPath('userData')
-  const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-  const fs = require('fs')
-  const config = JSON.parse(fs.readFileSync(configPath))
-  console.info(config)
-  if (!Kernel.init(config)) {
-    console.error('init kernel fail')
-  }
-  return Kernel
-})()
+Vue.prototype.$kernel = Kernel
 
 /* eslint-disable no-new */
 new Vue({
   components: { App },
   router,
   // store,
-  kernel,
   template: '<App/>'
 }).$mount('#app')

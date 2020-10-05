@@ -8,10 +8,18 @@ namespace caxios {
   std::string ConvertToString(const v8::Local<v8::String>& value)
   {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
+#if V8_MAJOR_VERSION <= 5
+    const int length = value->Utf8Length() + 1;
+#else
     const int length = value->Utf8Length(isolate)+1;
+#endif
     char* charFileName = new char[length];
     memset(charFileName, length, 0x00);
+#if V8_MAJOR_VERSION <= 5
+    (*value)->WriteUtf8(charFileName);
+#else
     (*value)->WriteUtf8(isolate, charFileName);
+#endif
     std::string str;
     str.assign(charFileName);
     return std::move(str);
@@ -19,14 +27,18 @@ namespace caxios {
 
   std::string ConvertToString(const v8::Local<v8::Value>& value)
   {
+#if V8_MAJOR_VERSION <= 7
     return ConvertToString(value->ToString(v8::Isolate::GetCurrent()));
+#elif V8_MAJOR_VERSION == 8
+    return ConvertToString(value->ToString(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked());
+#endif
   }
 
   int32_t ConvertToInt32(const v8::Local<v8::Value>& value)
   {
     int32_t cnt = 0;
     if (value->IsInt32()) {
-#if V8_MAJOR_VERSION == 7
+#if V8_MAJOR_VERSION <= 7
       cnt = value->ToInt32(v8::Isolate::GetCurrent())->Value();
 #elif V8_MAJOR_VERSION == 8
       value->Int32Value(v8::Isolate::GetCurrent()->GetCurrentContext()).To(&cnt);
@@ -51,11 +63,21 @@ namespace caxios {
   void SetArrayValue(v8::Local<v8::Array>& arr, int idx, const Snap& val)
   {
     auto obj = Nan::New<v8_traits<Snap>::type>();
+#if V8_MAJOR_VERSION == 7
     obj->Set(Nan::New("fileid").ToLocalChecked(), Nan::New<v8_traits<FileID>::type>(std::get<0>(val)));
     obj->Set(Nan::New("display").ToLocalChecked(), Nan::New(std::get<1>(val).c_str()).ToLocalChecked());
     obj->Set(Nan::New("step").ToLocalChecked(), Nan::New<v8_traits<char>::type>(std::get<2>(val)));
+#elif V8_MAJOR_VERSION == 8
+    obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("fileid").ToLocalChecked(), Nan::New<v8_traits<FileID>::type>(std::get<0>(val)));
+    obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("display").ToLocalChecked(), Nan::New(std::get<1>(val).c_str()).ToLocalChecked());
+    obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("step").ToLocalChecked(), Nan::New<v8_traits<char>::type>(std::get<2>(val)));
+#endif
     T_LOG("fileid: %d, display %s, step %d", std::get<0>(val), std::get<1>(val).c_str(), std::get<2>(val));
+#if V8_MAJOR_VERSION == 7
     arr->Set(idx, obj);
+#elif V8_MAJOR_VERSION == 8
+    arr->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), idx, obj);
+#endif
   }
 
   v8::Local<v8::Value> GetValueFromValue(const v8::Local<v8::Value>& value, const std::string& key)
@@ -78,8 +100,12 @@ namespace caxios {
       auto k = key.substr(0, pos);
       v8::Local<v8::Array> props = obj->GetOwnPropertyNames(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked();
       for (int i = 0, l = props->Length(); i < l; i++) {
-        v8::Local<v8::Value> localKey = props->Get(i);
+        v8::Local<v8::Value> localKey = props->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), i).ToLocalChecked();
+#if V8_MAJOR_VERSION == 7
         std::string propName = ConvertToString(localKey->ToString(v8::Isolate::GetCurrent()));
+#elif V8_MAJOR_VERSION == 8
+        std::string propName = ConvertToString(localKey->ToString(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked());
+#endif
         if (propName == k) {
           ret = obj->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), localKey).ToLocalChecked();
           return GetValueFromValue(ret, key.substr(pos + 1));
@@ -94,8 +120,12 @@ namespace caxios {
     auto item = v8::Local<v8::Object>::Cast(obj);
     v8::Local<v8::Array> props = item->GetOwnPropertyNames(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked();
     for (int i = 0, l = props->Length(); i < l; i++) {
-      v8::Local<v8::Value> key = props->Get(i);
+      v8::Local<v8::Value> key = props->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), i).ToLocalChecked();
+#if V8_MAJOR_VERSION == 7
       std::string propName = ConvertToString(key->ToString(v8::Isolate::GetCurrent()));
+#elif V8_MAJOR_VERSION == 8
+      std::string propName = ConvertToString(key->ToString(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked());
+#endif
       v8::Local<v8::Value> value = item->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), key).ToLocalChecked();
       func(key, value);
     }
@@ -107,7 +137,7 @@ namespace caxios {
       v8::Local<v8::Array> lArr = arr.As<v8::Array>();
       for (int i = 0, l = lArr->Length(); i < l; i++)
       {
-        v8::Local<v8::Value> localItem = lArr->Get(i);
+        v8::Local<v8::Value> localItem = lArr->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), i).ToLocalChecked();
         func(localItem);
       }
     }
@@ -116,7 +146,11 @@ namespace caxios {
   v8::Local<v8::String> StringToValue(const std::string& str)
   {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
+#if V8_MAJOR_VERSION == 7
     return v8::String::NewFromUtf8(isolate, str.c_str(), v8::String::kNormalString);
+#elif V8_MAJOR_VERSION == 8
+    return v8::String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked();
+#endif
   }
 
   std::string trunc(const std::string& elm)

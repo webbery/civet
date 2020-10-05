@@ -1,4 +1,4 @@
-import ImageBase from '../public/ImageBase'
+import FileBase from '../public/FileBase'
 import Storage from '../public/Kernel'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
@@ -12,17 +12,20 @@ export class ImageParser {
   }
 }
 
-const parseChain = async (fullpath, stat, stepFinishCB) => {
+const parseChain = (fullpath, stat, stepFinishCB) => {
   const path = require('path')
   const f = path.parse(fullpath)
-  const fid = await Storage.generateFilesID()
+  console.info(Storage)
+  const fid = Storage.generateFilesID(1)
   console.info(f.dir, f.base)
   let fileInfo = {
-    id: fid,
-    path: f.dir,
-    filename: f.base,
-    size: stat.size,
-    datetime: stat.atime.toString()
+    fileid: fid,
+    meta: [
+      { name: 'path', value: f.dir, type: 'str' },
+      { name: 'filename', value: f.base, type: 'str' },
+      { name: 'size', value: stat.size, type: 'value' },
+      { name: 'datetime', value: stat.atime.toString(), type: 'value' }
+    ]
   }
 
   let image = new JImage(fileInfo)
@@ -32,22 +35,10 @@ const parseChain = async (fullpath, stat, stepFinishCB) => {
   const color = new ImageColorParser()
   meta.nextParser(text)
   text.nextParser(color)
-  await meta.parse(image)
+  meta.parse(image)
 }
 
-export class JImage extends ImageBase {
-  // static async loadFromDB() {
-  // }
-
-  // async saveDB() {
-  //   let image = await localStorage.getImageInfo(this.id)
-  //   if (image) {
-  //     console.info('update image')
-  //   } else {
-  //     localStorage.addImages([this])
-  //   }
-  // }
-
+export class JImage extends FileBase {
   toJson() {
     return JSON.parse(JSON.stringify(this))
   }
@@ -80,26 +71,30 @@ class ImageMetaParser extends ImageParseBase {
       type = JString.getFormatType(meta['format'].description)
     }
     if (meta['DateTime'] !== undefined && meta['DateTime'].value) {
-      image.datetime = meta['DateTime'].value[0]
+      // image.datetime = meta['DateTime'].value[0]
+      image.addMeta('datetime', meta['DateTime'].value[0])
     }
-    image.type = this.getImageFormat(type)
-    image.width = this.getImageWidth(meta)
-    image.height = this.getImageHeight(meta)
+    image.addMeta('type', this.getImageFormat(type))
+    // image.type = this.getImageFormat(type)
+    image.addMeta('width', this.getImageWidth(meta))
+    image.addMeta('height', this.getImageHeight(meta))
+    // image.width = this.getImageWidth(meta)
+    // image.height = this.getImageHeight(meta)
     if (image.size > 5 * 1024 * 1024) {
-      image.thumbnail = this.getImageThumbnail(meta)
+      image.addMeta('thumbnail', this.getImageThumbnail(meta))
+      // image.thumbnail = this.getImageThumbnail(meta)
     }
     try {
-      await Storage.addFiles([image])
-      // await localStorage.addImages([image])
+      Storage.addFiles([image])
     } catch (err) {
       console.info('parse metadata error', err)
     }
     console.info('1', image)
-    image.stepCallback(undefined, image)
+    // image.stepCallback(undefined, image)
 
-    if (this.next !== undefined) {
-      this.next.parse(image)
-    }
+    // if (this.next !== undefined) {
+    //   this.next.parse(image)
+    // }
   }
 
   getImageWidth(meta) {

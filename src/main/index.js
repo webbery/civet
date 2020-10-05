@@ -11,6 +11,14 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
+function enableDevTools(window) {
+  window.webContents.on('did-frame-finish-load', () => {
+    window.webContents.once('devtools-opened', () => {
+      window.focus()
+    })
+    window.webContents.openDevTools()
+  })
+}
 let mainWindow, workerWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
@@ -41,10 +49,14 @@ function createWindow () {
   mainWindow.maximize()
   mainWindow.loadURL(winURL)
 
+  mainWindow.onbeforeunload = (e) => {
+    console.info('onbeforeunload')
+    return true
+  }
   mainWindow.on('closed', () => {
     console.info('---------close------------')
     workerWindow.close()
-    mainWindow = null
+    // mainWindow.close()
   })
 
   workerWindow = new BrowserWindow({
@@ -61,6 +73,10 @@ function createWindow () {
   else workerWindow.loadURL(workerURL)
   // mainWindow.openDevTools()
   // workerWindow.openDevTools()
+  if (process.env.NODE_ENV === 'development') {
+    enableDevTools(mainWindow)
+    enableDevTools(workerWindow)
+  }
   mainWindow.show()
 }
 

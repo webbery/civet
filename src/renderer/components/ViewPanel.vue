@@ -39,7 +39,9 @@ export default {
     console.info('mounted')
     if (this.firstLoad === true) {
       this.firstLoad = false
-      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+      // bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+      const snaps = this.$kernel.getFilesSnap(-1)
+      console.info('View Panel', snaps)
     }
   },
   computed: {

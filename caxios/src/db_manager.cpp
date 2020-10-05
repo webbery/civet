@@ -95,8 +95,7 @@ namespace caxios {
       json file=json::parse(js);
       T_LOG("GetFilesSnap: %s", js.c_str());
       try {
-        std::string display = trunc(to_string(file["display"]));
-        std::cout << display << std::endl;
+        std::string display = trunc(to_string(file["value"]));
         int step = atoi(file["step"].dump().c_str());
         Snap snap = { k, display, step };
         snaps.emplace_back(snap);

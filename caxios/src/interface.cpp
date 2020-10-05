@@ -79,12 +79,17 @@ namespace caxios {
     if (Addon::m_pCaxios == nullptr) {
       auto curContext = Nan::GetCurrentContext();
       if (info[0]->IsObject()) {
+#if V8_MAJOR_VERSION == 7
         v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent());
+#elif V8_MAJOR_VERSION == 8
+        v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked();
+#endif
         Local<Value> localVal = GetValueFromObject(obj, "db.path");
         std::string val = ConvertToString(localVal);
         Addon::m_pCaxios = new caxios::CAxios(val);
         node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
         info.GetReturnValue().Set(true);
+        T_LOG("init success");
         return;
       }
     }
@@ -176,7 +181,10 @@ namespace caxios {
     }
   }
 
-  void addTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  void addTags(const v8::FunctionCallbackInfo<v8::Value>& info) {
+    if (Addon::m_pCaxios != nullptr) {
+    }
+  }
   void addClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   // void addAnotation(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   // void addKeyword(const v8::FunctionCallbackInfo<v8::Value>& info) {}
@@ -235,11 +243,11 @@ NODE_MODULE_INIT() {
   EXPORT_JS_FUNCTION_PARAM(updateFileClass);
   EXPORT_JS_FUNCTION_PARAM(updateClassName);
   EXPORT_JS_FUNCTION_PARAM(getFilesInfo);
-  EXPORT_JS_FUNCTION(getFilesSnap);
-  EXPORT_JS_FUNCTION(getAllTags);
-  EXPORT_JS_FUNCTION(getUnTagFiles);
-  EXPORT_JS_FUNCTION(getUnClassifyFiles);
-  EXPORT_JS_FUNCTION(getAllClasses);
+  EXPORT_JS_FUNCTION_PARAM(getFilesSnap);
+  EXPORT_JS_FUNCTION_PARAM(getAllTags);
+  EXPORT_JS_FUNCTION_PARAM(getUnTagFiles);
+  EXPORT_JS_FUNCTION_PARAM(getUnClassifyFiles);
+  EXPORT_JS_FUNCTION_PARAM(getAllClasses);
   EXPORT_JS_FUNCTION_PARAM(getTagsOfFiles);
   EXPORT_JS_FUNCTION_PARAM(removeFiles);
   EXPORT_JS_FUNCTION_PARAM(removeTags);

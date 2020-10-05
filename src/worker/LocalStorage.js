@@ -48,13 +48,13 @@ function initDB() {
   const fs = require('fs')
   const userDir = remote.app.getPath('userData')
   const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-  config = JSON.parse(fs.readFileSync(configPath))
-  dbname = config.db.path
+  const config = JSON.parse(fs.readFileSync(configPath))
+  const dbname = config.db.path
   if (config.db.version !== undefined) {
     // 检查是否需要升级数据库
     if (DBVersion > config.db.version) {}
   }
-  Storage.init(config)
+  // Storage.init(config)
   console.info('======', dbname, '======')
   return function() {
     return Storage

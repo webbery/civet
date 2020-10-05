@@ -4,6 +4,7 @@
 #include <ctime>
 #include <iostream>
 #include <thread>
+#include <filesystem>
 
 namespace caxios {
   std::string err2str(int err) {
@@ -44,4 +45,38 @@ namespace caxios {
     auto tid = std::this_thread::get_id();
     return *(_Thrd_id_t*)&tid;
   }
+
+  class FLog {
+  public:
+    FLog(){
+      std::string logname("civetkern_");
+      int idx = 1;
+      while (true) {
+        std::string filename = logname + std::to_string(idx) + ".log";
+        if (!std::filesystem::exists(filename)) {
+          logname = filename;
+          break;
+        }
+        idx += 1;
+      }
+      _file = fopen(logname.c_str(), "a+");
+    }
+    ~FLog(){
+      fclose(_file);
+    }
+
+    void Write(const std::string& log) {
+      fputs(log.c_str(), _file);
+      fflush(_file);
+    }
+
+  private:
+    FILE* _file = nullptr; 
+  };
+  static FLog s_log;
+  void log2file(const std::string& log)
+  {
+    s_log.Write(log);
+  }
+
 }

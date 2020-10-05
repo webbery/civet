@@ -1,6 +1,7 @@
 #include "civetkern.h"
 #include <iostream>
 #include "util/util.h"
+#include "log.h"
 #define JS_CLASS_NAME  "Caxios"
 
 using namespace v8;
@@ -8,7 +9,7 @@ using namespace v8;
 namespace caxios {
 
 	CAxios::CAxios(const std::string& str) {
-    std::cout<< "CAxios("<< str <<")"<<std::endl;
+    T_LOG("new CAxios(%s)", str.c_str());
     if (m_pDBManager == nullptr) {
       m_pDBManager = new DBManager(str);
     }
@@ -40,18 +41,17 @@ namespace caxios {
   }
 
   CAxios::~CAxios() {
-    std::cout << "~CAxios(1)" << std::endl;
+    T_LOG("Begin ~CAxios()");
     if (m_pDBManager) {
       delete m_pDBManager;
       m_pDBManager = nullptr;
     }
-    std::cout << "~CAxios(2)" << std::endl;
+    T_LOG("Finish ~CAxios()");
   }
 
   void CAxios::Release(void* data) {
-    std::cout<< "Begin CAxios::Release()"<<std::endl;
+    T_LOG("CAxios::Release()");
     // delete static_cast<CAxios*>(data);
-    std::cout << "Finish CAxios::Release()" << std::endl;
   }
 
   bool CAxios::AddOrUpdateClass(const Nan::FunctionCallbackInfo<v8::Value>& info) {

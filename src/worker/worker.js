@@ -145,9 +145,6 @@ const messageProcessor = {
       readImages(fullpath)
     }
   },
-  'switchResource': (res) => {
-    Kernel.switchDatabase(res)
-  },
   'getImagesInfo': async (data) => {
     // let imagesIndex = []
     // if (data === undefined) {
