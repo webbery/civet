@@ -27,17 +27,15 @@ const workerURL = process.env.NODE_ENV === 'development'
   // ? `http://localhost:9081`
   ? `worker.html`
   : `file://${__dirname}/worker.html`
-function createWindow () {
-  Menu.setApplicationMenu(null)
-  /**
-   * Initial window options
-   */
+
+function createRendererWindow() {
   mainWindow = new BrowserWindow({
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
       enableRemoteModule: true,
-      webSecurity: false
+      webSecurity: false,
+      additionalArguments: ['renderer']
     },
     allowRunningInsecureContent: true,
     height: 563,
@@ -58,12 +56,21 @@ function createWindow () {
     workerWindow.close()
     // mainWindow.close()
   })
-
+  if (process.env.NODE_ENV === 'development') {
+    enableDevTools(mainWindow)
+  }
+  mainWindow.show()
+}
+function createWorkerWindow () {
+  /**
+   * Initial window options
+   */
   workerWindow = new BrowserWindow({
     show: process.env.NODE_ENV === 'development',
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      additionalArguments: ['worker']
     }
   })
   workerWindow.on('closed', () => {
@@ -74,10 +81,8 @@ function createWindow () {
   // mainWindow.openDevTools()
   // workerWindow.openDevTools()
   if (process.env.NODE_ENV === 'development') {
-    enableDevTools(mainWindow)
     enableDevTools(workerWindow)
   }
-  mainWindow.show()
 }
 
 app.on('window-all-closed', async () => {
@@ -89,7 +94,7 @@ app.on('window-all-closed', async () => {
 
 app.on('activate', () => {
   if (mainWindow === null) {
-    createWindow()
+    console.info('createWindow()')
   }
 })
 
@@ -168,8 +173,13 @@ app.on('ready', async () => {
   if (!fs.existsSync(cfgFile)) {
     fs.writeFileSync(cfgFile, JSON.stringify(cfg))
   }
+  else {
+    cfg.app = false
+    fs.writeFileSync(cfgFile, JSON.stringify(cfg))
+  }
 
-  createWindow()
+  Menu.setApplicationMenu(null)
+  createWorkerWindow()
   ipcMain.on('message-from-worker', (event, arg) => {
     // console.info('########################')
     // console.info(arg.type, arg.data)
@@ -183,7 +193,8 @@ app.on('ready', async () => {
   })
   ipcMain.on('ready', (event, arg) => {
     console.info('child process ready')
-    // available.push(event.sender)
+    createRendererWindow()
+  // available.push(event.sender)
     // doIt()
   })
 })

@@ -17,10 +17,11 @@ namespace caxios {
     TABLE_MATCH
   };
 
-  DBManager::DBManager(const std::string& dbdir)
+  DBManager::DBManager(const std::string& dbdir, int flag)
   {
+    _flag = (flag == 0 ? ReadWrite : ReadOnly);
     if (m_pDatabase == nullptr) {
-      m_pDatabase = new CDatabase(dbdir);
+      m_pDatabase = new CDatabase(dbdir, _flag);
     }
     if (m_pDatabase == nullptr) {
       std::cerr << "new CDatabase fail.\n";
@@ -32,9 +33,6 @@ namespace caxios {
       MDB_dbi dbi = m_pDatabase->OpenDatabase(g_tables[idx]);
       if (dbi >= 0) {
         m_mDBs[g_tables[idx]] = dbi;
-      }
-      else {
-        std::cerr << "Fail Open DB: " << g_tables[idx] << std::endl;
       }
     }
   }
@@ -54,6 +52,7 @@ namespace caxios {
   std::vector<caxios::FileID> DBManager::GenerateNextFilesID(int cnt /*= 1*/)
   {
     std::vector<FileID> filesID;
+    if (_flag == ReadOnly) return std::move(filesID);
     void* pData = nullptr;
     FileID lastID = 0;
     uint32_t len = 0;
@@ -74,6 +73,7 @@ namespace caxios {
 
   bool DBManager::AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files)
   {
+    if (_flag == ReadOnly) return false;
     for (auto item : files) {
       if (!AddFile(std::get<0>(item), std::get<1>(item), std::get<2>(item))) {
         return false;
@@ -88,6 +88,11 @@ namespace caxios {
 
   bool DBManager::GetFilesSnap(std::vector< Snap >& snaps)
   {
+    if (m_mDBs[TABLE_FILESNAP] == -1) {
+      m_mDBs[TABLE_FILESNAP] = m_pDatabase->OpenDatabase(TABLE_FILESNAP);
+      T_LOG("OpenDatabase: %s, DBI: %d", TABLE_FILESNAP, m_mDBs[TABLE_FILESNAP]);
+      if (m_mDBs[TABLE_FILESNAP] == -1) return false;
+    }
     m_pDatabase->Each(m_mDBs[TABLE_FILESNAP], [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
       if (k == 0) return false;
       using namespace nlohmann;
@@ -123,7 +128,7 @@ namespace caxios {
     for (MetaItem m: meta)
     {
       if (m["name"] == "title"){
-        snaps["display"] = m["display"];
+        snaps["value"] = m["value"];
         break;
       }
     }

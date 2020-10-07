@@ -84,9 +84,13 @@ namespace caxios {
 #elif V8_MAJOR_VERSION == 8
         v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked();
 #endif
+        int flag = 0;
+        if (!info[1]->IsUndefined()) {
+          flag = ConvertToInt32(info[1]);
+        }
         Local<Value> localVal = GetValueFromObject(obj, "db.path");
         std::string val = ConvertToString(localVal);
-        Addon::m_pCaxios = new caxios::CAxios(val);
+        Addon::m_pCaxios = new caxios::CAxios(val, flag);
         node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
         info.GetReturnValue().Set(true);
         T_LOG("init success");

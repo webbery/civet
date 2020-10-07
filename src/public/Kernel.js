@@ -4,12 +4,14 @@ const kernel = (function () {
   const userDir = remote.app.getPath('userData')
   const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
   const config = JSON.parse(fs.readFileSync(configPath))
-  // const dbname = config.db.path
   const instance = require('civetkern')
-  if (!instance.civetkern.init(config)) {
+  let flag = 0
+  if (process.argv[process.argv.length - 1] === 'renderer') {
+    flag = 1
+  }
+  if (!instance.civetkern.init(config, flag)) {
     console.info('init fail')
   }
-  console.info('require(caxio)')
   return instance.civetkern
 })()
 

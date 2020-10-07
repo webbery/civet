@@ -13,7 +13,7 @@ namespace caxios{
     static Nan::Persistent<v8::Function> constructor;
 
   public:
-    explicit CAxios(const std::string& str);
+    explicit CAxios(const std::string& str, int flag);
     ~CAxios();
     void Init(v8::Local<v8::Object> exports);
 

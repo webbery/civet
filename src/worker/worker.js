@@ -2,8 +2,7 @@ import JString from '../public/String'
 // import localStorage from './LocalStorage'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
-import { CategoryArray } from './Category'
-// import { GPU, input } from 'gpu.js'
+// import { CategoryArray } from './Category'
 import Kernel from '../public/Kernel'
 
 /* ************************ ↓↓↓↓↓↓发布时注释掉该部分↓↓↓↓↓↓ ********************** */
@@ -94,22 +93,6 @@ function readDir(path) {
   })
 }
 
-// function GPUTest() {
-//   console.info('gpu test')
-//   const gpu = new GPU({mode: 'cpu'})
-//   console.info('new gpu')
-//   const value1 = input([1, 2, 3, 4, 5, 6], [2, 1, 3])
-//   console.info(value1)
-//   function kernelFunction(x, y) {
-//     const v = x[this.thread.z][this.thread.y][this.thread.x] + y[this.thread.z][this.thread.y][this.thread.x]
-//     return v
-//   }
-//   const kernel = gpu.createKernel(kernelFunction, {output: [1]})
-//   console.info('1111111')
-//   const result = kernel(value1, value1)
-//   console.info('GPU: ', result)
-// }
-// let the main thread know this thread is ready to process something
 function ready() {
   ipcRenderer.send('ready')
   // GPUTest()
@@ -194,8 +177,8 @@ const messageProcessor = {
     return Kernel.addClasses(categoryName, chain, imageID)
   },
   'getAllCategory': async () => {
-    let category = await CategoryArray.loadFromDB()
-    reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
+    // let category = await CategoryArray.loadFromDB()
+    // reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
   'getUncategoryImages': async () => {
     let uncateimgs = await Kernel.getUnClassifyFiles()

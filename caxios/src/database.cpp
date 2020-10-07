@@ -17,7 +17,7 @@ namespace caxios {
     BT_VALUE
   };
 
-  CDatabase::CDatabase(const std::string& dbpath) {
+  CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
 #ifdef __APPLE__
     int status = mkdir(dbpath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #else
@@ -25,9 +25,17 @@ namespace caxios {
     if (!fs::exists(dbpath)) {
       fs::create_directory(dbpath);
     }
+    else {
+      if (flag == DBFlag::ReadOnly) m_flag = MDB_RDONLY;
+    }
 #endif
     mdb_env_create(&m_pDBEnv);
+    mdb_env_set_maxreaders(m_pDBEnv, 4);
+#ifdef _DEBUG
 #define MAX_EXPAND_DB_SIZE  50*1024*1024
+#else
+#define MAX_EXPAND_DB_SIZE  1*1024*1024*1024
+#endif
     if (const int rc = mdb_env_set_mapsize(m_pDBEnv, MAX_EXPAND_DB_SIZE)) {
       std::cout << "mdb_env_set_mapsize fail: " << err2str(rc) << std::endl;
       mdb_env_close(m_pDBEnv);
@@ -38,11 +46,13 @@ namespace caxios {
       mdb_env_close(m_pDBEnv);
       return;
     }
-    if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), 0, 0664)) {
-      std::cout << "mdb_env_open fail: " << err2str(rc) << std::endl;
+    //open_flag |= MDB_NOTLS;
+    T_LOG("Open DB %s, flag: %d", dbpath.c_str(), m_flag);
+    if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), m_flag | MDB_NOLOCK, 0664)) {
+      T_LOG("mdb_env_open fail: %s", err2str(rc).c_str());
     }
-    if (const int rc = mdb_txn_begin(m_pDBEnv, 0, 0, &m_pTransaction)) {
-      std::cout << "mdb_txn_begin fail: " << err2str(rc) << std::endl;
+    if (const int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &m_pTransaction)) {
+      T_LOG("mdb_txn_begin fail: %s", err2str(rc).c_str());
     }
   }
   CDatabase::~CDatabase() {
@@ -53,7 +63,9 @@ namespace caxios {
   MDB_dbi CDatabase::OpenDatabase(const std::string& dbname)
   {
     MDB_dbi dbi = -1;
-    if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), MDB_CREATE | MDB_INTEGERKEY, &dbi)) {
+    unsigned int flag = MDB_CREATE;
+    if (m_flag & MDB_RDONLY) flag = 0;
+    if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), flag | MDB_INTEGERKEY, &dbi)) {
       T_LOG("mdb_dbi_open %s fail %s", dbname.c_str(), err2str(rc).c_str());
       return dbi;
     }
@@ -75,13 +87,13 @@ namespace caxios {
     datum.mv_data = pData;
     datum.mv_size = len;
     if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
-      T_LOG("mdb_put fail: %d, key: %u", err2str(rc).c_str(), k);
+      T_LOG("mdb_put fail: %s, key: %u", err2str(rc).c_str(), k);
       return false;
     }
     if (m_dOperator == NORMAL) {
       m_dOperator = TRANSACTION;
     }
-    T_LOG("mdb_cursor_put %d, key: %u", dbi, k);
+    T_LOG("mdb_put %d, key: %u", dbi, k);
     return true;
   }
 
@@ -96,6 +108,7 @@ namespace caxios {
     }
     len = datum.mv_size;
     pData = datum.mv_data;
+    T_LOG("mdb_get %d, key: %u, len: %d", dbi, k, len);
     return true;
   }
 

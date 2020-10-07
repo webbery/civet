@@ -8,10 +8,10 @@ using namespace v8;
 
 namespace caxios {
 
-	CAxios::CAxios(const std::string& str) {
+	CAxios::CAxios(const std::string& str, int flag) {
     T_LOG("new CAxios(%s)", str.c_str());
     if (m_pDBManager == nullptr) {
-      m_pDBManager = new DBManager(str);
+      m_pDBManager = new DBManager(str, flag);
     }
   }
 

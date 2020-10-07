@@ -15,11 +15,10 @@
 #define TABLE_MATCH         "match_t"
 
 namespace caxios {
-  //extern const char* g_tables[];
 
   class DBManager {
   public:
-    DBManager(const std::string& dbdir);
+    DBManager(const std::string& dbdir, int flag);
     ~DBManager();
 
     //std::vector<std::string> GetAllDBInstance();
@@ -35,6 +34,7 @@ namespace caxios {
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
 
   private:
+    DBFlag _flag = ReadWrite;
     CDatabase* m_pDatabase = nullptr;
     std::map<std::string, MDB_dbi > m_mDBs;
   };

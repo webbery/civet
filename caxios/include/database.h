@@ -8,7 +8,10 @@
 #include "datum_type.h"
 
 namespace caxios{
-  typedef std::pair<MDB_dbi, MDB_txn*> DBHandle;
+  enum DBFlag {
+    ReadWrite,
+    ReadOnly
+  };
 
   enum DATABASE_OPERATOR {
     NORMAL = 0,     // Î´²Ù×÷×´Ì¬
@@ -17,7 +20,7 @@ namespace caxios{
 
   class CDatabase {
   public:
-    CDatabase(const std::string& dbpath);
+    CDatabase(const std::string& dbpath, DBFlag flag);
     ~CDatabase();
 
     MDB_dbi OpenDatabase(const std::string& dbname);
@@ -32,7 +35,7 @@ namespace caxios{
 
   private:
     MDB_env* m_pDBEnv = nullptr;
-    //MDB_txn* m_pRootTransaction = nullptr;
+    unsigned int m_flag = 0;
     MDB_txn* m_pTransaction = nullptr;
     DATABASE_OPERATOR m_dOperator = NORMAL;
   };

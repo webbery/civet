@@ -65,14 +65,14 @@ namespace caxios {
     auto obj = Nan::New<v8_traits<Snap>::type>();
 #if V8_MAJOR_VERSION == 7
     obj->Set(Nan::New("fileid").ToLocalChecked(), Nan::New<v8_traits<FileID>::type>(std::get<0>(val)));
-    obj->Set(Nan::New("display").ToLocalChecked(), Nan::New(std::get<1>(val).c_str()).ToLocalChecked());
+    obj->Set(Nan::New("value").ToLocalChecked(), Nan::New(std::get<1>(val).c_str()).ToLocalChecked());
     obj->Set(Nan::New("step").ToLocalChecked(), Nan::New<v8_traits<char>::type>(std::get<2>(val)));
 #elif V8_MAJOR_VERSION == 8
     obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("fileid").ToLocalChecked(), Nan::New<v8_traits<FileID>::type>(std::get<0>(val)));
-    obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("display").ToLocalChecked(), Nan::New(std::get<1>(val).c_str()).ToLocalChecked());
+    obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("value").ToLocalChecked(), Nan::New(std::get<1>(val).c_str()).ToLocalChecked());
     obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("step").ToLocalChecked(), Nan::New<v8_traits<char>::type>(std::get<2>(val)));
 #endif
-    T_LOG("fileid: %d, display %s, step %d", std::get<0>(val), std::get<1>(val).c_str(), std::get<2>(val));
+    T_LOG("fileid: %d, value %s, step %d", std::get<0>(val), std::get<1>(val).c_str(), std::get<2>(val));
 #if V8_MAJOR_VERSION == 7
     arr->Set(idx, obj);
 #elif V8_MAJOR_VERSION == 8
