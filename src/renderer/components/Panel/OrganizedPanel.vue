@@ -30,7 +30,6 @@
 
 <script>
 import bus from '../utils/Bus'
-import JString from '@/../public/String'
 import Service from '@/components/utils/Service'
 import FolderTree from '@/components/Control/FolderTree'
 import IconFolder from '@/components/Control/IconFolder'
@@ -68,8 +67,8 @@ export default {
           icon: 'el-icon-collection'
         }
       ],
-      directoryData: [],
       newFolder: false,
+      category: [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: dir/jpg, children: []}]
       newCategoryName: ''
     }
   },
@@ -107,29 +106,46 @@ export default {
     updateDisplayImageList(error, appendFiles) {
       if (error) console.log(error)
       console.info('recieve from worker message:', appendFiles)
-      let dirs = {}
-      for (let item of appendFiles) {
-        if (dirs[item.path] === undefined) {
-          dirs[item.path] = []
+      // TODO: 可能更新频繁导致的卡顿
+      const getCategory = function(categoryPath, children) {
+        if (categoryPath.length === 0) return children
+        for (let item of children) {
+          if (item.label === categoryPath[0]) {
+            if (item.children === undefined) {
+              item.children = []
+              return item.children
+            } else {
+              return getCategory(categoryPath.slice(1), item.children)
+            }
+          }
+          if (item.children !== undefined) {
+            return getCategory(categoryPath, parent, item.children)
+          }
         }
-        dirs[item.path].push({label: item.filename})
-        // 更新视图共享数据
-        item.path = JString.joinPath(item.path, item.filename)
-        this.$store.dispatch('addImage', item)
+        return undefined
       }
 
-      // console.info(this.directoryData)
-      for (let item of this.directoryData) {
-        // console.info('***', item.label, dirs[item.label])
-        if (dirs[item.label] !== undefined) {
-          for (let files of dirs[item.label]) {
-            item.children.push({label: files.label})
+      for (let item of appendFiles) {
+        if (item.category === undefined || item.category.length === 0) {
+          this.category.push({label: item.filename, id: item.id, type: item.type})
+        } else {
+          for (let cate of item.category) {
+            const catePath = cate.split('/')
+            let location = getCategory(catePath, this.category)
+            if (location === undefined) { // 分类不存在
+              let children = []
+              let root = children
+              for (let c of catePath) {
+                children.push({label: c, type: 'clz', children: []})
+                children = children.children
+              }
+              children.push({label: item.filename, id: item.id, type: item.type})
+              this.category.children.push(root)
+            } else { // 找到了对应的分类
+              location.push({label: item.filename, id: item.id, type: item.type})
+            }
           }
-          delete dirs[item.label]
         }
-      }
-      for (let k in dirs) {
-        this.directoryData.push({label: k, children: dirs[k]})
       }
     },
     async init() {

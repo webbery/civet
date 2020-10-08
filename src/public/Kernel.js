@@ -16,8 +16,10 @@ const kernel = (function () {
 })()
 
 export default {
-  generateFilesID: (num) => { return kernel.generateFilesID(num) },
-  addFiles: (src) => { return kernel.addFiles(src) },
   getFilesSnap: (flag) => { return kernel.getFilesSnap(flag) },
-  findFiles: (condition) => { return kernel.findFiles(condition) }
+  getFilesInfo: (filesID) => { return kernel.getFilesInfo(filesID) },
+  findFiles: (condition) => { return kernel.findFiles(condition) },
+  // 以下接口为可写接口
+  generateFilesID: (num) => { return kernel.generateFilesID(num) },
+  addFiles: (src) => { return kernel.addFiles(src) }
 }

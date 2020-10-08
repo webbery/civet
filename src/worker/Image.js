@@ -7,7 +7,7 @@ import JString from '../public/String'
 import fs from 'fs'
 
 export class ImageParser {
-  async parse(fullpath, stat, stepFinishCB) {
+  parse(fullpath, stat, stepFinishCB) {
     return parseChain(fullpath, stat, stepFinishCB)
   }
 }
@@ -19,9 +19,9 @@ const parseChain = (fullpath, stat, stepFinishCB) => {
   const fid = Storage.generateFilesID(1)
   console.info(f.dir, f.base)
   let fileInfo = {
-    fileid: fid,
+    fileid: fid[0],
     meta: [
-      { name: 'path', value: f.dir, type: 'str' },
+      { name: 'path', value: fullpath, type: 'str' },
       { name: 'filename', value: f.base, type: 'str' },
       { name: 'size', value: stat.size, type: 'value' },
       { name: 'datetime', value: stat.atime.toString(), type: 'value' }
@@ -36,6 +36,7 @@ const parseChain = (fullpath, stat, stepFinishCB) => {
   meta.nextParser(text)
   text.nextParser(color)
   meta.parse(image)
+  return image
 }
 
 export class JImage extends FileBase {
@@ -75,11 +76,8 @@ class ImageMetaParser extends ImageParseBase {
       image.addMeta('datetime', meta['DateTime'].value[0])
     }
     image.addMeta('type', this.getImageFormat(type))
-    // image.type = this.getImageFormat(type)
     image.addMeta('width', this.getImageWidth(meta))
     image.addMeta('height', this.getImageHeight(meta))
-    // image.width = this.getImageWidth(meta)
-    // image.height = this.getImageHeight(meta)
     if (image.size > 5 * 1024 * 1024) {
       image.addMeta('thumbnail', this.getImageThumbnail(meta))
       // image.thumbnail = this.getImageThumbnail(meta)

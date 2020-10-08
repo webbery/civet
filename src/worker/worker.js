@@ -72,13 +72,13 @@ const ReplyType = {
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
 
-async function readImages(fullpath) {
+function readImages(fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
     readDir(fullpath)
   } else {
     const parser = new ImageParser()
-    let img = await parser.parse(fullpath, info)
+    let img = parser.parse(fullpath, info)
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
 }

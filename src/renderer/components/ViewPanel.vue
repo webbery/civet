@@ -32,6 +32,7 @@ export default {
   data() {
     return {
       firstLoad: true,
+      imageList: [],
       lastSelection: null
     }
   },
@@ -43,17 +44,18 @@ export default {
       const snaps = this.$kernel.getFilesSnap(-1)
       console.info('View Panel', snaps)
     }
+    this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
   },
-  computed: {
-    imageList() {
-      // console.info('+++++++++', this.$store.state.Picture.imageList)
-      // if (this.$store.state.Picture.imageList.length > 80) {
-      //   return this.$store.state.Picture.imageList.slice(0, 79)
-      // }
-      // return this.$store.state.Picture.imageList
-      return []
-    }
-  },
+  // computed: {
+  //   imageList() {
+  //     // console.info('+++++++++', this.$store.state.Picture.imageList)
+  //     // if (this.$store.state.Picture.imageList.length > 80) {
+  //     //   return this.$store.state.Picture.imageList.slice(0, 79)
+  //     // }
+  //     // return this.$store.state.Picture.imageList
+  //     return []
+  //   }
+  // },
   watch: {
     $route: async function(to, from) {
       console.info('to: ', to, 'from:', from.path)
@@ -127,12 +129,14 @@ export default {
       const url = event.dataTransfer.getData('my-info')
       console.info('copy URI:', url)
     },
-    onUpdateImages(updateImages) {
-      // for (let item of updateImages) {
-      //   images.push(item.realpath)
-      // }
+    onUpdateImages(error, updateImages) {
+      if (error) console.log(error)
+      for (let item of updateImages) {
+        this.imageList.push({id: item.id, label: item.filename, path: item.path})
+      }
     },
     getImage(image) {
+      console.info('getImage:', image)
       return ImgTool.getSrc(image)
     }
   }

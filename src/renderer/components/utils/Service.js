@@ -22,7 +22,7 @@ const replyMessageMap = {
 
 let getServiceInstance = (function() {
   let hasInited
-  let callbackCache = []
+  let callbackCache = {}
   let service
   let promiseOn
   return function () {
@@ -37,11 +37,12 @@ let getServiceInstance = (function() {
           })
         },
         on: (type, callback) => {
-          console.info('message-from-main: type=' + type)
-          callbackCache.push({
-            type,
-            callback
-          })
+          console.info('regist message-from-main: type=' + type)
+          if (callbackCache[type] === undefined) {
+            callbackCache[type] = [callback]
+          } else {
+            callbackCache[type].push(callback)
+          }
         }
       }
       promiseOn = util.promisify(service.on)
@@ -54,10 +55,13 @@ let getServiceInstance = (function() {
         return result
       }
       ipcRenderer.on('message-to-renderer', (sender, msg) => {
-        callbackCache.forEach(cache => {
-          if (cache.type === msg.type) {
-            cache.callback && cache.callback(null, msg.data)
-          }
+        const callbacks = callbackCache[msg.type]
+        if (callbacks === undefined) {
+          console.info(msg.type, 'no callback')
+          return
+        }
+        callbacks.forEach(callback => {
+          callback(null, msg.data)
         })
       }) // 监听主进程的消息
     }

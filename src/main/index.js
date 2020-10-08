@@ -172,8 +172,7 @@ app.on('ready', async () => {
   console.info('cfgFile', cfgFile)
   if (!fs.existsSync(cfgFile)) {
     fs.writeFileSync(cfgFile, JSON.stringify(cfg))
-  }
-  else {
+  } else {
     cfg.app = false
     fs.writeFileSync(cfgFile, JSON.stringify(cfg))
   }

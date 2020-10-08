@@ -27,7 +27,6 @@ export default class FileBase {
   }
 
   metaType(value) {
-    console.info('typeof ', typeof (value))
     if (typeof value === 'number') return 'value'
     if (value[0] === '#') return 'value'
     return 'str'

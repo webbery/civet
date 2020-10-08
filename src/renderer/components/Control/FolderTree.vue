@@ -13,7 +13,7 @@
       <i class="el-icon-caret-bottom" v-if="item.children  && (expandTree[idx])" @click="onRetract(idx)"></i>
       <span class="el-icon-caret-right caret-hidden" v-if="(!item.type || item.type==='clz') && !item.children"></span>
       <IconFolder v-if="!item.type || item.type==='clz'" :icon="item.icon?item.icon:'el-icon-folder'" :label="item.label" :parent="chain"></IconFolder>
-      <div v-if="item.children && (expandTree[idx])" class="children">
+      <div v-if="item.children && item.children.length > 0 && (expandTree[idx])" class="children">
         <FolderTree :data="item.children" :parent="(parent===undefined ? item.label : parent + '/' +item.label)"></FolderTree>
       </div>
     </div>

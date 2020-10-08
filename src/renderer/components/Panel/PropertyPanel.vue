@@ -116,7 +116,8 @@ export default {
         }
         return v.toFixed(1) + unit
       }
-      let image = this.$store.getters.image(imageID)
+      // let image = this.$store.getters.image(imageID)
+      let image = this.$kernel.getFilesInfo([imageID])
       this.classes.length = 0
       for (let c of image.category) {
         this.classes.push(c)
