@@ -37,6 +37,7 @@
         'OTHER_CPLUSPLUSFLAGS': [
           '-fexceptions',
           '-Wall',
+          '-mmacosx-version-min=10.15',
           '-O3'
         ]
       },

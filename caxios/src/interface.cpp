@@ -88,15 +88,29 @@ namespace caxios {
         if (!info[1]->IsUndefined()) {
           flag = ConvertToInt32(info[1]);
         }
-        Local<Value> localVal = GetValueFromObject(obj, "db.path");
-        std::string val = ConvertToString(localVal);
-        Addon::m_pCaxios = new caxios::CAxios(val, flag);
-        node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
-        info.GetReturnValue().Set(true);
-        T_LOG("init success");
-        return;
+        Local<Value> localVal = GetValueFromObject(obj, "app.default");
+        std::string defaultName = ConvertToString(localVal);
+        Local<Value> resources = GetValueFromObject(obj, "resources");
+        Local<Array> arr = ForeachArray(resources, [&defaultName](const v8::Local<v8::Value>& item) {
+          auto objName = GetValueFromObject(item, "name");
+          std::string name = ConvertToString(objName);
+          if(name == defaultName) {
+            auto dbPath = GetValueFromObject(item, "db.path");
+            std::string val = ConvertToString(objName);
+            Addon::m_pCaxios = new caxios::CAxios(val, flag);
+            node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
+            info.GetReturnValue().Set(true);
+            return true;
+          }
+          return false;
+        });
+        if (Addon::m_pCaxios) {
+          T_LOG("init success");
+          return;
+        }
       }
     }
+    T_LOG("init fail");
     info.GetReturnValue().Set(false);
   }
 

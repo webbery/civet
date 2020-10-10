@@ -49,6 +49,8 @@ namespace caxios {
     auto tid = std::this_thread::get_id();
 #ifdef _WIN32
     return *(_Thrd_id_t*)&tid;
+#elif __APPLE__
+    return pthread_mach_thread_np(*(pthread_t*)&tid);
 #else
     return *(__gthread_t*)&tid;
 #endif

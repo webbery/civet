@@ -159,15 +159,24 @@ app.on('ready', async () => {
   const cfgFile = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
   const fs = require('fs')
   let cfg = {
-    db: {
-      path: userDir + '/civet'
-    },
-    resource: {
-      path: userDir + '/resource'
-    },
     app: {
-      first: true
-    }
+      first: true,
+      defaul: '图像库'
+    },
+    resources:[
+      {
+        name: '图像库',
+        db: {
+          path: userDir + '/civet'
+        },
+        linkdir: {
+          path: userDir + '/resource'
+        },
+        meta: [
+          {name: 'color', value: '主色', type: 'value', db: true}
+        ]
+      }
+    ]
   }
   console.info('cfgFile', cfgFile)
   if (!fs.existsSync(cfgFile)) {

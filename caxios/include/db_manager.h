@@ -28,6 +28,7 @@ namespace caxios {
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>&);
     bool GetFilesInfo(MetaItems& meta, Keywords& keywords, FileID* filesID, int file_num = 1);
     bool GetFilesSnap(std::vector< Snap >& snaps);
+    bool FindByValue();
 
   private:
     bool AddFile(FileID, const MetaItems&, const Keywords&);
