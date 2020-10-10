@@ -102,7 +102,7 @@ namespace caxios {
       try {
         std::string display = trunc(to_string(file["value"]));
         int step = atoi(file["step"].dump().c_str());
-        Snap snap = { k, display, step };
+        Snap snap{ k, display, step };
         snaps.emplace_back(snap);
       }catch(json::exception& e){
         T_LOG("ERR: %s", e.what());
@@ -119,7 +119,7 @@ namespace caxios {
     json files;
     files["meta"] = meta;
     std::string value = to_string(files);
-    if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, value.data(), value.size())) {
+    if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, (void*)(value.data()), value.size())) {
       T_LOG("Put TABLE_FILE_META Fail %s", value.c_str());
       return false;
     }
@@ -134,7 +134,7 @@ namespace caxios {
     }
     snaps["step"] = (char)0x1;
     value = to_string(snaps);
-    if (!m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileid, value.data(), value.size())) {
+    if (!m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileid, (void*)(value.data()), value.size())) {
       T_LOG("Put TABLE_FILESNAP Fail %s", value.c_str());
       return false;
     }

@@ -1,7 +1,6 @@
 #include "util.h"
 #include <iostream>
 #include "log.h"
-#include <nan.h>
 
 namespace caxios {
   

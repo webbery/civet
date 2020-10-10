@@ -3,6 +3,7 @@
 #include <string>
 #include <node.h>
 #include <functional>
+#include <nan.h>
 #include "datum_type.h"
 
 namespace caxios {

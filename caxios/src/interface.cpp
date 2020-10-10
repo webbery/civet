@@ -104,7 +104,7 @@ namespace caxios {
     if (Addon::m_pCaxios != nullptr) {
       int cnt = ConvertToInt32(info[0]);
       if (cnt <= 0) return;
-      Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
+      // Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
 
       //class PromiseWorker final : public Nan::AsyncWorker {
       //public:
@@ -126,9 +126,8 @@ namespace caxios {
       //  std::vector<FileID> _gid;
       //};
       std::vector<FileID> gid = Addon::m_pCaxios->GenNextFilesID(cnt);
-      v8::Local<v8::Array> results = ConvertFromArray(gid);
-      info.GetReturnValue().Set(results);
-      //Nan::AsyncQueueWorker(new PromiseWorker(callback, cnt));
+      // v8::Local<v8::Array> results = ConvertFromArray(gid);
+      // info.GetReturnValue().Set(results);
     }
   }
 

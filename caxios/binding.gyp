@@ -26,7 +26,8 @@
         '-fno-exceptions'
       ],
       "cflags_cc!": [
-        '-fno-exceptions'
+        '-fno-exceptions',
+        '-std=gnu++1y'
       ],
       'xcode_settings': {
         'CLANG_CXX_LANGUAGE_STANDARD': 'c++17',

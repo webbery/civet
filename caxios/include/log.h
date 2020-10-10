@@ -14,13 +14,12 @@
 #else
 #define T_LOG(fmt, ...)  {\
     char clg[256] = {0};\
-    sprintf(clg, "[%s] [%s:%d] [%u] [%s] "##fmt "\n", \
+    sprintf(clg, "[%s] [%s:%d] [%u] [%s] " fmt "\n", \
       caxios::current().c_str(),\
       caxios::get_file_name(__FILE__).c_str(),\
       __LINE__,\
       caxios::threadid(),\
-      __FUNCTION__,\
-      __VA_ARGS__);\
+      __FUNCTION__, ##__VA_ARGS__);\
     log2file(clg);\
   }
 #endif

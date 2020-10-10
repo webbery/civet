@@ -4,7 +4,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #else
-#include <filesystem>
+// if defined(_HAS_CXX17) && _HAS_CXX17
+// #include <filesystem>
+// namespace fs = std::filesystem;
+// #else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+// #endif  // _HAS_CXX17
 #endif
 #include "log.h"
 
@@ -21,7 +27,6 @@ namespace caxios {
 #ifdef __APPLE__
     int status = mkdir(dbpath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #else
-    namespace fs = std::filesystem;
     if (!fs::exists(dbpath)) {
       fs::create_directory(dbpath);
     }

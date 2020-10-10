@@ -4,7 +4,11 @@
 #include <ctime>
 #include <iostream>
 #include <thread>
-#include <filesystem>
+#include <experimental/filesystem>
+#ifndef _WIN32
+#include <errno.h>
+#include <string.h> 
+#endif
 
 namespace caxios {
   std::string err2str(int err) {
@@ -20,7 +24,7 @@ namespace caxios {
     std::string fullpath(pathname);
 #ifdef WIN32
     size_t pos = fullpath.find_last_of('\\');
-#elif __APPLE__
+#else
     size_t pos = fullpath.find_last_of('/');
 #endif
     return fullpath.substr(pos + 1, fullpath.size() - pos - 1);
@@ -43,7 +47,11 @@ namespace caxios {
 
   unsigned int threadid() {
     auto tid = std::this_thread::get_id();
+#ifdef _WIN32
     return *(_Thrd_id_t*)&tid;
+#else
+    return *(__gthread_t*)&tid;
+#endif
   }
 
   class FLog {
@@ -53,7 +61,7 @@ namespace caxios {
       int idx = 1;
       while (true) {
         std::string filename = logname + std::to_string(idx) + ".log";
-        if (!std::filesystem::exists(filename)) {
+        if (!std::experimental::filesystem::exists(filename)) {
           logname = filename;
           break;
         }
