@@ -5,29 +5,34 @@ import ExifReader from 'exifreader'
 import JString from '../public/String'
 // import CV from '../public/CV'
 import fs from 'fs'
+// import WorkerPool from './WorkerPool'
 
 export class ImageParser {
+  constructor(hardLinkDir) {
+    this.hardLinkDir = hardLinkDir
+  }
+
   parse(fullpath, stat, stepFinishCB) {
-    return parseChain(fullpath, stat, stepFinishCB)
+    const path = require('path')
+    const f = path.parse(fullpath)
+    console.info(f.dir, f.base, this.hardLinkDir)
+    const bakFilepath = this.hardLinkDir + '/' + f.base
+    fs.linkSync(fullpath, bakFilepath)
+    const fid = Storage.generateFilesID(1)
+    let fileInfo = {
+      fileid: fid[0],
+      meta: [
+        { name: 'path', value: bakFilepath, type: 'str' },
+        { name: 'filename', value: f.base, type: 'str' },
+        { name: 'size', value: stat.size, type: 'value' },
+        { name: 'datetime', value: stat.atime.toString(), type: 'value' }
+      ]
+    }
+    return parseChain(fileInfo, stepFinishCB)
   }
 }
 
-const parseChain = (fullpath, stat, stepFinishCB) => {
-  const path = require('path')
-  const f = path.parse(fullpath)
-  console.info(Storage)
-  const fid = Storage.generateFilesID(1)
-  console.info(f.dir, f.base)
-  let fileInfo = {
-    fileid: fid[0],
-    meta: [
-      { name: 'path', value: fullpath, type: 'str' },
-      { name: 'filename', value: f.base, type: 'str' },
-      { name: 'size', value: stat.size, type: 'value' },
-      { name: 'datetime', value: stat.atime.toString(), type: 'value' }
-    ]
-  }
-
+const parseChain = (fileInfo, stepFinishCB) => {
   let image = new JImage(fileInfo)
   image.stepCallback = stepFinishCB
   const meta = new ImageMetaParser()

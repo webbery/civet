@@ -6,6 +6,7 @@
 #include <node_api.h>
 //#include <napi.h>
 #include <functional>
+#include "json.hpp"
 #include "log.h"
 
 // https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
@@ -91,22 +92,25 @@ namespace caxios {
         Local<Value> localVal = GetValueFromObject(obj, "app.default");
         std::string defaultName = ConvertToString(localVal);
         Local<Value> resources = GetValueFromObject(obj, "resources");
-        Local<Array> arr = ForeachArray(resources, [&defaultName](const v8::Local<v8::Value>& item) {
-          auto objName = GetValueFromObject(item, "name");
-          std::string name = ConvertToString(objName);
-          if(name == defaultName) {
-            auto dbPath = GetValueFromObject(item, "db.path");
-            std::string val = ConvertToString(objName);
-            Addon::m_pCaxios = new caxios::CAxios(val, flag);
+        Local<v8::Array> lArr = resources.As<v8::Array>();
+        auto context = Nan::GetCurrentContext();
+        auto isolate = Isolate::GetCurrent();
+        for (int i = 0, l = lArr->Length(); i < l; i++)
+        {
+          v8::Local<v8::Value> item = lArr->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), i).ToLocalChecked();
+          std::string sItem = Stringify(item);
+          T_LOG("init %s, %s", sItem.c_str(), defaultName.c_str());
+          using namespace nlohmann;
+          json jsn = json::parse(sItem);
+          if (jsn["name"] == defaultName) {
+            std::string dbPath = jsn["db"]["path"];
+            auto meta = jsn["meta"].dump();
+            Addon::m_pCaxios = new caxios::CAxios(dbPath, flag, meta);
             node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
+            T_LOG("init success");
             info.GetReturnValue().Set(true);
-            return true;
+            return;
           }
-          return false;
-        });
-        if (Addon::m_pCaxios) {
-          T_LOG("init success");
-          return;
         }
       }
     }
@@ -118,30 +122,9 @@ namespace caxios {
     if (Addon::m_pCaxios != nullptr) {
       int cnt = ConvertToInt32(info[0]);
       if (cnt <= 0) return;
-      // Nan::Callback* callback = new Nan::Callback(info[1].As<v8::Function>());
-
-      //class PromiseWorker final : public Nan::AsyncWorker {
-      //public:
-      //  PromiseWorker(Nan::Callback* cb, int cnt)
-      //    :Nan::AsyncWorker(cb), _cnt(cnt) {}
-
-      //  void Execute() {
-      //    _gid = Addon::m_pCaxios->GenNextFilesID(_cnt);
-      //  }
-
-      //  void HandleOKCallback() {
-      //    Nan::HandleScope scope;
-      //    v8::Local<v8::Array> results = ConvertFromArray(_gid);
-      //    Local<Value> argv[] = { Nan::Null(), results };
-      //    callback->Call(2, argv);
-      //  }
-      //private:
-      //  int _cnt;
-      //  std::vector<FileID> _gid;
-      //};
       std::vector<FileID> gid = Addon::m_pCaxios->GenNextFilesID(cnt);
-      // v8::Local<v8::Array> results = ConvertFromArray(gid);
-      // info.GetReturnValue().Set(results);
+      v8::Local<v8::Array> results = ConvertFromArray(gid);
+      info.GetReturnValue().Set(results);
     }
   }
 
@@ -214,6 +197,13 @@ namespace caxios {
 
   void getFilesInfo(const v8::FunctionCallbackInfo<v8::Value>& info) {
     if (Addon::m_pCaxios != nullptr) {
+      if (info[0]->IsArray()) {
+        std::vector<FileID> filesID = ConvertToArray<FileID>(info[0]);
+        std::vector< FileInfo > filesInfo;
+        bool result = Addon::m_pCaxios->GetFilesInfo(filesID, filesInfo);
+        auto arr = ConvertFromArray(filesInfo);
+        info.GetReturnValue().Set(arr);
+      }
     }
   }
   void getFilesSnap(const v8::FunctionCallbackInfo<v8::Value>& info) {
@@ -240,6 +230,7 @@ namespace caxios {
   void searchFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void findFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
+  void flushDisk(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 }
 
 NODE_MODULE_INIT() {
@@ -271,4 +262,5 @@ NODE_MODULE_INIT() {
   EXPORT_JS_FUNCTION_PARAM(removeClasses);
   EXPORT_JS_FUNCTION_PARAM(searchFiles);
   EXPORT_JS_FUNCTION_PARAM(findFiles);
+  EXPORT_JS_FUNCTION_PARAM(flushDisk);
 }

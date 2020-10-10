@@ -5,6 +5,10 @@ import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
 import Kernel from '../public/Kernel'
 
+// 尽早打开主窗口
+const { ipcRenderer } = require('electron')
+ready()
+
 /* ************************ ↓↓↓↓↓↓发布时注释掉该部分↓↓↓↓↓↓ ********************** */
 // import Vue from 'vue'
 // import App from './App'
@@ -30,7 +34,6 @@ Array.prototype.remove = function (val) {
 
 const threshodMode = false
 // your background code here
-const { ipcRenderer } = require('electron')
 const fs = require('fs')
 const timer = (function () {
   let t = null
@@ -72,12 +75,49 @@ const ReplyType = {
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
 
+const {remote} = require('electron')
+const userDir = remote.app.getPath('userData')
+const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
+let bakDir
+// console.info(configPath, '............', userDir)
+// 递归创建目录 同步方法
+function mkdirsSync(dirname) {
+  if (fs.existsSync(dirname)) {
+    return true
+  } else {
+    const path = require('path')
+    if (mkdirsSync(path.dirname(dirname))) {
+      fs.mkdirSync(dirname)
+      return true
+    }
+  }
+}
+
+function initHardLinkDir(resourcName) {
+  const config = JSON.parse(fs.readFileSync(configPath))
+  for (let resource of config.resources) {
+    if (resourcName === resource.name) {
+      bakDir = resource.linkDir
+      if (!fs.existsSync(bakDir)) {
+        console.info('mkdir: ', bakDir)
+        mkdirsSync(bakDir)
+      }
+      break
+    }
+  }
+}
 function readImages(fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
     readDir(fullpath)
   } else {
-    const parser = new ImageParser()
+    if (bakDir === undefined) {
+      const config = JSON.parse(fs.readFileSync(configPath))
+      console.info('--------2----------', config)
+      initHardLinkDir(config.app.default)
+    }
+    console.info('--------3----------', bakDir)
+    const parser = new ImageParser(bakDir)
     let img = parser.parse(fullpath, info)
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
@@ -207,5 +247,3 @@ ipcRenderer.on('message-from-main', (event, arg) => {
   console.info('==================')
   messageProcessor[arg.type](arg.data)
 })
-
-ready()

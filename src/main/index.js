@@ -81,7 +81,8 @@ function createWorkerWindow () {
   // mainWindow.openDevTools()
   // workerWindow.openDevTools()
   if (process.env.NODE_ENV === 'development') {
-    enableDevTools(workerWindow)
+    workerWindow.webContents.openDevTools()
+    // enableDevTools(workerWindow)
   }
 }
 
@@ -155,37 +156,11 @@ function sendWindowMessage(targetWindow, message, payload) {
 
 app.on('ready', async () => {
   // 检查配置数据是否存在
-  const userDir = app.getPath('userData')
-  const cfgFile = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-  const fs = require('fs')
-  let cfg = {
-    app: {
-      first: true,
-      defaul: '图像库'
-    },
-    resources:[
-      {
-        name: '图像库',
-        db: {
-          path: userDir + '/civet'
-        },
-        linkdir: {
-          path: userDir + '/resource'
-        },
-        meta: [
-          {name: 'color', value: '主色', type: 'value', db: true}
-        ]
-      }
-    ]
+  const CivetConfig = require('../public/CivetConfig').CivetConfig
+  const cfg = new CivetConfig()
+  if (cfg.isFirstTime()) {
+    // 进入第一次配置页面
   }
-  console.info('cfgFile', cfgFile)
-  if (!fs.existsSync(cfgFile)) {
-    fs.writeFileSync(cfgFile, JSON.stringify(cfg))
-  } else {
-    cfg.app = false
-    fs.writeFileSync(cfgFile, JSON.stringify(cfg))
-  }
-
   Menu.setApplicationMenu(null)
   createWorkerWindow()
   ipcMain.on('message-from-worker', (event, arg) => {

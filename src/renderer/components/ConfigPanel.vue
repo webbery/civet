@@ -88,10 +88,10 @@ export default {
   },
   mounted() {
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '配置', cmd: 'cfg'})
-    const userDir = remote.app.getPath('userData')
-    this.configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-    this.config = JSON.parse(fs.readFileSync(this.configPath))
-    this.oldConfig = JSON.parse(JSON.stringify(this.config))
+    // const userDir = remote.app.getPath('userData')
+    // this.configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
+    // this.config = JSON.parse(fs.readFileSync(this.configPath))
+    // this.oldConfig = JSON.parse(JSON.stringify(this.config))
     this.loadPlugins()
   },
   methods: {

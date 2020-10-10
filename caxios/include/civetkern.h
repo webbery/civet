@@ -13,13 +13,14 @@ namespace caxios{
     static Nan::Persistent<v8::Function> constructor;
 
   public:
-    explicit CAxios(const std::string& str, int flag);
+    explicit CAxios(const std::string& str, int flag, const std::string& meta);
     ~CAxios();
     void Init(v8::Local<v8::Object> exports);
 
     std::vector<FileID> GenNextFilesID(int cnt = 1);
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files);
     bool GetFilesSnap(std::vector<Snap>& snaps);
+    bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool RemoveFiles(const std::vector<FileID>& files);
 
   private:

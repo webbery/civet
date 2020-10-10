@@ -1,8 +1,14 @@
 #include "db_manager.h"
 #include <iostream>
-#include "json.hpp"
 #include "log.h"
 #include "util/util.h"
+
+#define CHECK_DB_OPEN(dbname) \
+  if (m_mDBs[dbname] == -1) {\
+    m_mDBs[dbname] = m_pDatabase->OpenDatabase(dbname);\
+    T_LOG("OpenDatabase: %s, DBI: %d", dbname, m_mDBs[dbname]);\
+    if (m_mDBs[dbname] == -1) return false;\
+  }
 
 namespace caxios {
   const char* g_tables[] = {
@@ -17,7 +23,7 @@ namespace caxios {
     TABLE_MATCH
   };
 
-  DBManager::DBManager(const std::string& dbdir, int flag)
+  DBManager::DBManager(const std::string& dbdir, int flag, const std::string& meta/* = ""*/)
   {
     _flag = (flag == 0 ? ReadWrite : ReadOnly);
     if (m_pDatabase == nullptr) {
@@ -34,6 +40,9 @@ namespace caxios {
       if (dbi >= 0) {
         m_mDBs[g_tables[idx]] = dbi;
       }
+    }
+    if (!meta.empty() || meta != "[]") {
+      ParseMeta(meta);
     }
   }
 
@@ -86,13 +95,38 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo)
+  {
+    CHECK_DB_OPEN(TABLE_FILE_META);
+    for (auto fileID: filesID)
+    {
+      void* pData = nullptr;
+      uint32_t len = 0;
+      if (!m_pDatabase->Get(m_mDBs[TABLE_FILE_META], fileID, pData, len)) {
+        T_LOG("Get TABLE_FILE_META Fail: %d", fileID);
+        continue;
+      }
+      std::string sMeta((char*)pData, len);
+      using namespace nlohmann;
+      json meta = json::parse(sMeta);
+      MetaItems items;
+      for (auto value: meta) {
+        MetaItem item;
+        for (auto it = value.begin(); it!=value.end();++it)
+        {
+          item[it.key()] = trunc(it.value().dump());
+        }
+        items.emplace_back(item);
+      }
+      FileInfo fileInfo{ fileID, items, {}, {}, {} };
+      filesInfo.emplace_back(fileInfo);
+    }
+    return true;
+  }
+
   bool DBManager::GetFilesSnap(std::vector< Snap >& snaps)
   {
-    if (m_mDBs[TABLE_FILESNAP] == -1) {
-      m_mDBs[TABLE_FILESNAP] = m_pDatabase->OpenDatabase(TABLE_FILESNAP);
-      T_LOG("OpenDatabase: %s, DBI: %d", TABLE_FILESNAP, m_mDBs[TABLE_FILESNAP]);
-      if (m_mDBs[TABLE_FILESNAP] == -1) return false;
-    }
+    CHECK_DB_OPEN(TABLE_FILESNAP);
     m_pDatabase->Each(m_mDBs[TABLE_FILESNAP], [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
       if (k == 0) return false;
       using namespace nlohmann;
@@ -116,9 +150,9 @@ namespace caxios {
   bool DBManager::AddFile(FileID fileid, const MetaItems& meta, const Keywords& keywords)
   {
     using namespace nlohmann;
-    json files;
-    files["meta"] = meta;
-    std::string value = to_string(files);
+    json dbMeta;
+    dbMeta = meta;
+    std::string value = to_string(dbMeta);
     if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, (void*)(value.data()), value.size())) {
       T_LOG("Put TABLE_FILE_META Fail %s", value.c_str());
       return false;
@@ -138,12 +172,26 @@ namespace caxios {
       T_LOG("Put TABLE_FILESNAP Fail %s", value.c_str());
       return false;
     }
+    // meta
+    for (MetaItem m : meta) {
+
+    }
     return true;
   }
 
   bool DBManager::GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno)
   {
     return true;
+  }
+
+  void DBManager::ParseMeta(const std::string& meta)
+  {
+    nlohmann::json jsn = nlohmann::json::parse(meta);
+    for (auto item : jsn)
+    {
+      //std::cout << item.key() << std::endl;
+    }
+    T_LOG("schema: %s", meta.c_str());
   }
 
 }

@@ -79,6 +79,38 @@ namespace caxios {
 #endif
   }
 
+  void SetArrayValue(v8::Local<v8::Array>& arr, int idx, const FileInfo& val)
+  {
+    auto obj = Nan::New<v8_traits<FileInfo>::type>();
+    const std::vector<MetaItem>& items = std::get<1>(val);
+    auto meta = ConvertFromArray(items);
+#if V8_MAJOR_VERSION == 7
+    obj->Set(Nan::New("fileid").ToLocalChecked(), Nan::New<v8_traits<FileID>::type>(std::get<0>(val)));
+    obj->Set(Nan::New("meta").ToLocalChecked(), meta);
+#elif V8_MAJOR_VERSION == 8
+    obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("fileid").ToLocalChecked(), Nan::New<v8_traits<FileID>::type>(std::get<0>(val)));
+    obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), Nan::New("meta").ToLocalChecked(), meta);
+#endif
+
+    T_LOG("SetArrayValue FileInfo(fileid: %d)", std::get<0>(val));
+#if V8_MAJOR_VERSION == 7
+    arr->Set(idx, obj);
+#elif V8_MAJOR_VERSION == 8
+    arr->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), idx, obj);
+#endif
+  }
+
+  void SetArrayValue(v8::Local<v8::Array>& arr, int idx, const MetaItem& val)
+  {
+    auto jsn = ConvertFromMap(val);
+    //T_LOG("MetaItem fileid: %d, value %s, step %d", std::get<0>(val), std::get<1>(val).c_str(), std::get<2>(val));
+#if V8_MAJOR_VERSION == 7
+    arr->Set(idx, jsn);
+#elif V8_MAJOR_VERSION == 8
+    arr->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), idx, jsn);
+#endif
+  }
+
   v8::Local<v8::Value> GetValueFromValue(const v8::Local<v8::Value>& value, const std::string& key)
   {
     if (!key.empty()) {
@@ -111,6 +143,7 @@ namespace caxios {
         }
       }
     }
+    T_LOG("key %s not exist", key.c_str());
     return ret;
   }
 
@@ -150,6 +183,20 @@ namespace caxios {
 #elif V8_MAJOR_VERSION == 8
     return v8::String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked();
 #endif
+  }
+
+  std::string Stringify(v8::Local<v8::Value> item)
+  {
+    auto context = Nan::GetCurrentContext();
+    auto isolate = v8::Isolate::GetCurrent();
+    auto JSON = context->Global()->Get(context,
+      v8::String::NewFromUtf8(isolate, "JSON", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked().As<v8::Object>();
+    auto stringify = JSON->Get(context,
+      v8::String::NewFromUtf8(isolate, "stringify", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked().As<v8::Function>();
+    auto v = stringify->Call(context, Undefined(isolate), 1, &item).ToLocalChecked();
+    v8::String::Utf8Value json_value(isolate, v);
+    std::string sItem(*json_value, json_value.length());
+    return std::move(sItem);
   }
 
   std::string trunc(const std::string& elm)

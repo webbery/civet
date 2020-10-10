@@ -8,10 +8,10 @@ using namespace v8;
 
 namespace caxios {
 
-	CAxios::CAxios(const std::string& str, int flag) {
+	CAxios::CAxios(const std::string& str, int flag, const std::string& meta) {
     T_LOG("new CAxios(%s)", str.c_str());
     if (m_pDBManager == nullptr) {
-      m_pDBManager = new DBManager(str, flag);
+      m_pDBManager = new DBManager(str, flag, meta);
     }
   }
 
@@ -33,6 +33,11 @@ namespace caxios {
   bool CAxios::GetFilesSnap(std::vector<Snap>& snaps)
   {
     return m_pDBManager->GetFilesSnap(snaps);
+  }
+
+  bool CAxios::GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo)
+  {
+    return m_pDBManager->GetFilesInfo(filesID, filesInfo);
   }
 
   bool CAxios::RemoveFiles(const std::vector<FileID>& files)
