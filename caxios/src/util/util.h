@@ -13,7 +13,13 @@ namespace caxios {
   uint32_t ConvertToUInt32(const v8::Local<v8::Value>& value);
 
   template<typename T> struct v8_traits;
-  template<> struct v8_traits< FileID > {
+  // template<> struct v8_traits< FileID > {
+  //   typedef v8::Uint32 type;
+  //   static FileID from(const v8::Local<v8::Value>& t) {
+  //     return ConvertToUInt32(t);
+  //   }
+  // };
+  template<> struct v8_traits< unsigned int > {
     typedef v8::Uint32 type;
     static FileID from(const v8::Local<v8::Value>& t) {
       return ConvertToUInt32(t);
@@ -37,7 +43,8 @@ namespace caxios {
 
   template<typename T>
   void SetArrayValue(v8::Local<v8::Array>& arr, int idx, const T& val) {
-    Nan::Set(arr, idx, Nan::New<v8_traits<T>::type>(val));
+    Nan::Set(arr, idx, Nan::New(val));
+    // Nan::Set(arr, idx, Nan::New<v8_traits<T>::type>(val));
   }
 
   void SetArrayValue(v8::Local<v8::Array>& arr, int idx, const Snap& val);
@@ -64,10 +71,10 @@ namespace caxios {
     for_each(kv.begin(), kv.end(),
       [&](std::pair<K, V> pr) {
 #if V8_MAJOR_VERSION == 7
-        obj->Set(Nan::New<v8_traits<K>::type>(pr.first).ToLocalChecked(), Nan::New<v8_traits<K>::type>(pr.second).ToLocalChecked());
+        obj->Set(Nan::New(pr.first).ToLocalChecked(), Nan::New(pr.second).ToLocalChecked());
 #elif V8_MAJOR_VERSION == 8
         obj->Set(v8::Isolate::GetCurrent()->GetCurrentContext(), 
-          Nan::New<v8_traits<K>::type>(pr.first).ToLocalChecked(), Nan::New<v8_traits<K>::type>(pr.second).ToLocalChecked());
+          Nan::New(pr.first).ToLocalChecked(), Nan::New(pr.second).ToLocalChecked());
 #endif
       });
     return obj;
