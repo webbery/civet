@@ -74,7 +74,7 @@
   "dependencies": {
     "@tensorflow/tfjs": "^2.1.0",
     "axios": "^0.18.0",
-    "civetkern": "0.0.20",
+    "civetkern": "0.0.22",
     "crypto": "^1.0.1",
     "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",

@@ -97,7 +97,7 @@ function initHardLinkDir(resourcName) {
   const config = JSON.parse(fs.readFileSync(configPath))
   for (let resource of config.resources) {
     if (resourcName === resource.name) {
-      bakDir = resource.linkDir
+      bakDir = resource.linkdir
       if (!fs.existsSync(bakDir)) {
         console.info('mkdir: ', bakDir)
         mkdirsSync(bakDir)

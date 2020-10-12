@@ -89,23 +89,16 @@ namespace caxios {
         if (!info[1]->IsUndefined()) {
           flag = ConvertToInt32(info[1]);
         }
-        Local<Value> localVal = GetValueFromObject(obj, "app.default");
-        std::string defaultName = ConvertToString(localVal);
-        Local<Value> resources = GetValueFromObject(obj, "resources");
-        Local<v8::Array> lArr = resources.As<v8::Array>();
-        auto context = Nan::GetCurrentContext();
-        auto isolate = Isolate::GetCurrent();
-        for (int i = 0, l = lArr->Length(); i < l; i++)
+        std::string sConfig = Stringify(obj);
+        nlohmann::json config = nlohmann::json::parse(sConfig);
+        std::string defaultName = config["/app/default"_json_pointer].dump();
+        auto resources = config["/resources"_json_pointer];
+        for (auto item: resources)
         {
-          v8::Local<v8::Value> item = lArr->Get(v8::Isolate::GetCurrent()->GetCurrentContext(), i).ToLocalChecked();
-          std::string sItem = Stringify(item);
-          T_LOG("init %s, %s", sItem.c_str(), defaultName.c_str());
-          using namespace nlohmann;
-          json jsn = json::parse(sItem);
-          if (jsn["name"] == defaultName) {
-            std::string dbPath = jsn["db"]["path"];
-            auto meta = jsn["meta"].dump();
-            Addon::m_pCaxios = new caxios::CAxios(dbPath, flag, meta);
+          if (item["name"].dump() == defaultName) {
+            std::string dbPath = item["/db/path"_json_pointer].dump();
+            std::string meta = item["meta"].dump();
+            Addon::m_pCaxios = new caxios::CAxios(trunc(dbPath), flag, meta);
             node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
             T_LOG("init success");
             info.GetReturnValue().Set(true);
