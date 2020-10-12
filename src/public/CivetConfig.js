@@ -21,9 +21,7 @@ export class CivetConfig {
           db: {
             path: userDir + '/civet'
           },
-          linkdir: {
-            path: userDir + '/resource'
-          },
+          linkdir: userDir + '/resource',
           meta: [
             {name: 'color', value: '主色', type: 'val/array', db: true, size: 3}
           ]
