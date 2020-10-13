@@ -1,10 +1,11 @@
 import JString from '../public/String'
-// import localStorage from './LocalStorage'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
+import { CivetConfig } from '../public/CivetConfig'
 import Kernel from '../public/Kernel'
-
+console.info('finish init kernel')
+const cvtConfig = new CivetConfig()
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
 ready()
@@ -75,9 +76,6 @@ const ReplyType = {
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
 
-const {remote} = require('electron')
-const userDir = remote.app.getPath('userData')
-const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
 let bakDir
 // console.info(configPath, '............', userDir)
 // 递归创建目录 同步方法
@@ -94,7 +92,7 @@ function mkdirsSync(dirname) {
 }
 
 function initHardLinkDir(resourcName) {
-  const config = JSON.parse(fs.readFileSync(configPath))
+  const config = cvtConfig.getConfig()
   for (let resource of config.resources) {
     if (resourcName === resource.name) {
       bakDir = resource.linkDir
@@ -112,7 +110,7 @@ function readImages(fullpath) {
     readDir(fullpath)
   } else {
     if (bakDir === undefined) {
-      const config = JSON.parse(fs.readFileSync(configPath))
+      const config = cvtConfig.getConfig()
       console.info('--------2----------', config)
       initHardLinkDir(config.app.default)
     }

@@ -1,6 +1,6 @@
 {
   "name": "civet",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "author": "webberg <weble@qq.com>",
   "description": "An electron-vue project",
   "license": "MIT",
@@ -49,7 +49,7 @@
     },
     "mac": {
       "icon": "build/icons/icon.icns",
-      "target": "dmg"
+      "target": "pkg"
     },
     "win": {
       "icon": "build/icons/icon.ico",
@@ -74,7 +74,7 @@
   "dependencies": {
     "@tensorflow/tfjs": "^2.1.0",
     "axios": "^0.18.0",
-    "civetkern": "0.0.20",
+    "civetkern": "0.0.21",
     "crypto": "^1.0.1",
     "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",
@@ -137,7 +137,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^8.0.0",
+    "electron": "^8.5.2",
     "electron-builder": "^20.19.2",
     "electron-builder-squirrel-windows": "^22.3.5",
     "electron-debug": "^1.5.0",
