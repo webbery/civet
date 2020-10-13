@@ -11,6 +11,7 @@
         "src/db_manager.cpp",
         "src/log.cpp",
         "src/DBThread.cpp",
+        "src/table/TableSnap.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",

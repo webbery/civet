@@ -2,6 +2,7 @@
 #include <iostream>
 #include "log.h"
 #include "util/util.h"
+#include "Table.h"
 
 #define CHECK_DB_OPEN(dbname) \
   if (m_mDBs[dbname] == -1) {\
@@ -145,6 +146,11 @@ namespace caxios {
       return false;
     });
     return true;
+  }
+
+  bool DBManager::FindFiles(const nlohmann::json& query)
+  {
+
   }
 
   bool DBManager::AddFile(FileID fileid, const MetaItems& meta, const Keywords& keywords)

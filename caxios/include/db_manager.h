@@ -5,16 +5,6 @@
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
-#define TABLE_FILESNAP      "file_snap"
-#define TABLE_FILE_META     "file_meta"
-#define TABLE_KEYWORD_INDX  "keyword2indx"
-#define TABLE_INDX_KEYWORD  "indx2keyword"
-#define TABLE_TAG           "tag"
-#define TABLE_CLASS         "class"
-#define TABLE_ANNOTATION    "annotation"
-#define TABLE_MATCH_META    "match_meta"
-#define TABLE_MATCH         "match_t"
-
 namespace caxios {
 
   class DBManager {
@@ -29,7 +19,7 @@ namespace caxios {
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>&);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetFilesSnap(std::vector< Snap >& snaps);
-    bool FindByValue();
+    bool FindFiles(const nlohmann::json& query);
 
   private:
     bool AddFile(FileID, const MetaItems&, const Keywords&);

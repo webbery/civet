@@ -139,15 +139,23 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Del(MDB_dbi dbi, uint32_t key)
+  bool CDatabase::Del(MDB_dbi dbi, uint32_t k)
   {
+    MDB_val key, datum = { 0 };
+    key.mv_data = reinterpret_cast<void*>(&k);
+    key.mv_size = sizeof(uint32_t);
+
+    if (int rc = mdb_del(m_pTransaction, dbi, &key, NULL)) {
+      T_LOG("mdb_del fail: %s", err2str(rc).c_str());
+      return false;
+    }
     return true;
   }
 
   MDB_txn* CDatabase::Begin()
   {
     MDB_txn* pTxn = nullptr;
-    if (int rc = mdb_txn_begin(m_pDBEnv, 0, MDB_NOSYNC, &pTxn)) {
+    if (int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &pTxn)) {
       T_LOG("mdb_txn_begin: %s", err2str(rc).c_str());
       return nullptr;
     }
