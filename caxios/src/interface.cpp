@@ -183,7 +183,7 @@ namespace caxios {
   // void addKeyword(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
   void updateFile(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-
+  void updateFileKeywords(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void updateFileTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void updateFileClass(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   void updateClassName(const v8::FunctionCallbackInfo<v8::Value>& info) {}
@@ -240,6 +240,7 @@ NODE_MODULE_INIT() {
   EXPORT_JS_FUNCTION_PARAM(addTags);
   EXPORT_JS_FUNCTION_PARAM(addClasses);
   EXPORT_JS_FUNCTION_PARAM(updateFile);
+  EXPORT_JS_FUNCTION_PARAM(updateFileKeywords);
   EXPORT_JS_FUNCTION_PARAM(updateFileTags);
   EXPORT_JS_FUNCTION_PARAM(updateFileClass);
   EXPORT_JS_FUNCTION_PARAM(updateClassName);

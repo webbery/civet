@@ -1,10 +1,12 @@
 import JString from '../public/String'
-// import localStorage from './LocalStorage'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
+// import { CivetConfig } from '../public/CivetConfig'
+import { WorkerPool } from './WorkerPool/WorkerPool'
 import Kernel from '../public/Kernel'
-
+console.info('finish init kernel')
+// const cvtConfig = new CivetConfig()
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
 ready()
@@ -75,50 +77,49 @@ const ReplyType = {
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
 
-const {remote} = require('electron')
-const userDir = remote.app.getPath('userData')
-const configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-let bakDir
-// console.info(configPath, '............', userDir)
-// 递归创建目录 同步方法
-function mkdirsSync(dirname) {
-  if (fs.existsSync(dirname)) {
-    return true
-  } else {
-    const path = require('path')
-    if (mkdirsSync(path.dirname(dirname))) {
-      fs.mkdirSync(dirname)
-      return true
-    }
-  }
-}
+// let bakDir
+// // console.info(configPath, '............', userDir)
+// // 递归创建目录 同步方法
+// function mkdirsSync(dirname) {
+//   if (fs.existsSync(dirname)) {
+//     return true
+//   } else {
+//     const path = require('path')
+//     if (mkdirsSync(path.dirname(dirname))) {
+//       fs.mkdirSync(dirname)
+//       return true
+//     }
+//   }
+// }
 
-function initHardLinkDir(resourcName) {
-  const config = JSON.parse(fs.readFileSync(configPath))
-  for (let resource of config.resources) {
-    if (resourcName === resource.name) {
-      bakDir = resource.linkdir
-      if (!fs.existsSync(bakDir)) {
-        console.info('mkdir: ', bakDir)
-        mkdirsSync(bakDir)
-      }
-      break
-    }
-  }
-}
+// function initHardLinkDir(resourcName) {
+//   const config = cvtConfig.getConfig()
+//   for (let resource of config.resources) {
+//     if (resourcName === resource.name) {
+//       bakDir = resource.linkdir
+//       if (!fs.existsSync(bakDir)) {
+//         console.info('mkdir: ', bakDir)
+//         mkdirsSync(bakDir)
+//       }
+//       break
+//     }
+//   }
+// }
+
+const pool = new WorkerPool(1)
 function readImages(fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
     readDir(fullpath)
   } else {
-    if (bakDir === undefined) {
-      const config = JSON.parse(fs.readFileSync(configPath))
-      console.info('--------2----------', config)
-      initHardLinkDir(config.app.default)
-    }
-    console.info('--------3----------', bakDir)
-    const parser = new ImageParser(bakDir)
-    let img = parser.parse(fullpath, info)
+    // if (bakDir === undefined) {
+    //   const config = cvtConfig.getConfig()
+    //   console.info('--------2----------', config)
+    //   initHardLinkDir(config.app.default)
+    // }
+    const parser = new ImageParser(fullpath)
+    let img = parser.parse(info)
+    pool.addTask()
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
 }

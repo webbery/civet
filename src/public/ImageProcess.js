@@ -1,12 +1,12 @@
 // import SKMeans from 'skmeans'
-import { GPU } from 'gpu.js'
+// import { GPU } from 'gpu.js'
 
-let getOrCreateGPU = (function () {
-  let gpu
-  return function () {
-    return gpu || (gpu = new GPU())
-  }
-})()
+// let getOrCreateGPU = (function () {
+//   let gpu
+//   return function () {
+//     return gpu || (gpu = new GPU())
+//   }
+// })()
 
 // const rotateKernel = function(colors, width, height) {
 //   const pixel = colors[width - this.thread.x - 1][this.thread.y]
@@ -14,13 +14,13 @@ let getOrCreateGPU = (function () {
 //   // const pixel = colors[height - this.thread.y - 1][this.thread.z][width - this.thread.x - 1]
 // }
 
-const loop = function (input) {
-  let sum = 0
-  for (let i = 0; i < 64; ++i) {
-    sum += input[this.thread.x]
-  }
-  return sum
-}
+// const loop = function (input) {
+//   let sum = 0
+//   for (let i = 0; i < 64; ++i) {
+//     sum += input[this.thread.x]
+//   }
+//   return sum
+// }
 // function kmeans_gpu(data, k) {
 //   const length = data.length
 //   const findCentriod = getOrCreateGPU().createKernel(function (point, rest) {
@@ -115,21 +115,5 @@ export default {
     // console.info('colors', colors)
     return colors
   },
-  rotate: (image, width, height, isCanvas) => {
-    // let kernel = getOrCreateGPU().createKernel(rotateKernel).setOutput([width, height])
-    // if (isCanvas) {
-    //   kernel = kernel.setGraphical(true)
-    //   kernel(image, width, height)
-    //   console.info(kernel.canvas)
-    //   // return kernel.getCanvas()
-    //   return kernel.canvas
-    // } else {
-    //   const result = kernel(image, width, height)
-    //   console.info(result)
-    //   return result
-    // }
-    let kernel = getOrCreateGPU().createKernel(loop).setOutput([5])
-    const result = kernel([1, 3, 5, 7, 9])
-    console.info(result)
-  }
+  similarity: (histogram1, histogram2) => {}
 }
