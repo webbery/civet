@@ -1,5 +1,5 @@
 <template>
-  <div @contextmenu="onPopMenu($event,$root)">
+  <div @contextmenu="onPopMenu($event,$root)" class="tree">
     <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu"></PopMenu>
     <!-- <ul id="mytable">
     <li data-depth="0" class="collapse level0">
@@ -110,6 +110,9 @@ export default {
   display: block;
 }
 .img-name:active {
+  background-color: dodgerblue;
+}
+.tree:hover {
   background-color: dodgerblue;
 }
 </style>

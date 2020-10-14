@@ -2,7 +2,6 @@ const fs = require('fs')
 export class CivetConfig {
   constructor() {
     let app = null
-    console.info(process.type)
     if (process.type === 'browser') {
       app = require('electron').app
     } else {
@@ -21,9 +20,11 @@ export class CivetConfig {
           db: {
             path: userDir + '/civet'
           },
-          linkdir: userDir + '/resource',
           meta: [
-            {name: 'color', value: '主色', type: 'val/array', db: true, size: 3}
+            {name: 'color', value: '主色', type: 'val/array', query: true, size: 3, display: true},
+            {name: 'path', value: '路径', type: 'str', display: true},
+            {name: 'filename', value: '文件名', type: 'str', display: true},
+            {name: 'type', value: '类型', type: 'str', display: true}
           ]
         }
       ]
@@ -32,8 +33,8 @@ export class CivetConfig {
     if (!fs.existsSync(this.configPath)) {
       fs.writeFileSync(this.configPath, JSON.stringify(cfg))
     } else {
-      JSON.parse(fs.readFileSync(this.configPath))
-      cfg.app.first = false
+      cfg = JSON.parse(fs.readFileSync(this.configPath))
+      // cfg.app.first = false
     }
     this.config = cfg
   }
@@ -42,10 +43,28 @@ export class CivetConfig {
     return this.config
   }
 
+  meta() {
+    for (let resource of this.config.resources) {
+      if (this.config.app.default === resource.name) {
+        return resource.meta
+      }
+    }
+    return null
+  }
+
   isFirstTime() {
     return this.config.app.first
   }
 
+  switchResource(name) {}
+
+  getResourcesName() {
+    let resources = []
+    for (let resource of this.config.resources) {
+      resources.push(resource.name)
+    }
+    return resources
+  }
   save() {
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }

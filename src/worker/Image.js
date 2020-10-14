@@ -69,13 +69,15 @@ class ImageMetaParser extends ImageParseBase {
   }
 
   async parse(image) {
-    const fullpath = image.path + '/' + image.filename
+    const fullpath = image.path
     const buffer = fs.readFileSync(fullpath)
     const hashValue = await pHash({ext: 'image/jpeg', data: buffer}, 16, true)
-    const liklyFiles = Storage.findFiles({hash: hashValue})
-    if (liklyFiles && liklyFiles.length > 0) {
-      console.info('comparing ...')
-    }
+    console.info('hash: ', hashValue)
+    image.addMeta('hash', this.getImageFormat(hashValue))
+    // const liklyFiles = Storage.findFiles({hash: hashValue})
+    // if (liklyFiles && liklyFiles.length > 0) {
+    //   console.info('comparing ...')
+    // }
     const meta = ExifReader.load(buffer)
     delete meta['MakerNote']
     let type = meta['format']
@@ -96,11 +98,14 @@ class ImageMetaParser extends ImageParseBase {
       image.addMeta('thumbnail', thumbnail)
     }
     try {
-      Storage.addFiles([image])
+      // Storage.addFiles([image])
     } catch (err) {
       console.info('parse metadata error', err)
     }
     console.info('1', image)
+    let files = Storage.getFilesInfo([image.id])
+    console.info(files)
+
     // image.stepCallback(undefined, image)
 
     // if (this.next !== undefined) {

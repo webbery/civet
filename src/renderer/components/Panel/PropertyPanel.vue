@@ -1,12 +1,12 @@
 <template>
   <div class="property">
       <el-card :body-style="{ padding: '0px' }">
+        <div style="padding: 4px;" class="image-name">
+          <span >{{picture.label}}</span>
+        </div>
         <JImage :src="imagepath" :interact="false"></JImage>
         <div>
           <span v-for="color of picture.desccolors" :key="color"><span class="main-color" :style="{'background-color': color}" ></span></span>
-        </div>
-        <div style="padding: 4px;" class="image-name">
-          <span >{{picture.label}}</span>
         </div>
       </el-card>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
@@ -51,18 +51,15 @@
       <legend class="title">基本信息</legend>
     <el-row class="desc">
       <el-col :span="12">
-        <div class="name">路径: </div>
-        <div class="name">尺寸: </div>
-        <div class="name">文件大小: </div>
-        <div class="name">类型: </div>
-        <div class="name">添加日期: </div>
+        <div class="name" v-for="(i, name) in metaNames" :key="i">{{name}}:</div>
       </el-col>
       <el-col :span="12">
-        <div ><a href="javascript:void(0);" @click="openFolder()" class="value">{{imagepath}}</a></div>
+        <!-- <div ><a href="javascript:void(0);" @click="openFolder()" class="value">{{imagepath}}</a></div>
         <div class="value">{{picture.width}} X {{picture.height}}</div>
         <div class="value">{{picture.descsize}}</div>
         <div class="value">{{picture.type}}</div>
-        <div class="value">{{picture.datetime}}</div>
+        <div class="value">{{picture.datetime}}</div> -->
+        <div class="value" v-for="(i, value) in metaValues" :key="i">{{value}}</div>
       </el-col>
     </el-row>
     </fieldset>
@@ -73,10 +70,11 @@
 import bus from '../utils/Bus'
 import Service from '../utils/Service'
 import IconTag from '@/components/IconTag'
-import JString from '@/../public/String'
+// import JString from '@/../public/String'
 import JImage from '../JImage'
 import ImgTool from '../utils/ImgTool'
 import log from '@/../public/Logger'
+import { CivetConfig } from '@/../public/CivetConfig'
 
 export default {
   name: 'property-panel',
@@ -88,7 +86,9 @@ export default {
       inputVisible: false,
       inputValue: '',
       checkValue: [],
-      classes: []
+      classes: [],
+      metaNames: [],
+      metaValues: []
     }
   },
   components: {
@@ -107,55 +107,60 @@ export default {
   },
   methods: {
     async displayProperty(imageID) {
-      let getSize = (sz) => {
-        let v = sz / 1024
-        let unit = 'Kb'
-        if (v / 1024 > 1) {
-          unit = 'Mb'
-          v = v / 1024
-        }
-        return v.toFixed(1) + unit
+      // let getSize = (sz) => {
+      //   let v = sz / 1024
+      //   let unit = 'Kb'
+      //   if (v / 1024 > 1) {
+      //     unit = 'Mb'
+      //     v = v / 1024
+      //   }
+      //   return v.toFixed(1) + unit
+      // }
+      const config = new CivetConfig()
+      const meta = config.meta()
+      this.metaNames = []
+      for (let item of meta) {
+        if (item.display) this.metaNames.push(item.value)
       }
-      // let image = this.$store.getters.image(imageID)
       let image = this.$kernel.getFilesInfo([imageID])
-      this.classes.length = 0
-      for (let c of image.category) {
-        this.classes.push(c)
-      }
       log.info('PropertyPanel', image)
-      this.picture.descsize = getSize(image.size)
-      let colors = []
-      if (image.colors) {
-        for (let color of image.colors) {
-          colors.push('#' + JString.formatColor16(color[0]) + JString.formatColor16(color[1]) + JString.formatColor16(color[2]))
-        }
-        this.picture.colors = colors
-      }
-      const clazzName = this.$store.getters.classesName
-      // console.info('clear', clazzName)
-      for (let idx in clazzName) {
-        this.checkValue[idx] = false
-      }
-      if (image.category) {
-        for (let idx in clazzName) {
-          for (let n of image.category) {
-            // console.info(n, image.category)
-            if (n.name === clazzName[idx].name) {
-              this.checkValue[idx] = true
-              break
-            }
-          }
-        }
-      }
-      // image.desccolors = colors
-      this.picture.id = image.id
-      this.imagepath = image.path
-      this.picture.width = image.width
-      this.picture.height = image.height
-      this.picture.datetime = image.datetime
-      this.picture.type = image.type
-      this.picture.label = image.label
-      this.dynamicTags = image.tag ? image.tag.slice(0) : []
+      // this.classes.length = 0
+      // for (let c of image.category) {
+      //   this.classes.push(c)
+      // }
+      // this.picture.descsize = getSize(image.size)
+      // let colors = []
+      // if (image.colors) {
+      //   for (let color of image.colors) {
+      //     colors.push('#' + JString.formatColor16(color[0]) + JString.formatColor16(color[1]) + JString.formatColor16(color[2]))
+      //   }
+      //   this.picture.colors = colors
+      // }
+      // const clazzName = this.$store.getters.classesName
+      // // console.info('clear', clazzName)
+      // for (let idx in clazzName) {
+      //   this.checkValue[idx] = false
+      // }
+      // if (image.category) {
+      //   for (let idx in clazzName) {
+      //     for (let n of image.category) {
+      //       // console.info(n, image.category)
+      //       if (n.name === clazzName[idx].name) {
+      //         this.checkValue[idx] = true
+      //         break
+      //       }
+      //     }
+      //   }
+      // }
+      // // image.desccolors = colors
+      // this.picture.id = image.id
+      // this.imagepath = image.path
+      // this.picture.width = image.width
+      // this.picture.height = image.height
+      // this.picture.datetime = image.datetime
+      // this.picture.type = image.type
+      // this.picture.label = image.label
+      // this.dynamicTags = image.tag ? image.tag.slice(0) : []
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)

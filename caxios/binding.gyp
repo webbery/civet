@@ -11,13 +11,13 @@
         "src/db_manager.cpp",
         "src/log.cpp",
         "src/DBThread.cpp",
-        "src/table/TableSnap.cpp",
+        "src/QueryParser.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",
         "src",
-        "<!(node -e \"require('nan')\")",
-		# '<!@(node -p "require(\'node-addon-api\').include")',
+        # "<!(node -e \"require('nan')\")",
+		'<!@(node -p "require(\'node-addon-api\').include")',
       ],
       'cflags_c': [],
       'cflags_cc': [

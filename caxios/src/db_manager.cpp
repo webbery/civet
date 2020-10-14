@@ -42,9 +42,9 @@ namespace caxios {
         m_mDBs[g_tables[idx]] = dbi;
       }
     }
-    if (!meta.empty() || meta != "[]") {
-      ParseMeta(meta);
-    }
+    //if (!meta.empty() || meta != "[]") {
+    //  ParseMeta(meta);
+    //}
   }
 
   DBManager::~DBManager()
@@ -108,6 +108,7 @@ namespace caxios {
         continue;
       }
       std::string sMeta((char*)pData, len);
+      T_LOG("meta: %s", sMeta.c_str());
       using namespace nlohmann;
       json meta = json::parse(sMeta);
       MetaItems items;
@@ -148,9 +149,9 @@ namespace caxios {
     return true;
   }
 
-  bool DBManager::FindFiles(const nlohmann::json& query)
+  bool DBManager::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)
   {
-
+    return true;
   }
 
   bool DBManager::AddFile(FileID fileid, const MetaItems& meta, const Keywords& keywords)
@@ -163,6 +164,7 @@ namespace caxios {
       T_LOG("Put TABLE_FILE_META Fail %s", value.c_str());
       return false;
     }
+    T_LOG("Write ID: %d, Meta Info: %s", fileid, value.c_str());
     //snap
     json snaps;
     for (MetaItem m: meta)
@@ -178,6 +180,7 @@ namespace caxios {
       T_LOG("Put TABLE_FILESNAP Fail %s", value.c_str());
       return false;
     }
+    T_LOG("Write Snap: %s", value.c_str());
     // meta
     for (MetaItem m : meta) {
 

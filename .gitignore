@@ -2,6 +2,7 @@
 dist/electron/*
 dist/web/*
 build/*
+doc/*
 !build/icons
 coverage
 node_modules/

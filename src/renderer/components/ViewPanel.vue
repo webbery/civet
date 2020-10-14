@@ -46,16 +46,6 @@ export default {
     }
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
   },
-  // computed: {
-  //   imageList() {
-  //     // console.info('+++++++++', this.$store.state.Picture.imageList)
-  //     // if (this.$store.state.Picture.imageList.length > 80) {
-  //     //   return this.$store.state.Picture.imageList.slice(0, 79)
-  //     // }
-  //     // return this.$store.state.Picture.imageList
-  //     return []
-  //   }
-  // },
   watch: {
     $route: async function(to, from) {
       console.info('to: ', to, 'from:', from.path)

@@ -19,7 +19,7 @@ namespace caxios {
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>&);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetFilesSnap(std::vector< Snap >& snaps);
-    bool FindFiles(const nlohmann::json& query);
+    bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);
 
   private:
     bool AddFile(FileID, const MetaItems&, const Keywords&);

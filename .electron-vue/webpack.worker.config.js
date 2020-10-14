@@ -166,38 +166,33 @@ let workerConfig = {
 }
 
 /**
- * Adjust workerConfig for development settings
+ * 发版打开此处
  */
-if (process.env.NODE_ENV !== 'production') {
-  workerConfig.plugins.push(
-    new webpack.DefinePlugin({
-      '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
-    })
-  )
-}
+// if (process.env.NODE_ENV === 'production') {
+//   workerConfig.devtool = ''
 
-/**
- * Adjust workerConfig for production settings
- */
-if (process.env.NODE_ENV === 'production') {
-  workerConfig.devtool = ''
-
-  workerConfig.plugins.push(
-    new MinifyPlugin(),
-    new CopyWebpackPlugin([
-      {
-        from: path.join(__dirname, '../static'),
-        to: path.join(__dirname, '../dist/electron/static'),
-        ignore: ['.*']
-      }
-    ]),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': '"production"'
-    }),
-    new webpack.LoaderOptionsPlugin({
-      minimize: true
-    })
-  )
-}
+//   workerConfig.plugins.push(
+//     new MinifyPlugin(),
+//     new CopyWebpackPlugin([
+//       {
+//         from: path.join(__dirname, '../static'),
+//         to: path.join(__dirname, '../dist/electron/static'),
+//         ignore: ['.*']
+//       }
+//     ]),
+//     new webpack.DefinePlugin({
+//       'process.env.NODE_ENV': '"production"'
+//     }),
+//     new webpack.LoaderOptionsPlugin({
+//       minimize: true
+//     })
+//   )
+// } else {
+workerConfig.plugins.push(
+  new webpack.DefinePlugin({
+    '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
+  })
+)
+// }
 
 module.exports = workerConfig

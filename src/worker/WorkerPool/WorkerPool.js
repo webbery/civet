@@ -55,4 +55,10 @@ class WorkerPool {
 //   constructor(cb) {}
 // }
 
-module.exports = { WorkerPool }
+const pool = new WorkerPool(4)
+export default {
+  addTask: (func, params, cb) => {
+    pool.addTask(func, params)
+  },
+  release: () => {}
+}

@@ -3,7 +3,7 @@
     <el-tabs v-model="activeName" class="custom">
       <el-tab-pane label="资源" name="resources">
         <el-scrollbar style="height:95vh;">
-          <table>
+          <table rules="none" cellspacing=0 >
             <tr class="item" @click="handleResourceClick(headOptions[0])"><i :class="headOptions[0].icon"></i><td>全部</td><td /></tr>
             <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{headOptions[1].value}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{headOptions[2].value}}</td></tr>
@@ -235,7 +235,7 @@ el-tab-pane {
   outline: none;
 }
 .noselection:hover{
-  background-color: rgb(113, 176, 218);
+  background-color: rgb(9, 143, 231);
 }
 .noselection:hover:after {
   color: white;
@@ -246,13 +246,12 @@ el-tab-pane {
   z-index: 99999;
 }
 .item:hover {
-  background-color:rgb(225, 240, 250);
+  background-color:rgb(22, 149, 233);
   -webkit-user-select: none;
 }
-tr:hover{
-  background-color: rgb(113, 176, 218);
+
+table {
+  width: 100%;
 }
-td{
-  border: 0px;
-}
+
 </style>

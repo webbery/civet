@@ -3,238 +3,245 @@
 #include "MessageType.h"
 #include "util/util.h"
 #include <iostream>
-#include <node_api.h>
-//#include <napi.h>
+#include <napi.h>
 #include <functional>
 #include "json.hpp"
 #include "log.h"
 
 // https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
-using v8::FunctionCallbackInfo;
-using v8::Isolate;
-using v8::Local;
-using v8::Object;
-using v8::String;
-using v8::Value;
-
-#define EXPORT_JS_FUNCTION_PARAM(name) \
-  exports->Set(context, \
-    String::NewFromUtf8(isolate, #name, v8::NewStringType::kNormal) \
-    .ToLocalChecked(), \
-    v8::FunctionTemplate::New(isolate, caxios::name, external) \
-    ->GetFunction(context).ToLocalChecked()).FromJust()
-
-#define EXPORT_JS_FUNCTION(name) \
-  exports->Set(context, \
-    String::NewFromUtf8(isolate, #name, v8::NewStringType::kNormal) \
-    .ToLocalChecked(), \
-    v8::FunctionTemplate::New(isolate, caxios::name) \
-    ->GetFunction(context).ToLocalChecked()).FromJust()
+#define EXPORT_JS_FUNCTION_PARAM(name) exports.Set(#name, Napi::Function::New(env, caxios::name));
 
 namespace caxios {
-
-  class Addon {
-  public:
-    Addon(Isolate* isolate, Local<Object> exports) {
-      // 将次对象的实例挂到 exports 上。
-      exports_.Reset(isolate, exports);
-      exports_.SetWeak(this, DeleteMe, v8::WeakCallbackType::kParameter);
-    }
-
-    ~Addon() {
-      if (!exports_.IsEmpty()) {
-        // 重新设置引用以避免数据泄露。
-        exports_.ClearWeak();
-        exports_.Reset();
-      }
-    }
-
-  private:
-    // 导出即将被回收时调用的方法。
-    static void DeleteMe(const v8::WeakCallbackInfo<Addon>& info) {
-      std::cout<<"Delete Me" <<std::endl;
-      if (m_pCaxios) {
-        delete m_pCaxios;
-        m_pCaxios = nullptr;
-      }
-      delete info.GetParameter();
-    }
-
-    // 导出对象弱句柄。该类的实例将与其若绑定的 exports 对象一起销毁。
-    v8::Persistent<v8::Object> exports_;
-
-  public:
-    // 每个插件的数据
-    static CAxios* m_pCaxios;
-  };
-
-  CAxios* Addon::m_pCaxios = nullptr;
+  CAxios* g_pCaxios = nullptr;
   
-  void release(void* pAxios){
-    if (pAxios) {
-      delete static_cast<CAxios*>(pAxios);
-      pAxios = nullptr;
+  Napi::Value release(const Napi::CallbackInfo& info){
+    if (g_pCaxios) {
+      delete g_pCaxios;
+      g_pCaxios = nullptr;
     }
+    return info.Env().Undefined();
   }
-  void init(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios == nullptr) {
-      auto curContext = Nan::GetCurrentContext();
-      if (info[0]->IsObject()) {
-#if V8_MAJOR_VERSION == 7
-        v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent());
-#elif V8_MAJOR_VERSION == 8
-        v8::Local<v8::Object> obj = info[0]->ToObject(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked();
-#endif
-        int flag = 0;
-        if (!info[1]->IsUndefined()) {
-          flag = ConvertToInt32(info[1]);
-        }
-        std::string sConfig = Stringify(obj);
-        nlohmann::json config = nlohmann::json::parse(sConfig);
-        std::string defaultName = config["/app/default"_json_pointer].dump();
-        auto resources = config["/resources"_json_pointer];
-        for (auto item: resources)
-        {
-          if (item["name"].dump() == defaultName) {
-            std::string dbPath = item["/db/path"_json_pointer].dump();
-            std::string meta = item["meta"].dump();
-            Addon::m_pCaxios = new caxios::CAxios(trunc(dbPath), flag, meta);
-            node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), caxios::release, Addon::m_pCaxios);
-            T_LOG("init success");
-            info.GetReturnValue().Set(true);
-            return;
-          }
-        }
-      }
+  Napi::Value init(const Napi::CallbackInfo& info) {
+    if (g_pCaxios) return Napi::Value::From(info.Env(), true);
+    Napi::Object options = info[0].As<Napi::Object>();
+    int32_t flag = 0;
+    if (!info[1].IsUndefined()) {
+      flag = info[1].As<Napi::Number>().Int32Value();
     }
-    T_LOG("init fail");
-    info.GetReturnValue().Set(false);
+    std::string defaultName = AttrAsStr(options, "/app/default");
+    Napi::Object resource = FindObjectFromArray(options.Get("resources").As<Napi::Object>(), [&defaultName](Napi::Object obj)->bool {
+      if (AttrAsStr(obj, "name") == defaultName) return true;
+    });
+    if (!resource.IsUndefined()) {
+      std::string path = AttrAsStr(resource, "/db/path");
+      //std::string meta = AttrAsStr(resource, "meta");
+      g_pCaxios = new CAxios(path, flag);
+      T_LOG("init success");
+    }
+    return Napi::Value::From(info.Env(), true);
   }
 
-  void generateFilesID(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios != nullptr) {
-      int cnt = ConvertToInt32(info[0]);
-      if (cnt <= 0) return;
-      std::vector<FileID> gid = Addon::m_pCaxios->GenNextFilesID(cnt);
-      v8::Local<v8::Array> results = ConvertFromArray(gid);
-      info.GetReturnValue().Set(results);
+  Napi::Value generateFilesID(const Napi::CallbackInfo& info) {
+    if (g_pCaxios != nullptr) {
+      Napi::Number oCnt = info[0].As<Napi::Number>();
+      int cnt = oCnt.Int32Value();
+      if (cnt <= 0) return Napi::Value();
+      std::vector<FileID> gid = g_pCaxios->GenNextFilesID(cnt);
+      Napi::Env env = info.Env();
+      Napi::Array array = Napi::Array::New(env, gid.size());
+      for (unsigned int i = 0; i < gid.size(); ++i) {
+        array.Set(i, Napi::Value::From(env, gid[i]));
+      }
+      return array;
     }
+    return info.Env().Undefined();
   }
 
   /**
    * @brief
    * @param info describe here: https://www.yuque.com/webberg/dacstu/gi9q59#comment-880091
    */
-  void addFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios != nullptr) {
+  Napi::Value addFiles(const Napi::CallbackInfo& info) {
+    if (g_pCaxios != nullptr) {
       std::vector <std::tuple< FileID, MetaItems, Keywords >> vFiles;
       FileID fileID = 0;
       MetaItems metaItems;
       Keywords keywords;
-      std::map<std::string, std::function<void(const v8::Local<v8::Value>&)> > mMetaProccess;
-      mMetaProccess["fileid"] = [&fileID](const v8::Local<v8::Value>& v) {
-        fileID = ConvertToUInt32(v);
+      std::map<std::string, std::function<void(Napi::Value)> > mMetaProccess;
+      mMetaProccess["id"] = [&fileID](Napi::Value item) {
+        fileID = AttrAsUint32(item.As<Napi::Object>(), "id");
+        //T_LOG("FileID: %d", fileID);
       };
-      mMetaProccess["meta"] = [&metaItems](const v8::Local<v8::Value>& v) {
-        if (v->IsArray()) {
-          ForeachArray(v, [&metaItems](const v8::Local<v8::Value>& item) {
-            if (item->IsObject()) {
-              MetaItem meta;
-              ForeachObject(item, [&meta](const v8::Local<v8::Value>& k, const v8::Local<v8::Value>& v) {
-                std::string sKey = ConvertToString(k);
-                std::string sVal = ConvertToString(v);
-                meta[sKey] = sVal;
-                //std::cout << sKey << ": " << sVal << std::endl;
+      mMetaProccess["meta"] = [&metaItems](Napi::Value v) {
+        Napi::Array array = AttrAsArray(v.As<Napi::Object>(), "meta");
+        ForeachArray(array, [&metaItems](Napi::Value item) {
+          if (item.IsObject()) {
+            MetaItem meta;
+            ForeachObject(item, [&meta](const std::string& k, Napi::Value v) {
+              std::string sVal = AttrAsStr(v.As<Napi::Object>(), k);
+              meta[k] = sVal;
+              //T_LOG("Object: %s, %s", k.c_str(), sVal.c_str());
               });
-              metaItems.emplace_back(meta);
-            }
+            metaItems.emplace_back(meta);
+          }
           });
-        }
       };
-      mMetaProccess["keyword"] = [](const v8::Local<v8::Value>& v) {
+      mMetaProccess["keyword"] = [](Napi::Value v) {
       };
-      ForeachArray(info[0], [&vFiles, &fileID, &metaItems, &keywords, &mMetaProccess](const v8::Local<v8::Value>& item) {
-        if (item->IsObject()) {
-          ForeachObject(item, [&](const v8::Local<v8::Value>& k, const v8::Local<v8::Value>& v) {
-            std::string sKey = ConvertToString(k);
-            if (mMetaProccess.find(sKey) != mMetaProccess.end()) mMetaProccess[sKey](v);
+      ForeachArray(info[0], [&vFiles, &fileID, &metaItems, &keywords, &mMetaProccess](Napi::Value item) {
+        if (item.IsObject()) {
+          ForeachObject(item, [&](const std::string& k, Napi::Value v) {
+            if (mMetaProccess.find(k) != mMetaProccess.end()) mMetaProccess[k](v);
             else {
-              std::cout << "Key [" << sKey << "] callback not exist.\n";
+              std::cout << "Key [" << k << "] callback not exist.\n";
             }
           });
           vFiles.emplace_back(std::make_tuple(fileID, metaItems,keywords));
         }
       });
-      if (!Addon::m_pCaxios->AddFiles(vFiles)) {
+      if (!g_pCaxios->AddFiles(vFiles)) {
         T_LOG("addFiles fail");
-        info.GetReturnValue().Set(false);
-        return;
+        return Napi::Boolean::From(info.Env(), false);
       }
-      info.GetReturnValue().Set(true);
+      return Napi::Boolean::From(info.Env(), true);
     }
+    return Napi::Value();
   }
 
-  void addTags(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios != nullptr) {
-    }
+  Napi::Value addTags(const Napi::CallbackInfo& info) {
+    //if (Addon::m_pCaxios != nullptr) {
+    //}
+    return info.Env().Undefined();
   }
-  void addClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  Napi::Value addClasses(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
   // void addAnotation(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   // void addKeyword(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
-  void updateFile(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void updateFileKeywords(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void updateFileTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void updateFileClass(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void updateClassName(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  Napi::Value updateFile(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+  Napi::Value updateFileKeywords(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+  Napi::Value updateFileTags(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+  Napi::Value updateFileClass(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+  Napi::Value updateClassName(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
 
-  void getFilesInfo(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios != nullptr) {
-      if (info[0]->IsArray()) {
-        std::vector<FileID> filesID = ConvertToArray<FileID>(info[0]);
+  Napi::Value getFilesInfo(const Napi::CallbackInfo& cbInfo) {
+    if (g_pCaxios != nullptr) {
+      if (cbInfo[0].IsArray()) {
+        Napi::Array aFilesID = cbInfo[0].As<Napi::Array>();
         std::vector< FileInfo > filesInfo;
-        bool result = Addon::m_pCaxios->GetFilesInfo(filesID, filesInfo);
-        auto arr = ConvertFromArray(filesInfo);
-        info.GetReturnValue().Set(arr);
+        std::vector< FileID > filesID;
+        ForeachArray(aFilesID, [&filesID](Napi::Value item) {
+          FileID fid = item.As<Napi::Number>().Uint32Value();
+          filesID.emplace_back(fid);
+        });
+        bool result = g_pCaxios->GetFilesInfo(filesID, filesInfo);
+        Napi::Array array = Napi::Array::New(cbInfo.Env(), filesInfo.size());
+        for (unsigned int i = 0; i < filesInfo.size(); ++i) {
+          Napi::Object obj = Napi::Object::New(cbInfo.Env());
+          auto& info = filesInfo[i];
+          obj.Set("id", std::get<0>(info));
+          // meta
+          auto& metaInfo = std::get<1>(info);
+          int metaCnt = metaInfo.size();
+          Napi::Array meta = Napi::Array::New(cbInfo.Env(), metaCnt);
+          for (unsigned int idx = 0; idx < metaCnt; ++idx) {
+            Napi::Object prop = Napi::Object::New(cbInfo.Env());
+            for (auto itr = metaInfo[idx].begin(); itr != metaInfo[idx].end(); ++itr) {
+              prop.Set(itr->first, itr->second);
+            }
+            meta.Set(idx, prop);
+          }
+          obj.Set("meta", meta);
+          array.Set(i, obj);
+        }
+        return array;
       }
     }
+    return cbInfo.Env().Undefined();
   }
-  void getFilesSnap(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios != nullptr) {
+  Napi::Value getFilesSnap(const Napi::CallbackInfo& info) {
+    if (g_pCaxios != nullptr) {
       std::vector<Snap> snaps;
-      Addon::m_pCaxios->GetFilesSnap(snaps);
-      v8::Local<v8::Array> arr = ConvertFromArray(snaps);
-      info.GetReturnValue().Set(arr);
+      g_pCaxios->GetFilesSnap(snaps);
+      Napi::Array array = Napi::Array::New(info.Env(), snaps.size());
+      for (unsigned int i = 0; i < snaps.size(); ++i) {
+        auto obj = Napi::Object::New(info.Env());
+        obj.Set("id", std::get<0>(snaps[i]));
+        obj.Set("display", std::get<1>(snaps[i]));
+        obj.Set("step", std::get<2>(snaps[i]));
+        array.Set(i, obj);
+      }
+      return array;
     }
+    return info.Env().Undefined();
   }
-  void getAllTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void getUnTagFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void getUnClassifyFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void getAllClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void getTagsOfFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  Napi::Value getAllTags(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+  Napi::Value getUnTagFiles(const Napi::CallbackInfo& info) {
+    return info.Env().Undefined();
+  }
+  Napi::Value getUnClassifyFiles(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
+  Napi::Value getAllClasses(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
+  Napi::Value getTagsOfFiles(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
 
-  void removeFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {
-    if (Addon::m_pCaxios != nullptr) {
+  Napi::Value removeFiles(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
+  Napi::Value removeTags(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
+  Napi::Value removeClasses(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
+
+  Napi::Value searchFiles(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
+  Napi::Value findFiles(const Napi::CallbackInfo& info) {
+    //if (Addon::m_pCaxios != nullptr) {
+    //  if (!info[0]->IsUndefined()) {
+    //    auto query = Stringify(info[0]);
+    //    std::vector<FileInfo> vFiles;
+    //    Addon::m_pCaxios->FindFiles(query, vFiles);
+    //  }
+    //}
+    return Napi::Value();
+  }
+
+  Napi::Value flushDisk(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
+
+  Napi::Value writeLog(const Napi::CallbackInfo& info) {
+    if (!info[0].IsUndefined()) {
+      std::string str = info[0].As<Napi::String>();
+      caxios::log2file(caxios::trunc(str));
     }
+    return Napi::Value();
   }
-  void removeTags(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void removeClasses(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-
-  void searchFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-  void findFiles(const v8::FunctionCallbackInfo<v8::Value>& info) {}
-
-  void flushDisk(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 }
 
-NODE_MODULE_INIT() {
-  Isolate* isolate = context->GetIsolate();
-
-  // 为该扩展实例的AddonData创建一个新的实例
-  caxios::Addon* data = new caxios::Addon(isolate, exports);
-  // 在 v8::External 中包裹数据，这样我们就可以将它传递给我们暴露的方法。
-  Local<v8::External> external = v8::External::New(isolate, data);
-
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(init);
+  EXPORT_JS_FUNCTION_PARAM(release);
   EXPORT_JS_FUNCTION_PARAM(generateFilesID);
   EXPORT_JS_FUNCTION_PARAM(addFiles);
   EXPORT_JS_FUNCTION_PARAM(addTags);
@@ -257,4 +264,8 @@ NODE_MODULE_INIT() {
   EXPORT_JS_FUNCTION_PARAM(searchFiles);
   EXPORT_JS_FUNCTION_PARAM(findFiles);
   EXPORT_JS_FUNCTION_PARAM(flushDisk);
+  EXPORT_JS_FUNCTION_PARAM(writeLog);
+  return exports;
 }
+
+NODE_API_MODULE(civetkern, Init);

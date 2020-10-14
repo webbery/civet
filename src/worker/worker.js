@@ -3,7 +3,6 @@ import JString from '../public/String'
 import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
 // import { CivetConfig } from '../public/CivetConfig'
-// import { WorkerPool } from './WorkerPool/WorkerPool'
 import Kernel from '../public/Kernel'
 console.info('finish init kernel')
 // const cvtConfig = new CivetConfig()
@@ -105,8 +104,6 @@ const ReplyType = {
 //     }
 //   }
 // }
-
-// const pool = new WorkerPool(1)
 function readImages(fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
@@ -119,7 +116,6 @@ function readImages(fullpath) {
     // }
     const parser = new ImageParser(fullpath)
     let img = parser.parse(info)
-    // pool.addTask()
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
 }
