@@ -235,7 +235,7 @@ el-tab-pane {
   outline: none;
 }
 .noselection:hover{
-  background-color: rgb(0, 153, 255);
+  background-color: rgb(113, 176, 218);
 }
 .noselection:hover:after {
   color: white;
@@ -248,5 +248,11 @@ el-tab-pane {
 .item:hover {
   background-color:rgb(225, 240, 250);
   -webkit-user-select: none;
+}
+tr:hover{
+  background-color: rgb(113, 176, 218);
+}
+td{
+  border: 0px;
 }
 </style>

@@ -81,8 +81,8 @@ function createWorkerWindow () {
   // mainWindow.openDevTools()
   // workerWindow.openDevTools()
   if (process.env.NODE_ENV === 'development') {
-    workerWindow.webContents.openDevTools()
-    // enableDevTools(workerWindow)
+    // workerWindow.webContents.openDevTools()
+    enableDevTools(workerWindow)
   }
 }
 
@@ -177,7 +177,5 @@ app.on('ready', async () => {
   ipcMain.on('ready', (event, arg) => {
     console.info('child process ready')
     createRendererWindow()
-  // available.push(event.sender)
-    // doIt()
   })
 })
