@@ -122,6 +122,12 @@ export default {
       for (let item of meta) {
         if (item.display) this.metaNames.push(item.value)
       }
+      const config = new CivetConfig()
+      const meta = config.meta()
+      metaNames = []
+      for (let item of meta) {
+        if (item.display) metaNames.push(item.value)
+      }
       let image = this.$kernel.getFilesInfo([imageID])
       log.info('PropertyPanel', image)
       // this.classes.length = 0
