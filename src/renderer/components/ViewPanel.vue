@@ -22,6 +22,7 @@
 import bus from './utils/Bus'
 import Service from './utils/Service'
 import JImage from './JImage'
+import FileBase from '@/../public/FileBase'
 import ImgTool from './utils/ImgTool'
 
 export default {
@@ -43,6 +44,16 @@ export default {
       // bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
       const snaps = this.$kernel.getFilesSnap(-1)
       console.info('View Panel', snaps)
+      let imagesID = []
+      for (let snap of snaps) {
+        imagesID.push(snap.id)
+      }
+      const images = this.$kernel.getFilesInfo(imagesID)
+      let list = []
+      for (let image of images) {
+        list.push(new FileBase(image))
+      }
+      this.imageList = list
     }
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
   },

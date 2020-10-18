@@ -7,6 +7,7 @@
 #include <functional>
 #include "json.hpp"
 #include "log.h"
+#include "Value.h"
 
 // https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
 #define EXPORT_JS_FUNCTION_PARAM(name) exports.Set(#name, Napi::Function::New(env, caxios::name));
@@ -78,10 +79,25 @@ namespace caxios {
           if (item.IsObject()) {
             MetaItem meta;
             ForeachObject(item, [&meta](const std::string& k, Napi::Value v) {
-              std::string sVal = AttrAsStr(v.As<Napi::Object>(), k);
+              auto obj = v.As<Napi::Object>().Get(k);
+              std::string sVal;
+              if (obj.IsString()) {
+                sVal = obj.As<Napi::String>();
+              }
+              else if (obj.IsNumber()) {
+                auto num = obj.As<Napi::Number>().Uint32Value();
+                sVal = std::to_string(num);
+              }
+              else if( obj.IsDate()) {
+                double timestamp = obj.As<Napi::Date>().ValueOf();
+                sVal = std::to_string(timestamp);
+              }
+              else if (obj.IsArray()) {
+                T_LOG("Is Array: ??");
+              }
               meta[k] = sVal;
               //T_LOG("Object: %s, %s", k.c_str(), sVal.c_str());
-              });
+            });
             metaItems.emplace_back(meta);
           }
           });
@@ -103,6 +119,7 @@ namespace caxios {
         T_LOG("addFiles fail");
         return Napi::Boolean::From(info.Env(), false);
       }
+      T_LOG("addFiles Success");
       return Napi::Boolean::From(info.Env(), true);
     }
     return Napi::Value();

@@ -37,6 +37,7 @@ function createRendererWindow() {
       webSecurity: false,
       additionalArguments: ['renderer']
     },
+    backgroundColor: '#222933',
     allowRunningInsecureContent: true,
     height: 563,
     useContentSize: true,
@@ -51,7 +52,7 @@ function createRendererWindow() {
     console.info('onbeforeunload')
     return true
   }
-  mainWindow.on('closed', () => {
+  mainWindow.on('close', () => {
     console.info('---------close------------')
     workerWindow.close()
     // mainWindow.close()

@@ -2,7 +2,7 @@
   <div class="property">
       <el-card :body-style="{ padding: '0px' }">
         <div style="padding: 4px;" class="image-name">
-          <span >{{picture.label}}</span>
+          <span >{{filename}}</span>
         </div>
         <JImage :src="imagepath" :interact="false"></JImage>
         <div>
@@ -51,15 +51,10 @@
       <legend class="title">基本信息</legend>
     <el-row class="desc">
       <el-col :span="12">
-        <div class="name" v-for="(i, name) in metaNames" :key="i">{{name}}:</div>
+        <div class="name" v-for="name of metaNames">{{name}}:</div>
       </el-col>
       <el-col :span="12">
-        <!-- <div ><a href="javascript:void(0);" @click="openFolder()" class="value">{{imagepath}}</a></div>
-        <div class="value">{{picture.width}} X {{picture.height}}</div>
-        <div class="value">{{picture.descsize}}</div>
-        <div class="value">{{picture.type}}</div>
-        <div class="value">{{picture.datetime}}</div> -->
-        <div class="value" v-for="(i, value) in metaValues" :key="i">{{value}}</div>
+        <div class="value" v-for="value of metaValues">{{value}}</div>
       </el-col>
     </el-row>
     </fieldset>
@@ -70,11 +65,12 @@
 import bus from '../utils/Bus'
 import Service from '../utils/Service'
 import IconTag from '@/components/IconTag'
-// import JString from '@/../public/String'
+import JString from '@/../public/String'
 import JImage from '../JImage'
 import ImgTool from '../utils/ImgTool'
 import log from '@/../public/Logger'
 import { CivetConfig } from '@/../public/CivetConfig'
+import FileBase from '@/../public/FileBase'
 
 export default {
   name: 'property-panel',
@@ -87,6 +83,7 @@ export default {
       inputValue: '',
       checkValue: [],
       classes: [],
+      filename: '',
       metaNames: [],
       metaValues: []
     }
@@ -107,34 +104,24 @@ export default {
   },
   methods: {
     async displayProperty(imageID) {
-      // let getSize = (sz) => {
-      //   let v = sz / 1024
-      //   let unit = 'Kb'
-      //   if (v / 1024 > 1) {
-      //     unit = 'Mb'
-      //     v = v / 1024
-      //   }
-      //   return v.toFixed(1) + unit
-      // }
-      const config = new CivetConfig()
-      const meta = config.meta()
-      this.metaNames = []
-      for (let item of meta) {
-        if (item.display) this.metaNames.push(item.value)
+      let getSize = (sz) => {
+        let v = sz / 1024
+        let unit = 'Kb'
+        if (v / 1024 > 1) {
+          unit = 'Mb'
+          v = v / 1024
+        }
+        return v.toFixed(1) + unit
       }
-      const config = new CivetConfig()
-      const meta = config.meta()
-      metaNames = []
-      for (let item of meta) {
-        if (item.display) metaNames.push(item.value)
-      }
-      let image = this.$kernel.getFilesInfo([imageID])
+
+      let image = new FileBase(this.$kernel.getFilesInfo([imageID])[0])
       log.info('PropertyPanel', image)
+
       // this.classes.length = 0
       // for (let c of image.category) {
       //   this.classes.push(c)
       // }
-      // this.picture.descsize = getSize(image.size)
+      this.picture.descsize = getSize(parseInt(image.size))
       // let colors = []
       // if (image.colors) {
       //   for (let color of image.colors) {
@@ -159,14 +146,25 @@ export default {
       //   }
       // }
       // // image.desccolors = colors
-      // this.picture.id = image.id
-      // this.imagepath = image.path
-      // this.picture.width = image.width
-      // this.picture.height = image.height
-      // this.picture.datetime = image.datetime
-      // this.picture.type = image.type
-      // this.picture.label = image.label
-      // this.dynamicTags = image.tag ? image.tag.slice(0) : []
+      const config = new CivetConfig()
+      const schema = config.meta()
+      let names = []
+      let values = []
+      for (let item of image.meta) {
+        if (item.name === 'filename') {
+          this.filename = item.value
+          continue
+        }
+        if (config.isMetaDisplay(item.name, schema)) {
+          names.push(JString.i18n(item.name))
+          values.push(item.value)
+        }
+      }
+      this.metaNames = names
+      this.metaValues = values
+      this.picture.id = image.id
+      this.imagepath = image.path
+      this.dynamicTags = image.tag ? image.tag.slice(0) : []
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)

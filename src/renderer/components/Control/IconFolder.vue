@@ -64,4 +64,11 @@ span{
 input {
   display: inline;
 }
+.class-name:hover {
+  background-color:rgb(22, 149, 233);
+}
+.class-name {
+  width: 100%;
+  /* border: 2px solid brown ; */
+}
 </style>

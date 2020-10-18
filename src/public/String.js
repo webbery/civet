@@ -53,6 +53,9 @@ export default {
       case 'tag': return '标签'
       case 'anno': return '批注'
       case 'keyword': return '关键字'
+      case 'width': return '宽'
+      case 'height': return '高'
+      case 'type': return '类型'
       default: return '其他'
     }
   }

@@ -32,6 +32,7 @@ namespace caxios {
     }
     else {
       if (flag == DBFlag::ReadOnly) m_flag = MDB_RDONLY;
+      else m_flag = MDB_NOSYNC;
     }
 #endif
     mdb_env_create(&m_pDBEnv);
@@ -80,7 +81,8 @@ namespace caxios {
 
   void CDatabase::CloseDatabase(MDB_dbi dbi)
   {
-    this->Commit(m_pTransaction);
+    this->Commit();
+    mdb_env_sync(m_pDBEnv, 1);
     T_LOG("mdb_close %d", dbi);
     //mdb_close(m_pDBEnv, dbi);
   }
@@ -107,6 +109,7 @@ namespace caxios {
     MDB_val key, datum = { 0 };
     key.mv_data = reinterpret_cast<void*>(&k);
     key.mv_size = sizeof(uint32_t);
+    this->Begin();
     if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
       T_LOG("mdb_get fail: %s", err2str(rc).c_str());
       return false;
@@ -121,8 +124,9 @@ namespace caxios {
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
+    this->Begin();
     if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
-      std::cout << "mdb_cursor_open fail: " << err2str(rc) << std::endl;
+      T_LOG("mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
       return false;
     }
 
@@ -154,21 +158,24 @@ namespace caxios {
 
   MDB_txn* CDatabase::Begin()
   {
-    MDB_txn* pTxn = nullptr;
-    if (int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &pTxn)) {
-      T_LOG("mdb_txn_begin: %s", err2str(rc).c_str());
-      return nullptr;
+    if (m_pTransaction == nullptr) {
+      if (int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &m_pTransaction)) {
+        T_LOG("mdb_txn_begin: %s", err2str(rc).c_str());
+        return nullptr;
+      }
+      return m_pTransaction;
     }
-    return pTxn;
+    return nullptr;
   }
 
-  bool CDatabase::Commit(MDB_txn* pTxn)
+  bool CDatabase::Commit()
   {
     if (m_dOperator == NORMAL) return true;
-    if (int rc = mdb_txn_commit(pTxn)) {
+    if (int rc = mdb_txn_commit(m_pTransaction)) {
       T_LOG("mdb_txn_commit: %s", err2str(rc).c_str());
       return false;
     }
+    m_pTransaction = nullptr;
     T_LOG("mdb_txn_commit");
     m_dOperator = NORMAL;
     return true;

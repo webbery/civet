@@ -148,7 +148,7 @@ export default {
         }
       }
     },
-    async init() {
+    init() {
       // this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
       // console.info('----', this.directoryData)
       // const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
@@ -161,6 +161,12 @@ export default {
       // console.info('all tag', allTags)
       // this.$store.dispatch('setCategory', folders)
       // this.$store.dispatch('setTags', allTags)
+      const snaps = this.$kernel.getFilesSnap()
+      let category = []
+      for (let item of snaps) {
+        category.push({label: item.display, id: item.id, step: item.step})
+      }
+      this.category = category
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)

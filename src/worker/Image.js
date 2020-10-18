@@ -97,12 +97,12 @@ class ImageMetaParser extends ImageParseBase {
       const thumbnail = this.getImageThumbnail(meta)
       image.addMeta('thumbnail', thumbnail)
     }
+    console.info('1', image)
     try {
-      // Storage.addFiles([image])
+      Storage.addFiles([image])
     } catch (err) {
       console.info('parse metadata error', err)
     }
-    console.info('1', image)
     let files = Storage.getFilesInfo([image.id])
     console.info(files)
 

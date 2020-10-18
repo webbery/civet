@@ -85,8 +85,7 @@ export default {
         chain = this.parent + '/' + this.selection
       }
       console.info('delete', chain)
-      // this.$store.dispatch('removeTags', chain)
-      this.$store.dispatch('removeCategory', chain)
+      // this.$ipcRenderer.send(Service.REMOVE_FILES, {})
     },
     onChangeName: function (newName) {
       console.info(this.selection, newName)
@@ -112,7 +111,5 @@ export default {
 .img-name:active {
   background-color: dodgerblue;
 }
-.tree:hover {
-  background-color: dodgerblue;
-}
+
 </style>

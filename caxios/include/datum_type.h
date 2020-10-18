@@ -1,10 +1,11 @@
 #pragma once
 #include <map>
 #include <vector>
+#include "Value.h"
 
 namespace caxios {
   typedef unsigned int FileID;
-  typedef std::map<std::string, std::string> MetaItem;
+  typedef std::map<std::string, std::string > MetaItem;
   typedef std::vector<MetaItem> MetaItems;
   typedef std::vector<std::string> Tags;
   typedef std::vector<std::string> Annotations;

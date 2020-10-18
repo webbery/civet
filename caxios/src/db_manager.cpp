@@ -76,23 +76,23 @@ namespace caxios {
       lastID += 1;
       filesID.emplace_back(lastID);
     }
+    m_pDatabase->Begin();
     if (!m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], 0, &lastID, sizeof(FileID))) {
     }
+    m_pDatabase->Commit();
     return std::move(filesID);
   }
 
   bool DBManager::AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files)
   {
     if (_flag == ReadOnly) return false;
+    m_pDatabase->Begin();
     for (auto item : files) {
       if (!AddFile(std::get<0>(item), std::get<1>(item), std::get<2>(item))) {
         return false;
       }
     }
-    //m_pDatabase->Each(m_mDBs[TABLE_FILESNAP], [](uint32_t k, void* pData, uint32_t len) -> bool {
-    //  return false;
-    //});
-    //m_pDatabase->Commit(m_mDBs[TABLE_FILE_META].second);
+    m_pDatabase->Commit();
     return true;
   }
 
@@ -169,18 +169,18 @@ namespace caxios {
     json snaps;
     for (MetaItem m: meta)
     {
-      if (m["name"] == "title"){
+      if (m["name"] == "filename"){
         snaps["value"] = m["value"];
         break;
       }
     }
     snaps["step"] = (char)0x1;
-    value = to_string(snaps);
-    if (!m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileid, (void*)(value.data()), value.size())) {
-      T_LOG("Put TABLE_FILESNAP Fail %s", value.c_str());
+    std::string sSnaps = to_string(snaps);
+    if (!m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileid, (void*)(sSnaps.data()), sSnaps.size())) {
+      T_LOG("Put TABLE_FILESNAP Fail %s", sSnaps.c_str());
       return false;
     }
-    T_LOG("Write Snap: %s", value.c_str());
+    T_LOG("Write Snap: %s", sSnaps.c_str());
     // meta
     for (MetaItem m : meta) {
 

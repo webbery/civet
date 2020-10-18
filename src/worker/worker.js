@@ -26,6 +26,11 @@ ready()
 // }).$mount('#app')
 /* ************************ ↑↑↑↑↑发布时注释掉该部分↑↑↑↑↑ ********************** */
 
+window.onbeforeunload = (e) => {
+  Kernel.writeLog('********Worker Exit********')
+  Kernel.release()
+}
+
 Array.prototype.remove = function (val) {
   let index = this.indexOf(val)
   if (index > -1) {
@@ -165,28 +170,29 @@ const messageProcessor = {
       readImages(fullpath)
     }
   },
-  'getImagesInfo': async (data) => {
-    // let imagesIndex = []
-    // if (data === undefined) {
-    //   // 全部图片信息
-    //   let imagesSnap = await localStorage.getImagesSnap()
-    //   for (let imgID in imagesSnap) {
-    //     imagesIndex.push(imgID)
-    //   }
-    // } else {
-    //   imagesIndex = data
-    // }
-    // let imgs = await localStorage.getImagesInfo(imagesIndex)
-    // // console.info('getImagesInfo', imgs)
-    // let images = []
-    // for (let img of imgs) {
-    //   images.push(new JImage(img))
-    // }
-    // reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
+  'getImagesInfo': (data) => {
+    let imagesIndex = []
+    if (data === undefined) {
+      // 全部图片信息
+      let imagesSnap = Kernel.getFilesSnap()
+      for (let imgID in imagesSnap) {
+        imagesIndex.push(imgID)
+      }
+    } else {
+      imagesIndex = data
+    }
+    let imgs = Kernel.getFilesInfo(imagesIndex)
+    console.info('getImagesInfo', imgs)
+    let images = []
+    for (let img of imgs) {
+      images.push(new JImage(img))
+    }
+    reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
-  'getImageInfo': async (imageID) => {
-    let img = await localStorage.getFilesInfo(imageID)
-    let image = new JImage(img)
+  'getImageInfo': (imageID) => {
+    const img = Kernel.getFilesInfo([imageID])
+    // console.info('getImagesInfo', img)
+    let image = new JImage(img[0])
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
   'addTag': async (data) => {

@@ -24,7 +24,9 @@ export class CivetConfig {
             {name: 'color', value: '主色', type: 'val/array', query: true, size: 3, display: true},
             {name: 'path', value: '路径', type: 'str', display: true},
             {name: 'filename', value: '文件名', type: 'str', display: true},
-            {name: 'type', value: '类型', type: 'str', display: true}
+            {name: 'type', value: '类型', type: 'str', display: true},
+            {name: 'width', value: '宽', type: 'str', display: true},
+            {name: 'height', value: '高', type: 'str', display: true}
           ]
         }
       ]
@@ -41,6 +43,15 @@ export class CivetConfig {
 
   getConfig() {
     return this.config
+  }
+
+  getDBPath() {
+    for (let resource of this.config.resources) {
+      if (this.config.app.default === resource.name) {
+        return resource.db.path
+      }
+    }
+    return null
   }
 
   meta() {
@@ -65,6 +76,14 @@ export class CivetConfig {
     }
     return resources
   }
+
+  isMetaDisplay(name, meta) {
+    for (let item of meta) {
+      if (item.name === name && item.display === true) return true
+    }
+    return false
+  }
+
   save() {
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }

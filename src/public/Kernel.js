@@ -24,5 +24,8 @@ export default {
   // 以下接口为可写接口
   generateFilesID: (num) => { return kernel.generateFilesID(num) },
   addFiles: (src) => { return kernel.addFiles(src) },
-  updateFilesKeywords: (filesID, keywords) => {}
+  updateFilesKeywords: (filesID, keywords) => {},
+  release: () => {
+    kernel.release()
+  }
 }

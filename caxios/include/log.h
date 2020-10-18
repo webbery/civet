@@ -13,7 +13,8 @@
     __VA_ARGS__)
 #else
 #define T_LOG(fmt, ...)  {\
-    char clg[256] = {0};\
+    char* clg = new char[1024];\
+    memset(clg, 0, 1024);\
     sprintf(clg, "[%s] [%s:%d] [%u] [%s] " fmt "\n", \
       caxios::current().c_str(),\
       caxios::get_file_name(__FILE__).c_str(),\
@@ -21,6 +22,7 @@
       caxios::threadid(),\
       __FUNCTION__, ##__VA_ARGS__);\
     log2file(clg);\
+    delete[] clg;\
   }
 #endif
 

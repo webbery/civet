@@ -1,21 +1,14 @@
 <template>
   <div class="config">
     <div style="margin-top: 15px;">
-      <el-input placeholder="请输入内容" v-model="config.resource.path" class="input-with-select" :disabled="true">
-        <template slot="prepend">资源库路径：</template>
-          <el-button slot="append" icon="el-icon-more" @click="onSelectResourcePath()"></el-button>
-      </el-input>
-      <label>提示：资源库只保存文件的硬链接，不会占用额外的空间</label>
-    </div>
-    <div style="margin-top: 15px;">
-      <el-input placeholder="请输入内容" v-model="config.db.path" class="input-with-select" :disabled="true">
+      <el-input placeholder="请输入内容" v-model="config" class="input-with-select" :disabled="true">
         <template slot="prepend">数据库路径：</template>
         <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()"></el-button>
       </el-input>
       <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
     </div>
   <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button>
-  <div class="modules">
+  <!-- <div class="modules">
     <el-divider content-position="left">可用插件</el-divider>
     <el-collapse v-model="valiablePlugins" @change="handlePluginChange">
       <div v-for="(item, idx) of valiablePlugins" :key="idx">
@@ -50,7 +43,7 @@
         </div>
       </el-collapse-item>
     </el-collapse>
-  </div>
+  </div> -->
   </div>
 </template>
 
@@ -61,6 +54,7 @@ import Service from './utils/Service'
 import Folder from './utils/Folder'
 import fs from 'fs'
 import Plugins from '@/../public/Plugin'
+import { CivetConfig } from '@/../public/CivetConfig'
 
 export default {
   name: 'config-page',
@@ -69,14 +63,8 @@ export default {
       configPath: '',
       enableTransfer: false,
       tansferMessage: '开始迁移',
-      oldConfig: {
-        resource: {},
-        db: {}
-      },
-      config: {
-        resource: {},
-        db: {}
-      },
+      oldConfig: '',
+      config: '',
       valiablePlugins: [
         {path: '', name: 'image', version: '0.0.1', valid: true}
       ],
@@ -88,10 +76,9 @@ export default {
   },
   mounted() {
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '配置', cmd: 'cfg'})
-    // const userDir = remote.app.getPath('userData')
-    // this.configPath = (remote.app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
-    // this.config = JSON.parse(fs.readFileSync(this.configPath))
-    // this.oldConfig = JSON.parse(JSON.stringify(this.config))
+    const config = new CivetConfig()
+    this.config = config.getDBPath()
+    console.info('confog:', this.config)
     this.loadPlugins()
   },
   methods: {

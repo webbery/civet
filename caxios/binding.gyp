@@ -12,6 +12,10 @@
         "src/log.cpp",
         "src/DBThread.cpp",
         "src/QueryParser.cpp",
+        "src/Value.cpp",
+        "src/Value/String.cpp",
+        "src/Value/Integer.cpp",
+        "src/Value/Date.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",

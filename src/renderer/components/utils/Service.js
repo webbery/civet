@@ -86,6 +86,7 @@ export default{
   ADD_TAG: 'addTag',
   ADD_CATEGORY: 'addCategory',
   REMOVE_TAG: 'removeTag',
+  REMOVE_FILES: 'removeFiles',
   FIND_IMAGES_BY_KEYWORD: 'findImageWithKeyword',
   ON_IMAGE_UPDATE: 'updateImageList',
   UPDATE_IMAGE_CATEGORY: 'updateImageCategory',

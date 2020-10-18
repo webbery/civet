@@ -31,7 +31,7 @@ namespace caxios{
     bool Each(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb);
     bool Del(MDB_dbi dbi, uint32_t key);
     MDB_txn* Begin();
-    bool Commit(MDB_txn*);
+    bool Commit();
 
   private:
     MDB_env* m_pDBEnv = nullptr;
