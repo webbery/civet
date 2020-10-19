@@ -107,6 +107,7 @@ export default {
   text-overflow:ellipsis;
   white-space: nowrap;
   display: block;
+  cursor: default;
 }
 .img-name:active {
   background-color: dodgerblue;

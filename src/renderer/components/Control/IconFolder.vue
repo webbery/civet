@@ -69,6 +69,7 @@ input {
 }
 .class-name {
   width: 100%;
+  cursor: default;
   /* border: 2px solid brown ; */
 }
 </style>
