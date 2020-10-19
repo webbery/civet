@@ -24,41 +24,6 @@ namespace caxios {
     return std::move(str);
   }
 
-  std::string ConvertToString(const v8::Local<v8::Value>& value)
-  {
-#if V8_MAJOR_VERSION <= 7
-    return ConvertToString(value->ToString(v8::Isolate::GetCurrent()));
-#elif V8_MAJOR_VERSION == 8
-    return ConvertToString(value->ToString(v8::Isolate::GetCurrent()->GetCurrentContext()).ToLocalChecked());
-#endif
-  }
-
-  int32_t ConvertToInt32(const v8::Local<v8::Value>& value)
-  {
-    int32_t cnt = 0;
-    if (value->IsInt32()) {
-#if V8_MAJOR_VERSION <= 7
-      cnt = value->ToInt32(v8::Isolate::GetCurrent())->Value();
-#elif V8_MAJOR_VERSION == 8
-      value->Int32Value(v8::Isolate::GetCurrent()->GetCurrentContext()).To(&cnt);
-#endif
-    }
-    return cnt;
-  }
-
-  uint32_t ConvertToUInt32(const v8::Local<v8::Value>& value)
-  {
-    uint32_t cnt = 0;
-    if (value->IsUint32()) {
-//#if V8_MAJOR_VERSION == 7
-//      cnt = value->ToUint32(Nan::GetCurrentContext())->Value();
-//#elif V8_MAJOR_VERSION == 8
-      value->Uint32Value(v8::Isolate::GetCurrent()->GetCurrentContext()).To(&cnt);
-//#endif
-    }
-    return cnt;
-  }
-
   bool HasAttr(Napi::Object obj, std::string attr)
   {
     return obj.Has(attr);
@@ -174,18 +139,18 @@ namespace caxios {
     }
   }
 
-  std::string Stringify(v8::Local<v8::Value> item)
+  std::string Stringify(Napi::Env env, Napi::Object obj)
   {
-    auto isolate = v8::Isolate::GetCurrent();
-    auto context = isolate->GetCurrentContext();
-    auto JSON = context->Global()->Get(context,
-      v8::String::NewFromUtf8(isolate, "JSON", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked().As<v8::Object>();
-    auto stringify = JSON->Get(context,
-      v8::String::NewFromUtf8(isolate, "stringify", v8::NewStringType::kNormal).ToLocalChecked()).ToLocalChecked().As<v8::Function>();
-    auto v = stringify->Call(context, Undefined(isolate), 1, &item).ToLocalChecked();
-    v8::String::Utf8Value json_value(isolate, v);
-    std::string sItem(*json_value, json_value.length());
-    return std::move(sItem);
+    Napi::Object json = env.Global().Get("JSON").As<Napi::Object>();
+    Napi::Function stringify = json.Get("stringify").As<Napi::Function>();
+    return stringify.Call(json, { obj }).As<Napi::String>();
+  }
+
+  Napi::Object Parse(Napi::Env env, const std::string& str) {
+    Napi::Object json = env.Global().Get("JSON").As<Napi::Object>();
+    Napi::Function parse = json.Get("parse").As<Napi::Function>();
+    Napi::String jstr = Napi::String::New(env, str.c_str());
+    return parse.Call(json, { jstr }).As<Napi::Object>();
   }
 
   std::string trunc(const std::string& elm)

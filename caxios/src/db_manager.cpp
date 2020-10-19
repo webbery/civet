@@ -42,9 +42,9 @@ namespace caxios {
         m_mDBs[g_tables[idx]] = dbi;
       }
     }
-    //if (!meta.empty() || meta != "[]") {
-    //  ParseMeta(meta);
-    //}
+    if (!meta.empty() || meta.size()>4 || meta != "[]") {
+      ParseMeta(meta);
+    }
   }
 
   DBManager::~DBManager()
@@ -54,6 +54,10 @@ namespace caxios {
         m_pDatabase->CloseDatabase(item.second);
       }
       m_mDBs.clear();
+      for (auto item : m_mMetaDBs) {
+        m_pDatabase->CloseDatabase(item.second);
+      }
+      m_mMetaDBs.clear();
       delete m_pDatabase;
       m_pDatabase = nullptr;
     }
@@ -183,7 +187,16 @@ namespace caxios {
     T_LOG("Write Snap: %s", sSnaps.c_str());
     // meta
     for (MetaItem m : meta) {
-
+      std::string& name = m["name"];
+      auto itr = m_mSchema.find(name);
+      if (itr != m_mSchema.end()) { // 保存入meta表
+        MDB_dbi dbi = GetMetaDB(name);
+        // value做键, fileid做值
+        uint32_t key = std::stoul(m["value"]);
+        if (!m_pDatabase->Put(dbi, key, (void*)&fileid, sizeof(uint32_t))) {
+          T_LOG("Put %s Fail %s", name.c_str(), sSnaps.c_str());
+        }
+      }
     }
     return true;
   }
@@ -198,9 +211,25 @@ namespace caxios {
     nlohmann::json jsn = nlohmann::json::parse(meta);
     for (auto item : jsn)
     {
-      //std::cout << item.key() << std::endl;
+      if (item["db"] == true) {
+        m_mSchema[trunc(item["name"].dump())] = item["type"].dump();
+        //T_LOG("schema: %s", item["name"].dump().c_str());
+      }
     }
     T_LOG("schema: %s", meta.c_str());
+  }
+
+  MDB_dbi DBManager::GetMetaDB(const std::string& name)
+  {
+    auto pDB = m_mMetaDBs.find(name);
+    if (pDB == m_mMetaDBs.end()) {
+      MDB_dbi dbi = m_pDatabase->OpenDatabase(name);
+      m_mMetaDBs[name] = dbi;
+      return dbi;
+    }
+    else {
+      return pDB->second;
+    }
   }
 
 }

@@ -35,8 +35,11 @@ namespace caxios {
     });
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
-      //std::string meta = AttrAsStr(resource, "meta");
-      g_pCaxios = new CAxios(path, flag);
+      std::string meta;
+      if (flag == 0) { // ¶ÁÐ´Ä£Ê½
+        meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
+      }
+      g_pCaxios = new CAxios(path, flag, meta);
       T_LOG("init success");
     }
     return Napi::Value::From(info.Env(), true);

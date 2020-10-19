@@ -24,7 +24,8 @@ namespace caxios {
   void ForeachObject(Napi::Value value, std::function<void(const std::string&, Napi::Value)> func);
   void ForeachArray(Napi::Value arr, std::function<void(Napi::Value)> func);
 
-  std::string Stringify(v8::Local<v8::Value> obj);
+  std::string Stringify(Napi::Env env, Napi::Object obj);
+  Napi::Object Parse(Napi::Env env, const std::string& str);
 
   std::string trunc(const std::string& elm);
 }
