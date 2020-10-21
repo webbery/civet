@@ -5,6 +5,7 @@
 
 namespace caxios {
   typedef unsigned int FileID;
+  typedef uint32_t WordIndex;
   typedef std::map<std::string, std::string > MetaItem;
   typedef std::vector<MetaItem> MetaItems;
   typedef std::vector<std::string> Tags;

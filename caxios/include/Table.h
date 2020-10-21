@@ -1,6 +1,7 @@
 #pragma once 
 #include <string>
 
+#define TABLE_META          "dbinfo"
 #define TABLE_FILESNAP      "file_snap"
 #define TABLE_FILE_META     "file_meta"
 #define TABLE_KEYWORD_INDX  "keyword2indx"

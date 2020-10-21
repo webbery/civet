@@ -47,6 +47,12 @@ namespace caxios {
     return AttrAsStr(obj, attrs.substr(1, attrs.size() - 1));
   }
 
+  std::string AttrAsStr(Napi::Object obj, int attrs)
+  {
+    //T_LOG("display: %s", attrs.c_str());
+    return obj.Get(attrs).As<Napi::String>();
+  }
+
   uint32_t AttrAsUint32(Napi::Object obj, std::string attr)
   {
     return obj.Get(attr).As<Napi::Number>().Uint32Value();
@@ -103,6 +109,16 @@ namespace caxios {
     std::vector<uint32_t> vector(array.Length());
     for (unsigned int i = 0; i < array.Length(); i++) {
       vector[i] = AttrAsUint32(array, i);
+    }
+    return vector;
+  }
+
+  std::vector<std::string> AttrAsStringVector(Napi::Object obj, std::string attr)
+  {
+    Napi::Array array = obj.Get(attr).As<Napi::Array>();
+    std::vector<std::string> vector(array.Length());
+    for (unsigned int i = 0; i < array.Length(); i++) {
+      vector[i] = AttrAsStr(array, i);
     }
     return vector;
   }

@@ -104,11 +104,45 @@ namespace caxios {
     return true;
   }
 
+  bool CDatabase::Put(MDB_dbi dbi, const std::string& k, void* pData, uint32_t len, int flag /*= MDB_CURRENT*/)
+  {
+    MDB_val key, datum;
+    key.mv_data = (void*)(k.data());
+    key.mv_size = k.size();
+    datum.mv_data = pData;
+    datum.mv_size = len;
+    if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
+      T_LOG("mdb_put fail: %s, key: %s", err2str(rc).c_str(), k.c_str());
+      return false;
+    }
+    if (m_dOperator == NORMAL) {
+      m_dOperator = TRANSACTION;
+    }
+    T_LOG("mdb_put %d, key: %s", dbi, k.c_str());
+    return true;
+  }
+
   bool CDatabase::Get(MDB_dbi dbi, uint32_t k, void*& pData, uint32_t& len)
   {
     MDB_val key, datum = { 0 };
     key.mv_data = reinterpret_cast<void*>(&k);
     key.mv_size = sizeof(uint32_t);
+    this->Begin();
+    if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
+      T_LOG("mdb_get fail: %s", err2str(rc).c_str());
+      return false;
+    }
+    len = datum.mv_size;
+    pData = datum.mv_data;
+    T_LOG("mdb_get %d, key: %u, len: %d", dbi, k, len);
+    return true;
+  }
+
+  bool CDatabase::Get(MDB_dbi dbi, const std::string& k, void*& pData, uint32_t& len)
+  {
+    MDB_val key, datum = { 0 };
+    key.mv_data = (void*)(k.data());
+    key.mv_size = k.size();
     this->Begin();
     if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
       T_LOG("mdb_get fail: %s", err2str(rc).c_str());

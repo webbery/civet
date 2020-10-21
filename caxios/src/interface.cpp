@@ -128,10 +128,15 @@ namespace caxios {
     return Napi::Value();
   }
 
-  Napi::Value addTags(const Napi::CallbackInfo& info) {
-    //if (Addon::m_pCaxios != nullptr) {
-    //}
-    return info.Env().Undefined();
+  Napi::Value setTags(const Napi::CallbackInfo& info) {
+    if (g_pCaxios == nullptr) return info.Env().Undefined();
+    auto obj = info[0].As<Napi::Object>();
+    std::vector<FileID> vFileID = AttrAsUint32Vector(obj, "id");
+    std::vector<std::string> vTags = AttrAsStringVector(obj, "tag");
+    if (!g_pCaxios->SetTags(vFileID, vTags)) {
+      return Napi::Boolean::From(info.Env(), false);
+    }
+    return Napi::Boolean::From(info.Env(), true);
   }
   Napi::Value addClasses(const Napi::CallbackInfo& info) {
     return info.Env().Undefined();
@@ -238,7 +243,7 @@ namespace caxios {
   Napi::Value findFiles(const Napi::CallbackInfo& info) {
     if (g_pCaxios != nullptr) {
       if (!info[0].IsUndefined()) {
-        auto str = Stringify(info[0].As<Napi::Object>());
+        auto str = Stringify(info.Env(), info[0].As<Napi::Object>());
         nlohmann::json query = nlohmann::json::parse(str);
         std::vector<FileInfo> vFiles;
         if (g_pCaxios->FindFiles(query, vFiles)) return Napi::Boolean::From(info.Env(), true);
@@ -265,7 +270,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(release);
   EXPORT_JS_FUNCTION_PARAM(generateFilesID);
   EXPORT_JS_FUNCTION_PARAM(addFiles);
-  EXPORT_JS_FUNCTION_PARAM(addTags);
+  EXPORT_JS_FUNCTION_PARAM(setTags);
   EXPORT_JS_FUNCTION_PARAM(addClasses);
   EXPORT_JS_FUNCTION_PARAM(updateFile);
   EXPORT_JS_FUNCTION_PARAM(updateFileKeywords);

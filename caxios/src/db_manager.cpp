@@ -100,6 +100,30 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags)
+  {
+    if (_flag == ReadOnly) return false;
+    m_pDatabase->Begin();
+    auto mIndexes = GetWordsIndex(tags);
+    for (auto fileID : filesID) {
+      // 所有标签以数组形式保存, 第0位为数组长度
+      void* pData = nullptr;
+      uint32_t len = 0;
+      std::string value;
+      WordIndex* indexes = (WordIndex*)malloc(tags.size() * sizeof(WordIndex));
+      // 不存在则添加
+      WordIndex* ptr = indexes;
+      std::for_each(mIndexes.begin(), mIndexes.end(), [&ptr](std::pair<std::string, WordIndex> item) {
+        *ptr = item.second;
+        ++ptr;
+      });
+      m_pDatabase->Put(m_mDBs[TABLE_TAG], fileID, indexes, tags.size() * sizeof(WordIndex));
+      free(indexes);
+    }
+    m_pDatabase->Commit();
+    return true;
+  }
+
   bool DBManager::GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo)
   {
     CHECK_DB_OPEN(TABLE_FILE_META);
@@ -206,6 +230,11 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::GetFileTags(FileID fileID, Tags& tags)
+  {
+    return true;
+  }
+
   void DBManager::ParseMeta(const std::string& meta)
   {
     nlohmann::json jsn = nlohmann::json::parse(meta);
@@ -230,6 +259,35 @@ namespace caxios {
     else {
       return pDB->second;
     }
+  }
+
+  std::map<std::string, caxios::WordIndex> DBManager::GetWordsIndex(const std::vector<std::string>& words)
+  {
+    std::map<std::string, caxios::WordIndex> mIndexes;
+    WordIndex lastIndx = 0;
+    void* pData = nullptr;
+    uint32_t len = 0;
+    if (m_pDatabase->Get(m_mDBs[TABLE_KEYWORD_INDX], 0, pData, len)) {
+      if (pData != nullptr) {
+        lastIndx = *(WordIndex*)pData;
+      }
+    }
+    lastIndx += 1;
+    bool bUpdate = false;
+    for (auto& word : words) {
+      // 取字索引
+      if (!m_pDatabase->Get(m_mDBs[TABLE_KEYWORD_INDX], word, pData, len)) {
+        // 如果tag字符串不存在，添加
+        m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], word, &lastIndx, sizeof(WordIndex));
+        mIndexes[word] = lastIndx;
+        lastIndx += 1;
+        bUpdate = true;
+      }
+    }
+    if (bUpdate) {
+      m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], 0, &lastIndx, sizeof(WordIndex));
+    }
+    return std::move(mIndexes);
   }
 
 }

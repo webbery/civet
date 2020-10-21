@@ -25,6 +25,11 @@ namespace caxios {
     return m_pDBManager->AddFiles(files);
   }
 
+  bool CAxios::SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags)
+  {
+    return m_pDBManager->SetTags(filesID, tags);
+  }
+
   bool CAxios::GetFilesSnap(std::vector<Snap>& snaps)
   {
     return m_pDBManager->GetFilesSnap(snaps);

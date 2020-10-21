@@ -25,6 +25,7 @@ namespace caxios {
   class IStatement {
   public:
     virtual ~IStatement() {}
+    std::string Identity() { return _identity; }
 
   protected:
     IStatement(const std::string& k)
@@ -45,7 +46,7 @@ namespace caxios {
     void setKey(std::shared_ptr<IStatement> k){_key = k;}
     void setValue(std::shared_ptr<IStatement> v){_value = v;}
     void setSymbol(std::shared_ptr<IStatement> s){_symbol = s;}
-    std::string GetKey() { return _key->_identity;}
+    std::string GetKey() { return _key->Identity();}
 
   private:
     static std::map < std::string, std::function< std::shared_ptr<caxios::IExpression>(const nlohmann::json& v)> > m_Creator;
