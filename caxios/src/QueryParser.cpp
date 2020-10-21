@@ -7,8 +7,12 @@ namespace caxios {
   std::shared_ptr<caxios::IExpression> IExpression::Build(const std::string& s, const nlohmann::json& v)
   {
     if (m_Creator.size() == 0) {
-      m_Creator["$lt"] = [](const std::string& v) ->std::shared_ptr<caxios::IExpression> {
+      m_Creator["$lt"] = [](const nlohmann::json& v) ->std::shared_ptr<caxios::IExpression> {
         std::shared_ptr<caxios::IExpression> ptr(new caxios::JsonOperator("$lt", v, LessThan));
+        return ptr;
+      };
+      m_Creator["and"] = [](const nlohmann::json& v) ->std::shared_ptr<caxios::IExpression> {
+        std::shared_ptr<caxios::IExpression> ptr(new caxios::JsonOperator("and", v, And));
         return ptr;
       };
     }
@@ -48,7 +52,7 @@ namespace caxios {
 
   void QueryParser::Travel(std::function<void(IExpression* pExpression)> visitor)
   {
-
+    _ast->travel(visitor);
   }
 
   AST::~AST()
@@ -57,24 +61,21 @@ namespace caxios {
 
   void AST::travel(std::function<void(IExpression* pExpression)> visitor)
   {
-
+    // 深度遍历表所有的达式. TODO: 可以采用拓扑排序，提高执行器并发度
+    
   }
 
   void AST::Parse(const nlohmann::json& query)
   {
     T_LOG("Parse: %s", query.dump().c_str());
-    if (query.size() > 1) { // and ����
-      for (auto itr = query.begin(); itr != query.end(); ++itr) {
-        std::string k = itr.key();
-        nlohmann::json v = itr.value();
-        auto expression = IExpression::Build(k, v);
-      }
+    if (query.size() > 1) { // and 语义
+      _pRoot = IExpression::Build("and", query);
       return;
     }
     for (auto itr = query.begin(); itr != query.end(); ++itr) {
       std::string k = itr.key();
       nlohmann::json v = itr.value();
-      _pExpression = IExpression::Build(k, v);
+      _pRoot = IExpression::Build(k, v);
     }
   }
 
@@ -91,7 +92,7 @@ namespace caxios {
       for (auto itr = v.begin(); itr != v.end(); ++itr) {
         std::string k = itr.key();
         std::string val = itr.value();
-        _children.emplace_back(Build(k, val));
+        _expressions.emplace_back(Build(k, val));
       }
     }
   }

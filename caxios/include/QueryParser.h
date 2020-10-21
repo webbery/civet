@@ -1,8 +1,8 @@
 /************************************************************************/
-/* ²éÑ¯Óï·¨½âÎöÆ÷
- * ½âÎöjson£¬Éú³ÉÒ»¿ÃÓï·¨Ê÷
- * Óï·¨Ê÷µÄÃ¿¸ö½ÚµãÊÇÒ»¸ö¹æÔòµÄÊµÀı
- * ±éÀúÓï·¨Ê÷£¬Ö´ĞĞÃ¿¸ö¹æÔò£¬µÃµ½²éÑ¯½á¹û
+/* æŸ¥è¯¢è¯­æ³•è§£æå™¨
+ * è§£æjsonï¼Œç”Ÿæˆä¸€æ£µè¯­æ³•æ ‘
+ * è¯­æ³•æ ‘çš„æ¯ä¸ªèŠ‚ç‚¹æ˜¯ä¸€ä¸ªè§„åˆ™çš„å®ä¾‹
+ * éå†è¯­æ³•æ ‘ï¼Œæ‰§è¡Œæ¯ä¸ªè§„åˆ™ï¼Œå¾—åˆ°æŸ¥è¯¢ç»“æœ
 /************************************************************************/
 #pragma once
 #include "json.hpp"
@@ -21,39 +21,40 @@ namespace caxios {
     And,
     Terminate,
   };
-  class IToken {
-  public:
-    explicit IToken(const std::string& k) :_identity(k) {}
-    virtual ~IToken() {}
-  protected:
-    std::string _identity;
-  };
 
-  class ISymbol: public IToken {};
-  class IStatement : public IToken {
+  class IStatement {
   public:
     virtual ~IStatement() {}
 
   protected:
     IStatement(const std::string& k)
-      :IToken(k)
+      :_identity(k)
     {}
   
   protected:
+    std::string _identity;
   };
 
-  class IExpression : public IToken {
+  class IExpression {
   public:
     static std::shared_ptr<IExpression> Build(const std::string& s, const nlohmann::json& v);
-    IExpression(const std::string& k) :IToken(k) {}
+    IExpression(const std::string& k) {}
 
     virtual ~IExpression() {}
 
+    void setKey(std::shared_ptr<IStatement> k){_key = k;}
+    void setValue(std::shared_ptr<IStatement> v){_value = v;}
+    void setSymbol(std::shared_ptr<IStatement> s){_symbol = s;}
+    std::string GetKey() { return _key->_identity;}
+
   private:
     static std::map < std::string, std::function< std::shared_ptr<caxios::IExpression>(const nlohmann::json& v)> > m_Creator;
-    std::shared_ptr<IToken> _key;
-    std::shared_ptr<IToken> _value;
-    std::shared_ptr<ISymbol> _symbol;
+
+  protected:
+    std::shared_ptr<IStatement> _key;
+    std::shared_ptr<IStatement> _value;
+    std::shared_ptr<IStatement> _symbol;
+    std::vector<std::shared_ptr<IExpression> > _expressions;
   };
 
   class AST{
@@ -65,7 +66,7 @@ namespace caxios {
     void Parse(const nlohmann::json& query);
 
   protected:
-    std::shared_ptr<IExpression> _pExpression;
+    std::shared_ptr<IExpression> _pRoot;
   };
 
   class JsonKey : public IStatement {
@@ -79,7 +80,6 @@ namespace caxios {
 
   private:
     EOperator _op;
-    std::vector<std::shared_ptr<IExpression>> _children;
   };
   class JsonTerminate : public IExpression {
   public:

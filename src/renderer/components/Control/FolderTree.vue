@@ -8,7 +8,7 @@
     </ul> -->
     <div v-for="(item, idx) of data" :key="idx">
       <!-- {{item}} -->
-      <span v-if="item.type && item.type!='clz'" class="img-name">{{item.label}}</span>
+      <span v-if="item.type && item.type!='clz'" class="img-name" :id="item.id">{{item.label}}</span>
       <i class="el-icon-caret-right" v-if="item.children && !(expandTree[idx])" @click="onExpand(idx)"></i>
       <i class="el-icon-caret-bottom" v-if="item.children  && (expandTree[idx])" @click="onRetract(idx)"></i>
       <span class="el-icon-caret-right caret-hidden" v-if="(!item.type || item.type==='clz') && !item.children"></span>

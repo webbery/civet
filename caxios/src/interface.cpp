@@ -233,14 +233,15 @@ namespace caxios {
     return Napi::Value();
   }
   Napi::Value findFiles(const Napi::CallbackInfo& info) {
-    //if (Addon::m_pCaxios != nullptr) {
-    //  if (!info[0]->IsUndefined()) {
-    //    auto query = Stringify(info[0]);
-    //    std::vector<FileInfo> vFiles;
-    //    Addon::m_pCaxios->FindFiles(query, vFiles);
-    //  }
-    //}
-    return Napi::Value();
+    if (g_pCaxios != nullptr) {
+      if (!info[0].IsUndefined()) {
+        auto str = Stringify(info[0].As<Napi::Object>());
+        nlohmann::json query = nlohmann::json::parse(str);
+        std::vector<FileInfo> vFiles;
+        if (g_pCaxios->FindFiles(query, vFiles)) return Napi::Boolean::From(info.Env(), true);
+      }
+    }
+    return Napi::Boolean::From(info.Env(), false);
   }
 
   Napi::Value flushDisk(const Napi::CallbackInfo& info) {
