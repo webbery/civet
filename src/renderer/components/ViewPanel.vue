@@ -6,7 +6,7 @@
             <!-- <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div> -->
-          <JImage :src="getImage(image)" :interact="false" class="preview" @click.native="onImageClick($event, image)" @dblclick.native="onImageDbClick(image)">
+          <JImage :src="getImage(image)" :interact="false" class="preview" @click.native="onImageClick($event, image)" @dblclick.native="onImageDbClick(image)" @keydown.ctrl.67.native="onFileCopyOut(image)">
           </JImage>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
@@ -106,6 +106,10 @@ export default {
         console.info('debug:', imageInfo)
         this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.label}})
       }
+    },
+    onFileCopyOut(image) {
+      console.info('COPY')
+      // console.info(__filename, __line, image)
     },
     dropFiles(event) {
       let files = event.dataTransfer.files
