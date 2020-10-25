@@ -181,7 +181,7 @@ export default {
       let inputValue = this.inputValue
       if (inputValue) {
         this.dynamicTags.push(inputValue)
-        this.$ipcRenderer.send(Service.ADD_TAG, {imageID: this.picture.id, tagName: inputValue})
+        this.$ipcRenderer.send(Service.SET_TAG, {id: [this.picture.id], tag: this.dynamicTags})
         this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
       }
       this.inputVisible = false

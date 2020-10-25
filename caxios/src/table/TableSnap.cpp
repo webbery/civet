@@ -3,13 +3,11 @@
 namespace caxios {
 
   TableSnap::TableSnap(CDatabase* pDatabase, MDB_dbi dbi)
-    :_table(TABLE_FILESNAP)
-    , _dbi(dbi)
-    , _pDatabase(pDatabase)
+    : _pDatabase(pDatabase)
   {
   }
 
-  bool TableSnap::Add()
+  bool TableSnap::Add(const std::string& value, FileID fileid)
   {
     return true;
   }
@@ -19,13 +17,13 @@ namespace caxios {
     return true;
   }
 
-  bool TableSnap::Delete()
+  bool TableSnap::Delete(const std::string& value)
   {
 
     return true;
   }
 
-  bool TableSnap::Query()
+  bool TableSnap::Query(const std::string& k, std::vector<FileID>& filesID)
   {
 
     return true;

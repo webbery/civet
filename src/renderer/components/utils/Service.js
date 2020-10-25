@@ -83,7 +83,7 @@ export default{
   GET_UNTAG_IMAGES: 'getUntagImages',
   ADD_IMAGES_BY_DIRECORY: 'addImagesByDirectory',
   ADD_IMAGES_BY_PATHS: 'addImagesByPaths',
-  ADD_TAG: 'addTag',
+  SET_TAG: 'setTag',
   ADD_CATEGORY: 'addCategory',
   REMOVE_TAG: 'removeTag',
   REMOVE_FILES: 'removeFiles',

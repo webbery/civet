@@ -27,7 +27,6 @@ namespace caxios {
     virtual ~IStatement() {}
     std::string Identity() { return _identity; }
 
-  protected:
     IStatement(const std::string& k)
       :_identity(k)
     {}
@@ -36,17 +35,22 @@ namespace caxios {
     std::string _identity;
   };
 
+  class ITable;
   class IExpression {
   public:
     static std::shared_ptr<IExpression> Build(const std::string& s, const nlohmann::json& v);
-    IExpression(const std::string& k) {}
+    IExpression(const std::string& k):_key(new IStatement(k)) {}
 
     virtual ~IExpression() {}
+    virtual EOperator GetOperator() { return Terminate; }
+    virtual bool Query() { return false; }
+    bool isTerminal() { return GetKey() == "T"; }
+    std::vector<std::shared_ptr<IExpression> >& children() { return _expressions; }
 
     void setKey(std::shared_ptr<IStatement> k){_key = k;}
     void setValue(std::shared_ptr<IStatement> v){_value = v;}
-    void setSymbol(std::shared_ptr<IStatement> s){_symbol = s;}
-    std::string GetKey() { return _key->Identity();}
+    std::string GetKey() { if (nullptr != _key) return _key->Identity(); return ""; }
+
 
   private:
     static std::map < std::string, std::function< std::shared_ptr<caxios::IExpression>(const nlohmann::json& v)> > m_Creator;
@@ -54,7 +58,7 @@ namespace caxios {
   protected:
     std::shared_ptr<IStatement> _key;
     std::shared_ptr<IStatement> _value;
-    std::shared_ptr<IStatement> _symbol;
+    std::shared_ptr<ITable> _table;
     std::vector<std::shared_ptr<IExpression> > _expressions;
   };
 
@@ -78,6 +82,7 @@ namespace caxios {
   class JsonOperator: public IExpression {
   public:
     JsonOperator(const std::string& k, const nlohmann::json& v, EOperator op);
+    virtual EOperator GetOperator() { return _op; }
 
   private:
     EOperator _op;

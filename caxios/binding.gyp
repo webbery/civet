@@ -16,6 +16,8 @@
         "src/Value/String.cpp",
         "src/Value/Integer.cpp",
         "src/Value/Date.cpp",
+        "src/table/TableTag.cpp",
+        "src/table/TableMeta.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",

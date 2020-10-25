@@ -4,13 +4,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #else
-// if defined(_HAS_CXX17) && _HAS_CXX17
-// #include <filesystem>
-// namespace fs = std::filesystem;
-// #else
+#if defined(_HAS_CXX17) && _HAS_CXX17
+#include <filesystem>
+   namespace fs = std::filesystem;
+#else
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
-// #endif  // _HAS_CXX17
+#endif  // _HAS_CXX17
 #endif
 #include "log.h"
 
@@ -81,8 +81,11 @@ namespace caxios {
 
   void CDatabase::CloseDatabase(MDB_dbi dbi)
   {
-    this->Commit();
-    mdb_env_sync(m_pDBEnv, 1);
+    if (m_pDBEnv) {
+      this->Commit();
+      mdb_env_sync(m_pDBEnv, 1);
+      m_pDBEnv = nullptr;
+    }
     T_LOG("mdb_close %d", dbi);
     //mdb_close(m_pDBEnv, dbi);
   }

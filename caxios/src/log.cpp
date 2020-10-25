@@ -4,7 +4,13 @@
 #include <ctime>
 #include <iostream>
 #include <thread>
+#if defined(_HAS_CXX17) && _HAS_CXX17
+#include <filesystem>
+namespace fs = std::filesystem;
+#else
 #include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif  // _HAS_CXX17
 #ifndef _WIN32
 #include <errno.h>
 #include <string.h> 
@@ -63,7 +69,7 @@ namespace caxios {
       int idx = 1;
       while (true) {
         std::string filename = logname + std::to_string(idx) + ".log";
-        if (!std::experimental::filesystem::exists(filename)) {
+        if (!fs::exists(filename)) {
           logname = filename;
           break;
         }

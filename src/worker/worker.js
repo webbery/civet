@@ -195,9 +195,9 @@ const messageProcessor = {
     let image = new JImage(img[0])
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
-  'addTag': async (data) => {
-    // console.info(data.tagName)
-    await Kernel.addTags(data.imageID, data.tagName)
+  'setTag': async (data) => {
+    console.info(data)
+    await Kernel.setTags(data.imageID, data.tagName)
   },
   'removeTag': async (data) => {
     await Kernel.removeTags(data.tagName, data.imageID)

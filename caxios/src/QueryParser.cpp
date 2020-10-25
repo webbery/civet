@@ -15,14 +15,25 @@ namespace caxios {
         std::shared_ptr<caxios::IExpression> ptr(new caxios::JsonOperator("and", v, And));
         return ptr;
       };
+      m_Creator["$eq"] = [](const nlohmann::json& v) ->std::shared_ptr<caxios::IExpression> {
+        std::shared_ptr<caxios::IExpression> ptr(new caxios::JsonOperator("$eq", v, Equal));
+        return ptr;
+      };
     }
     if (s.empty()) {
       return std::shared_ptr<caxios::IExpression>(new caxios::JsonTerminate());
     }
     auto itr = m_Creator.find(s);
     if (itr == m_Creator.end()) {
-      std::shared_ptr<caxios::IExpression> ptr(new caxios::JsonOperator(s, v, Equal));
-      return ptr;
+      if (v.is_array()) {
+
+      }
+      else if (v.is_object()) {
+
+      }
+      else {
+        return std::shared_ptr<caxios::IExpression>(new caxios::JsonOperator(s, v, Equal));
+      }
     }
     return m_Creator[s](v);
   }
@@ -62,7 +73,14 @@ namespace caxios {
   void AST::travel(std::function<void(IExpression* pExpression)> visitor)
   {
     // 深度遍历表所有的达式. TODO: 可以采用拓扑排序，提高执行器并发度
-    
+    if (nullptr != _pRoot) {
+      T_LOG("Travel: %s", _pRoot->GetKey().c_str());
+      for (auto child : _pRoot->children()) {
+        T_LOG("Child: %s", child->GetKey().c_str());
+        visitor(child.get());
+      }
+      visitor(_pRoot.get());
+    }
   }
 
   void AST::Parse(const nlohmann::json& query)
@@ -94,6 +112,9 @@ namespace caxios {
         std::string val = itr.value();
         _expressions.emplace_back(Build(k, val));
       }
+    }
+    else {
+      if(v.is_string()) {}
     }
   }
 

@@ -1,5 +1,6 @@
 #pragma once 
 #include <string>
+#include "datum_type.h"
 
 #define TABLE_META          "dbinfo"
 #define TABLE_FILESNAP      "file_snap"
@@ -13,16 +14,18 @@
 #define TABLE_MATCH         "match_t"
 
 namespace caxios {
+  class CDatabase;
   class ITable {
   public:
-    std::string Name() { return _table; }
+    //std::string Name() { return _table; }
+    ITable(CDatabase* pDB) :  _pDatabase(pDB) {}
     virtual ~ITable() {}
 
-    virtual bool Add() = 0;
+    virtual bool Add(const std::string& value, const std::vector<FileID>& fileid) = 0;
     virtual bool Update() = 0;
-    virtual bool Delete() = 0;
-    virtual bool Query() = 0;
+    virtual bool Delete(const std::string& k) = 0;
+    virtual bool Query(const std::string& k, std::vector<FileID>& filesID) = 0;
   protected:
-    static std::string _table;
+    CDatabase* _pDatabase = nullptr;
   };
 }

@@ -5,7 +5,6 @@
 #include <string>
 #include "db_manager.h"
 #include "datum_type.h"
-#include "QueryParser.h"
 
 namespace caxios{
   class CAxios {
@@ -27,7 +26,6 @@ namespace caxios{
 
   private:
     DBManager* m_pDBManager = nullptr;
-    QueryParser m_qParser;
   };
 }
 

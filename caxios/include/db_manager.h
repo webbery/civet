@@ -2,6 +2,7 @@
 #include "database.h"
 #include "json.hpp"
 #include <map>
+#include "QueryParser.h"
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
@@ -24,14 +25,13 @@ namespace caxios {
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);
     void ParseMeta(const std::string& meta);
-    MDB_dbi GetMetaDB(const std::string& name);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
 
   private:
     DBFlag _flag = ReadWrite;
     CDatabase* m_pDatabase = nullptr;
+    QueryParser m_qParser;
     std::map<std::string, MDB_dbi > m_mDBs;
-    std::map<std::string, MDB_dbi > m_mMetaDBs; // 元信息查询表
-    std::map<std::string, std::string> m_mSchema; // <name, value>
+    std::map<std::string, ITable*> m_mTables;
   };
 }

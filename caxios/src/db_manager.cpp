@@ -2,7 +2,7 @@
 #include <iostream>
 #include "log.h"
 #include "util/util.h"
-#include "Table.h"
+#include "table/TableMeta.h"
 
 #define CHECK_DB_OPEN(dbname) \
   if (m_mDBs[dbname] == -1) {\
@@ -54,10 +54,10 @@ namespace caxios {
         m_pDatabase->CloseDatabase(item.second);
       }
       m_mDBs.clear();
-      for (auto item : m_mMetaDBs) {
-        m_pDatabase->CloseDatabase(item.second);
+      for (auto item : m_mTables) {
+        delete item.second;
       }
-      m_mMetaDBs.clear();
+      m_mTables.clear();
       delete m_pDatabase;
       m_pDatabase = nullptr;
     }
@@ -106,12 +106,12 @@ namespace caxios {
     m_pDatabase->Begin();
     auto mIndexes = GetWordsIndex(tags);
     for (auto fileID : filesID) {
-      // ËùÓĞ±êÇ©ÒÔÊı×éĞÎÊ½±£´æ, µÚ0Î»ÎªÊı×é³¤¶È
+      // æ‰€æœ‰æ ‡ç­¾ä»¥æ•°ç»„å½¢å¼ä¿å­˜, ç¬¬0ä½ä¸ºæ•°ç»„é•¿åº¦
       void* pData = nullptr;
       uint32_t len = 0;
       std::string value;
       WordIndex* indexes = (WordIndex*)malloc(tags.size() * sizeof(WordIndex));
-      // ²»´æÔÚÔòÌí¼Ó
+      // ä¸å­˜åœ¨åˆ™æ·»åŠ 
       WordIndex* ptr = indexes;
       std::for_each(mIndexes.begin(), mIndexes.end(), [&ptr](std::pair<std::string, WordIndex> item) {
         *ptr = item.second;
@@ -179,6 +179,13 @@ namespace caxios {
 
   bool DBManager::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)
   {
+    m_qParser.Parse(query);
+    m_qParser.Travel([](IExpression* pExpression) {
+      if (pExpression == nullptr) return;
+      T_LOG("Travel: %s", pExpression->GetKey().c_str());
+      if (pExpression->GetOperator() != EOperator::Terminate) {
+      }
+      });
     return true;
   }
 
@@ -212,15 +219,10 @@ namespace caxios {
     // meta
     for (MetaItem m : meta) {
       std::string& name = m["name"];
-      auto itr = m_mSchema.find(name);
-      if (itr != m_mSchema.end()) { // ±£´æÈëmeta±í
-        MDB_dbi dbi = GetMetaDB(name);
-        // value×ö¼ü, fileid×öÖµ
-        uint32_t key = std::stoul(m["value"]);
-        if (!m_pDatabase->Put(dbi, key, (void*)&fileid, sizeof(uint32_t))) {
-          T_LOG("Put %s Fail %s", name.c_str(), sSnaps.c_str());
-        }
-      }
+      if(m_mTables.find(name) == m_mTables.end()) continue;
+      std::vector<FileID> vID;
+      vID.emplace_back(fileid);
+      m_mTables[name]->Add(m["value"], vID);
     }
     return true;
   }
@@ -241,24 +243,12 @@ namespace caxios {
     for (auto item : jsn)
     {
       if (item["db"] == true) {
-        m_mSchema[trunc(item["name"].dump())] = item["type"].dump();
+        std::string name = trunc(item["name"].dump());
+        m_mTables[name] = new TableMeta(m_pDatabase, name, trunc(item["type"].dump()));
         //T_LOG("schema: %s", item["name"].dump().c_str());
       }
     }
     T_LOG("schema: %s", meta.c_str());
-  }
-
-  MDB_dbi DBManager::GetMetaDB(const std::string& name)
-  {
-    auto pDB = m_mMetaDBs.find(name);
-    if (pDB == m_mMetaDBs.end()) {
-      MDB_dbi dbi = m_pDatabase->OpenDatabase(name);
-      m_mMetaDBs[name] = dbi;
-      return dbi;
-    }
-    else {
-      return pDB->second;
-    }
   }
 
   std::map<std::string, caxios::WordIndex> DBManager::GetWordsIndex(const std::vector<std::string>& words)
@@ -275,9 +265,9 @@ namespace caxios {
     lastIndx += 1;
     bool bUpdate = false;
     for (auto& word : words) {
-      // È¡×ÖË÷Òı
+      // å–å­—ç´¢å¼•
       if (!m_pDatabase->Get(m_mDBs[TABLE_KEYWORD_INDX], word, pData, len)) {
-        // Èç¹ûtag×Ö·û´®²»´æÔÚ£¬Ìí¼Ó
+        // å¦‚æœtagå­—ç¬¦ä¸²ä¸å­˜åœ¨ï¼Œæ·»åŠ 
         m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], word, &lastIndx, sizeof(WordIndex));
         mIndexes[word] = lastIndx;
         lastIndx += 1;

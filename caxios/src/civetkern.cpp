@@ -47,10 +47,6 @@ namespace caxios {
 
   bool CAxios::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)
   {
-    m_qParser.Parse(query);
-    m_qParser.Travel([](IExpression* pExpression) {
-
-      });
     return true;
   }
 
