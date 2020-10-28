@@ -7,6 +7,7 @@ import JString from '../public/String'
 import fs from 'fs'
 import { imageHash } from 'image-hash'
 import util from 'util'
+import WorkerPool from './WorkerPool'
 
 const pHash = util.promisify(imageHash)
 export class ImageParser {
@@ -108,9 +109,9 @@ class ImageMetaParser extends ImageParseBase {
 
     // image.stepCallback(undefined, image)
 
-    // if (this.next !== undefined) {
-    //   this.next.parse(image)
-    // }
+    if (this.next !== undefined) {
+      this.next.parse(image)
+    }
   }
 
   getImageWidth(meta) {
@@ -164,20 +165,21 @@ class ImageTextParser extends ImageParseBase {
     this.step = 1
   }
 
+  task(fullpath) {
+    image.tag = NLP.getNouns(fullpath)
+  }
+
   async parse(image) {
     const fullpath = image.path + '/' + image.filename
+    WorkerPool.addTask(this.task, fullpath)
     image.tag = NLP.getNouns(fullpath)
     image.keyword = image.tag
-    // await localStorage.updateImage(image.id, 'keyword', image.keyword, this.step)
     try {
-      await Storage.updateFileTags(image.id, image.tag)
-      // await localStorage.updateImageTags(image.id, image.tag)
-      // await localStorage.nextStep(image.id)
+      // await Storage.updateFileTags(image.id, image.tag)
     } catch (err) {
       console.info('parse text error', err)
     }
-    console.info('2', image)
-    image.stepCallback(undefined, image)
+    // image.stepCallback(undefined, image)
 
     if (this.next !== undefined) {
       this.next.parse(image)

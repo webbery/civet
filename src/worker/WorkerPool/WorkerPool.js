@@ -12,7 +12,12 @@ class WorkerPool {
           console.info('task message', message)
           if (message.type === Messages.MSG_TASK_FINISH) {
             console.info('worker +1: ', message.value)
-            this.idles[message.value] = 0
+            if (this.tasks.length !== 0) {
+              const next = this.tasks.shift()
+              this.workers[message.value].postMessage(next)
+            } else {
+              this.idles[message.value] = 0
+            }
           }
         })
         worker.on('exit', () => {
@@ -31,11 +36,11 @@ class WorkerPool {
   addTask(func, params) {
     console.info('add task')
     if (this.idleNum <= 0) {
-      this.tasks.push({type: 'task', script: '(' + func + ')', params: params})
+      this.tasks.push({type: Messages.MSG_TASK, script: '(' + func + ')', params: params})
     } else {
       for (let idx = 0; idx < this.numThreads; ++idx) {
         if (this.idles[idx] === 0) {
-          this.workers[idx].postMessage({type: 'task', script: '(' + func + ')', params: params})
+          this.workers[idx].postMessage({type: Messages.MSG_TASK, value: idx, script: '(' + func + ')', params: params})
           this.idles[idx] = 1
           break
         }
@@ -46,7 +51,7 @@ class WorkerPool {
 
   release() {
     for (let worker of this.workers) {
-      worker.postMessage('exit')
+      worker.postMessage({type: Messages.MSG_EXIT})
     }
   }
 }
