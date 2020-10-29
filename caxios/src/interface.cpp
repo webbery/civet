@@ -228,6 +228,11 @@ namespace caxios {
   }
 
   Napi::Value removeFiles(const Napi::CallbackInfo& info) {
+    if (g_pCaxios) {
+      auto obj = info[0].As<Napi::Array>();
+      std::vector<FileID> vFilesID = AttrAsUint32Vector(obj, "id");
+      g_pCaxios->RemoveFiles(vFilesID);
+    }
     return Napi::Value();
   }
   Napi::Value removeTags(const Napi::CallbackInfo& info) {

@@ -58,7 +58,8 @@ function createRendererWindow() {
     // mainWindow.close()
   })
   if (process.env.NODE_ENV === 'development') {
-    enableDevTools(mainWindow)
+    mainWindow.webContents.openDevTools()
+    // enableDevTools(mainWindow)
   }
   mainWindow.show()
 }

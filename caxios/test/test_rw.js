@@ -17,8 +17,9 @@ resources:[
         //path: 'C:/Users/webberg/AppData/Roaming/Electron/civet'
     },
     meta: [
-        {name: 'color', value: '主色', type: 'value', db: true},
-        {name: 'size', value: '大小', type: 'value', db: true},
+        {name: 'color', value: '主色', type: 'color', db: true},
+        {name: 'datetime', value: '创建日期', type: 'date', db: true},
+        {name: 'size', value: '大小', type: 'int', db: true},
         {name: 'filename', value: '文件名', type: 'str', db: false}
     ]
     }
@@ -41,17 +42,19 @@ function testAddFiles() {
   // if (!snaps || snaps.length === 0){
   //   console.info('snaps is 0')
   // }
+	const t = new Date("Sun Sep 20 2020 12:58:14 GMT+0800 (中国标准时间)");
+	console.info(t)
 	instance.addFiles([{
 		'id': fileids[0],
 		'meta': [
 		{"name":"path","type":"str","value":"C:\\Users\\webberg\\Pictures\\f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg"},
 		{"name":"filename","type":"str","value":"f2d470a08a1011eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg"},
-		{"name":"size","type":"value","value":207879},
-		{"name":"datetime","type":"value","value":"Sun Sep 20 2020 12:58:14 GMT+0800 (中国标准时间)"},
+		{"name":"size","type":"int","value":207879},
+		{"name":"datetime","type":"date","value":t},
 		{"name":"hash","type":"str","value":"unknow"},
 		{"name":"type","type":"str","value":"unknow"},
-		{"name":"width","type":"value","value":650},
-		{"name":"height","type":"value","value":650}
+		{"name":"width","type":"int","value":650},
+		{"name":"height","type":"int","value":650}
 		],
 		keyword: undefined,
 		width: 650
@@ -75,10 +78,14 @@ function testSetTag(filesID){
 	}
 }
 
+function testFindFile() {
+	return instance.findFiles({tag: 'test'})
+}
 
 const filesID = testAddFiles()
 testSetTag(filesID)
-const filesInfo = instance.getFilesInfo(filesID)
+let filesInfo = instance.getFilesInfo(filesID)
+filesInfo = testFindFile()
 console.info('filesInfo', filesInfo)
 instance.release()
 

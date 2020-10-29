@@ -50,7 +50,7 @@ namespace caxios {
     void setKey(std::shared_ptr<IStatement> k){_key = k;}
     void setValue(std::shared_ptr<IStatement> v){_value = v;}
     std::string GetKey() { if (nullptr != _key) return _key->Identity(); return ""; }
-
+    std::string GetValue() { if (nullptr != _value) return _value->Identity(); return ""; }
 
   private:
     static std::map < std::string, std::function< std::shared_ptr<caxios::IExpression>(const nlohmann::json& v)> > m_Creator;

@@ -42,7 +42,7 @@ namespace caxios {
         m_mDBs[g_tables[idx]] = dbi;
       }
     }
-    if (!meta.empty() || meta.size()>4 || meta != "[]") {
+    if (!meta.empty() && meta.size()>4 && meta != "[]") {
       ParseMeta(meta);
     }
   }
@@ -180,11 +180,16 @@ namespace caxios {
   bool DBManager::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)
   {
     m_qParser.Parse(query);
-    m_qParser.Travel([](IExpression* pExpression) {
+    m_qParser.Travel([&](IExpression* pExpression) {
       if (pExpression == nullptr) return;
-      T_LOG("Travel: %s", pExpression->GetKey().c_str());
-      if (pExpression->GetOperator() != EOperator::Terminate) {
-      }
+      const std::string tableName = pExpression->GetKey();
+      T_LOG("Travel: %s", tableName.c_str());
+      if (m_mTables.find(tableName) == m_mTables.end()) return;
+      std::vector<FileID> vFilesID;
+      m_mTables[tableName]->Query(pExpression->GetValue(), vFilesID);
+      this->GetFilesInfo(vFilesID, filesInfo);
+      //if (pExpression->GetOperator() != EOperator::Terminate) {
+      //}
       });
     return true;
   }

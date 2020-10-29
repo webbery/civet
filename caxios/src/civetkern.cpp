@@ -47,7 +47,7 @@ namespace caxios {
 
   bool CAxios::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)
   {
-    return true;
+    return m_pDBManager->FindFiles(query, filesInfo);
   }
 
   CAxios::~CAxios() {

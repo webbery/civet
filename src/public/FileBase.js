@@ -6,7 +6,7 @@ export default class FileBase {
     this.category = json.category || []
     this.tag = json.tag || []
     for (let item of json.meta) {
-      console.info(item)
+      // console.info(item)
       this[item['name']] = item['value']
     }
   }

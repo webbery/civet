@@ -69,8 +69,9 @@ export default {
       // await this.loader.load(src)
       this.box = document.getElementById(this.boxid)
       this.canvas = document.getElementById(this.id)
-      this.canvas.width = this.box.offsetWidth
-      this.canvas.height = this.box.offsetHeight
+      // this.canvas.width = this.box.offsetWidth
+      // this.canvas.height = this.box.offsetHeight
+      log.info(this.box.offsetWidth, this.box.offsetHeight)
       this.context = this.canvas.getContext('2d')
       // console.info(src)
       if (typeof src === 'string') {
@@ -97,6 +98,7 @@ export default {
       // console.info(this.originWidth, this.box.offsetWidth)
       let aspect = this.imagewidth / this.imageheight
       let windowAspect = this.box.offsetWidth / this.box.offsetHeight
+      // let windowAspect = this.box.offsetWidth / this.box.offsetHeight
       let [startX, startY] = [0, 0]
       if (aspect > windowAspect) {
         // 扁图
@@ -104,7 +106,7 @@ export default {
         this.originHeight = Math.ceil(this.box.offsetHeight / aspect)
         startY = (this.box.offsetHeight - this.originHeight) / 2
       } else {
-        this.originWidth = Math.ceil(this.box.offsetWidth * aspect)
+        this.originWidth = Math.floor(this.box.offsetWidth * aspect)
         this.originHeight = this.box.offsetHeight
         startX = (this.box.offsetWidth - this.originWidth) / 2
       }
@@ -112,7 +114,6 @@ export default {
       this.centerY = this.box.offsetHeight / 2
       // console.info(startX, startY, this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight)
       this.context.translate(startX, startY)
-      // this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
       this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
       this.context.setTransform(1, 0, 0, 1, 0, 0)
     },

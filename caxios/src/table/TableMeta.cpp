@@ -101,7 +101,38 @@ namespace caxios {
 
   bool TableMeta::Query(const std::string& k, std::vector<FileID>& filesID)
   {
-    return true;
+    // 等于语义
+    void* pData = nullptr;
+    uint32_t len = 0;
+    switch (_type)
+    {
+    case caxios::VTString:
+      _pDatabase->Get(_dbi, k, pData, len);
+      break;
+    case caxios::VTInteger:
+    {
+      uint32_t key = std::stoul(k);
+      _pDatabase->Get(_dbi, key, pData, len);
+    }
+      break;
+    case caxios::VTDecimal:
+      break;
+    case caxios::VTDate:
+      break;
+    case caxios::VTColor:
+      break;
+    case caxios::VTHash:
+      break;
+    default:
+      return false;
+    }
+    if (len > 0) {
+      for (int idx = 0; idx < len / sizeof(FileID); ++idx) {
+        filesID.emplace_back(((FileID*)pData)[idx]);
+      }
+      return true;
+    }
+    return false;
   }
 
 bool TableMeta::AddFileIDByInteger(const std::string& value, const std::vector<FileID>& fileID)
