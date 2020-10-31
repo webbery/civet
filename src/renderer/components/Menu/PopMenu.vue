@@ -108,6 +108,7 @@
     },
     mounted() {
       this.$root.$on('easyAxis', (axis) => {
+        console.info('easyAxis', axis.tag, this.tag)
         if (axis.tag === this.tag) {
           this.show = true
           this.axis = axis
@@ -179,7 +180,7 @@
         // this.$emit('ecmcb', indexList)
         const idx = indexList[0]
         const item = this.list[idx]
-        item.cb(item.text)
+        item.cb(item.text, this.axis.parent, this.axis.index)
       }
     }
   }

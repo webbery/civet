@@ -20,7 +20,7 @@ namespace caxios {
     return true;
   }
 
-  bool TableTag::Delete(const std::string& k)
+  bool TableTag::Delete(const std::string& k, FileID fileID)
   {
 
     return true;

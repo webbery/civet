@@ -94,7 +94,7 @@ namespace caxios {
     return true;
   }
 
-  bool TableMeta::Delete(const std::string& k)
+  bool TableMeta::Delete(const std::string& k, FileID fileID)
   {
     return true;
   }

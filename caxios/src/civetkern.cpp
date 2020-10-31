@@ -42,7 +42,7 @@ namespace caxios {
 
   bool CAxios::RemoveFiles(const std::vector<FileID>& files)
   {
-    return true;
+    return m_pDBManager->RemoveFiles(files);
   }
 
   bool CAxios::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)

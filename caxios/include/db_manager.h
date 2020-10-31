@@ -15,6 +15,7 @@ namespace caxios {
 
     std::vector<FileID> GenerateNextFilesID(int cnt = 1);
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>&);
+    bool RemoveFiles(const std::vector<FileID>& filesID);
     bool SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetFilesSnap(std::vector< Snap >& snaps);
@@ -22,6 +23,7 @@ namespace caxios {
 
   private:
     bool AddFile(FileID, const MetaItems&, const Keywords&);
+    bool RemoveFile(FileID);
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);
     void ParseMeta(const std::string& meta);

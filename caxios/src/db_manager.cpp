@@ -4,12 +4,15 @@
 #include "util/util.h"
 #include "table/TableMeta.h"
 
-#define CHECK_DB_OPEN(dbname) \
+#define READ_BEGIN(dbname) \
   if (m_mDBs[dbname] == -1) {\
     m_mDBs[dbname] = m_pDatabase->OpenDatabase(dbname);\
     T_LOG("OpenDatabase: %s, DBI: %d", dbname, m_mDBs[dbname]);\
     if (m_mDBs[dbname] == -1) return false;\
   }
+
+#define WRITE_BEGIN()  m_pDatabase->Begin()
+#define WRITE_END()    m_pDatabase->Commit()
 
 namespace caxios {
   const char* g_tables[] = {
@@ -80,30 +83,41 @@ namespace caxios {
       lastID += 1;
       filesID.emplace_back(lastID);
     }
-    m_pDatabase->Begin();
+    WRITE_BEGIN();
     if (!m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], 0, &lastID, sizeof(FileID))) {
     }
-    m_pDatabase->Commit();
+    WRITE_END();
     return std::move(filesID);
   }
 
   bool DBManager::AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files)
   {
     if (_flag == ReadOnly) return false;
-    m_pDatabase->Begin();
+    WRITE_BEGIN();
     for (auto item : files) {
       if (!AddFile(std::get<0>(item), std::get<1>(item), std::get<2>(item))) {
         return false;
       }
     }
-    m_pDatabase->Commit();
+    WRITE_END();
+    return true;
+  }
+
+  bool DBManager::RemoveFiles(const std::vector<FileID>& filesID)
+  {
+    WRITE_BEGIN();
+    for (auto fileID: filesID)
+    {
+      RemoveFile(fileID);
+    }
+    WRITE_END();
     return true;
   }
 
   bool DBManager::SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags)
   {
     if (_flag == ReadOnly) return false;
-    m_pDatabase->Begin();
+    WRITE_BEGIN();
     auto mIndexes = GetWordsIndex(tags);
     for (auto fileID : filesID) {
       // 所有标签以数组形式保存, 第0位为数组长度
@@ -120,13 +134,13 @@ namespace caxios {
       m_pDatabase->Put(m_mDBs[TABLE_TAG], fileID, indexes, tags.size() * sizeof(WordIndex));
       free(indexes);
     }
-    m_pDatabase->Commit();
+    WRITE_END();
     return true;
   }
 
   bool DBManager::GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo)
   {
-    CHECK_DB_OPEN(TABLE_FILE_META);
+    READ_BEGIN(TABLE_FILE_META);
     for (auto fileID: filesID)
     {
       void* pData = nullptr;
@@ -156,7 +170,7 @@ namespace caxios {
 
   bool DBManager::GetFilesSnap(std::vector< Snap >& snaps)
   {
-    CHECK_DB_OPEN(TABLE_FILESNAP);
+    READ_BEGIN(TABLE_FILESNAP);
     m_pDatabase->Each(m_mDBs[TABLE_FILESNAP], [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
       if (k == 0) return false;
       using namespace nlohmann;
@@ -229,6 +243,31 @@ namespace caxios {
       vID.emplace_back(fileid);
       m_mTables[name]->Add(m["value"], vID);
     }
+    return true;
+  }
+
+  bool DBManager::RemoveFile(FileID fileID)
+  {
+    using namespace nlohmann;
+    //
+    void* pData = nullptr;
+    uint32_t len = 0;
+    if (!m_pDatabase->Get(m_mDBs[TABLE_FILE_META], fileID, pData, len)) {
+      T_LOG("GET TABLE_FILE_META Fail %d", fileID);
+      return false;
+    }
+    std::string info((char*)pData, len);
+    json meta = json::parse(info);
+    // meta
+    for (MetaItem m : meta) {
+      std::string& name = m["name"];
+      if (m_mTables.find(name) == m_mTables.end()) continue;
+      m_mTables[name]->Delete(m["value"], fileID);
+    }
+    // snap
+    m_pDatabase->Del(m_mDBs[TABLE_FILESNAP], fileID);
+    m_pDatabase->Del(m_mDBs[TABLE_FILE_META], fileID);
+    // TODO: 回收键值
     return true;
   }
 

@@ -71,6 +71,7 @@ function createWorkerWindow () {
     show: process.env.NODE_ENV === 'development',
     webPreferences: {
       nodeIntegration: true,
+      nodeIntegrationInWorker: true,
       enableRemoteModule: true,
       additionalArguments: ['worker']
     }

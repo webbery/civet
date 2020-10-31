@@ -190,6 +190,9 @@ namespace caxios {
       T_LOG("mdb_del fail: %s", err2str(rc).c_str());
       return false;
     }
+    if (m_dOperator == NORMAL) {
+      m_dOperator = TRANSACTION;
+    }
     return true;
   }
 

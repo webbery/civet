@@ -36,6 +36,7 @@ function testAddFiles() {
 //  instance.writeLog("hello log")
 //  const queryResult = instance.findFiles({title: 'hello'})
 //  console.info('find: ', queryResult)
+	console.info('====================testAddFiles==========================')
 	const fileids = instance.generateFilesID(2)
 	console.info(fileids)
   // let snaps = instance.getFilesSnap(-1)
@@ -73,20 +74,32 @@ function testAddFiles() {
 }
 
 function testSetTag(filesID){
+	console.info('====================testSetTag==========================')
 	if(instance.setTags({id:filesID, tag: ['test']})) {
   	  console.info('set tag success')
 	}
 }
 
 function testFindFile() {
+	console.info('====================test Find==========================')
 	return instance.findFiles({tag: 'test'})
+}
+
+function testRemoveFile(filesID) {
+	console.info('====================test Remove File==========================')
+	if (!instance.removeFiles(filesID)) {
+		console.info("remove fail")
+	}
 }
 
 const filesID = testAddFiles()
 testSetTag(filesID)
 let filesInfo = instance.getFilesInfo(filesID)
 filesInfo = testFindFile()
-console.info('filesInfo', filesInfo)
+console.info('find result: ', filesInfo)
+testRemoveFile(filesID)
+filesInfo = instance.getFilesInfo(filesID)
+console.info("after remove files: ", filesInfo)
 instance.release()
 
 console.info('test finish')

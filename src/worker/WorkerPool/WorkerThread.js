@@ -1,11 +1,13 @@
+// 留待版本升级稳定后使用
 import Messages from './MessageDefine'
-const cluster = require('cluster')
+// const { AsyncResource } = require('async_hooks')
+const { Worker } = require('worker_threads')
 
 class WorkerPool {
   constructor(numThreads) {
     this.workers = Array.from(Array(numThreads).keys()).map(
       () => {
-        const worker = cluster.fork('./Task.js')
+        const worker = new Worker('./Task.js')
         // worker.on('disconnect', () => { exit(1) })
         worker.on('message', (message) => {
           console.info('task message', message)

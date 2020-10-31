@@ -121,6 +121,7 @@ function readImages(fullpath) {
     // }
     const parser = new ImageParser(fullpath)
     let img = parser.parse(info)
+    console.info('readImages', img)
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
 }
@@ -198,6 +199,10 @@ const messageProcessor = {
   'setTag': async (data) => {
     console.info(data)
     await Kernel.setTags(data.imageID, data.tagName)
+  },
+  'removeFiles': (filesID) => {
+    console.info('removeFiles:', filesID)
+    Kernel.removeFiles(filesID)
   },
   'removeTag': async (data) => {
     await Kernel.removeTags(data.tagName, data.imageID)
