@@ -103,9 +103,14 @@ export default {
     updateUncategoryImages(updateValue) {
       this.headOptions[1].value += updateValue
     },
+    updateUntagFiles() {
+      const untags = this.$kernel.getUnTagFiles()
+      this.headOptions[2].value = untags.length
+    },
     updateDisplayImageList(error, appendFiles) {
       if (error) console.log(error)
       console.info('recieve from worker message:', appendFiles)
+      this.updateUntagFiles()
       // TODO: 可能更新频繁导致的卡顿
       const getCategory = function(categoryPath, children) {
         if (categoryPath.length === 0) return children
@@ -153,8 +158,7 @@ export default {
       // console.info('----', this.directoryData)
       // const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
       // // console.info('get category', folders)
-      // const uncategoryImages = await this.$ipcRenderer.get(Service.GET_UNCATEGORY_IMAGES)
-      // this.headOptions[1].value = uncategoryImages.length
+      this.updateUntagFiles()
       // const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
       // this.headOptions[2].value = untagImages.length
       // const allTags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS_WITH_IMAGES)

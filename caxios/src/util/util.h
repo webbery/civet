@@ -21,6 +21,8 @@ namespace caxios {
   std::vector<uint32_t> AttrAsUint32Vector(Napi::Object obj, std::string attr);
   std::vector<std::string> AttrAsStringVector(Napi::Object obj, std::string attr);
   Napi::Object FindObjectFromArray(Napi::Object obj, std::function<bool(Napi::Object)> func);
+  std::vector<uint32_t> ArrayAsUint32Vector(Napi::Array arr);
+  std::vector<std::string> ArrayAsStringVector(Napi::Array arr);
 
   void ForeachObject(Napi::Value value, std::function<void(const std::string&, Napi::Value)> func);
   void ForeachArray(Napi::Value arr, std::function<void(Napi::Value)> func);

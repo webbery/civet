@@ -32,7 +32,7 @@ namespace caxios {
     }
     else {
       if (flag == DBFlag::ReadOnly) m_flag = MDB_RDONLY;
-      else m_flag = MDB_NOSYNC;
+      else m_flag = MDB_WRITEMAP;
     }
 #endif
     mdb_env_create(&m_pDBEnv);
@@ -132,7 +132,9 @@ namespace caxios {
     key.mv_size = sizeof(uint32_t);
     this->Begin();
     if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
-      T_LOG("mdb_get fail: %s", err2str(rc).c_str());
+      T_LOG("mdb_get %d fail: %s", dbi, err2str(rc).c_str());
+      pData = nullptr;
+      len = 0;
       return false;
     }
     len = datum.mv_size;
@@ -157,7 +159,7 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Each(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb)
+  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb)
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;

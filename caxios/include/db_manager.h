@@ -15,10 +15,13 @@ namespace caxios {
 
     std::vector<FileID> GenerateNextFilesID(int cnt = 1);
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>&);
+    bool AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
     bool RemoveFiles(const std::vector<FileID>& filesID);
     bool SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetFilesSnap(std::vector< Snap >& snaps);
+    bool GetUntagFiles(std::vector<FileID>& filesID);
+    bool GetUnClassFiles(std::vector<FileID>& filesID);
     bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);
 
   private:
@@ -28,6 +31,7 @@ namespace caxios {
     bool GetFileTags(FileID fileID, Tags& tags);
     void ParseMeta(const std::string& meta);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
+    std::vector<std::string> GetWordByIndex(const WordIndex* const wordsIndx, size_t len);
 
   private:
     DBFlag _flag = ReadWrite;

@@ -75,9 +75,13 @@ function testAddFiles() {
 
 function testSetTag(filesID){
 	console.info('====================testSetTag==========================')
-	if(instance.setTags({id:filesID, tag: ['test']})) {
+	let untags = instance.getUnTagFiles()
+	console.info("UNTAGS: ", untags)
+	if(instance.setTags(filesID, ['test'])) {
   	  console.info('set tag success')
 	}
+	untags = instance.getUnTagFiles()
+	console.info("UNTAGS: ", untags)
 }
 
 function testFindFile() {
@@ -87,6 +91,7 @@ function testFindFile() {
 
 function testRemoveFile(filesID) {
 	console.info('====================test Remove File==========================')
+	console.info(filesID)
 	if (!instance.removeFiles(filesID)) {
 		console.info("remove fail")
 	}

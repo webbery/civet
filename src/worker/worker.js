@@ -196,16 +196,16 @@ const messageProcessor = {
     let image = new JImage(img[0])
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
-  'setTag': async (data) => {
+  'setTag': (data) => {
     console.info(data)
-    await Kernel.setTags(data.imageID, data.tagName)
+    Kernel.setTags(data.imageID, data.tagName)
   },
   'removeFiles': (filesID) => {
     console.info('removeFiles:', filesID)
     Kernel.removeFiles(filesID)
   },
-  'removeTag': async (data) => {
-    await Kernel.removeTags(data.tagName, data.imageID)
+  'removeTag': (data) => {
+    Kernel.removeTags(data.tagName, data.imageID)
   },
   'getAllTags': async (data) => {
     let allTags = await Kernel.getTags()

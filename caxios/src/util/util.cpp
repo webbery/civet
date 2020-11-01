@@ -135,6 +135,26 @@ namespace caxios {
     return Napi::Object();
   }
 
+  std::vector<uint32_t> ArrayAsUint32Vector(Napi::Array arr)
+  {
+    std::vector< uint32_t > vec;
+    ForeachArray(arr, [&vec](Napi::Value item) {
+      uint32_t fid = item.As<Napi::Number>().Uint32Value();
+      vec.emplace_back(fid);
+    });
+    return std::move(vec);
+  }
+
+  std::vector<std::string> ArrayAsStringVector(Napi::Array arr)
+  {
+    std::vector< std::string > vec;
+    ForeachArray(arr, [&vec](Napi::Value item) {
+      std::string fid = item.As<Napi::String>();
+      vec.emplace_back(fid);
+    });
+    return std::move(vec);
+  }
+
   void ForeachObject(Napi::Value value, std::function<void(const std::string&, Napi::Value)> func)
   {
     auto item = value.As<Napi::Object>();

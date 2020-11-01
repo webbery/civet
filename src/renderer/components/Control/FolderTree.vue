@@ -20,6 +20,7 @@
 import IconFolder from './IconFolder'
 import PopMenu from '@/components/Menu/PopMenu'
 import Service from '@/components/utils/Service'
+import bus from '@/components/utils/Bus'
 
 export default {
   name: 'FolderTree',
@@ -86,6 +87,7 @@ export default {
         // 删除文件
         if (item.type !== 'clz') {
           this.$ipcRenderer.send(Service.REMOVE_FILES, [item.id])
+          bus.emit(bus.EVENT_REMOVE_FILES, [item.id])
         }
       }
       this.data.splice(index, 1)

@@ -30,7 +30,7 @@ namespace caxios{
     bool Put(MDB_dbi dbi, const std::string&, void* pData, uint32_t len, int flag = MDB_CURRENT);
     bool Get(MDB_dbi dbi, uint32_t key, void*& pData, uint32_t& len);
     bool Get(MDB_dbi dbi, const std::string& key, void*& pData, uint32_t& len);
-    bool Each(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb);
+    bool Filter(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb);
     bool Del(MDB_dbi dbi, uint32_t key);
     MDB_txn* Begin();
     bool Commit();

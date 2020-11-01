@@ -4,7 +4,7 @@ const bus = new Vue()
 
 export default {
   emit: (msgType, msg) => {
-    console.info(msgType, msg)
+    // console.info(msgType, msg)
     bus.$emit(msgType, msg)
   },
   on: (msgType, callback) => {
@@ -14,6 +14,7 @@ export default {
   EVENT_UPDATE_DISPLAY_IMAGE: 'updateDisplayImage',
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
   EVENT_SELECT_IMAGE: 'selectImage',
+  EVENT_REMOVE_FILES: 'remveFiles',
   EVENT_UPDATE_NAV_DESCRIBTION: 'updateNavDesc',
   EVENT_DISPLAY_IMAGE: 'displayImage',
   EVENT_DISPLAY_SEARCH_RESULT: 'showSearchResult',

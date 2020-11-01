@@ -16,15 +16,18 @@ const kernel = (function () {
 
 export default {
   getFilesSnap: (flag) => {
-    console.info('getFilesSnap')
     return kernel.getFilesSnap(flag)
   },
   getFilesInfo: (filesID) => { return kernel.getFilesInfo(filesID) },
+  getUnTagFiles: () => { return kernel.getUnTagFiles() },
   findFiles: (condition) => { return kernel.findFiles(condition) },
   // 以下接口为可写接口
   generateFilesID: (num) => { return kernel.generateFilesID(num) },
   addFiles: (src) => { return kernel.addFiles(src) },
+  removeFiles: (filesID) => { kernel.removeFiles(filesID) },
   updateFilesKeywords: (filesID, keywords) => {},
+  setTags: (filesID, tags) => { return kernel.setTags(filesID, tags) },
+  addClasses: (classes) => {},
   release: () => {
     kernel.release()
   }

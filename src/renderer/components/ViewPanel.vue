@@ -55,6 +55,7 @@ export default {
       }
       this.imageList = list
     }
+    bus.on(bus.EVENT_REMOVE_FILES, this.onRemoveFiles)
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
   },
   watch: {
@@ -88,15 +89,15 @@ export default {
     }
   },
   methods: {
-    async onImageClick(e, image) {
+    onImageClick(e, image) {
       // console.info(this.$chilidren)
       bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
 
       // 框亮显示
       if (this.lastSelection !== null) {
-        this.lastSelection.style.border = '3px solid white'
+        this.lastSelection.style.border = '2px solid white'
       }
-      e.target.parentNode.style.border = '3px solid red'
+      e.target.parentNode.style.border = '2px solid red'
       this.lastSelection = e.target.parentNode
     },
     async onImageDbClick(image) {
@@ -138,6 +139,14 @@ export default {
       if (error) console.log(error)
       for (let item of updateImages) {
         this.imageList.push({id: item.id, label: item.filename, path: item.path})
+      }
+    },
+    onRemoveFiles(removeIDs) {
+      for (let id of removeIDs) {
+        const index = this.imageList.findIndex((image) => { return image.id === id })
+        if (index !== -1) {
+          this.imageList.splice(index, 1)
+        }
       }
     },
     getImage(image) {

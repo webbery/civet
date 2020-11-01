@@ -2,9 +2,9 @@
   <div :id="boxid" class="image-container" :class="interact?activeClasses[activeIndex]:''"
     @mouseleave="onMouseLeave" @mouseover="onMouseOver" @mousemove="onMouseMove"
     @mousedown="onMouseDown" @mouseup="onMouseUp" @mousewheel="onMouseWheel">
-      <el-scrollbar >
+      <!-- <el-scrollbar > -->
       <canvas :id="id" ></canvas>
-      </el-scrollbar>
+      <!-- </el-scrollbar> -->
   </div>
 </template>
 
@@ -69,8 +69,10 @@ export default {
       // await this.loader.load(src)
       this.box = document.getElementById(this.boxid)
       this.canvas = document.getElementById(this.id)
-      // this.canvas.width = this.box.offsetWidth
-      // this.canvas.height = this.box.offsetHeight
+      if (this.interact) {
+        this.canvas.width = this.box.offsetWidth
+        this.canvas.height = this.box.offsetHeight
+      }
       log.info(this.box.offsetWidth, this.box.offsetHeight)
       this.context = this.canvas.getContext('2d')
       // console.info(src)
@@ -102,14 +104,16 @@ export default {
       let [startX, startY] = [0, 0]
       if (aspect > windowAspect) {
         // 扁图
-        this.originWidth = this.box.offsetWidth
+        this.originWidth = this.box.offsetWidth - 4
         this.originHeight = Math.ceil(this.box.offsetHeight / aspect)
         startY = (this.box.offsetHeight - this.originHeight) / 2
       } else {
-        this.originWidth = Math.floor(this.box.offsetWidth * aspect)
+        this.originWidth = Math.floor(this.box.offsetWidth * aspect) - 4
         this.originHeight = this.box.offsetHeight
         startX = (this.box.offsetWidth - this.originWidth) / 2
       }
+      startX -= 2
+      startY += 2
       this.centerX = this.box.offsetWidth / 2
       this.centerY = this.box.offsetHeight / 2
       // console.info(startX, startY, this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight)

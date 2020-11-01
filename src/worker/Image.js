@@ -177,6 +177,7 @@ class ImageTextParser extends ImageParseBase {
     image.keyword = image.tag
     console.info('ImageTextParser', image.tag)
     try {
+      console.info(image)
       Storage.setTags([image.id], image.tag)
     } catch (err) {
       console.info('parse text error', err)

@@ -14,6 +14,10 @@
 #define WRITE_BEGIN()  m_pDatabase->Begin()
 #define WRITE_END()    m_pDatabase->Commit()
 
+#define BIT_TAG   (1<<1)
+#define BIT_CLASS (1<<2)
+#define BIT_ANNO  (1<<3)
+
 namespace caxios {
   const char* g_tables[] = {
     TABLE_FILESNAP,
@@ -103,6 +107,11 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID)
+  {
+    return true;
+  }
+
   bool DBManager::RemoveFiles(const std::vector<FileID>& filesID)
   {
     WRITE_BEGIN();
@@ -133,6 +142,19 @@ namespace caxios {
       });
       m_pDatabase->Put(m_mDBs[TABLE_TAG], fileID, indexes, tags.size() * sizeof(WordIndex));
       free(indexes);
+      // step |= 2
+      if (!m_pDatabase->Get(m_mDBs[TABLE_FILESNAP], fileID, pData, len)) {
+        continue;
+      }
+      std::string snap((char*)pData, len);
+      using namespace nlohmann;
+      json jSnap = json::parse(snap);
+      int step = atoi(jSnap["step"].dump().c_str());
+      if(step & (1 << 1)) continue;
+      step |= (1 << 1);
+      jSnap["step"] = std::to_string(step);
+      snap = jSnap.dump();
+      m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileID, snap.data(), snap.size());
     }
     WRITE_END();
     return true;
@@ -162,7 +184,16 @@ namespace caxios {
         }
         items.emplace_back(item);
       }
-      FileInfo fileInfo{ fileID, items, {}, {}, {} };
+      // tag
+      Tags tags;
+      if (m_pDatabase->Get(m_mDBs[TABLE_TAG], fileID, pData, len)) {
+        WordIndex* pWordIndex = (WordIndex*)pData;
+        tags = GetWordByIndex(pWordIndex, len/sizeof(WordIndex));
+      }
+      // ann
+      // clazz
+      // keyword
+      FileInfo fileInfo{ fileID, items, tags, {}, {} };
       filesInfo.emplace_back(fileInfo);
     }
     return true;
@@ -171,7 +202,7 @@ namespace caxios {
   bool DBManager::GetFilesSnap(std::vector< Snap >& snaps)
   {
     READ_BEGIN(TABLE_FILESNAP);
-    m_pDatabase->Each(m_mDBs[TABLE_FILESNAP], [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
+    m_pDatabase->Filter(m_mDBs[TABLE_FILESNAP], [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
       if (k == 0) return false;
       using namespace nlohmann;
       std::string js((char*)pData, len);
@@ -188,6 +219,24 @@ namespace caxios {
       
       return false;
     });
+    return true;
+  }
+
+  bool DBManager::GetUntagFiles(std::vector<FileID>& filesID)
+  {
+    std::vector<Snap> vSnaps;
+    if (!GetFilesSnap(vSnaps)) return false;
+    for (auto& snap : vSnaps) {
+      char bits = std::get<2>(snap);
+      if (!(bits &= BIT_TAG)) {
+        filesID.emplace_back(std::get<0>(snap));
+      }
+    }
+    return true;
+  }
+
+  bool DBManager::GetUnClassFiles(std::vector<FileID>& filesID)
+  {
     return true;
   }
 
@@ -264,6 +313,7 @@ namespace caxios {
       if (m_mTables.find(name) == m_mTables.end()) continue;
       m_mTables[name]->Delete(m["value"], fileID);
     }
+    // tag
     // snap
     m_pDatabase->Del(m_mDBs[TABLE_FILESNAP], fileID);
     m_pDatabase->Del(m_mDBs[TABLE_FILE_META], fileID);
@@ -273,11 +323,19 @@ namespace caxios {
 
   bool DBManager::GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno)
   {
+    // meta
     return true;
   }
 
   bool DBManager::GetFileTags(FileID fileID, Tags& tags)
   {
+    READ_BEGIN(TABLE_TAG);
+    void* pData = nullptr;
+    uint32_t len = 0;
+    if (!m_pDatabase->Get(m_mDBs[TABLE_TAG], fileID, pData, len)) return true;
+    WordIndex* pWordIndx = (WordIndex*)pData;
+    size_t cnt = len / sizeof(WordIndex);
+    tags = GetWordByIndex(pWordIndx, cnt);
     return true;
   }
 
@@ -313,15 +371,33 @@ namespace caxios {
       if (!m_pDatabase->Get(m_mDBs[TABLE_KEYWORD_INDX], word, pData, len)) {
         // 如果tag字符串不存在，添加
         m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], word, &lastIndx, sizeof(WordIndex));
+        m_pDatabase->Put(m_mDBs[TABLE_INDX_KEYWORD], lastIndx, (void*)word.data(), word.size());
         mIndexes[word] = lastIndx;
         lastIndx += 1;
         bUpdate = true;
+        continue;
       }
+      mIndexes[word] = *(WordIndex*)pData;
     }
     if (bUpdate) {
       m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], 0, &lastIndx, sizeof(WordIndex));
     }
     return std::move(mIndexes);
+  }
+
+  std::vector<std::string> DBManager::GetWordByIndex(const WordIndex* const wordsIndx, size_t len)
+  {
+    std::vector<std::string> vWords(len);
+    for (size_t idx = 0; idx<len;++idx)
+    {
+      WordIndex index = wordsIndx[idx];
+      void* pData = nullptr;
+      uint32_t len = 0;
+      if(!m_pDatabase->Get(m_mDBs[TABLE_INDX_KEYWORD], index, pData, len)) continue;
+      std::string word((char*)pData, len);
+      vWords[idx] = word;
+    }
+    return std::move(vWords);
   }
 
 }

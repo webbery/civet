@@ -113,15 +113,36 @@ export default {
         }
         return v.toFixed(1) + unit
       }
-
-      let image = new FileBase(this.$kernel.getFilesInfo([imageID])[0])
-      log.info('PropertyPanel', image)
-
+      const images = this.$kernel.getFilesInfo([imageID])
+      if (!images) return
+      log.info('PropertyPanel', images)
+      if (images.length === 1) {
+        let image = new FileBase(images[0])
+        this.picture.descsize = getSize(parseInt(image.size))
+        const config = new CivetConfig()
+        const schema = config.meta()
+        let names = []
+        let values = []
+        for (let item of image.meta) {
+          if (item.name === 'filename') {
+            this.filename = item.value
+            continue
+          }
+          if (config.isMetaDisplay(item.name, schema)) {
+            names.push(JString.i18n(item.name))
+            values.push(item.value)
+          }
+        }
+        this.metaNames = names
+        this.metaValues = values
+        this.picture.id = image.id
+        this.imagepath = image.path
+        this.dynamicTags = image.tag ? image.tag.slice(0) : []
+      }
       // this.classes.length = 0
       // for (let c of image.category) {
       //   this.classes.push(c)
       // }
-      this.picture.descsize = getSize(parseInt(image.size))
       // let colors = []
       // if (image.colors) {
       //   for (let color of image.colors) {
@@ -146,25 +167,6 @@ export default {
       //   }
       // }
       // // image.desccolors = colors
-      const config = new CivetConfig()
-      const schema = config.meta()
-      let names = []
-      let values = []
-      for (let item of image.meta) {
-        if (item.name === 'filename') {
-          this.filename = item.value
-          continue
-        }
-        if (config.isMetaDisplay(item.name, schema)) {
-          names.push(JString.i18n(item.name))
-          values.push(item.value)
-        }
-      }
-      this.metaNames = names
-      this.metaValues = values
-      this.picture.id = image.id
-      this.imagepath = image.path
-      this.dynamicTags = image.tag ? image.tag.slice(0) : []
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
