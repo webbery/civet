@@ -12,6 +12,7 @@
     __FUNCTION__,\
     __VA_ARGS__)
 #else
+#include <string.h>
 #define T_LOG(fmt, ...)  {\
     char* clg = new char[1024];\
     memset(clg, 0, 1024);\

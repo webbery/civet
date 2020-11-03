@@ -2,6 +2,7 @@
 #include "Table.h"
 #include "lmdb/lmdb.h"
 #include "Value.h"
+#include <string.h>
 
 namespace caxios {
 

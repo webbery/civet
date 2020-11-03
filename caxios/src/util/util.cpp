@@ -4,25 +4,25 @@
 
 namespace caxios {
   
-  std::string ConvertToString(const v8::Local<v8::String>& value)
-  {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-#if V8_MAJOR_VERSION <= 5
-    const int length = value->Utf8Length() + 1;
-#else
-    const int length = value->Utf8Length(isolate)+1;
-#endif
-    char* charFileName = new char[length];
-    memset(charFileName, length, 0x00);
-#if V8_MAJOR_VERSION <= 5
-    (*value)->WriteUtf8(charFileName);
-#else
-    (*value)->WriteUtf8(isolate, charFileName);
-#endif
-    std::string str;
-    str.assign(charFileName);
-    return std::move(str);
-  }
+//   std::string ConvertToString(const v8::Local<v8::String>& value)
+//   {
+//     v8::Isolate* isolate = v8::Isolate::GetCurrent();
+// #if V8_MAJOR_VERSION <= 5
+//     const int length = value->Utf8Length() + 1;
+// #else
+//     const int length = value->Utf8Length(isolate)+1;
+// #endif
+//     char* charFileName = new char[length];
+//     memset(charFileName, length, 0x00);
+// #if V8_MAJOR_VERSION <= 5
+//     (*value)->WriteUtf8(charFileName);
+// #else
+//     (*value)->WriteUtf8(isolate, charFileName);
+// #endif
+//     std::string str;
+//     str.assign(charFileName);
+//     return std::move(str);
+//   }
 
   bool HasAttr(Napi::Object obj, std::string attr)
   {

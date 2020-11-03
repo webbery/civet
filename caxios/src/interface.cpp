@@ -36,7 +36,7 @@ namespace caxios {
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
       std::string meta;
-      if (flag == 0) { // 读写模式
+      if (flag == 0) { // 锟斤拷写模式
         meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
       }
       g_pCaxios = new CAxios(path, flag, meta);
@@ -91,10 +91,12 @@ namespace caxios {
                 auto num = obj.As<Napi::Number>().Uint32Value();
                 sVal = std::to_string(num);
               }
+#if NAPI_VERSION > 5
               else if( obj.IsDate()) {
                 double timestamp = obj.As<Napi::Date>().ValueOf();
                 sVal = std::to_string(timestamp);
               }
+#endif
               else if (obj.IsArray()) {
                 T_LOG("Is Array: ??");
               }
