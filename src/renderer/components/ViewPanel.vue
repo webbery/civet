@@ -4,9 +4,6 @@
     <el-scrollbar style="height:96vh;">
         <div v-for="(image,idx) in imageList" :key="idx" class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
           <el-card :body-style="{ padding: '0px' }" style="position: relative">
-            <!-- <div class="bottom clearfix">
-              <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
-            </div> -->
           <JImage :src="getImage(image)" :interact="false" class="preview" 
             @dblclick.native="onImageDbClick(image)"
             @keydown.ctrl.67.native="onFileCopyOut(image)"
@@ -15,6 +12,7 @@
           </JImage>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
+            <input v-if="enableInput"/>
           </div>
         </el-card>
         </div>
@@ -41,6 +39,7 @@ export default {
       firstLoad: true,
       imageList: [],
       lastSelection: null,
+      enableInput: false,
       menus: [
         {text: '导出到计算机', cb: this.onChangeName},
         {text: '重命名', cb: this.onChangeName},
