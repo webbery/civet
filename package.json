@@ -93,7 +93,7 @@
     "uuid": "^8.1.0",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.6.0",

@@ -117,6 +117,7 @@ export default {
       this.centerX = this.box.offsetWidth / 2
       this.centerY = this.box.offsetHeight / 2
       // console.info(startX, startY, this.originWidth, this.originHeight, this.box.offsetWidth, this.box.offsetHeight)
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
       this.context.translate(startX, startY)
       this.context.drawImage(this.image, 0, 0, this.originWidth, this.originHeight)
       this.context.setTransform(1, 0, 0, 1, 0, 0)

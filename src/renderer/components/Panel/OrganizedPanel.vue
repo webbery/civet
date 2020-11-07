@@ -17,6 +17,7 @@
           <FolderTree :data="category"></FolderTree>
           <IconFolder icon="el-icon-folder" enableInput="true" v-if="newFolder" v-on:editFinish="editFinish" :label="newCategoryName"></IconFolder>
           </div>
+          <TreePanel></TreePanel>
         </el-scrollbar>
       </el-tab-pane>
       <!-- <el-tab-pane label="本地目录" name="direcories" class="directory" >
@@ -33,12 +34,14 @@ import bus from '../utils/Bus'
 import Service from '@/components/utils/Service'
 import FolderTree from '@/components/Control/FolderTree'
 import IconFolder from '@/components/Control/IconFolder'
+import TreePanel from '@/components/Panel/TreePanel'
 
 export default {
   name: 'organized-panel',
   components: {
     FolderTree,
-    IconFolder
+    IconFolder,
+    TreePanel
   },
   data() {
     return {
@@ -258,6 +261,9 @@ el-tab-pane {
 .item:hover {
   background-color:rgb(22, 149, 233);
   -webkit-user-select: none;
+}
+.item {
+  font-size: 14px;
 }
 
 table {

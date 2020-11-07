@@ -1,7 +1,7 @@
 <template>
-    <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
-    <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
-    <el-scrollbar style="height:96vh;">
+    <div id="main-content" @drop="dropFiles($event)" @dragover.prevent >
+    <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
+    <el-scrollbar style="height:96vh;" @click.native="onPanelClick($event)">
         <div v-for="(image,idx) in imageList" :key="idx" class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
           <el-card :body-style="{ padding: '0px' }" style="position: relative">
           <JImage :src="getImage(image)" :interact="false" class="preview" 
@@ -10,13 +10,12 @@
             @contextmenu.native="onImageClick($event, $root, image)" @click.native="onImageClick($event, $root, image)"
           >
           </JImage>
-          <div style="padding: 14px;">
-            <span class="name">{{image.label}}</span>
+          <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
+            <span class="name">{{image.filename}}</span>
             <input v-if="enableInput"/>
           </div>
         </el-card>
         </div>
-        
       </el-scrollbar>
     </div>
 </template>
@@ -28,6 +27,7 @@ import JImage from './JImage'
 import FileBase from '@/../public/FileBase'
 import ImgTool from './utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
+import Global from './utils/Global'
 
 export default {
   name: 'view-panel',
@@ -38,8 +38,9 @@ export default {
     return {
       firstLoad: true,
       imageList: [],
-      lastSelection: null,
+      lastSelections: {},
       enableInput: false,
+      imageSelected: false,
       menus: [
         {text: '导出到计算机', cb: this.onChangeName},
         {text: '重命名', cb: this.onChangeName},
@@ -62,14 +63,16 @@ export default {
       let list = []
       for (let image of images) {
         list.push(new FileBase(image))
+        console.info(image)
       }
       this.imageList = list
     }
     bus.on(bus.EVENT_REMOVE_FILES, this.onRemoveFiles)
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
+    bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
   },
   watch: {
-    $route: async function(to, from) {
+    $route: function(to, from) {
       console.info('to: ', to, 'from:', from.path)
       let name = to.query.name
       if (name === undefined) {
@@ -77,9 +80,9 @@ export default {
       }
       switch (to.path) {
         case '/':
-          let images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO)
-          console.info('all images:', images)
-          this.$store.dispatch('updateImageList', images)
+          // let images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO)
+          // console.info('all images:', images)
+          // this.$store.dispatch('updateImageList', images)
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break
         case '/uncategory':
@@ -99,23 +102,36 @@ export default {
     }
   },
   methods: {
-    onImageClick(e, root, image) {
-      // console.info(this.$chilidren)
-      bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
-      // 框亮显示
-      if (this.lastSelection !== null) {
-        this.lastSelection.style.border = '2px solid white'
+    onPanelClick(event) {
+      console.info('onPanelClick')
+      if (this.imageSelected) this.imageSelected = false
+      else {
+        this.clearSelections()
       }
-      e.target.parentNode.style.border = '2px solid red'
-      this.lastSelection = e.target.parentNode
-      if (e.button === 2) {
-        // right click
-        root.$emit('easyAxis', {
-          tag: 'mainView',
-          index: image.id,
-          x: event.clientX,
-          y: event.clientY
-        })
+    },
+    onImageClick(e, root, image) {
+      console.info('onImageClick')
+      this.imageSelected = true
+      if (!Global.ctrlPressed) {
+        bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
+        if (e.button === 2) { // 选择多个后右键
+          // right click
+          this.imageSelected = false
+          root.$emit('easyAxis', {
+            tag: 'mainView',
+            index: image.id,
+            x: event.clientX,
+            y: event.clientY
+          })
+        } else {
+          // 框亮显示
+          this.clearSelections()
+          this.lastSelections[image.id] = e.target.parentNode
+          e.target.parentNode.style.border = '2px solid red'
+        }
+      } else { // 多选
+        this.lastSelections[image.id] = e.target.parentNode
+        e.target.parentNode.style.border = '2px solid red'
       }
     },
     async onImageDbClick(image) {
@@ -123,7 +139,7 @@ export default {
       if (imageInfo !== null) {
         imageInfo['id'] = image.id
         console.info('debug:', imageInfo)
-        this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.label}})
+        this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.filename, cmd: 'display'}})
       }
     },
     onSelectMenu: function (indexList) {
@@ -159,7 +175,7 @@ export default {
     onUpdateImages(error, updateImages) {
       if (error) console.log(error)
       for (let item of updateImages) {
-        this.imageList.push({id: item.id, label: item.filename, path: item.path})
+        this.imageList.push({id: item.id, filename: item.filename, path: item.path})
       }
     },
     onRemoveFiles(removeIDs) {
@@ -173,6 +189,12 @@ export default {
     getImage(image) {
       console.info('getImage:', image)
       return ImgTool.getSrc(image)
+    },
+    clearSelections() {
+      for (const k in this.lastSelections) {
+        this.lastSelections[k].style.border = '2px solid white'
+      }
+      this.lastSelections = {}
     }
   }
 }
@@ -221,10 +243,7 @@ export default {
   display: inline;
 }
 .name {
-  /* max-width: 19%; */
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  overflow: hidden;
+  font-size: 12px;
 }
 .modal {
   display: none; /* Hidden by default */

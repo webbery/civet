@@ -24,6 +24,7 @@ import ViewPanel from '@/components/ViewPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/TagPanel'
 import ConfigPanel from '@/components/ConfigPanel'
+import Global from '@/components/utils/Global'
 
 export default {
   name: 'landing-page',
@@ -35,7 +36,33 @@ export default {
     TagPanel,
     ConfigPanel
   },
-  mounted() {}
+  mounted() {
+    // 挂载全局初始化事件
+    const os = require('os')
+    const platform = os.platform()
+    document.addEventListener('keydown', function(e) {
+      if (platform === 'win32') {
+        if (e.ctrlKey && !Global.ctrlPressed) {
+          Global.ctrlPressed = true
+        }
+      } else if (platform === 'mac') {
+        if (e.metaKey && !Global.ctrlPressed) {
+          Global.ctrlPressed = true
+        }
+      }
+    })
+    document.addEventListener('keyup', function(e) {
+      if (platform === 'win32') {
+        if (e.which === 17 && Global.ctrlPressed) {
+          Global.ctrlPressed = false
+        }
+      } else if (platform === 'mac') {
+        if (e.metaKey && Global.ctrlPressed) {
+          Global.ctrlPressed = false
+        }
+      }
+    })
+  }
 }
 </script>
 

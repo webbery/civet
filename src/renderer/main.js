@@ -23,6 +23,5 @@ Vue.prototype.$kernel = Kernel
 new Vue({
   components: { App },
   router,
-  // store,
   template: '<App/>'
 }).$mount('#app')

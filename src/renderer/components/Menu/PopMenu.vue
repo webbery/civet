@@ -83,15 +83,15 @@
       },
       // 列表项宽度
       itemWidth: {
-        default: 140
+        default: 120
       },
       // 列表项高度
       itemHeight: {
-        default: 36
+        default: 26
       },
       // 列表项字体
       itemSize: {
-        default: 14
+        default: 12
       },
       // 显示点偏移量
       offset: {
@@ -103,7 +103,7 @@
       },
       // 边界距离
       borderWidth: {
-        default: 6
+        default: 2
       }
     },
     mounted() {

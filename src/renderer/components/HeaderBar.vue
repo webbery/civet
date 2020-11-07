@@ -100,7 +100,11 @@ export default {
       }
     },
     goBack() {
-      this.$router.back(-1)
+      if (window.history.length === 0) {
+        console.info('no more page')
+        return
+      }
+      this.$router.go(-1)
     },
     async onSearch() {
       const keywords = this.keyword.split(' ')

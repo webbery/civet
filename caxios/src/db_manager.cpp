@@ -4,6 +4,7 @@
 #include "util/util.h"
 #include "table/TableMeta.h"
 #include <set>
+#include <utility>
 
 #define READ_BEGIN(dbname) \
   if (m_mDBs[dbname] == -1) {\
@@ -203,7 +204,8 @@ namespace caxios {
         continue;
       }
       std::string sMeta((char*)pData, len);
-      T_LOG("meta: %s", sMeta.c_str());
+      std::string sDebug((char*)pData, 500 <len? 500: len);
+      T_LOG("meta: %s", sDebug.c_str());
       using namespace nlohmann;
       json meta = json::parse(sMeta);
       MetaItems items;
