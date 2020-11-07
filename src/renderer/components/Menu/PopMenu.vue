@@ -204,6 +204,7 @@
     -webkit-user-select: none;
     -moz-user-select: none;
     z-index: 9999;
+    font-size: 12px;
   }
   .cm-ul {
     width: 100%;

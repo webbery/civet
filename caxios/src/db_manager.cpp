@@ -3,6 +3,7 @@
 #include "log.h"
 #include "util/util.h"
 #include "table/TableMeta.h"
+#include <set>
 
 #define READ_BEGIN(dbname) \
   if (m_mDBs[dbname] == -1) {\
@@ -15,8 +16,8 @@
 #define WRITE_END()    m_pDatabase->Commit()
 
 #define BIT_TAG   (1<<1)
-#define BIT_CLASS (1<<2)
-#define BIT_ANNO  (1<<3)
+//#define BIT_CLASS (1<<2)
+//#define BIT_ANNO  (1<<3)
 
 namespace caxios {
   const char* g_tables[] = {
@@ -25,7 +26,9 @@ namespace caxios {
     TABLE_KEYWORD_INDX,
     TABLE_INDX_KEYWORD,
     TABLE_TAG,
+    TABLE_TAG2FILE,
     TABLE_CLASS,
+    TABLE_CLASS2FILE,
     TABLE_ANNOTATION,
     TABLE_MATCH_META,
     TABLE_MATCH
@@ -52,6 +55,8 @@ namespace caxios {
     if (!meta.empty() && meta.size()>4 && meta != "[]") {
       ParseMeta(meta);
     }
+    // 检查数据库版本是否匹配, 如果不匹配, 则开启线程，将当前数据库copy一份，进行升级, 并同步后续的所有写操作
+    // 如果期间程序退出中断, 记录中断点, 下次启动时继续 
   }
 
   DBManager::~DBManager()
@@ -109,6 +114,29 @@ namespace caxios {
 
   bool DBManager::AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID)
   {
+    if (_flag == ReadOnly) return false;
+    WRITE_BEGIN();
+    auto mIndexes = GetWordsIndex(classes);
+    std::vector<WordIndex> vIndexes;
+    std::for_each(mIndexes.begin(), mIndexes.end(), [this, &vIndexes, &filesID](auto item) {
+      vIndexes.emplace_back(item.second);
+      AddFileID2Class(filesID, item.second);
+    });
+    for (auto fileID : filesID) {
+      void* pData = nullptr;
+      uint32_t len = 0;
+      if (!m_pDatabase->Get(m_mDBs[TABLE_CLASS], fileID, pData, len)) {
+        m_pDatabase->Put(m_mDBs[TABLE_CLASS], fileID, (void*)vIndexes.data(), vIndexes.size() * sizeof(WordIndex));
+      }
+      else {
+        WordIndex* pIndex = (WordIndex*)pData;
+        std::set<WordIndex> sIndexes(pIndex, pIndex + len / sizeof(WordIndex));
+        sIndexes.insert(vIndexes.begin(), vIndexes.end());
+        std::vector<WordIndex> vWordIndex(sIndexes.begin(), sIndexes.end());
+        m_pDatabase->Put(m_mDBs[TABLE_CLASS], fileID, (void*)vWordIndex.data(), vWordIndex.size() * sizeof(WordIndex));
+      }
+    }
+    WRITE_END();
     return true;
   }
 
@@ -128,6 +156,9 @@ namespace caxios {
     if (_flag == ReadOnly) return false;
     WRITE_BEGIN();
     auto mIndexes = GetWordsIndex(tags);
+    std::for_each(mIndexes.begin(), mIndexes.end(), [this, &filesID](std::pair<std::string, WordIndex> item) {
+      AddFileID2Tag(filesID, item.second);
+    });
     for (auto fileID : filesID) {
       // 所有标签以数组形式保存, 第0位为数组长度
       void* pData = nullptr;
@@ -192,8 +223,13 @@ namespace caxios {
       }
       // ann
       // clazz
+      Classes classes;
+      if (m_pDatabase->Get(m_mDBs[TABLE_CLASS], fileID, pData, len)) {
+        WordIndex* pWordIndex = (WordIndex*)pData;
+        classes = GetWordByIndex(pWordIndex, len / sizeof(WordIndex));
+      }
       // keyword
-      FileInfo fileInfo{ fileID, items, tags, {}, {} };
+      FileInfo fileInfo{ fileID, items, tags, classes, {}, {} };
       filesInfo.emplace_back(fileInfo);
     }
     return true;
@@ -291,6 +327,40 @@ namespace caxios {
       std::vector<FileID> vID;
       vID.emplace_back(fileid);
       m_mTables[name]->Add(m["value"], vID);
+    }
+    return true;
+  }
+
+  bool DBManager::AddFileID2Tag(const std::vector<FileID>& vFilesID, WordIndex index)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    if (!m_pDatabase->Get(m_mDBs[TABLE_TAG2FILE], index, pData, len)) {
+      m_pDatabase->Put(m_mDBs[TABLE_TAG2FILE], index, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
+    }
+    else {
+      FileID* pID = (FileID*)pData;
+      std::set<FileID> sFilesID(pID, pID + len / sizeof(FileID));
+      sFilesID.insert(vFilesID.begin(), vFilesID.end());
+      std::vector<FileID> vID(sFilesID.begin(), sFilesID.end());
+      m_pDatabase->Put(m_mDBs[TABLE_TAG2FILE], index, (void*)vID.data(), vID.size() * sizeof(FileID));
+    }
+    return true;
+  }
+
+  bool DBManager::AddFileID2Class(const std::vector<FileID>& vFilesID, WordIndex index)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    if (!m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], index, pData, len)) {
+      m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], index, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
+    }
+    else {
+      FileID* pID = (FileID*)pData;
+      std::set<FileID> sFilesID(pID, pID + len / sizeof(FileID));
+      sFilesID.insert(vFilesID.begin(), vFilesID.end());
+      std::vector<FileID> vID(sFilesID.begin(), sFilesID.end());
+      m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], index, (void*)vID.data(), vID.size() * sizeof(FileID));
     }
     return true;
   }

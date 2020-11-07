@@ -26,6 +26,8 @@ namespace caxios {
 
   private:
     bool AddFile(FileID, const MetaItems&, const Keywords&);
+    bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
+    bool AddFileID2Class(const std::vector<FileID>& vFilesID, WordIndex index);
     bool RemoveFile(FileID);
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);

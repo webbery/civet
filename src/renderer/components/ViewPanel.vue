@@ -1,12 +1,17 @@
 <template>
     <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
+    <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
     <el-scrollbar style="height:96vh;">
         <div v-for="(image,idx) in imageList" :key="idx" class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
-          <el-card :body-style="{ padding: '0px' }" style="position: relative" >
+          <el-card :body-style="{ padding: '0px' }" style="position: relative">
             <!-- <div class="bottom clearfix">
               <el-button type="text" class="button" icon="el-icon-zoom-in"></el-button>
             </div> -->
-          <JImage :src="getImage(image)" :interact="false" class="preview" @click.native="onImageClick($event, image)" @dblclick.native="onImageDbClick(image)" @keydown.ctrl.67.native="onFileCopyOut(image)">
+          <JImage :src="getImage(image)" :interact="false" class="preview" 
+            @dblclick.native="onImageDbClick(image)"
+            @keydown.ctrl.67.native="onFileCopyOut(image)"
+            @contextmenu.native="onImageClick($event, $root, image)" @click.native="onImageClick($event, $root, image)"
+          >
           </JImage>
           <div style="padding: 14px;">
             <span class="name">{{image.label}}</span>
@@ -24,17 +29,23 @@ import Service from './utils/Service'
 import JImage from './JImage'
 import FileBase from '@/../public/FileBase'
 import ImgTool from './utils/ImgTool'
+import PopMenu from '@/components/Menu/PopMenu'
 
 export default {
   name: 'view-panel',
   components: {
-    JImage
+    JImage, PopMenu
   },
   data() {
     return {
       firstLoad: true,
       imageList: [],
-      lastSelection: null
+      lastSelection: null,
+      menus: [
+        {text: '导出到计算机', cb: this.onChangeName},
+        {text: '重命名', cb: this.onChangeName},
+        {text: '删除', cb: this.onDeleteItem}
+      ]
     }
   },
   async mounted() {
@@ -89,16 +100,24 @@ export default {
     }
   },
   methods: {
-    onImageClick(e, image) {
+    onImageClick(e, root, image) {
       // console.info(this.$chilidren)
       bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
-
       // 框亮显示
       if (this.lastSelection !== null) {
         this.lastSelection.style.border = '2px solid white'
       }
       e.target.parentNode.style.border = '2px solid red'
       this.lastSelection = e.target.parentNode
+      if (e.button === 2) {
+        // right click
+        root.$emit('easyAxis', {
+          tag: 'mainView',
+          index: image.id,
+          x: event.clientX,
+          y: event.clientY
+        })
+      }
     },
     async onImageDbClick(image) {
       let imageInfo = await this.$ipcRenderer.get(Service.GET_IMAGE_INFO, image.id)
@@ -107,6 +126,9 @@ export default {
         console.info('debug:', imageInfo)
         this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.label}})
       }
+    },
+    onSelectMenu: function (indexList) {
+      console.info(indexList)
     },
     onFileCopyOut(image) {
       console.info('COPY')

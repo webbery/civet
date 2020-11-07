@@ -9,8 +9,9 @@ namespace caxios {
   typedef std::map<std::string, std::string > MetaItem;
   typedef std::vector<MetaItem> MetaItems;
   typedef std::vector<std::string> Tags;
+  typedef std::vector<std::string> Classes;
   typedef std::vector<std::string> Annotations;
   typedef std::vector<std::string> Keywords;
   typedef std::tuple<FileID, std::string, char> Snap; // fileid, display_name, initialize_state
-  typedef std::tuple<FileID, MetaItems, Tags, Annotations, Keywords> FileInfo;
+  typedef std::tuple<FileID, MetaItems, Tags, Classes, Annotations, Keywords> FileInfo;
 }

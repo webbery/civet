@@ -1,15 +1,34 @@
 <template>
   <el-row >
       <el-col :span="4">
-        <el-button @click="onClickResource" size="mini" round>资源库</el-button>
-        <el-button @click="onClickImport" size="mini" round>导入</el-button>
+        <el-dropdown>
+          <el-button @click="onClickResource" size="mini" round>资源库<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>默认</el-dropdown-item>
+            <el-dropdown-item divided>最近使用</el-dropdown-item>
+            <el-dropdown-item divided>新建资源库</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+        <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
         <el-button @click="onClickConfig" size="mini" round>配置</el-button>
         </el-col>
-    <el-col :span="6" class="custom">
+    <el-col :span="5" class="custom">
       <el-page-header @back="goBack" :content="viewDesc"></el-page-header>
     </el-col>
     <el-col :span="9" class="custom">
       <component :is="comName"></component>
+    </el-col>
+    <el-col :span="1">
+      <el-dropdown size="mini" >
+        <span class="selected">
+          所有<i class="el-icon-arrow-down el-icon--right"></i>
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item>所有</el-dropdown-item>
+          <el-dropdown-item>标签</el-dropdown-item>
+          <el-dropdown-item>分类</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
     </el-col>
     <el-col :span="5">
       <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onSearch()">
@@ -142,5 +161,8 @@ export default {
 	border-bottom-style: none;
   border-left-style: solid;
   padding-left: 10px;
+}
+.selected{
+  font-size: 12px;
 }
 </style>

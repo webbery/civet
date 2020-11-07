@@ -11,14 +11,14 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-function enableDevTools(window) {
-  window.webContents.on('did-frame-finish-load', () => {
-    window.webContents.once('devtools-opened', () => {
-      window.focus()
-    })
-    window.webContents.openDevTools()
-  })
-}
+// function enableDevTools(window) {
+//   window.webContents.on('did-frame-finish-load', () => {
+//     window.webContents.once('devtools-opened', () => {
+//       window.focus()
+//     })
+//     window.webContents.openDevTools()
+//   })
+// }
 let mainWindow, workerWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
@@ -62,6 +62,9 @@ function createRendererWindow() {
     // enableDevTools(mainWindow)
   }
   mainWindow.show()
+  if (process.env.NODE_ENV !== 'development') {
+    workerWindow.hide()
+  }
 }
 function createWorkerWindow () {
   /**
@@ -84,8 +87,8 @@ function createWorkerWindow () {
   // mainWindow.openDevTools()
   // workerWindow.openDevTools()
   if (process.env.NODE_ENV === 'development') {
-    // workerWindow.webContents.openDevTools()
-    enableDevTools(workerWindow)
+    workerWindow.webContents.openDevTools()
+    // enableDevTools(workerWindow)
   }
 }
 

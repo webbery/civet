@@ -1,6 +1,6 @@
 <template>
   <div class="tree">
-    <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu"></PopMenu>
+    <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu" tag="tree"></PopMenu>
     <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)">
       <!-- {{item}} -->
       <div >
@@ -66,7 +66,7 @@ export default {
       event.stopPropagation()
       event.preventDefault()
       root.$emit('easyAxis', {
-        // tag: tag,
+        tag: 'tree',
         parent: parent,
         index: indx,
         x: event.clientX,
