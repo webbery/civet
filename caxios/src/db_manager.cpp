@@ -17,7 +17,7 @@
 #define WRITE_END()    m_pDatabase->Commit()
 
 #define BIT_TAG   (1<<1)
-//#define BIT_CLASS (1<<2)
+#define BIT_CLASS (1<<2)
 //#define BIT_ANNO  (1<<3)
 
 namespace caxios {
@@ -30,6 +30,7 @@ namespace caxios {
     TABLE_TAG2FILE,
     TABLE_CLASS,
     TABLE_CLASS2FILE,
+    TABLE_COUNT,
     TABLE_ANNOTATION,
     TABLE_MATCH_META,
     TABLE_MATCH
@@ -115,7 +116,7 @@ namespace caxios {
 
   bool DBManager::AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID)
   {
-    if (_flag == ReadOnly) return false;
+    if (_flag == ReadOnly || classes.size() == 0) return false;
     WRITE_BEGIN();
     auto mIndexes = GetWordsIndex(classes);
     std::vector<WordIndex> vIndexes;
@@ -136,6 +137,7 @@ namespace caxios {
         std::vector<WordIndex> vWordIndex(sIndexes.begin(), sIndexes.end());
         m_pDatabase->Put(m_mDBs[TABLE_CLASS], fileID, (void*)vWordIndex.data(), vWordIndex.size() * sizeof(WordIndex));
       }
+
     }
     WRITE_END();
     return true;
@@ -273,8 +275,16 @@ namespace caxios {
     return true;
   }
 
-  bool DBManager::GetUnClassFiles(std::vector<FileID>& filesID)
+  bool DBManager::GetUnClassifyFiles(std::vector<FileID>& filesID)
   {
+    std::vector<Snap> vSnaps;
+    if (!GetFilesSnap(vSnaps)) return false;
+    for (auto& snap : vSnaps) {
+      char bits = std::get<2>(snap);
+      if (!(bits &= BIT_CLASS)) {
+        filesID.emplace_back(std::get<0>(snap));
+      }
+    }
     return true;
   }
 
@@ -330,6 +340,8 @@ namespace caxios {
       vID.emplace_back(fileid);
       m_mTables[name]->Add(m["value"], vID);
     }
+    // counts
+    //UpdateCount1(CT_UNCALSSIFY, 1);
     return true;
   }
 
@@ -423,6 +435,39 @@ namespace caxios {
       }
     }
     T_LOG("schema: %s", meta.c_str());
+  }
+
+  void DBManager::UpdateCount1(CountType ct, int value)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    uint32_t cnt = 0;
+    m_pDatabase->Get(m_mDBs[TABLE_COUNT], CT_UNCALSSIFY, pData, len);
+    if (pData) cnt = *(uint32_t*)pData;
+    cnt += value;
+    m_pDatabase->Put(m_mDBs[TABLE_COUNT], CT_UNCALSSIFY, (void*)&cnt, sizeof(uint32_t));
+  }
+
+  void DBManager::SetSnapStep(FileID fileID, int offset)
+  {
+    nlohmann::json jSnap;
+    int step = GetSnapStep(fileID, jSnap);
+    step |= (1 >> offset);
+    jSnap["step"] = step;
+    std::string snap = jSnap.dump();
+    m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileID, snap.data(), snap.size());
+  }
+
+  char DBManager::GetSnapStep(FileID fileID, nlohmann::json& jSnap)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    m_pDatabase->Get(m_mDBs[TABLE_FILESNAP], fileID, pData, len);
+    if (len == 0) return 0;
+    std::string snap((char*)pData, len);
+    jSnap = nlohmann::json::parse(snap);
+    int step = atoi(jSnap["step"].dump().c_str());
+    return step;
   }
 
   std::map<std::string, caxios::WordIndex> DBManager::GetWordsIndex(const std::vector<std::string>& words)

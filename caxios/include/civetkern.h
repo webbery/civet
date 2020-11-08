@@ -19,6 +19,7 @@ namespace caxios{
     bool GetFilesSnap(std::vector<Snap>& snaps);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetUntagFiles(std::vector<FileID>& filesID);
+    bool GetUnclassifyFiles(std::vector<FileID>& filesID);
     bool RemoveFiles(const std::vector<FileID>& files);
 
     bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);

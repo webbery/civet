@@ -50,6 +50,11 @@ namespace caxios {
     return m_pDBManager->GetUntagFiles(filesID);
   }
 
+  bool CAxios::GetUnclassifyFiles(std::vector<FileID>& filesID)
+  {
+    return m_pDBManager->GetUnClassifyFiles(filesID);
+  }
+
   bool CAxios::RemoveFiles(const std::vector<FileID>& files)
   {
     return m_pDBManager->RemoveFiles(files);

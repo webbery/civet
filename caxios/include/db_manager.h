@@ -3,6 +3,7 @@
 #include "json.hpp"
 #include <map>
 #include "QueryParser.h"
+#include <Table.h>
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
@@ -21,7 +22,7 @@ namespace caxios {
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetFilesSnap(std::vector< Snap >& snaps);
     bool GetUntagFiles(std::vector<FileID>& filesID);
-    bool GetUnClassFiles(std::vector<FileID>& filesID);
+    bool GetUnClassifyFiles(std::vector<FileID>& filesID);
     bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);
 
   private:
@@ -32,6 +33,9 @@ namespace caxios {
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);
     void ParseMeta(const std::string& meta);
+    void UpdateCount1(CountType ct, int cnt);
+    void SetSnapStep(FileID fileID, int offset);
+    char GetSnapStep(FileID fileID, nlohmann::json&);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
     std::vector<std::string> GetWordByIndex(const WordIndex* const wordsIndx, size_t len);
 

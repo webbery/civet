@@ -1,6 +1,6 @@
 # civet
 
-> 一个图片素材管理软件
+> 一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件
 
 ![界面预览](https://raw.githubusercontent.com/webbery/civet/master/show.JPG)
 

@@ -246,7 +246,17 @@ namespace caxios {
     return info.Env().Undefined();
   }
   Napi::Value getUnClassifyFiles(const Napi::CallbackInfo& info) {
-    return Napi::Value();
+    if (g_pCaxios) {
+      std::vector<FileID> vFilesID;
+      g_pCaxios->GetUnclassifyFiles(vFilesID);
+      Napi::Env env = info.Env();
+      Napi::Array array = Napi::Array::New(env, vFilesID.size());
+      for (unsigned int i = 0; i < vFilesID.size(); ++i) {
+        array.Set(i, Napi::Value::From(env, vFilesID[i]));
+      }
+      return array;
+    }
+    return info.Env().Undefined();
   }
   Napi::Value getAllClasses(const Napi::CallbackInfo& info) {
     return Napi::Value();

@@ -11,6 +11,7 @@
 #define TABLE_TAG2FILE      "tags"          // tag -> fileID
 #define TABLE_CLASS         "class"         // fileID -> class
 #define TABLE_CLASS2FILE    "classes"       // class -> fileID
+#define TABLE_COUNT         "count"         // about count of some statistic
 #define TABLE_ANNOTATION    "annotation"
 #define TABLE_MATCH_META    "match_meta"
 #define TABLE_MATCH         "match_t"
@@ -18,6 +19,10 @@
 
 namespace caxios {
   class CDatabase;
+
+  enum CountType {
+    CT_UNCALSSIFY = 1
+  };
   class ITable {
   public:
     //std::string Name() { return _table; }
