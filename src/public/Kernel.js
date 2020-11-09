@@ -14,12 +14,28 @@ const kernel = (function () {
   return instance.civetkern
 })()
 
+function zipFile(input) {
+  const fs = require("fs")
+  const inputStream = fs.createReadStream(input)
+  const zlib = require("zlib")
+  const gz = zlib.createGzip()
+  const stream = require('stream')
+  stream.pipeline(inputStream, gz, fs.createWriteStream(input + '.gz'), (err) => {
+    if (err) {
+      console.info('zlib error:', err)
+    }
+  })
+}
+
+global.zipFile = zipFile
+
 export default {
   getFilesSnap: (flag) => {
     return kernel.getFilesSnap(flag)
   },
   getFilesInfo: (filesID) => { return kernel.getFilesInfo(filesID) },
   getUnTagFiles: () => { return kernel.getUnTagFiles() },
+  getUnClassifyFiles: () => { return kernel.getUnClassifyFiles() },
   findFiles: (condition) => { return kernel.findFiles(condition) },
   // 以下接口为可写接口
   generateFilesID: (num) => { return kernel.generateFilesID(num) },

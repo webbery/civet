@@ -28,7 +28,11 @@ class Histogram {
     return parseInt(h) * 256 * 128 / DEDAULT_SQUARE + parseInt(s) * 256 / DEFAULT_SIDE + parseInt(v)
   }
 
-  index2rgb(index) {}
+  index2rgb(index) {
+    const square = index * DEDAULT_SQUARE / (256 * 128)
+    const h = parseInt(square)
+    index -= h * square
+  }
 
   // 保留最重要的9个颜色
   simplify(cnt = 9) {}

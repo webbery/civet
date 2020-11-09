@@ -198,6 +198,8 @@ class ImageColorParser extends ImageParseBase {
 
   async parse(image) {
     // image.stepFinishCB(image)
+    image.color = [0xFF0000, 0x00FF00, 0x0000FF]
+    Storage.updateFile({id: image.id}, {color: image.color, step: 0b100})
 
     if (this.next !== undefined) {
       this.next.parse(image)

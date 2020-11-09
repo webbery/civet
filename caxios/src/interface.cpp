@@ -156,7 +156,11 @@ namespace caxios {
   // void addKeyword(const v8::FunctionCallbackInfo<v8::Value>& info) {}
 
   Napi::Value updateFile(const Napi::CallbackInfo& info) {
-    return info.Env().Undefined();
+    // 0: query, 1: new value
+    if (!g_pCaxios) return Napi::Boolean::From(info.Env(), false);
+    auto query = info[0].As<Napi::Object>();
+    auto newValue = info[1].As<Napi::Object>();
+    return Napi::Boolean::From(info.Env(), true);
   }
   Napi::Value updateFileKeywords(const Napi::CallbackInfo& info) {
     return info.Env().Undefined();
