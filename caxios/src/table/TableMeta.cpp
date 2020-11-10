@@ -135,10 +135,10 @@ namespace caxios {
     return false;
   }
 
-bool TableMeta::AddFileIDByInteger(const std::string& value, const std::vector<FileID>& fileID)
-{
-  uint32_t key = std::stoul(value);
-  return AddFileID(key, fileID);
-}
+  bool TableMeta::AddFileIDByInteger(const std::string& value, const std::vector<FileID>& fileID)
+  {
+    uint32_t key = std::stoul(value);
+    return AddFileID(key, fileID);
+  }
 
 }

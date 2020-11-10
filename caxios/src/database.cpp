@@ -1,20 +1,17 @@
 #include "database.h"
 #include <iostream>
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
 #include <sys/types.h>
 #include <sys/stat.h>
-#else
-#if defined(_HAS_CXX17) && _HAS_CXX17
-#include <filesystem>
-   namespace fs = std::filesystem;
-#else
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#endif  // _HAS_CXX17
+#elif defined(WIN32)
+#include <direct.h>
+#include <io.h>
 #endif
 #include "log.h"
 
 #define MAX_NUM_DATABASE  32
+#define LIN_DELIMITER '/'
+#define WIN_DELIMITER '\\'
 
 namespace caxios {
   enum MetaType {
@@ -23,14 +20,28 @@ namespace caxios {
     BT_VALUE
   };
 
-  CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
-#ifdef __APPLE__
-    int status = mkdir(dbpath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-#else
-    if (!fs::exists(dbpath)) {
-      //fs::create_directory(dbpath);
-    }
+  void createDirectories(const std::string& dir) {
+#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+    if (access(dir.c_str(), 0) == 0) return;
+#elif defined(WIN32)
+    std::cout << dir << std::endl;
+    if (_access(dir.c_str(), 0) == 0) return;
 #endif
+    size_t pos = dir.rfind(LIN_DELIMITER);
+    std::cout << pos << std::endl;
+    if (pos == std::string::npos) {
+      pos = dir.rfind(WIN_DELIMITER);
+      if (pos == std::string::npos) return;
+    }
+    std::string parentDir = dir.substr(0, pos);
+    std::cout << "parentDir:"<<parentDir << std::endl;
+    createDirectories(parentDir);
+    std::cout << "Create:" << parentDir << std::endl;
+    mkdir(parentDir.c_str());
+  }
+
+  CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
+    createDirectories(dbpath);
     if (flag == DBFlag::ReadOnly) m_flag = MDB_RDONLY;
     else m_flag = MDB_WRITEMAP;
 

@@ -1,26 +1,55 @@
 <template>
   <div>
-    <el-collapse accordion>
-      <el-collapse-item>
-        <template slot="title">
-          一致性 Consistency<i class="header-icon el-icon-info"></i>
-        </template>
-        <div>与现实生活一致：与现实生活的流程、逻辑保持一致，遵循用户习惯的语言和概念；</div>
-        <div>在界面中一致：所有的元素和结构需保持一致，比如：设计样式、图标和文本、元素的位置等。</div>
-      </el-collapse-item>
-    </el-collapse>
+    <div role="tablist" aria-multiselectable="true" class="el-collapse">
+      <div :class="['el-collapse-item', classActive]">
+        <div role="tab" :aria-expanded="isActive">
+          <div role="button" id="el-collapse-head" tabindex="0" :class="['el-collapse-item__header', classActive]" v-on:click="onClick($event)" style="height: 24px; font-size: 14px; font-weight: bold;">
+            <i :class="expandArraw"></i>
+          分类
+            <i class="el-icon-circle-plus-outline header-icon dock-right"></i>
+          </div>
+        </div>
+        <div role="tabpanel" aria-labelledby="el-collapse-head-2660" id="el-collapse-content-2660" class="el-collapse-item__wrap" v-if="isActive" data-old-padding-top="" data-old-padding-bottom="" data-old-overflow="" aria-hidden="true">
+          <div class="el-collapse-item__content">
+            <slot></slot>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 export default {
-  name: 'TreePanel'
+  name: 'TreePanel',
+  data() {
+    return {
+      isActive: false
+    }
+  },
+  mounted() {},
+  computed: {
+    classActive: function() {
+      return {
+        'is-active': this.isActive
+      }
+    },
+    expandArraw: function() {
+      return {
+        'el-icon-arrow-down': this.isActive,
+        'el-icon-arrow-right': !this.isActive
+      }
+    }
+  },
+  methods: {
+    onClick(e, self) {
+      console.info('el-collapse-head click')
+      this.isActive = !this.isActive
+    }
+  }
 }
 </script>
-<style scoped>
-.el-collapse-item__arrow {
-  margin: 0 8px;
-}
-.el-collapse-item__content {
-   padding-left: 8px;
+<style>
+.dock-right {
+  margin: 0 8px 0 auto;
 }
 </style>

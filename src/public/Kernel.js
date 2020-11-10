@@ -15,9 +15,9 @@ const kernel = (function () {
 })()
 
 function zipFile(input) {
-  const fs = require("fs")
+  const fs = require('fs')
   const inputStream = fs.createReadStream(input)
-  const zlib = require("zlib")
+  const zlib = require('zlib')
   const gz = zlib.createGzip()
   const stream = require('stream')
   stream.pipeline(inputStream, gz, fs.createWriteStream(input + '.gz'), (err) => {
