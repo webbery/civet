@@ -13,6 +13,11 @@ export default {
   components: {
     LandingPage
   },
+  updated: function() {
+    this.$nextTick(() => {
+      console.info('all page updated.')
+    })
+  },
   destroyed: function() {
     Storage.release()
   }

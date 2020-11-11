@@ -23,11 +23,6 @@ let mainWindow, workerWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
-const workerURL = process.env.NODE_ENV === 'development'
-  // ? `http://localhost:9081`
-  ? `worker.html`
-  : `file://${__dirname}/worker.html`
-
 function createRendererWindow() {
   mainWindow = new BrowserWindow({
     webPreferences: {
@@ -66,12 +61,10 @@ function createRendererWindow() {
     workerWindow.hide()
   }
 }
-function createWorkerWindow () {
-  /**
-   * Initial window options
-   */
+function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
     show: process.env.NODE_ENV === 'development',
+    frame: false,
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
@@ -82,10 +75,19 @@ function createWorkerWindow () {
   workerWindow.on('closed', () => {
     console.log('background window closed')
   })
+  let workerURL;
+  if (bFirst) {
+    workerURL = process.env.NODE_ENV === 'development'
+      ? `guider.html`
+      : `file://${__dirname}/guider.html`
+  } else {
+    workerURL = process.env.NODE_ENV === 'development'
+      // ? `http://localhost:9081`
+      ? `worker.html`
+      : `file://${__dirname}/worker.html`
+  }
   if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
   else workerWindow.loadURL(workerURL)
-  // mainWindow.openDevTools()
-  // workerWindow.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     workerWindow.webContents.openDevTools()
     // enableDevTools(workerWindow)

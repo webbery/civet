@@ -3,33 +3,26 @@ import JString from '../public/String'
 import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
 // import { CivetConfig } from '../public/CivetConfig'
+import { CivetConfig } from '../public/CivetConfig'
 import Kernel from '../public/Kernel'
-console.info('finish init kernel')
-// const cvtConfig = new CivetConfig()
+import 'element-theme-dark'
+
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
-ready()
 
-/* ************************ ↓↓↓↓↓↓发布时注释掉该部分↓↓↓↓↓↓ ********************** */
-// import Vue from 'vue'
-// import App from './App'
-// import ElementUI from 'element-ui'
-// import 'element-theme-dark'
-// if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
-// Vue.config.productionTip = false
-// Vue.use(ElementUI)
+// ready()
+const Vue = (resolve) => { return import('vue') }
+const App = (resolve) => { return import('./App') }
+if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
+Vue.config.productionTip = false
+Vue.use(ElementUI)
+Vue.prototype.$ipcRenderer = ipcRenderer
 
-// /* eslint-disable no-new */
-// new Vue({
-//   components: { App },
-//   template: '<App/>'
-// }).$mount('#app')
-/* ************************ ↑↑↑↑↑发布时注释掉该部分↑↑↑↑↑ ********************** */
-
-window.onbeforeunload = (e) => {
-  Kernel.writeLog('********Worker Exit********')
-  Kernel.release()
-}
+/* splash */
+new Vue({
+  components: { App },
+  template: '<App/>'
+}).$mount('#app')
 
 Array.prototype.remove = function (val) {
   let index = this.indexOf(val)

@@ -5,7 +5,8 @@
     "scripts": {
         "install": "prebuild-install || node-gyp rebuild",
         "prebuild": "prebuild --all --strip",
-        "rebuild": "node-gyp rebuild --verbose"
+        "rebuild": "node-gyp rebuild --verbose",
+        "test": "./node_modules/mocha/bin/mocha test/civetkern.test.js"
     },
     "main": "index.js",
     "keywords": [
@@ -19,5 +20,9 @@
     "license": "MIT",
     "dependencies": {
         "node-addon-api": "^3.0.2"
+    },
+    "devDependencies": {
+        "chai": "^4.2.0",
+        "mocha": "^8.2.1"
     }
 }

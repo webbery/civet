@@ -25,7 +25,6 @@
   },
   "build": {
     "productName": "civet",
-    "afterSign": "notarize.js",
     "appId": "com.civet.app",
     "directories": {
       "output": "build"
