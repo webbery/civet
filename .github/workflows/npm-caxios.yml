@@ -1,24 +1,31 @@
 # This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
 # For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
 
-name: caxios
+name: caxios-build
 
-on:
-  release:
-    types: [created]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x]
+
     steps:
       - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
-      - run: cd caxios
-      - run: npm install
-      - run: node-gyp configure
-      - run: node-gyp build
+          node-version: ${{ matrix.node-version }}
+      - run: |
+        cd caxios
+        npm install
+        node-gyp configure
+        node-gyp build
+      env:
+        CI: true
 
   test:
     needs: build
@@ -29,5 +36,8 @@ jobs:
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
-      - run: cd caxios
-      - run: npm run test
+        run: |
+          cd caxios
+          npm run test
+        env:
+          CI: true

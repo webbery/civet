@@ -61,7 +61,8 @@
       "target": "nsis"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons",
+      "target": "deb"
     },
     "nsis": {
       "oneClick": false,

@@ -29,6 +29,7 @@ namespace caxios {
 
   std::string Stringify(Napi::Env env, Napi::Object obj);
   Napi::Object Parse(Napi::Env env, const std::string& str);
+  void Call(Napi::Env env, const std::string& str, const std::vector<std::string>& params);
 
   std::string trunc(const std::string& elm);
 }
