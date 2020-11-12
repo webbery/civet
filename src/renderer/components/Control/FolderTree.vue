@@ -1,5 +1,5 @@
 <template>
-  <div class="tree">
+  <div class="tree" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
     <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu" tag="tree"></PopMenu>
     <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)">
       <!-- {{item}} -->
@@ -118,5 +118,7 @@ export default {
 .img-name:active {
   background-color: dodgerblue;
 }
-
+.tree {
+  display: inline-block;
+}
 </style>

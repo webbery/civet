@@ -276,9 +276,12 @@ namespace caxios {
       for (unsigned int i = 0; i < arr.Length(); i++) {
         vFilesID[i] = AttrAsUint32(arr, i);
       }
-      g_pCaxios->RemoveFiles(vFilesID);
+      if (g_pCaxios->RemoveFiles(vFilesID)) {
+        T_LOG("Remove files finish");
+        return Napi::Boolean::From(info.Env(), true);
+      }
     }
-    return Napi::Value();
+    return Napi::Boolean::From(info.Env(), false);
   }
   Napi::Value removeTags(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {

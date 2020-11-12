@@ -20,12 +20,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
-        cd caxios
-        npm install
-        node-gyp configure
-        node-gyp build
-      env:
-        CI: true
+          cd caxios
+          npm install
+          node-gyp configure
+          node-gyp build
+        env:
+          CI: true
 
   test:
     needs: build
@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
-        run: |
+      - run: |
           cd caxios
           npm run test
         env:

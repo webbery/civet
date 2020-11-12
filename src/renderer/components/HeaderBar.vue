@@ -1,6 +1,7 @@
 <template>
   <el-row >
       <el-col :span="4">
+        <el-button @click="onClickConfig" type="text" size="mini" icon="el-icon-setting" circle></el-button>
         <el-dropdown>
           <el-button @click="onClickResource" size="mini" round>资源库<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown">
@@ -10,7 +11,6 @@
           </el-dropdown-menu>
         </el-dropdown>
         <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
-        <el-button @click="onClickConfig" size="mini" round>配置</el-button>
         </el-col>
     <el-col :span="5" class="custom">
       <el-page-header @back="goBack" :content="viewDesc"></el-page-header>

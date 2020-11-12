@@ -5,8 +5,8 @@
           <span >{{filename}}</span>
         </div>
         <JImage :src="imagepath" :interact="false"></JImage>
-        <div>
-          <span v-for="color of picture.desccolors" :key="color"><span class="main-color" :style="{'background-color': color}" ></span></span>
+        <div class="color-container">
+          <span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span>
         </div>
       </el-card>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
@@ -76,7 +76,7 @@ export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, width: 0, height: 0, size: 0, colors: [] },
+      picture: { id: null, width: 0, height: 0, size: 0, colors: ['#FF2277', '#179577', '#179577', '#179577', '#179577', '#179527'] },
       imagepath: '',
       dynamicTags: [],
       inputVisible: false,
@@ -261,14 +261,16 @@ img{
   width: 100%;
   height: 250px;
 }
-/* .preview{
-  object-fit: scale-down;
-} */
+.color-container{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .main-color{
   width: 20px;
   height: 35px;
   margin: 1px 3px 1px 3px;
-  border-radius: 8px;
+  border-radius: 3px;
   display: inline-block;
 }
 .image-name{

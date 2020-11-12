@@ -1,6 +1,8 @@
 'use strict'
 
 import { app, BrowserWindow, Menu, ipcMain } from 'electron'
+import { CivetConfig } from '../public/CivetConfig'
+
 // import '../renderer/store'
 // const cpus = require('os').cpus().length
 /**
@@ -48,7 +50,8 @@ function createRendererWindow() {
     return true
   }
   mainWindow.on('close', () => {
-    console.info('---------close------------')
+    const cfg = new CivetConfig()
+    cfg.save()
     workerWindow.close()
     // mainWindow.close()
   })
@@ -75,17 +78,17 @@ function createWorkerWindow (bFirst) {
   workerWindow.on('closed', () => {
     console.log('background window closed')
   })
-  let workerURL;
-  if (bFirst) {
-    workerURL = process.env.NODE_ENV === 'development'
-      ? `guider.html`
-      : `file://${__dirname}/guider.html`
-  } else {
-    workerURL = process.env.NODE_ENV === 'development'
-      // ? `http://localhost:9081`
-      ? `worker.html`
-      : `file://${__dirname}/worker.html`
-  }
+  let workerURL
+  // if (bFirst) {
+  //   workerURL = process.env.NODE_ENV === 'development'
+  //     ? `guider.html`
+  //     : `file://${__dirname}/guider.html`
+  // } else {
+  workerURL = process.env.NODE_ENV === 'development'
+    // ? `http://localhost:9081`
+    ? `worker.html`
+    : `file://${__dirname}/worker.html`
+  // }
   if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
   else workerWindow.loadURL(workerURL)
   if (process.env.NODE_ENV === 'development') {
@@ -164,7 +167,6 @@ function sendWindowMessage(targetWindow, message, payload) {
 
 app.on('ready', async () => {
   // 检查配置数据是否存在
-  const CivetConfig = require('../public/CivetConfig').CivetConfig
   const cfg = new CivetConfig()
   if (cfg.isFirstTime()) {
     // 进入第一次配置页面

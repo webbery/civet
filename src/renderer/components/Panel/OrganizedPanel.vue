@@ -9,13 +9,8 @@
             <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{headOptions[2].value}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
           </table>
-          <!-- <el-row type="flex">
-          <el-col :span="22"><fieldset class="hor-line"><legend class="inner">分类</legend></fieldset></el-col>
-          <el-col :span="2"><button class="noselection" @click="onAddFolder()">+</button></el-col>
-          </el-row> -->
           <TreePanel>
             <FolderTree :data="category"></FolderTree>
-            <IconFolder icon="el-icon-folder" enableInput="true" v-if="newFolder" v-on:editFinish="editFinish" :label="newCategoryName"></IconFolder>
           </TreePanel>
         </el-scrollbar>
       </el-tab-pane>
@@ -199,10 +194,6 @@ export default {
     onAddFolder() {
       // 添加一个分类文件夹
       this.newFolder = true
-    },
-    editFinish() {
-      this.newFolder = false
-      this.newCategoryName = ''
     }
   }
 }

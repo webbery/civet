@@ -9,6 +9,7 @@
 // import DatabasePage from './components/DatabasePage'
 import Splash from './components/Splash'
 import Guider from './components/Guider'
+import { CivetConfig } from '../public/CivetConfig'
 
 export default {
   name: 'dbpage',
@@ -17,6 +18,7 @@ export default {
   },
   data() {
     const config = new CivetConfig()
+    console.info('isFist:', config.isFirstTime())
     return {
       isFirst: config.isFirstTime()
     }

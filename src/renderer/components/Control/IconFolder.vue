@@ -43,7 +43,7 @@ export default {
     },
     onSave() {
       this.enableInput = false
-      this.$emit('editFinish')
+      this.$emit('onblur')
       if (this.folderName.trim() === '') return
       console.info('chain:', this.parent)
       this.$ipcRenderer.send(Service.ADD_CATEGORY, this.folderName, this.parent)

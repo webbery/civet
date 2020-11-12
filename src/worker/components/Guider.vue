@@ -1,8 +1,8 @@
 <template>
-    <div>Guider</div>
+  <div>Guider</div>
 </template>
 <script>
 export default {
-    name: 'Guider'
+  name: 'Guider'
 }
 </script>

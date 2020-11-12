@@ -2,20 +2,18 @@ import JString from '../public/String'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
-// import { CivetConfig } from '../public/CivetConfig'
-import { CivetConfig } from '../public/CivetConfig'
 import Kernel from '../public/Kernel'
 import 'element-theme-dark'
+import Vue from 'vue'
+import App from './App'
 
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
 
 // ready()
-const Vue = (resolve) => { return import('vue') }
-const App = (resolve) => { return import('./App') }
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
-Vue.use(ElementUI)
+// Vue.use(ElementUI)
 Vue.prototype.$ipcRenderer = ipcRenderer
 
 /* splash */
@@ -127,11 +125,6 @@ function readDir(path) {
       readImages(JString.joinPath(path, item))
     }
   })
-}
-
-function ready() {
-  ipcRenderer.send('ready')
-  // GPUTest()
 }
 
 function reply2Renderer(type, value) {

@@ -22,7 +22,7 @@ let cfg = {
       }
   ]
 }
-describe('civetkern read-write test', function() {
+describe('civetkern add test', function() {
   before(function() {
     assert(instance.init(cfg) === true)
   })
@@ -54,11 +54,19 @@ describe('civetkern read-write test', function() {
     let snaps = instance.getFilesSnap(-1)
     assert(snaps.length !== 0)
   })
-  it('set tags success', function() {})
-  it('find files success', function() {})
-  it('remove files success', function() {
-    const result = instance.removeFiles(fileids)
-    assert(result === true)
+  it('get untag files', function() {
+    let untags = instance.getUnTagFiles()
+    assert(untags.length === 1)
+  })
+  it('set file tag', function() {
+    assert(instance.setTags(fileids, ['test']) === true)
+  })
+  it('get untag files again', function() {
+    let untags = instance.getUnTagFiles()
+    assert(untags.length === 0)
+  })
+  it('find files success', function() {
+    let result = instance.findFiles({tag: 'test'})
   })
   after(function() {
     instance.release()
@@ -72,13 +80,27 @@ describe('civetkern read only test', function() {
   let snaps = null
   it('get file snaps success', function() {
     snaps = instance.getFilesSnap(-1)
-    assert(snaps.length !== 0)
+    assert(snaps.length === 1)
   })
   it('get files info success', function() {
     let filesInfo = instance.getFilesInfo([snaps[0].id])
-    assert(filesInfo.length !== 0)
+    assert(filesInfo.length === 1)
   })
   it('find files success', function() {})
+  after(function() {
+    instance.release()
+  })
+})
+
+describe('civetkern clean test', function() {
+  before(function() {
+    assert(instance.init(cfg) === true)
+  })
+  it('remove files success', function() {
+    let snaps = instance.getFilesSnap(-1)
+    const result = instance.removeFiles([snaps[0].id])
+    assert(result === true)
+  })
   after(function() {
     instance.release()
   })

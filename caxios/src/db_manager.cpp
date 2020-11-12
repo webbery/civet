@@ -389,6 +389,7 @@ namespace caxios {
       T_LOG("GET TABLE_FILE_META Fail %d", fileID);
       return false;
     }
+    T_LOG("meta len: %d", len);
     std::string info((char*)pData, len);
     json meta = json::parse(info);
     // meta

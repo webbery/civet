@@ -206,27 +206,13 @@ namespace caxios {
 
   void Call(Napi::Env env, const std::string& func, const std::vector<std::string>& params)
   {
-    napi_value global, add_two, arg;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) return;
-    status = napi_get_named_property(env, global, func.c_str(), &add_two);
-    if (status != napi_ok) return;
-
-    // const arg = 1337
-    status = napi_create_int32(env, 1337, &arg);
-    if (status != napi_ok) return;
-
-    napi_value* argv = &arg;
-    size_t argc = 1;
-
-    // AddTwo(arg);
-    napi_value return_val;
-    status = napi_call_function(env, global, add_two, argc, argv, &return_val);
-    if (status != napi_ok) return;
-
-    // Convert the result back to a native type
-    int32_t result;
-    status = napi_get_value_int32(env, return_val, &result);
-    if (status != napi_ok) return;
+    auto global = env.Global();
+    auto function = global.Get(func);
+    std::vector<napi_value> vArgs;
+    for (const std::string& arg : params) {
+      Napi::String v = Napi::String::New(env, arg.c_str());
+      vArgs.emplace_back(v);
+    }
+    auto result = function.As<Napi::Function>().Call(vArgs);
   }
 }

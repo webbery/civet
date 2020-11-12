@@ -85,6 +85,7 @@ export class CivetConfig {
   }
 
   save() {
+    this.config.app.first = false
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }
 }

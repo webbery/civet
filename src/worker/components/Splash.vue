@@ -1,8 +1,8 @@
 <template>
-    <div>Splash</div>
+  <div>civet启动!</div>
 </template>
 <script>
 export default {
-    name: 'Splash'
+  name: 'Splash'
 }
 </script>
