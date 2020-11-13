@@ -7,7 +7,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, macos-latest]
 
     strategy:
       matrix:
@@ -15,8 +15,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
       - name: build
-        uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
         run: |
@@ -29,11 +29,11 @@ jobs:
 
   test:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
       - name: test
-        uses: actions/setup-node@v1
         with:
           node-version: 12
         run: |
