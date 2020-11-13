@@ -36,7 +36,7 @@ namespace caxios {
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
       std::string meta;
-      if (flag == 0) { // ��дģʽ
+      if (flag == 0) { //
         meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
       }
       g_pCaxios = new CAxios(path, flag, meta);
@@ -114,7 +114,7 @@ namespace caxios {
           ForeachObject(item, [&](const std::string& k, Napi::Value v) {
             if (mMetaProccess.find(k) != mMetaProccess.end()) mMetaProccess[k](v);
             else {
-              std::cout << "Key [" << k << "] callback not exist.\n";
+              T_LOG("Key [%s] callback not exist", k.c_str());
             }
           });
           vFiles.emplace_back(std::make_tuple(fileID, metaItems,keywords));
@@ -132,8 +132,9 @@ namespace caxios {
 
   Napi::Value setTags(const Napi::CallbackInfo& info) {
     if (g_pCaxios == nullptr) return Napi::Boolean::From(info.Env(), false);
-    auto ids = info[0].As<Napi::Array>();
-    auto tags = info[1].As<Napi::Array>();
+    auto obj = info[0].As<Napi::Object>();
+    auto ids = AttrAsArray(obj, "id");
+    auto tags = AttrAsArray(obj, "tag");
     std::vector<FileID> vFileID = ArrayAsUint32Vector(ids);
     std::vector<std::string> vTags = ArrayAsStringVector(tags);
     if (!g_pCaxios->SetTags(vFileID, vTags)) {
@@ -143,14 +144,26 @@ namespace caxios {
   }
   Napi::Value addClasses(const Napi::CallbackInfo& info) {
     if (g_pCaxios == nullptr) return Napi::Boolean::From(info.Env(), false);
-    auto classesName = info[0].As<Napi::Array>();
-    auto filesID = info[1].As<Napi::Array>();
-    std::vector<FileID> vFileID = ArrayAsUint32Vector(filesID);
-    std::vector<std::string> vClasses = ArrayAsStringVector(classesName);
-    if (!g_pCaxios->AddClasses(vClasses, vFileID)) {
-      return Napi::Boolean::From(info.Env(), false);
+    if (info[0].IsArray()) {
+      auto classesName = info[0].As<Napi::Array>();
+      std::vector<std::string> vClasses = ArrayAsStringVector(classesName);
+      if (!g_pCaxios->AddClasses(vClasses)) {
+        return Napi::Boolean::From(info.Env(), false);
+      }
+      return Napi::Boolean::From(info.Env(), true);
     }
-    return Napi::Boolean::From(info.Env(), true);
+    else if (info[0].IsObject()) {
+      auto obj = info[0].As<Napi::Object>();
+      auto ids = AttrAsArray(obj, "id");
+      auto clsNames = AttrAsArray(obj, "class");
+      std::vector<FileID> vFileID = ArrayAsUint32Vector(ids);
+      std::vector<std::string> vClasses = ArrayAsStringVector(clsNames);
+      if (!g_pCaxios->AddClasses(vClasses, vFileID)) {
+        return Napi::Boolean::From(info.Env(), false);
+      }
+      return Napi::Boolean::From(info.Env(), true);
+    }
+    return Napi::Boolean::From(info.Env(), false);
   }
   // void addAnotation(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   // void addKeyword(const v8::FunctionCallbackInfo<v8::Value>& info) {}
@@ -266,6 +279,17 @@ namespace caxios {
     return Napi::Value();
   }
   Napi::Value getTagsOfFiles(const Napi::CallbackInfo& info) {
+    T_LOG("get tag");
+    if (g_pCaxios) {
+      Napi::Object obj = info[0].As<Napi::Object>();
+      auto aFilesID = AttrAsArray(obj, "id");
+      std::vector<FileID> vFilesID = ArrayAsUint32Vector(aFilesID);
+      std::vector<Tags> vTags;
+      T_LOG("get tag 2");
+      g_pCaxios->GetTagsOfFiles(vFilesID, vTags);
+      Napi::Array array = Napi::Array::New(info.Env(), vTags.size());
+      return array;
+    }
     return Napi::Value();
   }
 
@@ -285,11 +309,15 @@ namespace caxios {
   }
   Napi::Value removeTags(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {
+      return Napi::Boolean::From(info.Env(), true);
     }
-      return Napi::Value();
+    return Napi::Boolean::From(info.Env(), false);
   }
   Napi::Value removeClasses(const Napi::CallbackInfo& info) {
-    return Napi::Value();
+    if (g_pCaxios) {
+      return Napi::Boolean::From(info.Env(), true);
+    }
+    return Napi::Boolean::From(info.Env(), false);
   }
 
   Napi::Value searchFiles(const Napi::CallbackInfo& info) {
@@ -325,12 +353,12 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(release);
   EXPORT_JS_FUNCTION_PARAM(generateFilesID);
   EXPORT_JS_FUNCTION_PARAM(addFiles);
-  EXPORT_JS_FUNCTION_PARAM(setTags);
+  EXPORT_JS_FUNCTION_PARAM(setTags);            // 否决的
   EXPORT_JS_FUNCTION_PARAM(addClasses);
   EXPORT_JS_FUNCTION_PARAM(updateFile);
-  EXPORT_JS_FUNCTION_PARAM(updateFileKeywords);
-  EXPORT_JS_FUNCTION_PARAM(updateFileTags);
-  EXPORT_JS_FUNCTION_PARAM(updateFileClass);
+  EXPORT_JS_FUNCTION_PARAM(updateFileKeywords); // 否决的
+  EXPORT_JS_FUNCTION_PARAM(updateFileTags);     // 否决的
+  EXPORT_JS_FUNCTION_PARAM(updateFileClass);    // 否决的
   EXPORT_JS_FUNCTION_PARAM(updateClassName);
   EXPORT_JS_FUNCTION_PARAM(getFilesInfo);
   EXPORT_JS_FUNCTION_PARAM(getFilesSnap);

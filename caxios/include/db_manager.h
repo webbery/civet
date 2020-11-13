@@ -16,6 +16,7 @@ namespace caxios {
 
     std::vector<FileID> GenerateNextFilesID(int cnt = 1);
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>&);
+    bool AddClasses(const std::vector<std::string>& classes);
     bool AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
     bool RemoveFiles(const std::vector<FileID>& filesID);
     bool SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags);
@@ -23,6 +24,7 @@ namespace caxios {
     bool GetFilesSnap(std::vector< Snap >& snaps);
     bool GetUntagFiles(std::vector<FileID>& filesID);
     bool GetUnClassifyFiles(std::vector<FileID>& filesID);
+    bool GetTagsOfFiles(const std::vector<FileID>& filesID, std::vector<Tags>& tags);
     bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);
 
   private:

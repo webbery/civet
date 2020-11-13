@@ -15,11 +15,13 @@ namespace caxios{
     std::vector<FileID> GenNextFilesID(int cnt = 1);
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files);
     bool AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
+    bool AddClasses(const std::vector<std::string>& classes);
     bool SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags);
     bool GetFilesSnap(std::vector<Snap>& snaps);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetUntagFiles(std::vector<FileID>& filesID);
     bool GetUnclassifyFiles(std::vector<FileID>& filesID);
+    bool GetTagsOfFiles(const std::vector<FileID>& filesID, std::vector<Tags>& tags);
     bool RemoveFiles(const std::vector<FileID>& files);
 
     bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);

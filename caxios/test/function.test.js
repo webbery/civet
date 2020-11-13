@@ -59,11 +59,31 @@ describe('civetkern add test', function() {
     assert(untags.length === 1)
   })
   it('set file tag', function() {
-    assert(instance.setTags(fileids, ['test']) === true)
+    assert(instance.setTags({id: fileids, tag: ['test']}) === true)
   })
   it('get untag files again', function() {
     let untags = instance.getUnTagFiles()
-    assert(untags.length === 0)
+    expect(untags).to.have.lengthOf(0)
+  })
+  it('add class', function() {
+    let result = instance.addClasses(['class1', 'class2'])
+    expect(result).to.equal(true)
+  })
+  it('add files to class', function() {
+    let result = instance.addClasses({id: [fileids[0]], class: ['type1', 'type2']})
+    expect(result).to.equal(true)
+  })
+  it('update file meta info', function() {
+    instance.updateFile({id: [fileids[0]], filename: '测试'})
+  })
+  it('update files tags', function() {
+    instance.updateFileTags({id: [fileids[0]], tag: ['newTag']})
+  })
+  it('update files class', function() {
+    instance.updateFileClass({id: [fileids[0]], class: ['newClass']})
+  })
+  it('update class name', function() {
+    instance.updateClassName('newClass', '新分类')
   })
   it('find files success', function() {
     let result = instance.findFiles({tag: 'test'})
@@ -86,7 +106,23 @@ describe('civetkern read only test', function() {
     let filesInfo = instance.getFilesInfo([snaps[0].id])
     assert(filesInfo.length === 1)
   })
-  it('find files success', function() {})
+  it('get all tags', function() {
+    instance.getAllTags()
+  })
+  it('get all classes', function() {
+    instance.getAllClasses()
+  })
+  it('get file tags', function() {
+    let result = instance.getTagsOfFiles({id: [snaps[0].id]})
+    expect(result).to.lengthOf(1)
+  })
+  it('find files success', function() {
+    instance.findFiles({tag: 'test'})
+    // instance.findFiles({size: {$gt: 10240, $lt: 21000}})
+  })
+  it('search files', function() {
+    instance.searchFiles('分类')
+  })
   after(function() {
     instance.release()
   })
@@ -96,8 +132,19 @@ describe('civetkern clean test', function() {
   before(function() {
     assert(instance.init(cfg) === true)
   })
+  let snaps = null
+  it('remove file class', function() {
+    snaps = instance.getFilesSnap(-1)
+    assert(snaps.length === 1)
+    instance.removeClasses({id: [snaps[0].id], class: ['新分类']})
+  })
+  it('remove classes', function() {
+    instance.removeClasses(['新分类'])
+  })
+  it('remove file tags', function() {
+    instance.removeTags({id: [snaps[0].id], tag: ['test']})
+  })
   it('remove files success', function() {
-    let snaps = instance.getFilesSnap(-1)
     const result = instance.removeFiles([snaps[0].id])
     assert(result === true)
   })

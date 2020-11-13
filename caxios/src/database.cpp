@@ -24,19 +24,17 @@ namespace caxios {
 #if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
     if (access(dir.c_str(), 0) == 0) return;
 #elif defined(WIN32)
-    std::cout << dir << std::endl;
     if (_access(dir.c_str(), 0) == 0) return;
 #endif
     size_t pos = dir.rfind(LIN_DELIMITER);
-    std::cout << pos << std::endl;
     if (pos == std::string::npos) {
       pos = dir.rfind(WIN_DELIMITER);
       if (pos == std::string::npos) return;
     }
     std::string parentDir = dir.substr(0, pos);
-    std::cout << "parentDir:"<<parentDir << std::endl;
+    //std::cout << "parentDir:"<<parentDir << std::endl;
     createDirectories(parentDir);
-    std::cout << "Create:" << parentDir << std::endl;
+    //std::cout << "Create:" << parentDir << std::endl;
     mkdir(parentDir.c_str());
   }
 

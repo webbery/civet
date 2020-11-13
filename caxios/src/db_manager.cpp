@@ -143,6 +143,11 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::AddClasses(const std::vector<std::string>& classes)
+  {
+    return true;
+  }
+
   bool DBManager::RemoveFiles(const std::vector<FileID>& filesID)
   {
     WRITE_BEGIN();
@@ -184,6 +189,7 @@ namespace caxios {
       using namespace nlohmann;
       json jSnap = json::parse(snap);
       int step = atoi(jSnap["step"].dump().c_str());
+      T_LOG("Step: %d", step);
       if(step & (1 << 1)) continue;
       step |= (1 << 1);
       jSnap["step"] = std::to_string(step);
@@ -250,7 +256,10 @@ namespace caxios {
       T_LOG("GetFilesSnap: %s", js.c_str());
       try {
         std::string display = trunc(to_string(file["value"]));
-        int step = atoi(file["step"].dump().c_str());
+        std::string val = trunc(file["step"].dump());
+        T_LOG("File step: %s", val.c_str());
+        int step = std::stoi(val);
+        T_LOG("File step: %d, %s", step, val.c_str());
         Snap snap{ k, display, step };
         snaps.emplace_back(snap);
       }catch(json::exception& e){
@@ -268,6 +277,7 @@ namespace caxios {
     if (!GetFilesSnap(vSnaps)) return false;
     for (auto& snap : vSnaps) {
       char bits = std::get<2>(snap);
+      T_LOG("Step Bit: %d", bits);
       if (!(bits &= BIT_TAG)) {
         filesID.emplace_back(std::get<0>(snap));
       }
@@ -284,6 +294,16 @@ namespace caxios {
       if (!(bits &= BIT_CLASS)) {
         filesID.emplace_back(std::get<0>(snap));
       }
+    }
+    return true;
+  }
+
+  bool DBManager::GetTagsOfFiles(const std::vector<FileID>& filesID, std::vector<Tags>& vTags)
+  {
+    for (auto fileID : filesID) {
+      Tags tags;
+      GetFileTags(fileID, tags);
+      vTags.emplace_back(tags);
     }
     return true;
   }
@@ -421,6 +441,7 @@ namespace caxios {
     WordIndex* pWordIndx = (WordIndex*)pData;
     size_t cnt = len / sizeof(WordIndex);
     tags = GetWordByIndex(pWordIndx, cnt);
+    T_LOG("File Tags: %d", tags.size());
     return true;
   }
 

@@ -30,6 +30,11 @@ namespace caxios {
     return m_pDBManager->AddClasses(classes, filesID);
   }
 
+  bool CAxios::AddClasses(const std::vector<std::string>& classes)
+  {
+    return m_pDBManager->AddClasses(classes);
+  }
+
   bool CAxios::SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags)
   {
     return m_pDBManager->SetTags(filesID, tags);
@@ -53,6 +58,11 @@ namespace caxios {
   bool CAxios::GetUnclassifyFiles(std::vector<FileID>& filesID)
   {
     return m_pDBManager->GetUnClassifyFiles(filesID);
+  }
+
+  bool CAxios::GetTagsOfFiles(const std::vector<FileID>& filesID, std::vector<Tags>& tags)
+  {
+    return m_pDBManager->GetTagsOfFiles(filesID, tags);
   }
 
   bool CAxios::RemoveFiles(const std::vector<FileID>& files)
