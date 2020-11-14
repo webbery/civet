@@ -122,7 +122,7 @@ namespace caxios {
     std::vector<WordIndex> vIndexes;
     std::for_each(mIndexes.begin(), mIndexes.end(), [this, &vIndexes, &filesID](auto item) {
       vIndexes.emplace_back(item.second);
-      AddFileID2Class(filesID, item.second);
+      this->AddFileID2Class(filesID, item.second);
     });
     for (auto fileID : filesID) {
       void* pData = nullptr;
@@ -194,7 +194,7 @@ namespace caxios {
       step |= (1 << 1);
       jSnap["step"] = std::to_string(step);
       snap = jSnap.dump();
-      m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileID, snap.data(), snap.size());
+      m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileID, (void*)snap.data(), snap.size());
     }
     WRITE_END();
     return true;
@@ -477,7 +477,7 @@ namespace caxios {
     step |= (1 >> offset);
     jSnap["step"] = step;
     std::string snap = jSnap.dump();
-    m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileID, snap.data(), snap.size());
+    m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileID, (void*)snap.data(), snap.size());
   }
 
   char DBManager::GetSnapStep(FileID fileID, nlohmann::json& jSnap)

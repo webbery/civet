@@ -1,6 +1,6 @@
 #include "database.h"
 #include <iostream>
-#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
 #include <sys/types.h>
 #include <sys/stat.h>
 #elif defined(WIN32)
@@ -35,7 +35,11 @@ namespace caxios {
     //std::cout << "parentDir:"<<parentDir << std::endl;
     createDirectories(parentDir);
     //std::cout << "Create:" << parentDir << std::endl;
-    mkdir(parentDir.c_str());
+    mkdir(parentDir.c_str()
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+      ,0777
+#endif
+    );
   }
 
   CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
