@@ -186,6 +186,11 @@ export default {
         }
       }
     },
+    onDeleteItem(name, parent, fileid) {
+      this.onRemoveFiles([fileid])
+      bus.emit(Service.EVENT_REMOVE_ITEM, [fileid])
+      this.$ipcRenderer.send(Service.REMOVE_FILES, [fileid])
+    },
     getImage(image) {
       console.info('getImage:', image)
       return ImgTool.getSrc(image)

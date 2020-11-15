@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [12.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -22,8 +22,6 @@ jobs:
           npm install
           node-gyp configure
           node-gyp build
-        env:
-          CI: true
 
   test:
     needs: build
@@ -35,5 +33,3 @@ jobs:
         run: |
           cd caxios
           npm run test
-        env:
-          CI: true

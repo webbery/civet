@@ -3,9 +3,10 @@ import Storage from '../public/Kernel'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
-// import CV from '../public/CV'
+import CV from '../public/ImageProcess'
 import fs from 'fs'
 import { imageHash } from 'image-hash'
+import sharp from 'sharp'
 import util from 'util'
 // import WorkerPool from './WorkerPool/WorkerPool'
 
@@ -74,7 +75,7 @@ class ImageMetaParser extends ImageParseBase {
     const buffer = fs.readFileSync(fullpath)
     const hashValue = await pHash({ext: 'image/jpeg', data: buffer}, 16, true)
     console.info('hash: ', hashValue)
-    image.addMeta('hash', this.getImageFormat(hashValue))
+    image.addMeta('hash', hashValue)
     // const liklyFiles = Storage.findFiles({hash: hashValue})
     // if (liklyFiles && liklyFiles.length > 0) {
     //   console.info('comparing ...')
@@ -98,19 +99,18 @@ class ImageMetaParser extends ImageParseBase {
       const thumbnail = this.getImageThumbnail(meta)
       image.addMeta('thumbnail', thumbnail)
     }
-    console.info('1', image)
     try {
       Storage.addFiles([image])
     } catch (err) {
       console.info('parse metadata error', err)
     }
-    let files = Storage.getFilesInfo([image.id])
-    console.info(files)
+    // let files = Storage.getFilesInfo([image.id])
+    // console.info(files)
 
     // image.stepCallback(undefined, image)
 
     if (this.next !== undefined) {
-      this.next.parse(image)
+      this.next.parse(image, buffer)
     }
   }
 
@@ -170,7 +170,7 @@ class ImageTextParser extends ImageParseBase {
     NLP.getNouns(fullpath)
   }
 
-  async parse(image) {
+  async parse(image, buffer) {
     const fullpath = image.path + '/' + image.filename
     // WorkerPool.addTask(this.task, fullpath)
     image.tag = NLP.getNouns(fullpath)
@@ -184,9 +184,9 @@ class ImageTextParser extends ImageParseBase {
     }
     // image.stepCallback(undefined, image)
 
-    // if (this.next !== undefined) {
-    //   this.next.parse(image)
-    // }
+    if (this.next !== undefined) {
+      this.next.parse(image, buffer)
+    }
   }
 }
 
@@ -196,10 +196,21 @@ class ImageColorParser extends ImageParseBase {
     this.step = 2
   }
 
-  async parse(image) {
+  async parse(image, buffer) {
     // image.stepFinishCB(image)
+    // console.info('buffer: ', buffer.length, buffer)
+    // const stream = require('stream')
+    // const bufferStream = new stream.Duplex()
+    // bufferStream.push(buffer)
+    // bufferStream.push(null)
+    // // bufferStream.end(buffer)
+    // const bufferize = sharp().clone().toBuffer()
+    // const pixel = bufferStream.pipe(bufferize)
+    const pixel = await sharp(buffer).jpeg({force: true}).raw().toBuffer({ resolveWithObject: true })
+    console.info(pixel)
+    CV.sumaryColors(pixel)
     image.color = [0xFF0000, 0x00FF00, 0x0000FF]
-    Storage.updateFile({id: image.id}, {color: image.color, step: 0b100})
+    // Storage.updateFile({id: image.id}, {color: image.color, step: 0b100})
 
     if (this.next !== undefined) {
       this.next.parse(image)

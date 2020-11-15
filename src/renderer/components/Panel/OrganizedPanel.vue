@@ -9,7 +9,7 @@
             <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{headOptions[2].value}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
           </table>
-          <TreePanel>
+          <TreePanel :isActive="true">
             <FolderTree :data="category"></FolderTree>
           </TreePanel>
         </el-scrollbar>

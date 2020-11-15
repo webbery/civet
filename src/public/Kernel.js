@@ -43,6 +43,7 @@ export default {
   removeFiles: (filesID) => { kernel.removeFiles(filesID) },
   updateFilesKeywords: (filesID, keywords) => {},
   setTags: (filesID, tags) => { return kernel.setTags(filesID, tags) },
+  removeTags: (filesID, tags) => { return kernel.removeTags(filesID, tags) },
   addClasses: (classes) => {},
   release: () => {
     kernel.release()

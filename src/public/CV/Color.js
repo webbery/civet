@@ -1,41 +1,52 @@
-class RGB {
-  constructor(R, G, B) {
-    this._r = R / 255.0
-    this._g = G / 255.0
-    this._b = B / 255.0
-    this._max = Math.max(this._r, this._g, this._b)
-    this._min = Math.min(this._r, this._g, this._b)
-  }
+import * as tf from '@tensorflow/tfjs-node'
 
-  hsv() {
-    const diff = this._max - this._min
-    if (diff === 0) this._h = 0
-    else if (this._max === this._r && this._g >= this._b) {
-      this._h = 60 * (this._g - this._b) / diff
-    } else if (this._max === this._r && this._g < this._b) {
-      this._h = 60 * (this._g - this._b) / diff + 360
-    } else if (this._max === this._g) {
-      this._h = 60 * (this._b - this._r) / diff + 120
-    } else if (this._max === this._b) {
-      this._h = 60 * (this._r - this._g) / diff + 240
-    }
-    if (this._max === 0) this._s = 0
-    else this._s = diff / this._max
-    this._v = this._max
-    return {H: this._h, S: this._s, V: this._v}
-  }
+function zeroFactorWithDiv(frac) {
+  const delta = frac.step(0)
+  const tmp = frac.add(tf.scalar(1).sub(delta))
+  return delta.div(tmp)
 }
 
-class HSV {
-  constructor(h, s, v) {}
+function equal21(val, color) {
+  const dC = val.sub(color)
+  return dC.step(0)
+}
 
-  rgb() {}
+function rgb2hsv(rgb, length) {
+  const shape = [length, 3]
+  const uiRGB = tf.tensor(rgb, shape)
+  const normalRGB = uiRGB.mul(1 / 255.0)
+  // console.info('222222222')
+  // normalRGB.print()
+  // uiRGB.print()
+  const [R, G, B] = tf.split(normalRGB, [1, 1, 1], 1)
+  // console.info('+++++++++++')
+  const maxVal = tf.maximum(tf.maximum(R, G), B)
+  const minVal = tf.minimum(tf.minimum(R, G), B)
+  const diff = maxVal.sub(minVal)
+  // H
+  const delta = zeroFactorWithDiv(diff)
+  const deltaR = equal21(maxVal, R)
+  const deltaG = equal21(maxVal, G)
+  const deltaB = equal21(maxVal, B)
+  const elm1 = G.sub(B).mul(delta).mul(deltaR)
+  const elm2 = B.sub(R).mul(delta).add(tf.scalar(2)).mul(deltaG)
+  const elm3 = R.sub(G).mul(delta).add(tf.scalar(4)).mul(deltaB)
+  const c = elm1.add(elm2).add(elm3).mul(diff.step(0))
+  const h = tf.scalar(60).mul(c).div(tf.scalar(360.0))
+  const H = tf.scalar(1.0).sub(h)
+  // console.info('HHHHHHHHHHHHHH')
+  // H.print()
+  // S
+  const factor = zeroFactorWithDiv(maxVal)
+  const S = diff.mul(factor)
+  // V
+  const V = maxVal
+  return [H, S, V]
 }
 
 export default {
-  hsv: (r, g, b) => {
-    const color = new RGB(r, g, b)
-    return color.HSV()
+  rgb2hsv: (rgb, length) => {
+    return rgb2hsv(rgb, length)
   },
   rgb: (h, s, v) => {}
 }

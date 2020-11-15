@@ -6,7 +6,8 @@
         </div>
         <JImage :src="imagepath" :interact="false"></JImage>
         <div class="color-container">
-          <span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span>
+          <span v-if="picture.colors.length!==0" ><span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span></span>
+          <span v-else icon="el-icon-loading"></span>
         </div>
       </el-card>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->

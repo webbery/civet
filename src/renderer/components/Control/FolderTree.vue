@@ -49,6 +49,9 @@ export default {
     data: Array,
     parent: String
   },
+  mounted() {
+    bus.on(bus.EVENT_REMOVE_ITEM, this.onRemoveItems)
+  },
   methods: {
     onExpand: function(idx) {
       // console.info(idx)
@@ -81,7 +84,7 @@ export default {
     },
     onDeleteItem: function (name, parent, index) {
       const item = this.data[index]
-      console.info(item)
+      console.info(index, item)
       // 判断是否是展开节点,如果是展开节点,先获取所有子节点及叶子节点,删除叶子节点,然后删除子节点
       if (!item.children || item.children.length === 0) {
         // 删除文件
@@ -91,6 +94,19 @@ export default {
         }
       }
       this.data.splice(index, 1)
+    },
+    onRemoveItems: function (filesID) {
+      console.info('onRemoveItems', filesID)
+      for (let idx = 0; idx < this.data.length; ++idx) {
+        for (let pos = 0; pos < filesID.length; ++pos) {
+          if (this.data[idx].id === filesID[pos]) {
+            this.data.splice(idx, 1)
+            filesID.splice(pos, 1)
+            if (filesID.length === 0) return
+            break
+          }
+        }
+      }
     },
     onChangeName: function (newName, parent, index) {
       console.info(this.selection, newName, parent, index)

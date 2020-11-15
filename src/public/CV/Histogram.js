@@ -1,46 +1,47 @@
-import Color from 'Color'
-import { imageHash } from 'image-hash'
+import Color from './Color'
+import * as tf from '@tensorflow/tfjs-node'
 
-const DEFAULT_SIDE = 4
-const DEDAULT_SQUARE = DEFAULT_SIDE * DEFAULT_SIDE
-const DEFAULT_BIN = DEDAULT_SQUARE * DEFAULT_SIDE
-class Histogram {
-  constructor(image, bin) {
-    this._table = {}
-    // 256*256*128 分成64pix/bin
-    const size = 256 * 256 * 128 / DEFAULT_BIN
-    this._hist = new Array(size)
-    this._hist.fill(0)
-    for (let idx = 0; idx < image.length; idx += 2) {
-      const r = image[idx]
-      const g = image[idx + 1]
-      const b = image[idx + 2]
-      const index = this.rgb2index(r, g, b)
-      this._hist[index] += 1
-    }
-  }
+const wide = tf.scalar(16, 'float32')
+const squard = wide.mul(wide)
+const bin = squard.mul(wide)
 
-  rgb2index(r, g, b) {
-    const hsv = Color.hsv(r, g, b)
-    const h = hsv.H / DEFAULT_SIDE
-    const s = hsv.S / DEFAULT_SIDE
-    const v = hsv.V / DEFAULT_SIDE
-    return parseInt(h) * 256 * 128 / DEDAULT_SQUARE + parseInt(s) * 256 / DEFAULT_SIDE + parseInt(v)
-  }
+function color2indx(pixel) {
+  const vr = pixel[0].div(wide)
+  const vg = pixel[1].div(wide)
+  const vb = pixel[2].div(wide)
+  const row = vg.mul(squard)
+  return vr.mul(bin).mul(squard).add(row).add(vb)
+}
 
-  index2rgb(index) {
-    const square = index * DEDAULT_SQUARE / (256 * 128)
-    const h = parseInt(square)
-    index -= h * square
-  }
-
-  // 保留最重要的9个颜色
-  simplify(cnt = 9) {}
+function indx2hsv(indices) {
+  const frac = bin.mul(squard)
+  const vv = indices.div(frac)
+  const h = vv.mul(wide)
+  console.info('HHHHHHHHH')
+  h.print()
+  indices = indices.sub(vv.mul(frac))
+  const vw = indices.div(squard)
+  const s = vw.mul(wide)
+  console.info('SSSSSSS')
+  s.print()
+  indices = indices.sub(vw.mul(squard))
+  const v = indices.mul(wide)
+  console.info('VVVVVVV')
+  s.print()
+  return [h.div(tf.scalar(180, 'float32')), s.div(tf.scalar(255, 'float32')), v.div(tf.scalar(255, 'float32'))]
 }
 
 export default {
   colorHistogram: (image) => {
-    const hist = new Histogram(imageHash)
-    hist.simplify()
+    let hsv = Color.rgb2hsv(image.data, image.info.width * image.info.height)
+    const indices = color2indx(hsv).reshape([-1])
+    const fAmounts = indices.floor()
+    const arr = fAmounts.arraySync()
+    const amounts = tf.tensor1d(arr, 'int32')
+    const counts = tf.oneHot(amounts, 4096).sum(0)
+    const result = tf.topk(counts, 20)
+    // result.values.print()
+    // result.indices.print()
+    hsv = indx2hsv(result.indices)
   }
 }

@@ -24,9 +24,14 @@ export default {
   name: 'TreePanel',
   data() {
     return {
-      isActive: false,
       newClass: false,
       newCategoryName: ''
+    }
+  },
+  props: {
+    isActive: {
+      type: Boolean,
+      default: false
     }
   },
   mounted() {},
