@@ -3,7 +3,7 @@ import Vue from 'vue'
 
 import App from './App'
 import router from './router'
-// import store from './store'
+import store from './store'
 import ElementUI from 'element-ui'
 // import 'element-ui/lib/theme-chalk/index.css'
 import 'element-theme-dark'
@@ -23,5 +23,6 @@ Vue.prototype.$kernel = Kernel
 new Vue({
   components: { App },
   router,
+  store,
   template: '<App/>'
 }).$mount('#app')

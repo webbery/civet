@@ -79,7 +79,6 @@
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^2.7.0",
-    "axios": "^0.18.0",
     "civetkern": "0.0.38",
     "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",
@@ -93,6 +92,7 @@
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.4.1",
+    "vuex": "^3.5.1",
     "workerpool": "^6.0.3"
   },
   "devDependencies": {
