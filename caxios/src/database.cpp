@@ -65,7 +65,7 @@ namespace caxios {
       return;
     }
     //open_flag |= MDB_NOTLS;
-    T_LOG("Open DB %s, flag: %d", dbpath.c_str(), m_flag);
+    T_LOG("Open DB %s, flag: %d, Mode: %s", dbpath.c_str(), m_flag, m_flag == MDB_RDONLY? "ReadOnly": "ReadWrite");
     if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), m_flag | MDB_NOTLS | MDB_NORDAHEAD | MDB_NOSUBDIR | MDB_NOLOCK, 0664)) {
       T_LOG("mdb_env_open fail: %s", err2str(rc).c_str());
     }

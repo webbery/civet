@@ -6,6 +6,7 @@
         "install": "prebuild-install || node-gyp rebuild",
         "prebuild": "prebuild --all --strip",
         "rebuild": "node-gyp rebuild --verbose",
+        "build": "node-gyp configure && node-gyp build",
         "test": "node_modules/.bin/mocha test/function.test.js"
     },
     "main": "index.js",

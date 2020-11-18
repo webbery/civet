@@ -29,6 +29,7 @@ namespace caxios {
     if (!info[1].IsUndefined()) {
       flag = info[1].As<Napi::Number>().Int32Value();
     }
+    init_log(flag);
     std::string defaultName = AttrAsStr(options, "/app/default");
     Napi::Object resource = FindObjectFromArray(options.Get("resources").As<Napi::Object>(), [&defaultName](Napi::Object obj)->bool {
       if (AttrAsStr(obj, "name") == defaultName) return true;
@@ -321,21 +322,29 @@ namespace caxios {
   }
 
   Napi::Value searchFiles(const Napi::CallbackInfo& info) {
+    if (g_pCaxios) {
+      auto str = Stringify(info.Env(), info[0].As<Napi::Object>());
+      nlohmann::json query = nlohmann::json::parse(str);
+      std::vector<FileInfo> vFiles;
+    }
     return Napi::Value();
   }
+  
   Napi::Value findFiles(const Napi::CallbackInfo& info) {
     if (g_pCaxios != nullptr) {
       if (!info[0].IsUndefined()) {
         auto str = Stringify(info.Env(), info[0].As<Napi::Object>());
         nlohmann::json query = nlohmann::json::parse(str);
         std::vector<FileInfo> vFiles;
-        if (g_pCaxios->FindFiles(query, vFiles)) return Napi::Boolean::From(info.Env(), true);
+        g_pCaxios->FindFiles(query, vFiles);
+        Napi::Env env = info.Env();
+        Napi::Array array = Napi::Array::New(env, vFilesID.size());
+        for (unsigned int i = 0; i < vFilesID.size(); ++i) {
+          array.Set(i, Napi::Value::From(env, vFilesID[i]));
+        }
+        return array;
       }
     }
-    return Napi::Boolean::From(info.Env(), false);
-  }
-
-  Napi::Value flushDisk(const Napi::CallbackInfo& info) {
     return Napi::Value();
   }
 
@@ -372,7 +381,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(removeClasses);
   EXPORT_JS_FUNCTION_PARAM(searchFiles);
   EXPORT_JS_FUNCTION_PARAM(findFiles);
-  EXPORT_JS_FUNCTION_PARAM(flushDisk);
   EXPORT_JS_FUNCTION_PARAM(writeLog);
   return exports;
 }

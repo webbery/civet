@@ -19,10 +19,8 @@ jobs:
       - name: build
         run: |
           cd caxios
-          whereis node-gyp
           npm install
-          node-gyp configure
-          node-gyp build
+          npm run build
 
   test:
     needs: build

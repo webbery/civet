@@ -4,17 +4,18 @@
 #include <ctime>
 #include <iostream>
 #include <thread>
-#if defined(_HAS_CXX17) && _HAS_CXX17
-#include <filesystem>
-namespace fs = std::filesystem;
-#else
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#endif  // _HAS_CXX17
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+#include <sys/types.h>
+#include <sys/stat.h>
+#elif defined(WIN32)
+#include <direct.h>
+#include <io.h>
+#endif
 #ifndef _WIN32
 #include <errno.h>
 #include <string.h> 
 #endif
+#include "util/util.h"
 
 namespace caxios {
   std::string err2str(int err) {
@@ -65,20 +66,32 @@ namespace caxios {
   class FLog {
   public:
     FLog(){
+    }
+    ~FLog(){
+      fclose(_file);
+    }
+
+    bool Open(bool flag) {
       std::string logname("civetkern_");
+      std::string mode("read");
+      if (flag == 0) mode = "write";
       int idx = 1;
       while (true) {
-        std::string filename = logname + std::to_string(idx) + ".log";
-        if (!fs::exists(filename)) {
+        std::string filename = logname + std::to_string(idx) + "_" + mode + ".log";
+        if (!caxios::exist(filename)) {
           logname = filename;
           break;
+        }
+        else {
+          struct stat statbuf;
+          stat(filename.c_str(), &statbuf);
+          if (statbuf.st_size < 1024 * 1024 * 1024) {
+            break;
+          }
         }
         idx += 1;
       }
       _file = fopen(logname.c_str(), "a+");
-    }
-    ~FLog(){
-      fclose(_file);
     }
 
     void Write(const std::string& log) {
@@ -86,6 +99,10 @@ namespace caxios {
       fflush(_file);
     }
 
+  private:
+    bool validateMaxSize() {
+      return false;
+    }
   private:
     FILE* _file = nullptr; 
   };
@@ -95,4 +112,7 @@ namespace caxios {
     s_log.Write(log);
   }
 
+  bool init_log(bool flag) {
+    return s_log.Open(flag);
+  }
 }

@@ -34,6 +34,7 @@ namespace caxios {
   std::string current();
   unsigned int threadid();
 
+  bool init_log(bool flag);
   void log2file(const std::string& log);
 }
 

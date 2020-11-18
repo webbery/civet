@@ -1,28 +1,24 @@
 #include "util.h"
 #include <iostream>
 #include "log.h"
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+#include <sys/types.h>
+#include <sys/stat.h>
+#elif defined(WIN32)
+#include <direct.h>
+#include <io.h>
+#endif
 
 namespace caxios {
   
-//   std::string ConvertToString(const v8::Local<v8::String>& value)
-//   {
-//     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-// #if V8_MAJOR_VERSION <= 5
-//     const int length = value->Utf8Length() + 1;
-// #else
-//     const int length = value->Utf8Length(isolate)+1;
-// #endif
-//     char* charFileName = new char[length];
-//     memset(charFileName, length, 0x00);
-// #if V8_MAJOR_VERSION <= 5
-//     (*value)->WriteUtf8(charFileName);
-// #else
-//     (*value)->WriteUtf8(isolate, charFileName);
-// #endif
-//     std::string str;
-//     str.assign(charFileName);
-//     return std::move(str);
-//   }
+  bool exist(const std::string& filepath) {
+#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+    if (access(dir.c_str(), 0) == 0) return true;
+#elif defined(WIN32)
+    if (_access(dir.c_str(), 0) == 0) return true;
+#endif
+    return false;
+  }
 
   bool HasAttr(Napi::Object obj, std::string attr)
   {

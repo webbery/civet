@@ -32,6 +32,8 @@ namespace caxios {
   void Call(Napi::Env env, const std::string& str, const std::vector<std::string>& params);
 
   std::string trunc(const std::string& elm);
+
+  bool exist(const std::string& filepath);
 }
 
 #endif

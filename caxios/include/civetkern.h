@@ -25,6 +25,7 @@ namespace caxios{
     bool RemoveFiles(const std::vector<FileID>& files);
 
     bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);
+    bool SearchFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);
 
   private:
     static void Release(void* data);
