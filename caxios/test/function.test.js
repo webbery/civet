@@ -52,7 +52,7 @@ describe('civetkern add test', function() {
   })
   it('get file snaps success', function() {
     let snaps = instance.getFilesSnap(-1)
-    assert(snaps.length !== 0)
+    assert(snaps.length === 1)
   })
   it('get untag files', function() {
     let untags = instance.getUnTagFiles()
@@ -80,7 +80,8 @@ describe('civetkern add test', function() {
     instance.updateFileTags({id: [fileids[0]], tag: ['newTag']})
   })
   it('update files class', function() {
-    instance.updateFileClass({id: [fileids[0]], class: ['newClass']})
+    let result = instance.updateFileClass({id: [fileids[0]], class: ['newClass']})
+    expect(result).to.equal(true)
   })
   it('update class name', function() {
     instance.updateClassName('newClass', '新分类')
@@ -107,10 +108,14 @@ describe('civetkern read only test', function() {
     assert(filesInfo.length === 1)
   })
   it('get all tags', function() {
-    instance.getAllTags()
+    const tags = instance.getAllTags()
+    expect(tags).to.include.keys('t')
+    //expect(tags).to.have.deep.property('t[0].name', 'test')
   })
   it('get all classes', function() {
-    instance.getAllClasses()
+    const allClasses = instance.getAllClasses()
+    console.info(allClasses)
+    expect(allClasses).to.lengthOf(5)
   })
   it('get file tags', function() {
     let result = instance.getTagsOfFiles({id: [snaps[0].id]})

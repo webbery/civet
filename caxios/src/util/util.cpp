@@ -13,9 +13,9 @@ namespace caxios {
   
   bool exist(const std::string& filepath) {
 #if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
-    if (access(dir.c_str(), 0) == 0) return true;
+    if (access(filepath.c_str(), 0) == 0) return true;
 #elif defined(WIN32)
-    if (_access(dir.c_str(), 0) == 0) return true;
+    if (_access(filepath.c_str(), 0) == 0) return true;
 #endif
     return false;
   }

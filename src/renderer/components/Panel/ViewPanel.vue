@@ -21,13 +21,13 @@
 </template>
 
 <script>
-import bus from './utils/Bus'
-import Service from './utils/Service'
-import JImage from './JImage'
-import FileBase from '@/../public/FileBase'
-import ImgTool from './utils/ImgTool'
+import bus from '../utils/Bus'
+import Service from '../utils/Service'
+import JImage from '../JImage'
+import ImgTool from '../utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
-import Global from './utils/Global'
+import Global from '../utils/Global'
+import { mapState } from 'vuex'
 
 export default {
   name: 'view-panel',
@@ -37,7 +37,7 @@ export default {
   data() {
     return {
       firstLoad: true,
-      imageList: [],
+      // imageList: [],
       lastSelections: {},
       enableInput: false,
       imageSelected: false,
@@ -50,27 +50,30 @@ export default {
   },
   async mounted() {
     console.info('mounted')
-    if (this.firstLoad === true) {
-      this.firstLoad = false
-      // bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
-      const snaps = this.$kernel.getFilesSnap(-1)
-      console.info('View Panel', snaps)
-      let imagesID = []
-      for (let snap of snaps) {
-        imagesID.push(snap.id)
-      }
-      const images = this.$kernel.getFilesInfo(imagesID)
-      let list = []
-      for (let image of images) {
-        list.push(new FileBase(image))
-        console.info(image)
-      }
-      this.imageList = list
-    }
-    bus.on(bus.EVENT_REMOVE_FILES, this.onRemoveFiles)
+    // if (this.firstLoad === true) {
+    //   this.firstLoad = false
+    // bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+    //   const snaps = this.$kernel.getFilesSnap(-1)
+    //   console.info('View Panel', snaps)
+    //   let imagesID = []
+    //   for (let snap of snaps) {
+    //     imagesID.push(snap.id)
+    //   }
+    //   const images = this.$kernel.getFilesInfo(imagesID)
+    //   let list = []
+    //   for (let image of images) {
+    //     list.push(new FileBase(image))
+    //     console.info(image)
+    //   }
+    //   this.imageList = list
+    // }
+    // bus.on(bus.EVENT_REMOVE_FILES, this.onRemoveFiles)
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
   },
+  computed: mapState({
+    imageList: (state) => state.Cache.viewItems
+  }),
   watch: {
     $route: function(to, from) {
       console.info('to: ', to, 'from:', from.path)
@@ -174,9 +177,9 @@ export default {
     },
     onUpdateImages(error, updateImages) {
       if (error) console.log(error)
-      for (let item of updateImages) {
-        this.imageList.push({id: item.id, filename: item.filename, path: item.path})
-      }
+      // for (let item of updateImages) {
+      //   this.imageList.push({id: item.id, filename: item.filename, path: item.path})
+      // }
     },
     onRemoveFiles(removeIDs) {
       for (let id of removeIDs) {

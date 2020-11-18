@@ -65,6 +65,21 @@ namespace caxios {
     return m_pDBManager->GetTagsOfFiles(filesID, tags);
   }
 
+  bool CAxios::GetAllClasses(Classes& classes)
+  {
+    return m_pDBManager->GetAllClasses(classes);
+  }
+
+  bool CAxios::GetAllTags(TagTable& tags)
+  {
+    return m_pDBManager->GetAllTags(tags);
+  }
+
+  bool CAxios::UpdateFilesClasses(const std::vector<FileID>& filesID, const std::vector<std::string>& classes)
+  {
+    return m_pDBManager->UpdateFilesClasses(filesID, classes);
+  }
+
   bool CAxios::RemoveFiles(const std::vector<FileID>& files)
   {
     return m_pDBManager->RemoveFiles(files);

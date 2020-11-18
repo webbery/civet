@@ -27,15 +27,15 @@ export default new Router({
     },
     {
       path: '/query',
-      component: require('@/components/ViewPanel').default
+      component: require('@/components/Panel/ViewPanel').default
     },
     {
       path: '/uncategory',
-      component: require('@/components/ViewPanel').default
+      component: require('@/components/Panel/ViewPanel').default
     },
     {
       path: '/',
-      component: require('@/components/ViewPanel').default
+      component: require('@/components/Panel/ViewPanel').default
     },
     {
       path: '*',

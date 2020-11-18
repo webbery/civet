@@ -26,8 +26,8 @@
         v-model="inputValue"
         ref="saveTagInput"
         size="small"
-        @keyup.enter.native="handleInputConfirm"
-        @blur="handleInputConfirm"
+        @keyup.enter.native="onTagConfirm"
+        @blur="onTagConfirm"
       ></el-input>
       <el-button v-else class="button-new-tag" size="mini" @click="showInput">添加标签</el-button>
     </fieldset>
@@ -180,12 +180,13 @@ export default {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
-    handleInputConfirm() {
+    onTagConfirm() {
+      if (!this.picture.id) return
       let inputValue = this.inputValue
       if (inputValue) {
         this.dynamicTags.push(inputValue)
         this.$ipcRenderer.send(Service.SET_TAG, {id: [this.picture.id], tag: this.dynamicTags})
-        this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
+        // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
       }
       this.inputVisible = false
       this.inputValue = ''

@@ -9,6 +9,7 @@
 #define TABLE_INDX_KEYWORD  "indx2keyword"
 #define TABLE_TAG           "tag"           // fileID -> tag
 #define TABLE_TAG2FILE      "tags"          // tag -> fileID
+#define TABLE_TAG_INDX      "tag_indx"      // alphabet -> tag indx
 #define TABLE_CLASS         "class"         // fileID -> class
 #define TABLE_CLASS2FILE    "classes"       // class -> fileID
 #define TABLE_COUNT         "count"         // about count of some statistic

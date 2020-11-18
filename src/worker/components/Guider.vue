@@ -13,7 +13,7 @@
 </template>
 <script>
 import { remote } from 'electron'
-import { CivetConfig } from '../public/CivetConfig'
+import { CivetConfig } from '../../public/CivetConfig'
 
 export default {
   name: 'Guider',

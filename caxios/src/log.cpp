@@ -76,8 +76,9 @@ namespace caxios {
       std::string mode("read");
       if (flag == 0) mode = "write";
       int idx = 1;
+      std::string filename;
       while (true) {
-        std::string filename = logname + std::to_string(idx) + "_" + mode + ".log";
+        filename = logname + std::to_string(idx) + "_" + mode + ".log";
         if (!caxios::exist(filename)) {
           logname = filename;
           break;
@@ -91,7 +92,7 @@ namespace caxios {
         }
         idx += 1;
       }
-      _file = fopen(logname.c_str(), "a+");
+      _file = fopen(filename.c_str(), "a+");
     }
 
     void Write(const std::string& log) {

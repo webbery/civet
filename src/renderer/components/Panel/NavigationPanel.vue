@@ -29,9 +29,10 @@ import Service from '@/components/utils/Service'
 import FolderTree from '@/components/Control/FolderTree'
 import IconFolder from '@/components/Control/IconFolder'
 import TreePanel from '@/components/Panel/TreePanel'
+import { mapState } from 'vuex'
 
 export default {
-  name: 'organized-panel',
+  name: 'navigation-panel',
   components: {
     FolderTree,
     IconFolder,
@@ -65,27 +66,24 @@ export default {
         }
       ],
       newFolder: false,
-      category: [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: dir/jpg, children: []}]
+      // category: [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: dir/jpg, children: []}]
       newCategoryName: ''
     }
   },
-  // computed: {
-  //   loadDirectory() {
-  //     console.info('computed：', this.$store.EventBus.importDirectory)
-  //     return this.$store.EventBus.importDirectory
-  //   },
-  //   categoryName() {
-  //     return this.$store.getters.classesName
-  //   },
-  //   category() {
-  //     console.info('classes', this.$store.getters.category)
-  //     return this.$store.getters.category
-  //   },
-  //   tags() {
-  //     console.info('1 comupted tags: ', this.$store.getters.tags)
-  //     return this.$store.getters.tags
-  //   }
-  // },
+  computed: mapState({
+    // loadDirectory() {
+    //   console.info('computed：', this.$store.EventBus.importDirectory)
+    //   return this.$store.EventBus.importDirectory
+    // },
+    // categoryName() {
+    //   return this.$store.getters.classesName
+    // },
+    category: state => state.Cache.classes
+    // tags() {
+    //   console.info('1 comupted tags: ', this.$store.getters.tags)
+    //   return this.$store.getters.tags
+    // }
+  }),
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
     bus.on(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, this.updateUncategoryImages)
@@ -104,10 +102,15 @@ export default {
       const untags = this.$kernel.getUnTagFiles()
       this.headOptions[2].value = untags.length
     },
+    updateUnclassifyFiles() {
+      const unclasses = this.$kernel.getUnClassifyFiles()
+      this.headOptions[1].value = unclasses.length
+    },
     updateDisplayImageList(error, appendFiles) {
       if (error) console.log(error)
       console.info('recieve from worker message:', appendFiles)
       this.updateUntagFiles()
+      this.updateUnclassifyFiles()
       // TODO: 可能更新频繁导致的卡顿
       const getCategory = function(categoryPath, children) {
         if (categoryPath.length === 0) return children
@@ -127,28 +130,28 @@ export default {
         return undefined
       }
 
-      for (let item of appendFiles) {
-        if (item.category === undefined || item.category.length === 0) {
-          this.category.push({label: item.filename, id: item.id, type: item.type})
-        } else {
-          for (let cate of item.category) {
-            const catePath = cate.split('/')
-            let location = getCategory(catePath, this.category)
-            if (location === undefined) { // 分类不存在
-              let children = []
-              let root = children
-              for (let c of catePath) {
-                children.push({label: c, type: 'clz', children: []})
-                children = children.children
-              }
-              children.push({label: item.filename, id: item.id, type: item.type})
-              this.category.children.push(root)
-            } else { // 找到了对应的分类
-              location.push({label: item.filename, id: item.id, type: item.type})
-            }
-          }
-        }
-      }
+      // for (let item of appendFiles) {
+      //   if (item.category === undefined || item.category.length === 0) {
+      //     this.category.push({label: item.filename, id: item.id, type: item.type})
+      //   } else {
+      //     for (let cate of item.category) {
+      //       const catePath = cate.split('/')
+      //       let location = getCategory(catePath, this.category)
+      //       if (location === undefined) { // 分类不存在
+      //         let children = []
+      //         let root = children
+      //         for (let c of catePath) {
+      //           children.push({label: c, type: 'clz', children: []})
+      //           children = children.children
+      //         }
+      //         children.push({label: item.filename, id: item.id, type: item.type})
+      //         this.category.children.push(root)
+      //       } else { // 找到了对应的分类
+      //         location.push({label: item.filename, id: item.id, type: item.type})
+      //       }
+      //     }
+      //   }
+      // }
     },
     init() {
       // this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)

@@ -6,6 +6,7 @@
         "src/lmdb/mdb.c",
         "src/lmdb/midl.c",
         "src/util/util.cpp",
+        "src/util/pinyin.cpp",
         "src/interface.cpp",
         "src/database.cpp",
         "src/db_manager.cpp",

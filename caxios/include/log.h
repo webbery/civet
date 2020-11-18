@@ -1,6 +1,7 @@
 #ifndef _CAXIOS_LOG_H_
 #define _CAXIOS_LOG_H_
 #include <string>
+#include <vector>
 
 #ifdef _DEBUG
 #define T_LOG(fmt, ...) \
@@ -33,6 +34,16 @@ namespace caxios {
   std::string get_file_name(const char* pathname);
   std::string current();
   unsigned int threadid();
+  template<typename T>
+  std::string format_vector(const std::vector<T>& vi) {
+    std::string str;
+    for (auto item : vi)
+    {
+      str += std::to_string(item);
+      str += ",";
+    }
+    return str;
+  }
 
   bool init_log(bool flag);
   void log2file(const std::string& log);

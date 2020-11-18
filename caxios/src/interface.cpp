@@ -15,6 +15,26 @@
 namespace caxios {
   CAxios* g_pCaxios = nullptr;
   
+  namespace {
+    Napi::Object FileInfo2Object(napi_env env, const FileInfo& info) {
+      Napi::Object obj = Napi::Object::New(env);
+      obj.Set("id", std::get<0>(info));
+      // meta
+      auto& metaInfo = std::get<1>(info);
+      int metaCnt = metaInfo.size();
+      Napi::Array meta = Napi::Array::New(env, metaCnt);
+      for (unsigned int idx = 0; idx < metaCnt; ++idx) {
+        Napi::Object prop = Napi::Object::New(env);
+        for (auto itr = metaInfo[idx].begin(); itr != metaInfo[idx].end(); ++itr) {
+          prop.Set(itr->first, itr->second);
+        }
+        meta.Set(idx, prop);
+      }
+      obj.Set("meta", meta);
+      return obj;
+    }
+  }
+
   Napi::Value release(const Napi::CallbackInfo& info){
     if (g_pCaxios) {
       delete g_pCaxios;
@@ -137,6 +157,7 @@ namespace caxios {
     auto ids = AttrAsArray(obj, "id");
     auto tags = AttrAsArray(obj, "tag");
     std::vector<FileID> vFileID = ArrayAsUint32Vector(ids);
+    T_LOG("start set tags, input ids: %s", format_vector(vFileID).c_str());
     std::vector<std::string> vTags = ArrayAsStringVector(tags);
     if (!g_pCaxios->SetTags(vFileID, vTags)) {
       return Napi::Boolean::From(info.Env(), false);
@@ -183,7 +204,12 @@ namespace caxios {
     return info.Env().Undefined();
   }
   Napi::Value updateFileClass(const Napi::CallbackInfo& info) {
-    return info.Env().Undefined();
+    if (!g_pCaxios) return Napi::Boolean::From(info.Env(), false);
+    auto sql = info[0].As<Napi::Object>();
+    auto filesID = AttrAsUint32Vector(sql, "id");
+    auto classes = AttrAsStringVector(sql, "class");
+
+    return Napi::Boolean::From(info.Env(), true);
   }
   Napi::Value updateClassName(const Napi::CallbackInfo& info) {
     return info.Env().Undefined();
@@ -202,21 +228,7 @@ namespace caxios {
         bool result = g_pCaxios->GetFilesInfo(filesID, filesInfo);
         Napi::Array array = Napi::Array::New(cbInfo.Env(), filesInfo.size());
         for (unsigned int i = 0; i < filesInfo.size(); ++i) {
-          Napi::Object obj = Napi::Object::New(cbInfo.Env());
-          auto& info = filesInfo[i];
-          obj.Set("id", std::get<0>(info));
-          // meta
-          auto& metaInfo = std::get<1>(info);
-          int metaCnt = metaInfo.size();
-          Napi::Array meta = Napi::Array::New(cbInfo.Env(), metaCnt);
-          for (unsigned int idx = 0; idx < metaCnt; ++idx) {
-            Napi::Object prop = Napi::Object::New(cbInfo.Env());
-            for (auto itr = metaInfo[idx].begin(); itr != metaInfo[idx].end(); ++itr) {
-              prop.Set(itr->first, itr->second);
-            }
-            meta.Set(idx, prop);
-          }
-          obj.Set("meta", meta);
+          Napi::Object obj = FileInfo2Object(cbInfo.Env(), filesInfo[i]);
           array.Set(i, obj);
         }
         return array;
@@ -242,18 +254,41 @@ namespace caxios {
   }
   Napi::Value getAllTags(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {
-#define TEST_CNT 2
-      Napi::Array array = Napi::Array::New(info.Env(), TEST_CNT);
-      for (unsigned int i = 0; i < TEST_CNT; ++i) {
-        array.Set(i, "test tag");
+      // return {A: [{locale: abaaba, name: tagname, files: [id1, id2, ...]}], ...}
+      TagTable vTags;
+      g_pCaxios->GetAllTags(vTags);
+      Napi::Object allTags = Napi::Object::New(info.Env());
+      for (auto& item : vTags) {
+        auto& tags = item.second;
+        Napi::Array arr = Napi::Array::New(info.Env(), tags.size());
+        for (unsigned int idx = 0; idx < tags.size(); ++idx) {
+          // {locale: abaaba, name: tagname, files: [id1, id2, ...]}
+          Napi::Object tag = Napi::Object::New(info.Env());
+          tag.Set("locale", std::get<0>(tags[idx]));
+          tag.Set("name", std::get<1>(tags[idx]));
+          auto& files = std::get<2>(tags[idx]);
+          Napi::Array filesID = Napi::Array::New(info.Env(), files.size());
+          for (size_t i = 0; i < files.size(); ++i) {
+            filesID.Set(i, files[i]);
+          }
+          tag.Set("files", filesID);
+          arr.Set(idx, tag);
+        }
+        allTags.Set(std::string(&item.first, 1), arr);
       }
+      return allTags;
     }
     return info.Env().Undefined();
   }
   Napi::Value getUnTagFiles(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {
       std::vector<FileID> vFilesID;
-      g_pCaxios->GetUntagFiles(vFilesID);
+      if (!g_pCaxios->GetUntagFiles(vFilesID)) {
+        T_LOG("get untag file fail");
+      }
+      else {
+        T_LOG("get untag file");
+      }
       Napi::Env env = info.Env();
       Napi::Array array = Napi::Array::New(env, vFilesID.size());
       for (unsigned int i = 0; i < vFilesID.size(); ++i) {
@@ -277,6 +312,16 @@ namespace caxios {
     return info.Env().Undefined();
   }
   Napi::Value getAllClasses(const Napi::CallbackInfo& info) {
+    if (g_pCaxios) {
+      Classes classes;
+      g_pCaxios->GetAllClasses(classes);
+      Napi::Env env = info.Env();
+      Napi::Array array = Napi::Array::New(env, classes.size());
+      for (unsigned int i = 0; i < classes.size(); ++i) {
+        array.Set(i, Napi::Value::From(env, classes[i]));
+      }
+      return array;
+    }
     return Napi::Value();
   }
   Napi::Value getTagsOfFiles(const Napi::CallbackInfo& info) {
@@ -338,9 +383,10 @@ namespace caxios {
         std::vector<FileInfo> vFiles;
         g_pCaxios->FindFiles(query, vFiles);
         Napi::Env env = info.Env();
-        Napi::Array array = Napi::Array::New(env, vFilesID.size());
-        for (unsigned int i = 0; i < vFilesID.size(); ++i) {
-          array.Set(i, Napi::Value::From(env, vFilesID[i]));
+        Napi::Array array = Napi::Array::New(env, vFiles.size());
+        for (unsigned int i = 0; i < vFiles.size(); ++i) {
+          Napi::Object obj = FileInfo2Object(env, vFiles[i]);
+          array.Set(i, Napi::Value::From(env, obj));
         }
         return array;
       }

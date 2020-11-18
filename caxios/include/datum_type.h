@@ -9,6 +9,7 @@ namespace caxios {
   typedef std::map<std::string, std::string > MetaItem;
   typedef std::vector<MetaItem> MetaItems;
   typedef std::vector<std::string> Tags;
+  typedef std::map<char, std::vector<std::tuple<std::string, std::string, std::vector<FileID> > > > TagTable;
   typedef std::vector<std::string> Classes;
   typedef std::vector<std::string> Annotations;
   typedef std::vector<std::string> Keywords;

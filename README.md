@@ -1,6 +1,6 @@
 # civet
 
-> 一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件
+> 一个咸鱼，闲得开发的一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件，虽然目前只支持图片管理，但是未来，将不止于图片管理。你能想到的，终将实现:kissing_heart:
 
 ![界面预览](https://raw.githubusercontent.com/webbery/civet/master/show.JPG)
 

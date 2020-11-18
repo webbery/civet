@@ -36,6 +36,7 @@ export default {
   getFilesInfo: (filesID) => { return kernel.getFilesInfo(filesID) },
   getUnTagFiles: () => { return kernel.getUnTagFiles() },
   getUnClassifyFiles: () => { return kernel.getUnClassifyFiles() },
+  getAllClasses: () => { return kernel.getAllClasses() },
   findFiles: (condition) => { return kernel.findFiles(condition) },
   // 以下接口为可写接口
   generateFilesID: (num) => { return kernel.generateFilesID(num) },

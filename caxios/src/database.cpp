@@ -194,6 +194,30 @@ namespace caxios {
     return true;
   }
 
+  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb)
+  {
+    MDB_cursor* cursor = nullptr;
+    int rc = 0;
+    this->Begin();
+    if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
+      T_LOG("mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
+      return false;
+    }
+
+    MDB_val key, datum = { 0 };
+    while ((rc = mdb_cursor_get(cursor, &key, &datum, MDB_NEXT)) == 0) {
+      //printf("key: %u, data: %d %s\n",
+      //  *(uint32_t*)(key.mv_data),
+      //  (int)datum.mv_size, (char*)datum.mv_data);
+      std::string sKey((char*)key.mv_data, key.mv_size);
+      if (cb(sKey, datum.mv_data, datum.mv_size)) {
+        break;
+      }
+    }
+    mdb_cursor_close(cursor);
+    return true;
+  }
+
   bool CDatabase::Del(MDB_dbi dbi, uint32_t k)
   {
     MDB_val key, datum = { 0 };
