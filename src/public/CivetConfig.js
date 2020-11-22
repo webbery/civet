@@ -1,12 +1,7 @@
 const fs = require('fs')
 export class CivetConfig {
   constructor() {
-    let app = null
-    if (process.type === 'browser') {
-      app = require('electron').app
-    } else {
-      app = require('electron').remote.app
-    }
+    const app = require('./System').default.app()
     const userDir = app.getPath('userData')
     this.configPath = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
     let cfg = {
@@ -68,7 +63,7 @@ export class CivetConfig {
         return
       }
     }
-    this.config.default = name
+    this.config.app.default = name
     this.config.resources.push({
       name: name,
       db: {path: path + '/' + name},

@@ -87,6 +87,7 @@ export default {
     },
     onUpdateHeadNav(query) {
       this.viewDesc = query.name
+      console.info(query.cmd)
       switch (query.cmd) {
         case 'display-tag':
         case 'display-all':

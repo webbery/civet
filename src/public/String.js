@@ -7,11 +7,13 @@ export default {
   },
   getFormatType: (str) => {
     const start = str.indexOf('/')
-    if (start > 0) {
+    if (start > 0) { // such as: image/jpg
       const name = str.substring(start + 1)
       return name
-    } else {
-      const name = str.substring(str.indexOf('.') + 1)
+    } else { // file:
+      const pos = str.lastIndexOf('.')
+      if (pos === -1) return 'unknow'
+      const name = str.substring(pos + 1)
       return name
     }
   },

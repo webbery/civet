@@ -1,20 +1,18 @@
 <template>
   <div id="app">
-    <Guider v-if="isFirst"></Guider>
-    <Splash v-else></Splash>
+    <Splash></Splash>
   </div>
 </template>
 
 <script>
 // import DatabasePage from './components/DatabasePage'
 import Splash from './components/Splash'
-import Guider from './components/Guider'
 import { CivetConfig } from '../public/CivetConfig'
 
 export default {
   name: 'dbpage',
   components: {
-    Splash, Guider
+    Splash
   },
   data() {
     const config = new CivetConfig()
@@ -24,9 +22,9 @@ export default {
     }
   },
   mounted() {
-    if (!this.isFirst) {
-      this.$ipcRenderer.send('ready')
-    }
+    // if (!this.isFirst) {
+    this.$ipcRenderer.send('ready')
+    // }
   }
 }
 </script>

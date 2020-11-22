@@ -1,5 +1,6 @@
 import FileBase from '@/../public/FileBase'
 import Kernel from '@/../public/Kernel'
+import Service from '@/components/utils/Service'
 import Vue from 'vue'
 
 const state = {
@@ -8,18 +9,41 @@ const state = {
   classes: [],
   viewItems: [],
   tags: {},
-  properties: {}
+  untags: 0,
+  unclasses: 0
 }
 
 const getters = {
-  tags: state => {
-    console.info('----getter----', state.tags)
-    return state.query
-  },
   viewItems: state => {
     return state.viewItems
   },
-  classes: state => { return state.classes }
+  classes: state => { return state.classes },
+  getFiles: (state, getters) => {
+    return (filesID) => {
+      let files = []
+      for (let fileID of filesID) {
+        const file = state.cache.filter(file => file.id === fileID)
+        if (file !== null) {
+          files.push(file[0])
+        }
+      }
+      return files
+    }
+  },
+  untags: state => { return state.untags },
+  unclasses: state => { return state.unclasses },
+  tags: state => { return state.tags }
+}
+
+const remote = {
+  async recieveCounts() {
+    const uncalsses = await Service.getServiceInstance().get(Service.GET_UNCATEGORY_IMAGES)
+    const untags = await Service.getServiceInstance().get(Service.GET_UNTAG_IMAGES)
+    return {uncalsses: uncalsses, untags: untags}
+  },
+  async recieveTags() {
+    return Service.getServiceInstance().get(Service.GET_ALL_TAGS)
+  }
 }
 
 const mutations = {
@@ -47,12 +71,51 @@ const mutations = {
         Vue.set(state.classes, idx, cls[idx])
       }
     }
+    // count
+    const untags = Kernel.getUnTagFiles()
+    state.untags = untags.length
+    const unclasses = Kernel.getUnClassifyFiles()
+    state.unclasses = unclasses.length
+    // tags
+    state.tags = Kernel.getAllTags()
+  },
+  addFiles(state, files) {
+    for (let file of files) {
+      state.cache.push(new FileBase(file))
+    }
+    // setting view panel item
+    for (let idx = 0; idx < files.length; ++idx) {
+      const pos = state.viewItems.length + idx
+      Vue.set(state.viewItems, pos, state.cache[pos])
+    }
+    // count
+    const untags = Kernel.getUnTagFiles()
+    state.untags = untags.length
+    const unclasses = Kernel.getUnClassifyFiles()
+    state.unclasses = unclasses.length
   },
   query(state, query) {
     //   console.info('++++++')
     state.query = query
   },
-  removeFiles(state, query) {}
+  async addTag(state, mutation) {
+    const {fileID, tag} = mutation
+    console.info('cache add tag:', fileID, tag)
+    const files = state.cache.filter(file => file.id === fileID)
+    if (files.length === 0) {
+      Kernel.writeLog('cache add tag 0, fileID=' + fileID)
+      return
+    }
+    files[0].tag.push(tag)
+    Service.getServiceInstance().send(Service.SET_TAG, {id: [fileID], tag: files[0].tag})
+    const {unclasses, untags} = await remote.recieveCounts()
+    state.untags = untags.length
+    state.uncalsses = unclasses.length
+    // update tags
+    state.tags = await remote.recieveTags()
+  },
+  removeFiles(state, query) {},
+  update(state, sql) {}
 }
 
 const actions = {
@@ -66,9 +129,28 @@ const actions = {
     commit('removeFiles', files)
   },
   addFiles({commit}, files) {
-    commit('removeFiles', files)
+    commit('addFiles', files)
   },
-  addTags({commit}, sql) {}
+  addTag({commit}, mutation) {
+    commit('addTag', mutation)
+  },
+  update({commit}, sql) {
+    /*
+     *  sql like: {query:'', $set:{}}, {query:'', $unset:{}}
+     */
+    commit('update', sql)
+  },
+  remove({commit}, sql) {
+    /*
+     *  sql like: {query:''}
+     */
+    commit('update', sql)
+  },
+  insert({commit}, sql) {
+    /*
+     *  sql like: {query:'', value: {}}
+     */
+  }
 }
 
 export default {

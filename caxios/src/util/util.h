@@ -23,6 +23,7 @@ namespace caxios {
   Napi::Object FindObjectFromArray(Napi::Object obj, std::function<bool(Napi::Object)> func);
   std::vector<uint32_t> ArrayAsUint32Vector(Napi::Array arr);
   std::vector<std::string> ArrayAsStringVector(Napi::Array arr);
+  Napi::Array Vector2Array(Napi::Env env, const std::vector<std::string>& vStr);
 
   void ForeachObject(Napi::Value value, std::function<void(const std::string&, Napi::Value)> func);
   void ForeachArray(Napi::Value arr, std::function<void(Napi::Value)> func);
@@ -32,8 +33,20 @@ namespace caxios {
   void Call(Napi::Env env, const std::string& str, const std::vector<std::string>& params);
 
   std::string trunc(const std::string& elm);
+  std::vector<std::string> split(const std::string& str, char delim);
 
   bool exist(const std::string& filepath);
+  std::string serialize(const std::vector< std::vector<WordIndex> >& classes);
+  std::string serialize(const std::vector<WordIndex>& classes);
+
+  void deserialize(const std::string&, std::vector<WordIndex>&);
+  void deserialize(const std::string&, std::vector< std::vector<WordIndex> >&);
+  template<typename Ret>
+  Ret deserialize(const std::string& str) {
+    Ret ret;
+    deserialize(str, ret);
+    return std::move(ret);
+  }
 }
 
 #endif

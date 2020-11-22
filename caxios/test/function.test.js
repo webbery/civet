@@ -11,7 +11,7 @@ let cfg = {
       {
       name: '图像库',
       db: {
-          path: 'tdb'
+          path: '数据库'
       },
       meta: [
           {name: 'color', value: '主色', type: 'color', db: true},
@@ -52,26 +52,35 @@ describe('civetkern add test', function() {
   })
   it('get file snaps success', function() {
     let snaps = instance.getFilesSnap(-1)
-    assert(snaps.length === 1)
+    expect(snaps).to.have.lengthOf(1)
+    expect(snaps[0]['step']).to.be.equal(1)
   })
   it('get untag files', function() {
     let untags = instance.getUnTagFiles()
     assert(untags.length === 1)
   })
   it('set file tag', function() {
-    assert(instance.setTags({id: fileids, tag: ['test']}) === true)
+    assert(instance.setTags({id: fileids, tag: ['test','标签']}) === true)
   })
   it('get untag files again', function() {
     let untags = instance.getUnTagFiles()
     expect(untags).to.have.lengthOf(0)
   })
+  it('get unclassify files', function() {
+    const unclasses = instance.getUnClassifyFiles()
+    expect(unclasses).to.have.lengthOf(1)
+  })
   it('add class', function() {
-    let result = instance.addClasses(['class1', 'class2'])
+    let result = instance.addClasses(['class1', 'class2', 'class1/class3'])
     expect(result).to.equal(true)
   })
   it('add files to class', function() {
     let result = instance.addClasses({id: [fileids[0]], class: ['type1', 'type2']})
     expect(result).to.equal(true)
+  })
+  it('get unclassify files', function() {
+    const unclasses = instance.getUnClassifyFiles()
+    expect(unclasses).to.have.lengthOf(0)
   })
   it('update file meta info', function() {
     instance.updateFile({id: [fileids[0]], filename: '测试'})
@@ -101,21 +110,29 @@ describe('civetkern read only test', function() {
   let snaps = null
   it('get file snaps success', function() {
     snaps = instance.getFilesSnap(-1)
-    assert(snaps.length === 1)
+    expect(snaps).to.lengthOf(1)
+    expect(snaps[0].step).to.equal(3)
   })
-  it('get files info success', function() {
+  it('get files info', function() {
+    // console.info('file id', snaps[0])
     let filesInfo = instance.getFilesInfo([snaps[0].id])
-    assert(filesInfo.length === 1)
+    // console.info(filesInfo)
+    expect(filesInfo).to.lengthOf(1)
+    expect(filesInfo[0]['tag']).to.exist
+    expect(filesInfo[0]['tag']).to.not.include('test')
+    expect(filesInfo[0]['tag']).to.not.include('标签')
+    expect(filesInfo[0]['tag']).to.include('newTag')
   })
   it('get all tags', function() {
     const tags = instance.getAllTags()
-    expect(tags).to.include.keys('t')
-    //expect(tags).to.have.deep.property('t[0].name', 'test')
+    expect(tags).to.include.keys(['T','B'])
+    expect(tags['T']).to.lengthOf(1)
+    expect(tags['B']).to.lengthOf(1)
   })
   it('get all classes', function() {
     const allClasses = instance.getAllClasses()
     console.info(allClasses)
-    expect(allClasses).to.lengthOf(5)
+    expect(allClasses).to.lengthOf(6)
   })
   it('get file tags', function() {
     let result = instance.getTagsOfFiles({id: [snaps[0].id]})

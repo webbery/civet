@@ -85,6 +85,11 @@ namespace caxios {
     return m_pDBManager->RemoveFiles(files);
   }
 
+  bool CAxios::RemoveTags(const std::vector<FileID>& files, const Tags& tags)
+  {
+    return m_pDBManager->RemoveTags(files, tags);
+  }
+
   bool CAxios::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)
   {
     return m_pDBManager->FindFiles(query, filesInfo);

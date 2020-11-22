@@ -1,4 +1,4 @@
-import Histgram from './CV/Histogram'
+// import Histgram from './CV/Histogram'
 
 // function image2Array(image) {
 //   const gpu = getOrCreateGPU()
@@ -28,7 +28,7 @@ import Histgram from './CV/Histogram'
 // }
 export default {
   sumaryColors: async (pixels) => {
-    Histgram.colorHistogram(pixels)
+    // Histgram.colorHistogram(pixels)
     // return colors
   },
   similarity: (histogram1, histogram2) => {}

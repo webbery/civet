@@ -71,7 +71,6 @@ import JImage from '../JImage'
 import ImgTool from '../utils/ImgTool'
 import log from '@/../public/Logger'
 import { CivetConfig } from '@/../public/CivetConfig'
-import FileBase from '@/../public/FileBase'
 
 export default {
   name: 'property-panel',
@@ -93,18 +92,18 @@ export default {
     IconTag, JImage
   },
   computed: {
-    candidateClasses() {
-      return this.$store.getters.classesName
-    },
-    imageClasses() {
-      return this.classes
-    }
+    // candidateClasses() {
+    //   return this.$store.getters.classesName
+    // },
+    // imageClasses() {
+    //   return this.classes
+    // }
   },
   mounted() {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
   },
   methods: {
-    async displayProperty(imageID) {
+    displayProperty(imageID) {
       let getSize = (sz) => {
         let v = sz / 1024
         let unit = 'Kb'
@@ -114,17 +113,20 @@ export default {
         }
         return v.toFixed(1) + unit
       }
-      const images = this.$kernel.getFilesInfo([imageID])
-      if (!images) return
-      log.info('PropertyPanel', images)
-      if (images.length === 1) {
-        let image = new FileBase(images[0])
-        this.picture.descsize = getSize(parseInt(image.size))
+      // const images = this.$kernel.getFilesInfo([imageID])
+      console.info(this.$store)
+      const files = this.$store.getters.getFiles([imageID])
+      if (!files) return
+      log.info('PropertyPanel', files)
+      if (files.length === 1) {
+        let file = files[0]
+        console.info(file)
+        this.picture.descsize = getSize(parseInt(file.size))
         const config = new CivetConfig()
         const schema = config.meta()
         let names = []
         let values = []
-        for (let item of image.meta) {
+        for (let item of file.meta) {
           if (item.name === 'filename') {
             this.filename = item.value
             continue
@@ -136,9 +138,9 @@ export default {
         }
         this.metaNames = names
         this.metaValues = values
-        this.picture.id = image.id
-        this.imagepath = image.path
-        this.dynamicTags = image.tag ? image.tag.slice(0) : []
+        this.picture.id = file.id
+        this.imagepath = file.path
+        this.dynamicTags = file.tag ? file.tag.slice(0) : []
       }
       // this.classes.length = 0
       // for (let c of image.category) {
@@ -185,8 +187,8 @@ export default {
       let inputValue = this.inputValue
       if (inputValue) {
         this.dynamicTags.push(inputValue)
-        this.$ipcRenderer.send(Service.SET_TAG, {id: [this.picture.id], tag: this.dynamicTags})
-        // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
+        // this.$ipcRenderer.send(Service.SET_TAG, {id: [this.picture.id], tag: this.dynamicTags})
+        this.$store.dispatch('addTag', {fileID: this.picture.id, tag: inputValue})
       }
       this.inputVisible = false
       this.inputValue = ''

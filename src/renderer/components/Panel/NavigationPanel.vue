@@ -5,8 +5,8 @@
         <el-scrollbar style="height:95vh;">
           <table rules="none" cellspacing=0 >
             <tr class="item" @click="handleResourceClick(headOptions[0])"><i :class="headOptions[0].icon"></i><td>全部</td><td /></tr>
-            <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{headOptions[1].value}}</td></tr>
-            <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{headOptions[2].value}}</td></tr>
+            <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{classes}}</td></tr>
+            <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{untags}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
           </table>
           <TreePanel :isActive="true">
@@ -78,11 +78,9 @@ export default {
     // categoryName() {
     //   return this.$store.getters.classesName
     // },
-    category: state => state.Cache.classes
-    // tags() {
-    //   console.info('1 comupted tags: ', this.$store.getters.tags)
-    //   return this.$store.getters.tags
-    // }
+    category: state => state.Cache.classes,
+    untags: state => state.Cache.untags,
+    classes: state => state.Cache.unclasses
   }),
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
@@ -98,19 +96,19 @@ export default {
     updateUncategoryImages(updateValue) {
       this.headOptions[1].value += updateValue
     },
-    updateUntagFiles() {
-      const untags = this.$kernel.getUnTagFiles()
-      this.headOptions[2].value = untags.length
-    },
-    updateUnclassifyFiles() {
-      const unclasses = this.$kernel.getUnClassifyFiles()
-      this.headOptions[1].value = unclasses.length
-    },
+    // updateUntagFiles() {
+    //   const untags = this.$kernel.getUnTagFiles()
+    //   this.headOptions[2].value = untags.length
+    // },
+    // updateUnclassifyFiles() {
+    //   const unclasses = this.$kernel.getUnClassifyFiles()
+    //   this.headOptions[1].value = unclasses.length
+    // },
     updateDisplayImageList(error, appendFiles) {
       if (error) console.log(error)
       console.info('recieve from worker message:', appendFiles)
-      this.updateUntagFiles()
-      this.updateUnclassifyFiles()
+      // this.updateUntagFiles()
+      // this.updateUnclassifyFiles()
       // TODO: 可能更新频繁导致的卡顿
       const getCategory = function(categoryPath, children) {
         if (categoryPath.length === 0) return children
@@ -154,17 +152,6 @@ export default {
       // }
     },
     init() {
-      // this.directoryData = await this.$ipcRenderer.get(Service.GET_IMAGES_DIRECTORY)
-      // console.info('----', this.directoryData)
-      // const folders = await this.$ipcRenderer.get(Service.GET_ALL_CATEGORY)
-      // // console.info('get category', folders)
-      this.updateUntagFiles()
-      // const untagImages = await this.$ipcRenderer.get(Service.GET_UNTAG_IMAGES)
-      // this.headOptions[2].value = untagImages.length
-      // const allTags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS_WITH_IMAGES)
-      // console.info('all tag', allTags)
-      // this.$store.dispatch('setCategory', folders)
-      // this.$store.dispatch('setTags', allTags)
       const snaps = this.$kernel.getFilesSnap()
       let category = []
       for (let item of snaps) {
@@ -185,6 +172,7 @@ export default {
       switch (node.name) {
         case 'manageTag':
           this.$router.push({path: '/tagManager', query: {name: node.label, cmd: 'manage-tag'}})
+          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '标签管理', cmd: 'display-tag'})
           break
         case 'all':
           this.$router.push({path: '/', query: {name: node.label, cmd: 'display-all'}})

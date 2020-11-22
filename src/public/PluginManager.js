@@ -26,6 +26,7 @@ function init(plgDir) {
     }
   }
 
+  if (!fs.existsSync(plgDir)) return null
   const plguins = fs.readdirSync(plgDir)
   for (let filename of plguins) {
     const fullpath = path.join(plgDir, filename)
@@ -41,10 +42,10 @@ function init(plgDir) {
 
 function load() {
   if (thirdModules === null) {
-    const app = require('electron')
+    const app = require('./System').default.app()
     const root = app.getAppPath()
     console.info('plugin dir:', root)
-    thirdModules = init(root + 'plugins')
+    thirdModules = init(root + '/plugins')
   }
   return thirdModules
 }
@@ -58,6 +59,7 @@ export default {
     //   }
     // }
     const lext = ext.toLowerCase()
+    console.info(lext)
     if (lext === 'jpg' || lext === 'jpeg' || lext === 'bmp' || lext === 'tiff' || lext === 'png') return true
     return null
   }

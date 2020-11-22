@@ -19,6 +19,7 @@ namespace caxios {
     bool AddClasses(const std::vector<std::string>& classes);
     bool AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
     bool RemoveFiles(const std::vector<FileID>& filesID);
+    bool RemoveTags(const std::vector<FileID>& files, const Tags& tags);
     bool SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetFilesSnap(std::vector< Snap >& snaps);
@@ -34,8 +35,9 @@ namespace caxios {
     bool AddFile(FileID, const MetaItems&, const Keywords&);
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
     bool AddTagPY(const std::string& tag, WordIndex indx);
-    bool AddFileID2Class(const std::vector<FileID>& vFilesID, WordIndex index);
+    bool AddFileID2Class(const std::vector<FileID>& vFilesID, const std::string&);
     bool RemoveFile(FileID);
+    bool RemoveTag(FileID, const Tags& tags);
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);
     void ParseMeta(const std::string& meta);

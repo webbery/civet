@@ -1,9 +1,9 @@
 <template>
   <div class="bound">
     <el-scrollbar style="height:96vh;">
-    <div v-for="(tag,idx) in tags" :key="idx">
-      <div class="letter">{{tag.letter}}</div>
-      <div><button  v-for="(name,i) in tag.name" :key="i" border :label="name">{{name}}</button></div>
+    <div v-for="(aTags, letter) in tags" :key="letter">
+      <div class="letter">{{letter}}</div>
+      <div><button  v-for="(tag, i) in aTags" :key="i" border :label="tag.name">{{tag.name + ' ' + tag.files.length}}</button></div>
       <el-divider></el-divider>
     </div>
     </el-scrollbar>
@@ -11,9 +11,6 @@
 </template>
 
 <script>
-import bus from './utils/Bus'
-import Service from './utils/Service'
-
 export default {
   name: 'tag-page',
   data() {
@@ -22,21 +19,12 @@ export default {
     }
   },
   mounted() {
-    
     this.updateTags()
   },
   methods: {
-    async updateTags() {
-      const tags = await this.$ipcRenderer.get(Service.GET_ALL_TAGS)
-      let tagsInfo = []
-      for (let tagIndx in tags) {
-        const tag = {
-          letter: tagIndx,
-          name: tags[tagIndx]
-        }
-        tagsInfo.push(tag)
-      }
-      this.tags = tagsInfo
+    updateTags() {
+      this.tags = this.$store.getters.tags
+      console.info(this.tags)
     }
   }
 }

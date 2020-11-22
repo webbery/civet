@@ -1,14 +1,12 @@
 # civet
 
-> 一个咸鱼，闲得开发的一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件，虽然目前只支持图片管理，但是未来，将不止于图片管理。你能想到的，终将实现:kissing_heart:
+> :kissing_heart:一个咸鱼摄影给自己开发的一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件，虽然目前只支持图片管理，但是未来将不止于图片管理。
 
 ![界面预览](https://raw.githubusercontent.com/webbery/civet/master/show.JPG)
 
 ### 下载
 
 开发进度  
-![85%](https://progress-bar.dev/85/?title=导入模块)
-![65%](https://progress-bar.dev/65/?title=标签模块)
 ![32%](https://progress-bar.dev/32/?title=搜索模块)
 ![73%](https://progress-bar.dev/73/?title=预览模块)
 ![70%](https://progress-bar.dev/70/?title=存储模块)
@@ -24,30 +22,13 @@
 | Eagle  | Electron | Json/图片拷贝 |  | 有 | | | 私有
 | Billfish  | Qt | Sqlite + 图片拷贝/索引 |  | Chrome | | | 私有
 
-### 目录
-
-[1. 导入](#导入)  
-[2. 标签](#标签)  
-[3. 搜索](#搜索)  
-[4. 预览](#预览)  
-
-### 功能列表
-
-#### 1. 导入
-##### 1.1 导入本地文件夹
-##### 1.2 导入单个文件
-#### 2. 标签
-##### 2.1 自动标签生成
-##### 2.2 手动添加标签
-#### 3. 搜索
-##### 3.1 基于文本的检索
-##### 3.2 相似图片检索
-##### 3.3 颜色域检索
-#### 4. 预览
-
 #### 问题反馈
 
 如有任何使用上的问题或建议请反馈到 https://github.com/webbery/civet/issues
+
+#### 感谢  
+C++开源库：lmdb, flatbuffer, json  
+依赖的各个js库  
 
 ---
 

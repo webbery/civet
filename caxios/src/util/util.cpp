@@ -8,6 +8,7 @@
 #include <direct.h>
 #include <io.h>
 #endif
+#define CHAR_BIT  255
 
 namespace caxios {
   
@@ -18,6 +19,53 @@ namespace caxios {
     if (_access(filepath.c_str(), 0) == 0) return true;
 #endif
     return false;
+  }
+
+  std::string serialize(const std::vector< std::vector<WordIndex> >& classes)
+  {
+    // len wordindexes len wordindexes ...
+    std::string s;
+    for (auto& v : classes) {
+      char len = v.size();
+      s.push_back(len);
+      std::string t = serialize(v);
+      s.append(t);
+    }
+    return s;
+  }
+
+  void deserialize(const std::string& s, std::vector<WordIndex>& v)
+  {
+    for (size_t idx = 0; idx < s.size(); idx += 4) {
+      WordIndex wi = (s[3] | s[2] | s[1] | s[0]);
+      v.emplace_back(wi);
+    }
+  }
+
+  void deserialize(const std::string& s, std::vector< std::vector<WordIndex> >& v)
+  {
+    for (size_t idx = 0; idx < s.size();) {
+      char len = s[idx];
+      std::vector<WordIndex> wds = deserialize<std::vector<WordIndex>>(s.substr(idx + 1, len));
+      v.push_back(wds);
+      idx += len + 1;
+    }
+  }
+
+  std::string serialize(const std::vector<WordIndex>& classes)
+  {
+    std::string s;
+    for (const WordIndex& wi : classes) {
+      char c1 = wi & CHAR_BIT;
+      s.push_back(c1);
+      char c2 = wi & (CHAR_BIT << 8);
+      s.push_back(c2);
+      char c3 = wi & (CHAR_BIT << 8);
+      s.push_back(c3);
+      char c4 = wi & (CHAR_BIT << 8);
+      s.push_back(c4);
+    }
+    return s;
   }
 
   bool HasAttr(Napi::Object obj, std::string attr)
@@ -151,6 +199,16 @@ namespace caxios {
     return std::move(vec);
   }
 
+  Napi::Array Vector2Array(Napi::Env env, const std::vector<std::string>& vStr)
+  {
+    int cnt = vStr.size();
+    Napi::Array arr = Napi::Array::New(env, cnt);
+    for (unsigned int idx = 0; idx < cnt; ++idx) {
+      arr.Set(idx, vStr[idx]);
+    }
+    return arr;
+  }
+
   void ForeachObject(Napi::Value value, std::function<void(const std::string&, Napi::Value)> func)
   {
     auto item = value.As<Napi::Object>();
@@ -198,6 +256,22 @@ namespace caxios {
       end -= 1;
     }
     return elm.substr(start, end - start);
+  }
+
+  std::vector<std::string> split(const std::string& str, char delim)
+  {
+    std::vector<std::string> vStr;
+    size_t start = 0;
+    for (size_t idx = 0; idx < str.size(); ++idx)
+    {
+      if (str[idx] == delim) {
+        auto t = str.substr(start, idx - start);
+        vStr.emplace_back(t);
+        start = idx + 1;
+      }
+    }
+    vStr.emplace_back(str.substr(start, str.size() - start));
+    return vStr;
   }
 
   void Call(Napi::Env env, const std::string& func, const std::vector<std::string>& params)

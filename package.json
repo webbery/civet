@@ -79,8 +79,7 @@
     }
   },
   "dependencies": {
-    "@tensorflow/tfjs-node": "^2.7.0",
-    "civetkern": "0.0.39",
+    "civetkern": "0.0.42",
     "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",
     "element-ui": "^2.13.2",

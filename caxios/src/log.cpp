@@ -93,6 +93,8 @@ namespace caxios {
         idx += 1;
       }
       _file = fopen(filename.c_str(), "a+");
+      if (_file) return true;
+      return false;
     }
 
     void Write(const std::string& log) {
@@ -111,6 +113,17 @@ namespace caxios {
   void log2file(const std::string& log)
   {
     s_log.Write(log);
+  }
+
+  std::string format_vector(const std::vector<std::string>& vi)
+  {
+    std::string str;
+    for (auto& item : vi)
+    {
+      str += item;
+      str += ",";
+    }
+    return str;
   }
 
   bool init_log(bool flag) {

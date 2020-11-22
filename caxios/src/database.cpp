@@ -83,7 +83,7 @@ namespace caxios {
     MDB_dbi dbi = -1;
     unsigned int flag = MDB_CREATE;
     if (m_flag & MDB_RDONLY) flag = 0;
-    if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), flag | MDB_INTEGERKEY, &dbi)) {
+    if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), flag, &dbi)) {
       T_LOG("mdb_dbi_open %s fail %s", dbname.c_str(), err2str(rc).c_str());
       return dbi;
     }

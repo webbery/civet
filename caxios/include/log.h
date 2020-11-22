@@ -45,6 +45,8 @@ namespace caxios {
     return str;
   }
 
+  std::string format_vector(const std::vector<std::string>& vi);
+
   bool init_log(bool flag);
   void log2file(const std::string& log);
 }

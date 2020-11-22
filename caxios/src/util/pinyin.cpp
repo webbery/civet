@@ -2,6 +2,7 @@
 #include "pinyin.h"
 #include <codecvt>
 #include <locale>
+#include <algorithm>
 
 typedef short Int16;
 typedef int Int32;
@@ -878,6 +879,8 @@ std::vector<std::string> getLocaleAlphabet(wchar_t chr)
   std::vector<std::string> vLocale;
   if (chr < 255) {
     std::wstring str(&chr, 1);
+    std::transform(str.begin(), str.end(), str.begin(),
+      [](unsigned char c) { return std::toupper(c); });
     vLocale.emplace_back(wstring2string(str));
     return vLocale;
   }

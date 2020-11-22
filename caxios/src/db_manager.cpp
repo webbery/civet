@@ -121,23 +121,31 @@ namespace caxios {
     if (_flag == ReadOnly || classes.size() == 0) return false;
     WRITE_BEGIN();
     auto mIndexes = GetWordsIndex(classes);
-    std::vector<WordIndex> vIndexes;
-    std::for_each(mIndexes.begin(), mIndexes.end(), [this, &vIndexes, &filesID](auto item) {
-      vIndexes.emplace_back(item.second);
-      this->AddFileID2Class(filesID, item.second);
-    });
+    T_LOG("mIndexes size: %d", mIndexes.size());
+    std::vector<std::vector<WordIndex>> vIndexes;
+    for (auto& clazz : classes) {
+      std::vector<std::string> vTokens = split(clazz, '/');
+      std::vector<WordIndex> vClassPath(vTokens.size());
+      std::transform(vTokens.begin(), vTokens.end(), vClassPath.begin(), [&mIndexes](const std::string& token)-> WordIndex {
+        return mIndexes[token];
+      });
+      std::string classPath = serialize(vClassPath);
+      this->AddFileID2Class(filesID, classPath);
+      vIndexes.emplace_back(vClassPath);
+    }
     for (auto fileID : filesID) {
       void* pData = nullptr;
       uint32_t len = 0;
       if (!m_pDatabase->Get(m_mDBs[TABLE_CLASS], fileID, pData, len)) {
-        m_pDatabase->Put(m_mDBs[TABLE_CLASS], fileID, (void*)vIndexes.data(), vIndexes.size() * sizeof(WordIndex));
+        std::string sIndexes = serialize(vIndexes);
+        m_pDatabase->Put(m_mDBs[TABLE_CLASS], fileID, (void*)sIndexes.data(), sIndexes.size());
       }
       else {
-        WordIndex* pIndex = (WordIndex*)pData;
-        std::set<WordIndex> sIndexes(pIndex, pIndex + len / sizeof(WordIndex));
-        sIndexes.insert(vIndexes.begin(), vIndexes.end());
-        std::vector<WordIndex> vWordIndex(sIndexes.begin(), sIndexes.end());
-        m_pDatabase->Put(m_mDBs[TABLE_CLASS], fileID, (void*)vWordIndex.data(), vWordIndex.size() * sizeof(WordIndex));
+        std::string str((char*)pData, len);
+        std::vector< std::vector<WordIndex> > vResult = deserialize<std::vector<std::vector<WordIndex>>>(str);
+        vResult.insert(vResult.end(), vIndexes.begin(), vIndexes.end());
+        std::string sResult = serialize(vResult);
+        m_pDatabase->Put(m_mDBs[TABLE_CLASS], fileID, (void*)sResult.data(), sResult.size());
       }
 
     }
@@ -152,10 +160,17 @@ namespace caxios {
     auto mIndexes = GetWordsIndex(classes);
     void* pData = nullptr;
     uint32_t len = 0;
-    for (auto item : mIndexes) {
-      m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], item.second, pData, len);
+    for (auto& clazz : classes) {
+      std::vector<std::string> vTokens = split(clazz, '/');
+      std::vector<WordIndex> vClassPath(vTokens.size());
+      std::transform(vTokens.begin(), vTokens.end(), vClassPath.begin(), [&mIndexes](const std::string& token)-> WordIndex {
+        return mIndexes[token];
+      });
+      std::string key((char*)&(vClassPath[0]), vClassPath.size() * sizeof(WordIndex));
+      m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], key, pData, len);
       if (len == 0) {
-        m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], item.second, pData, len);
+        T_LOG("Put class: %s", key.c_str());
+        m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], key, pData, len);
       }
     }
     WRITE_END();
@@ -168,6 +183,16 @@ namespace caxios {
     for (auto fileID: filesID)
     {
       RemoveFile(fileID);
+    }
+    WRITE_END();
+    return true;
+  }
+
+  bool DBManager::RemoveTags(const std::vector<FileID>& filesID, const Tags& tags)
+  {
+    WRITE_BEGIN();
+    for (auto fileID : filesID)
+    {
     }
     WRITE_END();
     return true;
@@ -204,7 +229,7 @@ namespace caxios {
       using namespace nlohmann;
       json jSnap = json::parse(snap);
       int step = atoi(jSnap["step"].dump().c_str());
-      T_LOG("Step: %d", step);
+      T_LOG("file %d Step: %d", fileID, step);
       if(step & (1 << 1)) continue;
       step |= (1 << 1);
       jSnap["step"] = std::to_string(step);
@@ -245,6 +270,11 @@ namespace caxios {
       if (m_pDatabase->Get(m_mDBs[TABLE_TAG], fileID, pData, len)) {
         WordIndex* pWordIndex = (WordIndex*)pData;
         tags = GetWordByIndex(pWordIndex, len/sizeof(WordIndex));
+        T_LOG("file tags cnt: %d", tags.size());
+        for (auto& t : tags)
+        {
+          T_LOG("file %d tags: %s", fileID, t.c_str());
+        }
       }
       // ann
       // clazz
@@ -445,33 +475,36 @@ namespace caxios {
     auto py = getLocaleAlphabet(wTag[0]);
     T_LOG("Pinyin: %s -> %s", wTag.c_str(), py[0].c_str());
     WRITE_BEGIN();
-    std::vector<WordIndex> vIndx;
+    std::set<WordIndex> sIndx;
     void* pData = nullptr;
     uint32_t len = 0;
     if (m_pDatabase->Get(m_mDBs[TABLE_TAG_INDX], py[0], pData, len)) {
       WordIndex* pWords = (WordIndex*)pData;
       size_t cnt = len / sizeof(WordIndex);
-      vIndx.assign(pWords, pWords + cnt);
+      sIndx = std::set<WordIndex>(pWords, pWords + cnt);
     }
-    vIndx.emplace_back(indx);
+    sIndx.insert(indx);
+    std::vector< WordIndex> vIndx(sIndx.begin(), sIndx.end());
     m_pDatabase->Put(m_mDBs[TABLE_TAG_INDX], py[0], vIndx.data(), vIndx.size() * sizeof(WordIndex));
     WRITE_END();
     return true;
   }
 
-  bool DBManager::AddFileID2Class(const std::vector<FileID>& vFilesID, WordIndex index)
+  bool DBManager::AddFileID2Class(const std::vector<FileID>& vFilesID, const std::string& key)
   {
     void* pData = nullptr;
     uint32_t len = 0;
-    if (!m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], index, pData, len)) {
-      m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], index, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
+    if (!m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], key, pData, len)) {
+      //T_LOG("Put new class: %d", index);
+      m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], key, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
     }
     else {
       FileID* pID = (FileID*)pData;
       std::set<FileID> sFilesID(pID, pID + len / sizeof(FileID));
       sFilesID.insert(vFilesID.begin(), vFilesID.end());
       std::vector<FileID> vID(sFilesID.begin(), sFilesID.end());
-      m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], index, (void*)vID.data(), vID.size() * sizeof(FileID));
+      //T_LOG("Put class: %d", index);
+      m_pDatabase->Put(m_mDBs[TABLE_CLASS2FILE], key, (void*)vID.data(), vID.size() * sizeof(FileID));
     }
     return true;
   }
@@ -503,6 +536,29 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::RemoveTag(FileID fileID, const Tags& tags)
+  {
+    READ_BEGIN(TABLE_TAG);
+    void* pData = nullptr;
+    uint32_t len = 0;
+    m_pDatabase->Get(m_mDBs[TABLE_TAG], fileID, pData, len);
+    if (len == 0) return true;
+    auto indexes = GetWordsIndex(tags);
+    WordIndex* pWordIndx = (WordIndex*)pData;
+    size_t cnt = len / sizeof(WordIndex);
+    for (auto& item : indexes)
+      for (size_t idx = 0; idx < cnt; ++idx) {
+      {
+        if (pWordIndx[idx] == item.second) {
+          pWordIndx[idx] = 0;
+          break;
+        }
+      }
+    }
+    m_pDatabase->Put(m_mDBs[TABLE_TAG], fileID, pData, len);
+    return true;
+  }
+
   bool DBManager::GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno)
   {
     // meta
@@ -518,7 +574,6 @@ namespace caxios {
     WordIndex* pWordIndx = (WordIndex*)pData;
     size_t cnt = len / sizeof(WordIndex);
     tags = GetWordByIndex(pWordIndx, cnt);
-    T_LOG("File Tags: %d", tags.size());
     return true;
   }
 
@@ -583,21 +638,31 @@ namespace caxios {
     lastIndx += 1;
     bool bUpdate = false;
     for (auto& word : words) {
-      // 取字索引
-      if (!m_pDatabase->Get(m_mDBs[TABLE_KEYWORD_INDX], word, pData, len)) {
-        // 如果tag字符串不存在，添加
-        m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], word, &lastIndx, sizeof(WordIndex));
-        m_pDatabase->Put(m_mDBs[TABLE_INDX_KEYWORD], lastIndx, (void*)word.data(), word.size());
-        mIndexes[word] = lastIndx;
-        lastIndx += 1;
-        bUpdate = true;
-        continue;
+      std::vector<std::string> vTokens = split(word, '/');
+      for (auto& token: vTokens)
+      {
+        // 取字索引
+        if (!m_pDatabase->Get(m_mDBs[TABLE_KEYWORD_INDX], token, pData, len)) {
+          // 如果tag字符串不存在，添加
+          T_LOG("Add new word: %s", token.c_str());
+          m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], token, &lastIndx, sizeof(WordIndex));
+          m_pDatabase->Put(m_mDBs[TABLE_INDX_KEYWORD], lastIndx, (void*)token.data(), token.size());
+          mIndexes[token] = lastIndx;
+          lastIndx += 1;
+          bUpdate = true;
+          continue;
+        }
+        mIndexes[token] = *(WordIndex*)pData;
+        T_LOG("Get word: %s, %d", token.c_str(), mIndexes[token]);
       }
-      mIndexes[word] = *(WordIndex*)pData;
     }
     if (bUpdate) {
       m_pDatabase->Put(m_mDBs[TABLE_KEYWORD_INDX], 0, &lastIndx, sizeof(WordIndex));
     }
+    //m_pDatabase->Filter(m_mDBs[TABLE_KEYWORD_INDX], [](const std::string& k, void* pData, uint32_t len)->bool {
+    //  T_LOG("keyword indx: %s", k.c_str());
+    //  return false;
+    //});
     return std::move(mIndexes);
   }
 
@@ -607,6 +672,10 @@ namespace caxios {
     for (size_t idx = 0; idx< cnt;++idx)
     {
       WordIndex index = wordsIndx[idx];
+      if (index == 0) {
+        T_LOG("word index: 0");
+        continue;
+      }
       void* pData = nullptr;
       uint32_t len = 0;
       if(!m_pDatabase->Get(m_mDBs[TABLE_INDX_KEYWORD], index, pData, len)) continue;

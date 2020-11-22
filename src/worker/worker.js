@@ -5,6 +5,7 @@ import { ImageParser, JImage } from './Image'
 import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
+import storage from '../public/Kernel'
 
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
@@ -158,7 +159,6 @@ const messageProcessor = {
   },
   'getImagesInfo': (data) => {
     let imagesIndex = []
-    const storage = require('../public/Kernel')
     if (data === undefined) {
       // 全部图片信息
       let imagesSnap = storage.getFilesSnap()
@@ -177,7 +177,6 @@ const messageProcessor = {
     reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
   'getImageInfo': (imageID) => {
-    const storage = require('../public/Kernel')
     const img = storage.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
     let image = new JImage(img[0])
@@ -185,37 +184,30 @@ const messageProcessor = {
   },
   'setTag': (data) => {
     console.info(data)
-    const storage = require('../public/Kernel')
-    storage.setTags(data.imageID, data.tagName)
+    storage.setTags(data.id, data.tag)
   },
   'removeFiles': (filesID) => {
     console.info('removeFiles:', filesID)
-    const storage = require('../public/Kernel')
     storage.removeFiles(filesID)
   },
   'removeTag': (data) => {
-    const storage = require('../public/Kernel')
     storage.removeTags(data.tagName, data.imageID)
   },
   'getAllTags': (data) => {
-    const storage = require('../public/Kernel')
     let allTags = storage.getAllTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
   },
   'getAllTagsWithImages': (data) => {
-    const storage = require('../public/Kernel')
     let allTags = storage.getTagsOfFiles()
     console.info('allTags', allTags)
     reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
   'findImageWithKeyword': (keywords) => {
-    const storage = require('../public/Kernel')
     let allID = storage.searchFiles(keywords)
     // console.info('reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
     reply2Renderer(ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD, allID)
   },
   'addCategory': (categoryName, chain, imageID) => {
-    const storage = require('../public/Kernel')
     return storage.addClasses(categoryName, chain, imageID)
   },
   'getAllCategory': async () => {
@@ -223,25 +215,21 @@ const messageProcessor = {
     // reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
   'getUncategoryImages': async () => {
-    const storage = require('../public/Kernel')
     let uncateimgs = storage.getUnClassifyFiles()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
   },
   'getUntagImages': () => {
-    const storage = require('../public/Kernel')
     let untagimgs = storage.getUnTagFiles()
     reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
   },
   'updateImageCategory': (data) => {
-    const storage = require('../public/Kernel')
     storage.updateFileClass(data.imageID, data.category)
   },
   'updateCategoryName': (oldName, newName) => {
-    const storage = require('../public/Kernel')
     storage.updateClassName(oldName, newName)
   },
-  'reInitDB': (data) => {
-    // localStorage.reloadDB(data)
+  'reInitDB': async (data) => {
+    storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
   }
 }

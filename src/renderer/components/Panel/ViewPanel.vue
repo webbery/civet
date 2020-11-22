@@ -157,13 +157,16 @@ export default {
     dropFiles(event) {
       let files = event.dataTransfer.files
       let paths = []
-      const String = require('../../../public/String')
+      const String = require('../../../public/String').default
+      const h = this.$createElement
       for (let item of files) {
         const ext = String.getFormatType(item.path)
         if (PluginManager.getModuleByExt(ext) === null) {
           this.$notify.error({
             title: '不支持的格式',
-            message: item.path,
+            dangerouslyUseHTMLString: true,
+            message: h('div', {style: 'color: white; font-size: 12px;'}, item.path),
+            // duration: 0,
             position: 'bottom_right'
           })
           continue
@@ -189,6 +192,7 @@ export default {
     },
     onUpdateImages(error, updateImages) {
       if (error) console.log(error)
+      this.$store.dispatch('addFiles', updateImages)
       // for (let item of updateImages) {
       //   this.imageList.push({id: item.id, filename: item.filename, path: item.path})
       // }

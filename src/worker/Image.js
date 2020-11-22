@@ -2,11 +2,12 @@ import FileBase from '../public/FileBase'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
-import CV from '../public/ImageProcess'
+// import CV from '../public/ImageProcess'
 import fs from 'fs'
 import { imageHash } from 'image-hash'
-import sharp from 'sharp'
+// import sharp from 'sharp'
 import util from 'util'
+import storage from '../public/Kernel'
 // import WorkerPool from './WorkerPool/WorkerPool'
 
 const pHash = util.promisify(imageHash)
@@ -21,7 +22,6 @@ export class ImageParser {
     console.info(f.dir, f.base, this.hardLinkDir)
     // const bakFilepath = this.hardLinkDir + '/' + f.base
     // fs.linkSync(fullpath, bakFilepath)
-    const storage = require('../public/Kernel')
     const fid = storage.generateFilesID(1)
     let fileInfo = {
       fileid: fid[0],
@@ -100,7 +100,6 @@ class ImageMetaParser extends ImageParseBase {
       image.addMeta('thumbnail', thumbnail)
     }
     try {
-      const storage = require('../public/Kernel')
       storage.addFiles([image])
     } catch (err) {
       console.info('parse metadata error', err)
@@ -179,7 +178,6 @@ class ImageTextParser extends ImageParseBase {
     console.info('ImageTextParser', image.tag)
     try {
       console.info(image)
-      const storage = require('../public/Kernel')
       storage.setTags([image.id], image.tag)
     } catch (err) {
       console.info('parse text error', err)
@@ -199,18 +197,9 @@ class ImageColorParser extends ImageParseBase {
   }
 
   async parse(image, buffer) {
-    // image.stepFinishCB(image)
-    // console.info('buffer: ', buffer.length, buffer)
-    // const stream = require('stream')
-    // const bufferStream = new stream.Duplex()
-    // bufferStream.push(buffer)
-    // bufferStream.push(null)
-    // // bufferStream.end(buffer)
-    // const bufferize = sharp().clone().toBuffer()
-    // const pixel = bufferStream.pipe(bufferize)
-    const pixel = await sharp(buffer).jpeg({force: true}).raw().toBuffer({ resolveWithObject: true })
-    console.info(pixel)
-    CV.sumaryColors(pixel)
+    // const pixel = await sharp(buffer).jpeg({force: true}).raw().toBuffer({ resolveWithObject: true })
+    // console.info(pixel)
+    // CV.sumaryColors(pixel)
     image.color = [0xFF0000, 0x00FF00, 0x0000FF]
     // Storage.updateFile({id: image.id}, {color: image.color, step: 0b100})
 

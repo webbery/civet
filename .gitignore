@@ -6,6 +6,7 @@ build/*
 doc/*
 !build/icons
 coverage
+caxios/build/*
 node_modules/
 npm-debug.log
 npm-debug.log.*
