@@ -1,5 +1,4 @@
 import FileBase from '../public/FileBase'
-import Storage from '../public/Kernel'
 import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
@@ -22,7 +21,8 @@ export class ImageParser {
     console.info(f.dir, f.base, this.hardLinkDir)
     // const bakFilepath = this.hardLinkDir + '/' + f.base
     // fs.linkSync(fullpath, bakFilepath)
-    const fid = Storage.generateFilesID(1)
+    const storage = require('../public/Kernel')
+    const fid = storage.generateFilesID(1)
     let fileInfo = {
       fileid: fid[0],
       meta: [
@@ -100,7 +100,8 @@ class ImageMetaParser extends ImageParseBase {
       image.addMeta('thumbnail', thumbnail)
     }
     try {
-      Storage.addFiles([image])
+      const storage = require('../public/Kernel')
+      storage.addFiles([image])
     } catch (err) {
       console.info('parse metadata error', err)
     }
@@ -178,7 +179,8 @@ class ImageTextParser extends ImageParseBase {
     console.info('ImageTextParser', image.tag)
     try {
       console.info(image)
-      Storage.setTags([image.id], image.tag)
+      const storage = require('../public/Kernel')
+      storage.setTags([image.id], image.tag)
     } catch (err) {
       console.info('parse text error', err)
     }

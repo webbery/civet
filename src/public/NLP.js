@@ -1,4 +1,4 @@
-import pinyin from 'pinyin'
+// import pinyin from 'pinyin'
 
 const NLP = (function () {
   let Segment = require('segment')
@@ -29,13 +29,13 @@ export default {
   getNouns: (str) => {
     return NLP.retrieveNoun(str)
   },
-  getFirstLetter: (cn) => {
-    return pinyin(cn, {
-      heteronym: true,
-      segment: true,
-      style: pinyin.STYLE_FIRST_LETTER
-    })
-  },
+  // getFirstLetter: (cn) => {
+  //   return pinyin(cn, {
+  //     heteronym: true,
+  //     segment: true,
+  //     style: pinyin.STYLE_FIRST_LETTER
+  //   })
+  // },
   simhash: (pixels, width, height) => {
     // 使用dhash算法
   }

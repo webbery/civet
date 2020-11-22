@@ -46,9 +46,9 @@ namespace caxios {
     time_t tt = system_clock::to_time_t(n);
     tm t = *gmtime(&tt);
     char buf[64] = { 0 };
-    sprintf(buf, "%04u-%02u-%02u %02u:%02u:%02u.%03u", t.tm_year + 1900,
+    sprintf(buf, "%04u-%02u-%02u %02u:%02u:%02u.%06u", t.tm_year + 1900,
       t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,
-      static_cast<unsigned>(tp / std::chrono::milliseconds(1)));
+      static_cast<unsigned>(tp / std::chrono::microseconds(1)));
     return std::string(buf);
   }
 

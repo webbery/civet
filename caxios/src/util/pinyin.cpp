@@ -1,5 +1,5 @@
 ﻿#include <stdexcept>
-#include "Pinyin.h"
+#include "pinyin.h"
 #include <codecvt>
 #include <locale>
 

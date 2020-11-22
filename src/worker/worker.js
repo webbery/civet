@@ -2,7 +2,6 @@ import JString from '../public/String'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
-import Kernel from '../public/Kernel'
 import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
@@ -159,16 +158,17 @@ const messageProcessor = {
   },
   'getImagesInfo': (data) => {
     let imagesIndex = []
+    const storage = require('../public/Kernel')
     if (data === undefined) {
       // 全部图片信息
-      let imagesSnap = Kernel.getFilesSnap()
+      let imagesSnap = storage.getFilesSnap()
       for (let imgID in imagesSnap) {
         imagesIndex.push(imgID)
       }
     } else {
       imagesIndex = data
     }
-    let imgs = Kernel.getFilesInfo(imagesIndex)
+    let imgs = storage.getFilesInfo(imagesIndex)
     console.info('getImagesInfo', imgs)
     let images = []
     for (let img of imgs) {
@@ -177,56 +177,68 @@ const messageProcessor = {
     reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
   'getImageInfo': (imageID) => {
-    const img = Kernel.getFilesInfo([imageID])
+    const storage = require('../public/Kernel')
+    const img = storage.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
     let image = new JImage(img[0])
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
   'setTag': (data) => {
     console.info(data)
-    Kernel.setTags(data.imageID, data.tagName)
+    const storage = require('../public/Kernel')
+    storage.setTags(data.imageID, data.tagName)
   },
   'removeFiles': (filesID) => {
     console.info('removeFiles:', filesID)
-    Kernel.removeFiles(filesID)
+    const storage = require('../public/Kernel')
+    storage.removeFiles(filesID)
   },
   'removeTag': (data) => {
-    Kernel.removeTags(data.tagName, data.imageID)
+    const storage = require('../public/Kernel')
+    storage.removeTags(data.tagName, data.imageID)
   },
-  'getAllTags': async (data) => {
-    let allTags = await Kernel.getTags()
+  'getAllTags': (data) => {
+    const storage = require('../public/Kernel')
+    let allTags = storage.getAllTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
   },
-  'getAllTagsWithImages': async (data) => {
-    let allTags = await Kernel.getTagsOfFiles()
+  'getAllTagsWithImages': (data) => {
+    const storage = require('../public/Kernel')
+    let allTags = storage.getTagsOfFiles()
     console.info('allTags', allTags)
     reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
-  'findImageWithKeyword': async (keywords) => {
-    let allID = await Kernel.searchFiles(keywords)
+  'findImageWithKeyword': (keywords) => {
+    const storage = require('../public/Kernel')
+    let allID = storage.searchFiles(keywords)
     // console.info('reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
     reply2Renderer(ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD, allID)
   },
-  'addCategory': async (categoryName, chain, imageID) => {
-    return Kernel.addClasses(categoryName, chain, imageID)
+  'addCategory': (categoryName, chain, imageID) => {
+    const storage = require('../public/Kernel')
+    return storage.addClasses(categoryName, chain, imageID)
   },
   'getAllCategory': async () => {
     // let category = await CategoryArray.loadFromDB()
     // reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
   'getUncategoryImages': async () => {
-    let uncateimgs = await Kernel.getUnClassifyFiles()
+    const storage = require('../public/Kernel')
+    let uncateimgs = storage.getUnClassifyFiles()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
   },
-  'getUntagImages': async () => {
-    let untagimgs = await Kernel.getUnTagFiles()
+  'getUntagImages': () => {
+    const storage = require('../public/Kernel')
+    let untagimgs = storage.getUnTagFiles()
     reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
   },
-  'updateImageCategory': async (data) => {
-    await localStorage.updateFileClass(data.imageID, data.category)
+  'updateImageCategory': (data) => {
+    const storage = require('../public/Kernel')
+    storage.updateFileClass(data.imageID, data.category)
   },
-  'updateCategoryName': async (oldName, newName) => {
-    await localStorage.updateClassName(oldName, newName)
+  'updateCategoryName': (oldName, newName) => {
+    const storage = require('../public/Kernel')
+    storage.updateClassName(oldName, newName)
   },
   'reInitDB': (data) => {
     // localStorage.reloadDB(data)
