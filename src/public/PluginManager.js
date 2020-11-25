@@ -52,11 +52,13 @@ export default {
   load: load,
   getModuleByExt: (ext) => {
     load()
-    for (let module of thirdModules) {
-      if (module['type'] === 'file' && module['ext'].indexOf(ext) > -1) {
-        return module
-      }
-    }
+    // for (let module of thirdModules) {
+    //   if (module['type'] === 'file' && module['ext'].indexOf(ext) > -1) {
+    //     return module
+    //   }
+    // }
+    const lext = ext.toLowerCase()
+    if (lext === 'jpg' || lext === 'jpeg' || lext === 'bmp' || lext === 'tiff' || lext === 'png') return true
     return null
   }
 }

@@ -6,7 +6,6 @@
 
 <script>
 import LandingPage from '@/components/LandingPage'
-import Storage from '@/../public/Kernel'
 import CV from '@/../public/ImageProcess'
 
 export default {
@@ -28,6 +27,7 @@ export default {
     })
   },
   destroyed: function() {
+    const Storage = require('../public/Kernel')
     Storage.release()
   }
 }

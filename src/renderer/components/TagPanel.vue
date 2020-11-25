@@ -22,7 +22,7 @@ export default {
     }
   },
   mounted() {
-    bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.$route.query)
+    
     this.updateTags()
   },
   methods: {

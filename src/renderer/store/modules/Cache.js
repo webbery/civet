@@ -7,6 +7,7 @@ const state = {
   cache: [],
   classes: [],
   viewItems: [],
+  tags: {},
   properties: {}
 }
 

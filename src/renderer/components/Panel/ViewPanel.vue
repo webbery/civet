@@ -11,7 +11,7 @@
           >
           </JImage>
           <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
-            <span class="name">{{image.filename}}</span>
+            <span class="name" >{{image.filename}}</span>
             <input v-if="enableInput"/>
           </div>
         </el-card>
@@ -28,6 +28,7 @@ import ImgTool from '../utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
 import Global from '../utils/Global'
 import { mapState } from 'vuex'
+import PluginManager from '@/../public/PluginManager'
 
 export default {
   name: 'view-panel',
@@ -152,10 +153,21 @@ export default {
       console.info('COPY')
       // console.info(__filename, __line, image)
     },
+    onImageNameChange(image) {},
     dropFiles(event) {
       let files = event.dataTransfer.files
       let paths = []
+      const String = require('../../../public/String')
       for (let item of files) {
+        const ext = String.getFormatType(item.path)
+        if (PluginManager.getModuleByExt(ext) === null) {
+          this.$notify.error({
+            title: '不支持的格式',
+            message: item.path,
+            position: 'bottom_right'
+          })
+          continue
+        }
         paths.push(item.path)
       }
       if (paths.length > 0) {

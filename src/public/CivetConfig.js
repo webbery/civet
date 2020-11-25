@@ -11,18 +11,9 @@ export class CivetConfig {
     this.configPath = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
     let cfg = {
       app: {
-        first: true,
-        default: '图像库'
+        first: true
       },
-      resources: [
-        {
-          name: '图像库',
-          db: {
-            path: userDir + '/civet'
-          },
-          meta: this.schema()
-        }
-      ]
+      resources: []
     }
     console.info('cfgPath', this.configPath)
     if (!fs.existsSync(this.configPath)) {
