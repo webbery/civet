@@ -47,6 +47,8 @@ namespace caxios {
     deserialize(str, ret);
     return std::move(ret);
   }
+  // use hash to encode string
+  int32_t encode(const std::string& str);
 }
 
 #endif

@@ -126,6 +126,15 @@ namespace caxios {
     return str;
   }
 
+  std::string format_x16(const std::string& str)
+  {
+    std::string ret;
+    for (char c : str) {
+      ret += std::to_string(c);
+    }
+    return ret;
+  }
+
   bool init_log(bool flag) {
     return s_log.Open(flag);
   }

@@ -1,6 +1,7 @@
 # civet
 
-> :kissing_heart:一个咸鱼摄影给自己开发的一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件，虽然目前只支持图片管理，但是未来将不止于图片管理。
+> :kissing_heart: 本人摄影兼后期，为自己开发的一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
+目标是希望像VSCode那样，以扩展的形式让用户组装成各类数字资产(图片、文档、视频、文献、网页等)的管理软件。
 
 ![界面预览](https://raw.githubusercontent.com/webbery/civet/master/show.JPG)
 
@@ -16,19 +17,25 @@
 **道阻且长，行则将至。**
 
 ### 类似软件对比
-|  软件   | 开发平台  | 本地存储  | 图片支持 | Web插件 | 云盘支持 | 智能检索 | 协议 |
-| :----: | :----:   |  :----: | :----: | :----: | :----: | :----: | :----: |
-| Civet  | Electron/C++ | lmdb |  |  |  |  | 开源MIT
-| Eagle  | Electron | Json/图片拷贝 |  | 有 | | | 私有
-| Billfish  | Qt | Sqlite + 图片拷贝/索引 |  | Chrome | | | 私有
+|  软件   | 开发平台  | 本地存储  | 协议 |
+| :----: | :----:   |  :----: | :----: |
+| Civet  | Electron/C++ | lmdb | 开源MIT
+| Eagle  | Electron | Json/图片拷贝 | 私有
+| Billfish  | Qt | Sqlite + 图片拷贝/索引 | 私有
 
 #### 问题反馈
 
 如有任何使用上的问题或建议请反馈到 https://github.com/webbery/civet/issues
 
+#### RoadMap
+1. 增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取
+2. 增加存储插件功能，以支持多种存储方式(如本地复制、云存储等)
+3. 增加信息提取插件功能，以增强不同文件类型的信息存储与检索
+4. 引入HTML5批注规范，为各种类型的文件增加批注功能
+
 #### 感谢  
-C++开源库：lmdb, flatbuffer, json  
-依赖的各个js库  
+lmdb数据库, 常用在计算机视觉中，用于存储大量图片  
+sharp图像库，支持多种格式图像的读取  
 
 ---
 

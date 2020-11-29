@@ -1,19 +1,18 @@
 <template>
-  <span>
+  <div :class="{item: !isSelected, selected: isSelected}">
     <i :class="icon"></i>
     <span class="class-name" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick">{{label}}</span>
     <input v-if="enableInput" @blur="onSave()" v-model="folderName" ref="folderInput"/>
-  </span>
+  </div>
 </template>
 <script>
-import Service from '../utils/Service'
-
 export default {
   name: 'icon-folder',
   props: {
     icon: { type: String },
     label: { type: String },
     parent: { type: String },
+    isSelected: {type: Boolean, default: false},
     enableInput: { type: Boolean, default: false }
   },
   data() {
@@ -43,12 +42,8 @@ export default {
     },
     onSave() {
       this.enableInput = false
-      this.$emit('onblur')
+      this.$emit('onblur', this.folderName)
       if (this.folderName.trim() === '') return
-      console.info('chain:', this.parent)
-      this.$ipcRenderer.send(Service.ADD_CATEGORY, this.folderName, this.parent)
-      // 同时更新缓存
-      this.$store.dispatch('addCategory', this.folderName, this.parent)
       this.label = this.folderName
     },
     onRightClick(event) {
@@ -61,15 +56,19 @@ export default {
 span{
   -webkit-user-select: none;
 }
+.item {
+  width: 100%;
+  display: inline-block;
+}
+.item:hover {
+  background-color:rgb(55, 80, 97);
+}
 input {
   display: inline;
 }
-.class-name:hover {
-  background-color:rgb(22, 149, 233);
-}
-.class-name {
+.selected {
   width: 100%;
-  cursor: default;
-  /* border: 2px solid brown ; */
+  display: inline-block;
+  background-color:rgb(16, 125, 197);
 }
 </style>

@@ -6,7 +6,7 @@ import Vue from 'vue'
 const state = {
   query: {},
   cache: [],
-  classes: [],
+  classes: [{name: 'test.jpg', type: 'jpg', id: 1}, {name: 'test', type: 'clz', id: 1, children: [{name: 'test2.jpg', type: 'jpg', id: 1}]}],
   viewItems: [],
   tags: {},
   untags: 0,
@@ -114,6 +114,9 @@ const mutations = {
     // update tags
     state.tags = await remote.recieveTags()
   },
+  addClass(state, mutation) {
+    Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
+  },
   removeFiles(state, query) {},
   update(state, sql) {}
 }
@@ -133,6 +136,9 @@ const actions = {
   },
   addTag({commit}, mutation) {
     commit('addTag', mutation)
+  },
+  addClass({commit}, mutation) {
+    commit('addClass', mutation)
   },
   update({commit}, sql) {
     /*

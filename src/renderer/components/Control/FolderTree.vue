@@ -1,18 +1,15 @@
 <template>
   <div class="tree" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
     <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu" tag="tree"></PopMenu>
-    <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)">
+    <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)" @click="onItemClick(idx)">
       <!-- {{item}} -->
-      <div >
-        <!-- <span v-if="item.type && item.type!='clz'" class="img-name" :id="item.id">{{item.label}}</span> -->
-        <i class="el-icon-caret-right" v-if="item.children && !(expandTree[idx])" @click="onExpand(idx)"></i>
-        <i class="el-icon-caret-bottom" v-if="item.children  && (expandTree[idx])" @click="onRetract(idx)"></i>
+        <i class="el-icon-caret-right" v-if="item.children && !(expandTree[idx])"></i>
+        <i class="el-icon-caret-bottom" v-if="item.children  && (expandTree[idx])"></i>
         <span class="el-icon-caret-right caret-hidden" v-if="item.type==='clz' && !item.children"></span>
-        <IconFolder v-if="!item.type || item.type==='clz'" :icon="item.icon?item.icon:'el-icon-folder'" :label="item.label" :parent="chain"></IconFolder>
+        <IconFolder :icon="item.icon?item.icon:'el-icon-folder'" :isSelected="selections[idx]" :label="item.name" :parent="chain"></IconFolder>
         <div v-if="item.children && item.children.length > 0 && (expandTree[idx])" class="children">
-          <FolderTree :data="item.children" :parent="(parent===undefined ? item.label : parent + '/' +item.label)"></FolderTree>
+          <FolderTree :data="item.children" :parent="(parent===undefined ? item.name : parent + '/' +item.name)"></FolderTree>
         </div>
-      </div>
     </div>
   </div>
 </template>
@@ -29,14 +26,18 @@ export default {
   },
   data() {
     let expandTree = []
+    let selections = []
     if (this.data) {
       for (let idx = 0; idx < this.data.length; ++idx) {
         expandTree.push(false)
+        selections.push(false)
       }
     }
-    // console.info('folder length:', this.data.length)
+    console.info('folder tree:', this.data)
     return {
       expandTree: expandTree,
+      selections: selections,
+      lastSelections: [],
       menus: [
         // {text: '添加子类', cb: this.onAddClass},
         {text: '重命名', cb: this.onChangeName},
@@ -53,19 +54,19 @@ export default {
     bus.on(bus.EVENT_REMOVE_ITEM, this.onRemoveItems)
   },
   methods: {
-    onExpand: function(idx) {
-      // console.info(idx)
-      this.$set(this.expandTree, idx, true)
-      // this.expandTree[idx] = true
-    },
-    onRetract: function(idx) {
-      this.$set(this.expandTree, idx, false)
-      // this.expandTree[idx] = false
+    onItemClick: function(idx) {
+      console.info(idx, this.expandTree[idx])
+      this.$set(this.expandTree, idx, !this.expandTree[idx])
+      for (let indx of this.lastSelections) {
+        this.selections[indx] = false
+      }
+      this.selections[idx] = true
+      this.lastSelections = [idx]
     },
     onPopMenu: function(event, root, parent, indx) {
       this.selection = event.toElement.innerText
       // console.info(this.parent, tag, root)
-      console.info('pop menu:', this.selection)
+      console.info('pop menu:', this.selection, indx)
       event.stopPropagation()
       event.preventDefault()
       root.$emit('easyAxis', {
@@ -131,10 +132,8 @@ export default {
   display: block;
   cursor: default;
 }
-.img-name:active {
-  background-color: dodgerblue;
-}
 .tree {
+  width: 100%;
   display: inline-block;
 }
 </style>

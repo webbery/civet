@@ -23,7 +23,7 @@ export default new Router({
     {
       path: '/tagManager',
       name: 'tag-page',
-      component: require('@/components/TagPanel').default
+      component: require('@/components/Panel/TagPanel').default
     },
     {
       path: '/query',
@@ -32,6 +32,10 @@ export default new Router({
     {
       path: '/uncategory',
       component: require('@/components/Panel/ViewPanel').default
+    },
+    {
+      path: '/untag',
+      component: require('@/components/Panel/TaglessPanel').default
     },
     {
       path: '/',

@@ -9,7 +9,7 @@ using namespace v8;
 namespace caxios {
 
 	CAxios::CAxios(const std::string& str, int flag, const std::string& meta) {
-    T_LOG("new CAxios(%s)", str.c_str());
+    T_LOG("CAxios", "new CAxios(%s)", str.c_str());
     if (m_pDBManager == nullptr) {
       m_pDBManager = new DBManager(str, flag, meta);
     }
@@ -65,7 +65,7 @@ namespace caxios {
     return m_pDBManager->GetTagsOfFiles(filesID, tags);
   }
 
-  bool CAxios::GetAllClasses(Classes& classes)
+  bool CAxios::GetAllClasses(nlohmann::json& classes)
   {
     return m_pDBManager->GetAllClasses(classes);
   }
@@ -80,6 +80,11 @@ namespace caxios {
     return m_pDBManager->UpdateFilesClasses(filesID, classes);
   }
 
+  bool CAxios::UpdateClassName(const std::string& oldName, const std::string& newName)
+  {
+    return m_pDBManager->UpdateClassName(oldName, newName);
+  }
+
   bool CAxios::RemoveFiles(const std::vector<FileID>& files)
   {
     return m_pDBManager->RemoveFiles(files);
@@ -90,22 +95,22 @@ namespace caxios {
     return m_pDBManager->RemoveTags(files, tags);
   }
 
-  bool CAxios::FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo)
+  bool CAxios::Query(const std::string& query, std::vector< FileInfo>& filesInfo)
   {
-    return m_pDBManager->FindFiles(query, filesInfo);
+    return m_pDBManager->Query(query, filesInfo);
   }
 
   CAxios::~CAxios() {
-    T_LOG("Begin ~CAxios()");
+    T_LOG("CAxios", "Begin ~CAxios()");
     if (m_pDBManager) {
       delete m_pDBManager;
       m_pDBManager = nullptr;
     }
-    T_LOG("Finish ~CAxios()");
+    T_LOG("CAxios", "Finish ~CAxios()");
   }
 
   void CAxios::Release(void* data) {
-    T_LOG("CAxios::Release()");
+    T_LOG("CAxios", "CAxios::Release()");
     // delete static_cast<CAxios*>(data);
   }
 

@@ -65,17 +65,17 @@ namespace caxios {
       return;
     }
     //open_flag |= MDB_NOTLS;
-    T_LOG("Open DB %s, flag: %d, Mode: %s", dbpath.c_str(), m_flag, m_flag == MDB_RDONLY? "ReadOnly": "ReadWrite");
+    T_LOG("database", "Open DB %s, flag: %d, Mode: %s", dbpath.c_str(), m_flag, m_flag == MDB_RDONLY? "ReadOnly": "ReadWrite");
     if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), m_flag | MDB_NOTLS | MDB_NORDAHEAD | MDB_NOSUBDIR | MDB_NOLOCK, 0664)) {
-      T_LOG("mdb_env_open fail: %s", err2str(rc).c_str());
+      T_LOG("database", "mdb_env_open fail: %s", err2str(rc).c_str());
     }
     if (const int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &m_pTransaction)) {
-      T_LOG("mdb_txn_begin fail: %s", err2str(rc).c_str());
+      T_LOG("database", "mdb_txn_begin fail: %s", err2str(rc).c_str());
     }
   }
   CDatabase::~CDatabase() {
     mdb_env_close(m_pDBEnv);
-    T_LOG("~CDatabase()");
+    T_LOG("database", "~CDatabase()");
   }
 
   MDB_dbi CDatabase::OpenDatabase(const std::string& dbname)
@@ -84,10 +84,10 @@ namespace caxios {
     unsigned int flag = MDB_CREATE;
     if (m_flag & MDB_RDONLY) flag = 0;
     if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), flag, &dbi)) {
-      T_LOG("mdb_dbi_open %s fail %s", dbname.c_str(), err2str(rc).c_str());
+      T_LOG("database", "mdb_dbi_open %s fail %s", dbname.c_str(), err2str(rc).c_str());
       return dbi;
     }
-    T_LOG("mdb_dbi_open %d, %s", dbi, dbname.c_str());
+    T_LOG("database", "mdb_dbi_open %d, %s", dbi, dbname.c_str());
     return dbi;
   }
 
@@ -98,7 +98,7 @@ namespace caxios {
       mdb_env_sync(m_pDBEnv, 1);
       m_pDBEnv = nullptr;
     }
-    T_LOG("mdb_close %d", dbi);
+    T_LOG("database", "mdb_close %d", dbi);
     //mdb_close(m_pDBEnv, dbi);
   }
 
@@ -109,13 +109,13 @@ namespace caxios {
     datum.mv_data = pData;
     datum.mv_size = len;
     if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
-      T_LOG("mdb_put fail: %s, key: %u", err2str(rc).c_str(), k);
+      T_LOG("database", "mdb_put fail: %s, key: %u", err2str(rc).c_str(), k);
       return false;
     }
     if (m_dOperator == NORMAL) {
       m_dOperator = TRANSACTION;
     }
-    T_LOG("mdb_put %d, key: %u", dbi, k);
+    T_LOG("database", "mdb_put %d, key: %u", dbi, k);
     return true;
   }
 
@@ -127,13 +127,13 @@ namespace caxios {
     datum.mv_data = pData;
     datum.mv_size = len;
     if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
-      T_LOG("mdb_put fail: %s, key: %s", err2str(rc).c_str(), k.c_str());
+      T_LOG("database", "mdb_put fail: %s, key: %s", err2str(rc).c_str(), k.c_str());
       return false;
     }
     if (m_dOperator == NORMAL) {
       m_dOperator = TRANSACTION;
     }
-    T_LOG("mdb_put %d, key: %s", dbi, k.c_str());
+    T_LOG("database", "mdb_put %d, key: %s", dbi, k.c_str());
     return true;
   }
 
@@ -144,14 +144,14 @@ namespace caxios {
     key.mv_size = sizeof(uint32_t);
     this->Begin();
     if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
-      T_LOG("mdb_get %d fail: %s", dbi, err2str(rc).c_str());
+      T_LOG("database", "mdb_get %d fail: %s", dbi, err2str(rc).c_str());
       pData = nullptr;
       len = 0;
       return false;
     }
     len = datum.mv_size;
     pData = datum.mv_data;
-    T_LOG("mdb_get %d, key: %u, len: %d", dbi, k, len);
+    T_LOG("database", "mdb_get %d, key: %u, len: %d", dbi, k, len);
     return true;
   }
 
@@ -162,12 +162,12 @@ namespace caxios {
     key.mv_size = k.size();
     this->Begin();
     if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
-      T_LOG("mdb_get fail: %s", err2str(rc).c_str());
+      T_LOG("database", "mdb_get fail: %s", err2str(rc).c_str());
       return false;
     }
     len = datum.mv_size;
     pData = datum.mv_data;
-    T_LOG("mdb_get %d, key: %u, len: %d", dbi, k, len);
+    T_LOG("database", "mdb_get %d, key: %u, len: %d", dbi, k, len);
     return true;
   }
 
@@ -177,7 +177,7 @@ namespace caxios {
     int rc = 0;
     this->Begin();
     if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
-      T_LOG("mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
+      T_LOG("database", "mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
       return false;
     }
 
@@ -200,7 +200,7 @@ namespace caxios {
     int rc = 0;
     this->Begin();
     if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
-      T_LOG("mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
+      T_LOG("database", "mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
       return false;
     }
 
@@ -225,7 +225,7 @@ namespace caxios {
     key.mv_size = sizeof(uint32_t);
 
     if (int rc = mdb_del(m_pTransaction, dbi, &key, NULL)) {
-      T_LOG("mdb_del fail: %s", err2str(rc).c_str());
+      T_LOG("database", "mdb_del fail: %s", err2str(rc).c_str());
       return false;
     }
     if (m_dOperator == NORMAL) {
@@ -238,7 +238,7 @@ namespace caxios {
   {
     if (m_pTransaction == nullptr) {
       if (int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &m_pTransaction)) {
-        T_LOG("mdb_txn_begin: %s", err2str(rc).c_str());
+        T_LOG("database", "mdb_txn_begin: %s", err2str(rc).c_str());
         return nullptr;
       }
       return m_pTransaction;
@@ -250,11 +250,11 @@ namespace caxios {
   {
     if (m_dOperator == NORMAL) return true;
     if (int rc = mdb_txn_commit(m_pTransaction)) {
-      T_LOG("mdb_txn_commit: %s", err2str(rc).c_str());
+      T_LOG("database", "mdb_txn_commit: %s", err2str(rc).c_str());
       return false;
     }
     m_pTransaction = nullptr;
-    T_LOG("mdb_txn_commit");
+    T_LOG("database", "mdb_txn_commit");
     m_dOperator = NORMAL;
     return true;
   }

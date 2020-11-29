@@ -5,7 +5,7 @@
         <el-scrollbar style="height:95vh;">
           <table rules="none" cellspacing=0 >
             <tr class="item" @click="handleResourceClick(headOptions[0])"><i :class="headOptions[0].icon"></i><td>全部</td><td /></tr>
-            <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{classes}}</td></tr>
+            <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{unclasses}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{untags}}</td></tr>
             <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
           </table>
@@ -25,9 +25,7 @@
 
 <script>
 import bus from '../utils/Bus'
-import Service from '@/components/utils/Service'
 import FolderTree from '@/components/Control/FolderTree'
-import IconFolder from '@/components/Control/IconFolder'
 import TreePanel from '@/components/Panel/TreePanel'
 import { mapState } from 'vuex'
 
@@ -35,7 +33,6 @@ export default {
   name: 'navigation-panel',
   components: {
     FolderTree,
-    IconFolder,
     TreePanel
   },
   data() {
@@ -66,7 +63,7 @@ export default {
         }
       ],
       newFolder: false,
-      // category: [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: dir/jpg, children: []}]
+      // category: [{name: 'test.jpg', type: 'jpg', id: 1}, {name: 'test', type: 'dir', id: 1, children: [{name: 'test2.jpg', type: 'jpg', id: 1}]}], // [{label: name, type: dir/jpg, children: []}]
       newCategoryName: ''
     }
   },
@@ -80,12 +77,11 @@ export default {
     // },
     category: state => state.Cache.classes,
     untags: state => state.Cache.untags,
-    classes: state => state.Cache.unclasses
+    unclasses: state => state.Cache.unclasses
   }),
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
     bus.on(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, this.updateUncategoryImages)
-    this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.updateDisplayImageList)
     this.init()
   },
   methods: {
@@ -104,53 +100,6 @@ export default {
     //   const unclasses = this.$kernel.getUnClassifyFiles()
     //   this.headOptions[1].value = unclasses.length
     // },
-    updateDisplayImageList(error, appendFiles) {
-      if (error) console.log(error)
-      console.info('recieve from worker message:', appendFiles)
-      // this.updateUntagFiles()
-      // this.updateUnclassifyFiles()
-      // TODO: 可能更新频繁导致的卡顿
-      const getCategory = function(categoryPath, children) {
-        if (categoryPath.length === 0) return children
-        for (let item of children) {
-          if (item.label === categoryPath[0]) {
-            if (item.children === undefined) {
-              item.children = []
-              return item.children
-            } else {
-              return getCategory(categoryPath.slice(1), item.children)
-            }
-          }
-          if (item.children !== undefined) {
-            return getCategory(categoryPath, parent, item.children)
-          }
-        }
-        return undefined
-      }
-
-      // for (let item of appendFiles) {
-      //   if (item.category === undefined || item.category.length === 0) {
-      //     this.category.push({label: item.filename, id: item.id, type: item.type})
-      //   } else {
-      //     for (let cate of item.category) {
-      //       const catePath = cate.split('/')
-      //       let location = getCategory(catePath, this.category)
-      //       if (location === undefined) { // 分类不存在
-      //         let children = []
-      //         let root = children
-      //         for (let c of catePath) {
-      //           children.push({label: c, type: 'clz', children: []})
-      //           children = children.children
-      //         }
-      //         children.push({label: item.filename, id: item.id, type: item.type})
-      //         this.category.children.push(root)
-      //       } else { // 找到了对应的分类
-      //         location.push({label: item.filename, id: item.id, type: item.type})
-      //       }
-      //     }
-      //   }
-      // }
-    },
     init() {
       const snaps = this.$kernel.getFilesSnap()
       let category = []
@@ -173,6 +122,10 @@ export default {
         case 'manageTag':
           this.$router.push({path: '/tagManager', query: {name: node.label, cmd: 'manage-tag'}})
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '标签管理', cmd: 'display-tag'})
+          break
+        case 'untag':
+          this.$router.push({path: '/untag', query: {name: node.label, cmd: ''}})
+          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '未标签', cmd: 'display-tagless'})
           break
         case 'all':
           this.$router.push({path: '/', query: {name: node.label, cmd: 'display-all'}})
@@ -221,26 +174,8 @@ el-tab-pane {
   margin: 0 20px;
   padding: 0 10px;
 }
-.noselection{
-  color: #999;
-  -webkit-user-select: none;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-}
-.noselection:hover{
-  background-color: rgb(9, 143, 231);
-}
-.noselection:hover:after {
-  color: white;
-  position: absolute;
-  width: 100px;
-  height: 25px;
-  content: '单击添加新的分类';
-  z-index: 99999;
-}
 .item:hover {
-  background-color:rgb(22, 149, 233);
+  background-color:rgb(16, 125, 197);
   -webkit-user-select: none;
 }
 .item {

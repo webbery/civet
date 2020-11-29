@@ -22,7 +22,7 @@ import HeaderBar from '@/components/HeaderBar'
 import NavigationPanel from '@/components/Panel/NavigationPanel'
 import ViewPanel from '@/components/Panel/ViewPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
-import TagPanel from '@/components/TagPanel'
+import TagPanel from '@/components/Panel/TagPanel'
 import ConfigPanel from '@/components/ConfigPanel'
 import Global from '@/components/utils/Global'
 

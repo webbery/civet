@@ -2,8 +2,8 @@
 #include "database.h"
 #include "json.hpp"
 #include <map>
-#include "QueryParser.h"
 #include <Table.h>
+#include "log.h"
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
@@ -26,10 +26,11 @@ namespace caxios {
     bool GetUntagFiles(std::vector<FileID>& filesID);
     bool GetUnClassifyFiles(std::vector<FileID>& filesID);
     bool GetTagsOfFiles(const std::vector<FileID>& filesID, std::vector<Tags>& tags);
-    bool GetAllClasses(Classes& classes);
+    bool GetAllClasses(nlohmann::json& classes);
     bool GetAllTags(TagTable& tags);
     bool UpdateFilesClasses(const std::vector<FileID>& filesID, const std::vector<std::string>& classes);
-    bool FindFiles(const nlohmann::json& query, std::vector< FileInfo>& filesInfo);
+    bool UpdateClassName(const std::string& oldName, const std::string& newName);
+    bool Query(const std::string& query, std::vector< FileInfo>& filesInfo);
 
   private:
     bool AddFile(FileID, const MetaItems&, const Keywords&);
@@ -40,18 +41,41 @@ namespace caxios {
     bool RemoveTag(FileID, const Tags& tags);
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);
+    std::vector<FileID> GetFilesByClass(const std::vector<WordIndex>& clazz);
+    bool IsFileExist(FileID fileID);
+    bool IsClassExist(const std::string& clazz);
+    uint32_t GenerateClassHash(const std::vector<WordIndex>& clazz);
+    uint32_t GetClassHash(const std::string& clazz);
+    std::vector<FileID> mapExistFiles(const std::vector<FileID>&);
     void ParseMeta(const std::string& meta);
     void UpdateCount1(CountType ct, int cnt);
-    void SetSnapStep(FileID fileID, int offset);
+    void SetSnapStep(FileID fileID, int bit);
     char GetSnapStep(FileID fileID, nlohmann::json&);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
     std::vector<std::string> GetWordByIndex(const WordIndex* const wordsIndx, size_t cnt);
+    template<typename Itr>
+    std::map<WordIndex, std::string> GetWordByIndex(const Itr start, const Itr end) {
+      std::map<WordIndex, std::string> mWords;
+      for (Itr itr = start; itr != end; ++itr)
+      {
+        WordIndex index = *itr;
+        if (index == 0) {
+          T_LOG("dict", "word index: 0");
+          continue;
+        }
+        void* pData = nullptr;
+        uint32_t len = 0;
+        if (!m_pDatabase->Get(m_mDBs[TABLE_INDX_KEYWORD], index, pData, len)) continue;
+        std::string word((char*)pData, len);
+        mWords[index] = word;
+      }
+      return std::move(mWords);
+    }
     std::vector<std::vector<FileID>> GetFilesIDByTagIndex(const WordIndex* const wordsIndx, size_t cnt);
 
   private:
     DBFlag _flag = ReadWrite;
     CDatabase* m_pDatabase = nullptr;
-    QueryParser m_qParser;
     std::map<std::string, MDB_dbi > m_mDBs;
     std::map<std::string, ITable*> m_mTables;
   };

@@ -69,7 +69,6 @@ export default {
     //   this.imageList = list
     // }
     // bus.on(bus.EVENT_REMOVE_FILES, this.onRemoveFiles)
-    this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
   },
   computed: mapState({
@@ -189,13 +188,6 @@ export default {
       // event.stopPropagation()
       const url = event.dataTransfer.getData('my-info')
       console.info('copy URI:', url)
-    },
-    onUpdateImages(error, updateImages) {
-      if (error) console.log(error)
-      this.$store.dispatch('addFiles', updateImages)
-      // for (let item of updateImages) {
-      //   this.imageList.push({id: item.id, filename: item.filename, path: item.path})
-      // }
     },
     onRemoveFiles(removeIDs) {
       for (let id of removeIDs) {

@@ -4,17 +4,18 @@
 #include <vector>
 
 #ifdef _DEBUG
-#define T_LOG(fmt, ...) \
-  printf("[%s] [%s:%d] [%u] [%s] "##fmt "\n",\
+#define T_LOG(module, fmt, ...) \
+  printf("[%s] [%s:%d] [%u] [%s] [%s] "##fmt "\n",\
     caxios::current().c_str(),\
     caxios::get_file_name(__FILE__).c_str(),\
     __LINE__,\
     caxios::threadid(),\
+    module,\
     __FUNCTION__,\
     __VA_ARGS__)
 #else
 #include <string.h>
-#define T_LOG(fmt, ...)  {\
+#define T_LOG(module, fmt, ...)  {\
     char* clg = new char[1024];\
     memset(clg, 0, 1024);\
     sprintf(clg, "[%s] [%s:%d] [%u] [%s] " fmt "\n", \
@@ -22,6 +23,7 @@
       caxios::get_file_name(__FILE__).c_str(),\
       __LINE__,\
       caxios::threadid(),\
+      module,\
       __FUNCTION__, ##__VA_ARGS__);\
     log2file(clg);\
     delete[] clg;\
@@ -46,6 +48,7 @@ namespace caxios {
   }
 
   std::string format_vector(const std::vector<std::string>& vi);
+  std::string format_x16(const std::string& str);
 
   bool init_log(bool flag);
   void log2file(const std::string& log);

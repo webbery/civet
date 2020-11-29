@@ -20,8 +20,10 @@
   </div>
 </template>
 <script>
+import IconFolder from '@/components/Control/IconFolder'
 export default {
   name: 'TreePanel',
+  components: { IconFolder },
   data() {
     return {
       newClass: false,
@@ -55,11 +57,12 @@ export default {
     },
     onAddClassify(event) {
       event.stopPropagation()
-      console.info('onAddClassify')
       this.newClass = true
     },
-    onBlur() {
-      this.newClass = false
+    onBlur(newClass) {
+      if (newClass.trim() === '') return
+      this.$store.dispatch('addClass', newClass)
+      this.newClass = false// 同时更新缓存
       this.newCategoryName = ''
     }
   }

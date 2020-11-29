@@ -7,7 +7,6 @@
 #include <functional>
 #include "json.hpp"
 #include "log.h"
-#include "Value.h"
 
 // https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
 #define EXPORT_JS_FUNCTION_PARAM(name) exports.Set(#name, Napi::Function::New(env, caxios::name));
@@ -40,6 +39,72 @@ namespace caxios {
       obj.Set("class", classes);
       return obj;
     }
+
+    Napi::Value Classes2Array(napi_env env, const nlohmann::json& vClasses) {
+      T_LOG("interface", "classes json: %s", vClasses.dump().c_str());
+      int addition = 0;
+      if (vClasses.find("type") != vClasses.end()) {
+        addition = -1;
+      }
+      if (addition == -1 && vClasses.size() == 1) {
+        return Napi::Value();
+      }
+      else if (vClasses.is_string() && vClasses.get<std::string>() == "type") {
+        return Napi::Value();
+      }
+      if (vClasses.is_object()) {
+        size_t pos = 0;
+        Napi::Array array = Napi::Array::New(env, vClasses.size() + addition);
+        for (auto itr = vClasses.begin(); itr != vClasses.end(); ++itr) {
+          T_LOG("interface", "classes json key: %s", itr.key().c_str());
+          if (itr.key() == "type") continue;
+          Napi::Object cls = Napi::Object::New(env);
+          if (itr.key() == "children") {
+            auto& item = itr.value();
+            if (item.size()) {
+              Napi::Value children = Classes2Array(env, item);
+              //Napi::Array children = Napi::Array::New(env, item.size());
+              //size_t idx = 0;
+              //for (auto ptr = item.begin(); ptr != item.end(); ++ptr)
+              //{
+              //  if (ptr->is_object()) {
+              //    Napi::Value child = Classes2Array(env, ptr.value());
+              //    children.Set(idx, child);
+              //  }
+              //  else {
+              //    T_LOG("class size obj %d: %d", item.size(), ptr.value().get<FileID>());
+              //    children.Set(idx, ptr.value().get<FileID>());
+              //  }
+              //  ++idx;
+              //}
+              cls.Set("children", children);
+            }
+          }
+          else {
+            cls.Set("name", itr.key());
+            cls.Set("type", "clz");
+            Napi::Value children = Classes2Array(env, itr.value());
+            if (!children.IsUndefined()) {
+              cls.Set("children", children.As<Napi::Array>());
+            }
+          }
+          array.Set(pos, cls);
+          pos += 1;
+        }
+        return array;
+      }
+      else if (vClasses.is_array()) { // array
+        size_t pos = 0;
+        Napi::Array array = Napi::Array::New(env, vClasses.size());
+        for (auto ptr = vClasses.begin(); ptr != vClasses.end(); ++ptr) {
+          if (ptr->is_number()) {
+            array.Set(pos, ptr->get<FileID>());
+          }
+        }
+        return array;
+      }
+      return Napi::Value();
+    }
   }
 
   Napi::Value release(const Napi::CallbackInfo& info){
@@ -68,7 +133,7 @@ namespace caxios {
         meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
       }
       g_pCaxios = new CAxios(path, flag, meta);
-      T_LOG("init success");
+      T_LOG("interface", "init success");
     }
     return Napi::Value::From(info.Env(), true);
   }
@@ -126,7 +191,7 @@ namespace caxios {
               }
 #endif
               else if (obj.IsArray()) {
-                T_LOG("Is Array: ??");
+                T_LOG("interface", "Is Array: ??");
               }
               meta[k] = sVal;
               //T_LOG("Object: %s, %s", k.c_str(), sVal.c_str());
@@ -142,17 +207,17 @@ namespace caxios {
           ForeachObject(item, [&](const std::string& k, Napi::Value v) {
             if (mMetaProccess.find(k) != mMetaProccess.end()) mMetaProccess[k](v);
             else {
-              T_LOG("Key [%s] callback not exist", k.c_str());
+              T_LOG("interface", "Key [%s] callback not exist", k.c_str());
             }
           });
           vFiles.emplace_back(std::make_tuple(fileID, metaItems,keywords));
         }
       });
       if (!g_pCaxios->AddFiles(vFiles)) {
-        T_LOG("addFiles fail");
+        T_LOG("interface", "addFiles fail");
         return Napi::Boolean::From(info.Env(), false);
       }
-      T_LOG("addFiles Success");
+      T_LOG("interface", "addFiles Success");
       return Napi::Boolean::From(info.Env(), true);
     }
     return Napi::Value();
@@ -165,7 +230,7 @@ namespace caxios {
     auto tags = AttrAsArray(obj, "tag");
     std::vector<FileID> vFileID = ArrayAsUint32Vector(ids);
     std::vector<std::string> vTags = ArrayAsStringVector(tags);
-    T_LOG("start set tags, input file ids: %s, tags: %s", format_vector(vFileID).c_str(), format_vector(vTags).c_str());
+    T_LOG("interface", "start set tags, input file ids: %s, tags: %s", format_vector(vFileID).c_str(), format_vector(vTags).c_str());
     if (!g_pCaxios->SetTags(vFileID, vTags)) {
       return Napi::Boolean::From(info.Env(), false);
     }
@@ -187,7 +252,7 @@ namespace caxios {
       auto clsNames = AttrAsArray(obj, "class");
       std::vector<FileID> vFileID = ArrayAsUint32Vector(ids);
       std::vector<std::string> vClasses = ArrayAsStringVector(clsNames);
-      T_LOG("add files to classes");
+      T_LOG("interface", "add files to classes");
       if (!g_pCaxios->AddClasses(vClasses, vFileID)) {
         return Napi::Boolean::From(info.Env(), false);
       }
@@ -222,11 +287,15 @@ namespace caxios {
     auto sql = info[0].As<Napi::Object>();
     auto filesID = AttrAsUint32Vector(sql, "id");
     auto classes = AttrAsStringVector(sql, "class");
-
-    return Napi::Boolean::From(info.Env(), true);
+    bool result = g_pCaxios->UpdateFilesClasses(filesID, classes);
+    return Napi::Boolean::From(info.Env(), result);
   }
   Napi::Value updateClassName(const Napi::CallbackInfo& info) {
-    return info.Env().Undefined();
+    if (!g_pCaxios) return Napi::Boolean::From(info.Env(), false);
+    std::string oldName = info[0].As<Napi::String>();
+    std::string newName = info[1].As<Napi::String>();
+    bool result = g_pCaxios->UpdateClassName(oldName, newName);
+    return Napi::Boolean::From(info.Env(), result);
   }
 
   Napi::Value getFilesInfo(const Napi::CallbackInfo& cbInfo) {
@@ -239,7 +308,7 @@ namespace caxios {
           FileID fid = item.As<Napi::Number>().Uint32Value();
           filesID.emplace_back(fid);
         });
-        T_LOG("files info %s", format_vector(filesID).c_str());
+        T_LOG("interface", "files info %s", format_vector(filesID).c_str());
         bool result = g_pCaxios->GetFilesInfo(filesID, filesInfo);
         Napi::Array array = Napi::Array::New(cbInfo.Env(), filesInfo.size());
         for (unsigned int i = 0; i < filesInfo.size(); ++i) {
@@ -299,10 +368,10 @@ namespace caxios {
     if (g_pCaxios) {
       std::vector<FileID> vFilesID;
       if (!g_pCaxios->GetUntagFiles(vFilesID)) {
-        T_LOG("get untag file fail");
+        T_LOG("interface", "get untag file fail");
       }
       else {
-        T_LOG("get untag file");
+        T_LOG("interface", "get untag file");
       }
       Napi::Env env = info.Env();
       Napi::Array array = Napi::Array::New(env, vFilesID.size());
@@ -328,25 +397,20 @@ namespace caxios {
   }
   Napi::Value getAllClasses(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {
-      Classes classes;
+      nlohmann::json classes;
       g_pCaxios->GetAllClasses(classes);
       Napi::Env env = info.Env();
-      Napi::Array array = Napi::Array::New(env, classes.size());
-      for (unsigned int i = 0; i < classes.size(); ++i) {
-        array.Set(i, Napi::Value::From(env, classes[i]));
-      }
-      return array;
+      auto arry = Classes2Array(env, classes);
+      return arry;
     }
     return Napi::Value();
   }
   Napi::Value getTagsOfFiles(const Napi::CallbackInfo& info) {
-    T_LOG("get tag");
     if (g_pCaxios) {
       Napi::Object obj = info[0].As<Napi::Object>();
       auto aFilesID = AttrAsArray(obj, "id");
       std::vector<FileID> vFilesID = ArrayAsUint32Vector(aFilesID);
       std::vector<Tags> vTags;
-      T_LOG("get tag 2");
       g_pCaxios->GetTagsOfFiles(vFilesID, vTags);
       Napi::Array array = Napi::Array::New(info.Env(), vTags.size());
       return array;
@@ -362,7 +426,7 @@ namespace caxios {
         vFilesID[i] = AttrAsUint32(arr, i);
       }
       if (g_pCaxios->RemoveFiles(vFilesID)) {
-        T_LOG("Remove files finish");
+        T_LOG("interface", "Remove files finish");
         return Napi::Boolean::From(info.Env(), true);
       }
     }
@@ -394,20 +458,25 @@ namespace caxios {
     return Napi::Value();
   }
   
-  Napi::Value findFiles(const Napi::CallbackInfo& info) {
+  Napi::Value query(const Napi::CallbackInfo& info) {
     if (g_pCaxios != nullptr) {
       if (!info[0].IsUndefined()) {
         auto str = Stringify(info.Env(), info[0].As<Napi::Object>());
-        nlohmann::json query = nlohmann::json::parse(str);
-        std::vector<FileInfo> vFiles;
-        g_pCaxios->FindFiles(query, vFiles);
-        Napi::Env env = info.Env();
-        Napi::Array array = Napi::Array::New(env, vFiles.size());
-        for (unsigned int i = 0; i < vFiles.size(); ++i) {
-          Napi::Object obj = FileInfo2Object(env, vFiles[i]);
-          array.Set(i, Napi::Value::From(env, obj));
+        try {
+          std::vector<FileInfo> vFiles;
+          g_pCaxios->Query(str, vFiles);
+          Napi::Env env = info.Env();
+          Napi::Array array = Napi::Array::New(env, vFiles.size());
+          for (unsigned int i = 0; i < vFiles.size(); ++i) {
+            Napi::Object obj = FileInfo2Object(env, vFiles[i]);
+            array.Set(i, Napi::Value::From(env, obj));
+          }
+          return array;
         }
-        return array;
+        catch (const std::exception& e) {
+          T_LOG("query", "exception: %s", e.what());
+          return Napi::String::From(info.Env(), e.what());
+        }
       }
     }
     return Napi::Value();
@@ -445,7 +514,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(removeTags);
   EXPORT_JS_FUNCTION_PARAM(removeClasses);
   EXPORT_JS_FUNCTION_PARAM(searchFiles);
-  EXPORT_JS_FUNCTION_PARAM(findFiles);
+  EXPORT_JS_FUNCTION_PARAM(query);
   EXPORT_JS_FUNCTION_PARAM(writeLog);
   return exports;
 }

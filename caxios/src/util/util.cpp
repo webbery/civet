@@ -29,7 +29,12 @@ namespace caxios {
       char len = v.size();
       s.push_back(len);
       std::string t = serialize(v);
-      s.append(t);
+      for (auto itr = t.begin(); itr<t.end();++itr)
+      {
+        s.push_back(*itr);
+      }
+      //std::copy(t.begin(), t.end(), s.end());
+      T_LOG("util", "serialize %s(%d)", format_x16(t).c_str(), len);
     }
     return s;
   }
@@ -37,7 +42,8 @@ namespace caxios {
   void deserialize(const std::string& s, std::vector<WordIndex>& v)
   {
     for (size_t idx = 0; idx < s.size(); idx += 4) {
-      WordIndex wi = (s[3] | s[2] | s[1] | s[0]);
+      WordIndex wi = ((s[idx] >> 24) | (s[idx + 1] >> 16) | (s[idx + 2] >> 8) | s[idx + 3]);
+      T_LOG("util", "deserialize %s: %d", format_x16(s).c_str(), wi);
       v.emplace_back(wi);
     }
   }
@@ -52,19 +58,29 @@ namespace caxios {
     }
   }
 
+  int32_t encode(const std::string& str)
+  {
+    int32_t hash, idx;
+    for (hash = str.size(), idx = 0; idx < str.size(); ++idx) {
+      hash = (hash << 4) ^ (hash >> 28) ^ str[idx];
+    }
+    return hash % std::numeric_limits<int32_t>::max();
+  }
+
   std::string serialize(const std::vector<WordIndex>& classes)
   {
     std::string s;
     for (const WordIndex& wi : classes) {
-      char c1 = wi & CHAR_BIT;
-      s.push_back(c1);
+      char c4 = wi & (CHAR_BIT << 24);
+      s.push_back(c4);
+      char c3 = wi & (CHAR_BIT << 16);
+      s.push_back(c3);
       char c2 = wi & (CHAR_BIT << 8);
       s.push_back(c2);
-      char c3 = wi & (CHAR_BIT << 8);
-      s.push_back(c3);
-      char c4 = wi & (CHAR_BIT << 8);
-      s.push_back(c4);
+      char c1 = wi & CHAR_BIT;
+      s.push_back(c1);
     }
+    T_LOG("util", "serialize %s(%d, %d)", format_x16(s).c_str(), classes.size(), s.size());
     return s;
   }
 

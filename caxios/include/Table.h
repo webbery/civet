@@ -2,7 +2,7 @@
 #include <string>
 #include "datum_type.h"
 
-#define TABLE_META          "dbinfo"
+#define TABLE_SCHEMA        "dbinfo"
 #define TABLE_FILESNAP      "file_snap"
 #define TABLE_FILE_META     "file_meta"
 #define TABLE_KEYWORD_INDX  "keyword2indx"
@@ -10,8 +10,10 @@
 #define TABLE_TAG           "tag"           // fileID -> tag
 #define TABLE_TAG2FILE      "tags"          // tag -> fileID
 #define TABLE_TAG_INDX      "tag_indx"      // alphabet -> tag indx
-#define TABLE_CLASS         "class"         // fileID -> class
-#define TABLE_CLASS2FILE    "classes"       // class -> fileID
+#define TABLE_CLASS2HASH    "class2hash"    // class -> hash, so that when class name change, hash can not be change
+#define TABLE_HASH2CLASS    "hash2class"    // hash -> class
+#define TABLE_FILE2CLASS    "class"         // fileID -> class hash
+#define TABLE_CLASS2FILE    "classes"       // class hash -> fileID
 #define TABLE_COUNT         "count"         // about count of some statistic
 #define TABLE_ANNOTATION    "annotation"
 #define TABLE_MATCH_META    "match_meta"

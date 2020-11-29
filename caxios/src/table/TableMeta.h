@@ -1,7 +1,6 @@
 #pragma once
 #include "Table.h"
 #include "lmdb/lmdb.h"
-#include "Value.h"
 #include <string.h>
 #include "database.h"
 
@@ -47,6 +46,5 @@ namespace caxios {
   private:
     MDB_dbi _dbi = 0;
     std::string _table;
-    ValueType _type = VTUnkwon;
   };
 }
