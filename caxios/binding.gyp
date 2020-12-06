@@ -12,6 +12,7 @@
         "src/db_manager.cpp",
         "src/log.cpp",
         "src/DBThread.cpp",
+        "src/QueryAction.cpp",
         "src/table/TableTag.cpp",
         "src/table/TableMeta.cpp",
         "src/civetkern.cpp" ],

@@ -89,9 +89,9 @@ namespace caxios {
     return obj.Has(attr);
   }
 
-  std::string AttrAsStr(Napi::Object obj, std::string attrs)
+  std::string AttrAsStr(Napi::Object obj, const std::string& attrs)
   {
-    //T_LOG("display: %s", attrs.c_str());
+    //T_LOG("util", "---display: %s", attrs.c_str());
     if (attrs[0] != '/') {
       return obj.Get(attrs).As<Napi::String>();
     }
@@ -100,7 +100,7 @@ namespace caxios {
       std::string attr = attrs.substr(1, offset - 1);
       size_t count = attrs.size() - attr.size();
       std::string child = attrs.substr(offset, count);
-      //T_LOG("display: %s, %s", attr.c_str(), child.c_str());
+      //T_LOG("util", "display: %s, %s", attr.c_str(), child.c_str());
       obj = obj.Get(attr).As<Napi::Object>();
       return AttrAsStr(obj, child);
     }

@@ -95,9 +95,6 @@ describe('civetkern add test', function() {
   it('update class name', function() {
     instance.updateClassName('newClass', '新分类')
   })
-  it('find files success', function() {
-    let result = instance.findFiles('{keyword}')
-  })
   after(function() {
     instance.release()
   })
@@ -116,7 +113,7 @@ describe('civetkern read only test', function() {
   it('get files info', function() {
     // console.info('file id', snaps[0])
     let filesInfo = instance.getFilesInfo([snaps[0].id])
-    // console.info(filesInfo)
+    console.info(filesInfo)
     expect(filesInfo).to.lengthOf(1)
     expect(filesInfo[0]['tag']).to.exist
     expect(filesInfo[0]['tag']).to.not.include('test')
@@ -147,12 +144,10 @@ describe('civetkern read only test', function() {
     let result = instance.getTagsOfFiles({id: [snaps[0].id]})
     expect(result).to.lengthOf(1)
   })
-  it('find files success', function() {
-    instance.findFiles({tag: 'test'})
-    // instance.findFiles({size: {$gt: 10240, $lt: 21000}})
-  })
   it('search files', function() {
-    instance.searchFiles('分类')
+    let result = instance.query({keyword: '标签'})
+    console.info(result)
+    // instance.findFiles({size: {$gt: 10240, $lt: 21000}})
   })
   after(function() {
     instance.release()

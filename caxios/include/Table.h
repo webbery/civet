@@ -7,6 +7,8 @@
 #define TABLE_FILE_META     "file_meta"
 #define TABLE_KEYWORD_INDX  "keyword2indx"
 #define TABLE_INDX_KEYWORD  "indx2keyword"
+#define TABLE_KEYWORD2FILE  "keyword2file"
+#define TABLE_FILE2KEYWORD  "file2keyword"
 #define TABLE_TAG           "tag"           // fileID -> tag
 #define TABLE_TAG2FILE      "tags"          // tag -> fileID
 #define TABLE_TAG_INDX      "tag_indx"      // alphabet -> tag indx
@@ -19,6 +21,8 @@
 #define TABLE_MATCH_META    "match_meta"
 #define TABLE_MATCH         "match_t"
 #define TABLE_RECYCLE_ID    "recycle"
+
+#define SCHEMA_VERSION    1
 
 namespace caxios {
   class CDatabase;

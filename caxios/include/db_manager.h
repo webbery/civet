@@ -32,9 +32,15 @@ namespace caxios {
     bool UpdateClassName(const std::string& oldName, const std::string& newName);
     bool Query(const std::string& query, std::vector< FileInfo>& filesInfo);
 
+  public: // will be implimented in ITable
+    bool QueryKeyword(const std::string& tableName, const std::string& value, std::vector<FileID>& outFilesID);
+
   private:
+    void ValidVersion();
     bool AddFile(FileID, const MetaItems&, const Keywords&);
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
+    bool AddFileID2Keyword(FileID, WordIndex);
+    bool AddKeyword2File(WordIndex, FileID);
     bool AddTagPY(const std::string& tag, WordIndex indx);
     bool AddFileID2Class(const std::vector<FileID>& vFilesID, const std::string&);
     bool RemoveFile(FileID);

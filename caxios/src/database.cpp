@@ -44,23 +44,25 @@ namespace caxios {
 
   CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
     createDirectories(dbpath);
+    T_LOG("init", "createDirectories: %s", dbpath.c_str());
     if (flag == DBFlag::ReadOnly) m_flag = MDB_RDONLY;
     else m_flag = MDB_WRITEMAP;
 
     mdb_env_create(&m_pDBEnv);
     mdb_env_set_maxreaders(m_pDBEnv, 4);
 #ifdef _DEBUG
-#define MAX_EXPAND_DB_SIZE  50*1024*1024
+#define MAX_EXPAND_DB_SIZE  5*1024*1024
 #else
 #define MAX_EXPAND_DB_SIZE  1*1024*1024*1024
 #endif
+    T_LOG("init", "max db size: %d", MAX_EXPAND_DB_SIZE);
     if (const int rc = mdb_env_set_mapsize(m_pDBEnv, MAX_EXPAND_DB_SIZE)) {
-      std::cout << "mdb_env_set_mapsize fail: " << err2str(rc) << std::endl;
+      T_LOG("init", "mdb_env_set_mapsize fail: %s", err2str(rc).c_str());
       mdb_env_close(m_pDBEnv);
       return;
     }
     if (const int rc = mdb_env_set_maxdbs(m_pDBEnv, MAX_NUM_DATABASE)) {
-      std::cout << "mdb_env_set_maxdbs fail: " << err2str(rc) << std::endl;
+      T_LOG("init", "mdb_env_set_maxdbs fail: %s", err2str(rc).c_str());
       mdb_env_close(m_pDBEnv);
       return;
     }
@@ -109,13 +111,13 @@ namespace caxios {
     datum.mv_data = pData;
     datum.mv_size = len;
     if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
-      T_LOG("database", "mdb_put fail: %s, key: %u", err2str(rc).c_str(), k);
+      T_LOG("database", "mdb_put fail: %s, key: %d, data: %p, len: %d", err2str(rc).c_str(), k, pData, len);
       return false;
     }
     if (m_dOperator == NORMAL) {
       m_dOperator = TRANSACTION;
     }
-    T_LOG("database", "mdb_put %d, key: %u", dbi, k);
+    T_LOG("database", "mdb_put %d, key: %d", dbi, k);
     return true;
   }
 

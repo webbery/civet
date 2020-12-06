@@ -1,7 +1,7 @@
 {
   "name": "civet",
   "version": "0.1.0",
-  "author": "webberg <weble@qq.com>",
+  "author": "webberg <webbery@foxmail.com>",
   "description": "图像素材管理软件",
   "license": "MIT",
   "main": "./dist/electron/main.js",

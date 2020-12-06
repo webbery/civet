@@ -37,6 +37,9 @@ namespace caxios {
       // class
       Napi::Array classes = Vector2Array(env, std::get<3>(info));
       obj.Set("class", classes);
+      // keyword
+      Napi::Array keywords = Vector2Array(env, std::get<5>(info));
+      obj.Set("keyword", keywords);
       return obj;
     }
 

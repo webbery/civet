@@ -18,7 +18,7 @@
 #define T_LOG(module, fmt, ...)  {\
     char* clg = new char[1024];\
     memset(clg, 0, 1024);\
-    sprintf(clg, "[%s] [%s:%d] [%u] [%s] " fmt "\n", \
+    sprintf(clg, "[%s] [%s:%d] [%u] [%s] [%s] " fmt "\n", \
       caxios::current().c_str(),\
       caxios::get_file_name(__FILE__).c_str(),\
       __LINE__,\

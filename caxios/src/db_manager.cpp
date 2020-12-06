@@ -27,10 +27,13 @@
 
 namespace caxios {
   const char* g_tables[] = {
+    TABLE_SCHEMA,
     TABLE_FILESNAP,
     TABLE_FILE_META,
     TABLE_KEYWORD_INDX,
     TABLE_INDX_KEYWORD,
+    TABLE_KEYWORD2FILE,
+    TABLE_FILE2KEYWORD,
     TABLE_TAG,
     TABLE_TAG2FILE,
     TABLE_TAG_INDX,
@@ -66,6 +69,7 @@ namespace caxios {
       ParseMeta(meta);
     }
     // 检查数据库版本是否匹配, 如果不匹配, 则开启线程，将当前数据库copy一份，进行升级, 并同步后续的所有写操作
+
     // 如果期间程序退出中断, 记录中断点, 下次启动时继续 
   }
 
@@ -134,14 +138,20 @@ namespace caxios {
       std::vector<std::string> vTokens = split(clazz, '/');
       std::vector<WordIndex> vClassPath;
       T_LOG("class", "class path %d", vClassPath.size());
-      std::for_each(vTokens.begin(), vTokens.end(), [&mIndexes, &vClassPath](const std::string& token) {
-        T_LOG("class", "class token: %s, %d", token.c_str(), mIndexes[token]);
+      std::for_each(vTokens.begin(), vTokens.end(), [this, &mIndexes, &vClassPath, &existID](const std::string& token) {
+        T_LOG("class", "files count %d, class token: %s, %d", existID.size(), token.c_str(), mIndexes[token]);
         vClassPath.emplace_back(mIndexes[token]);
+        for (FileID fileID : existID)
+        {
+          this->AddKeyword2File(mIndexes[token], fileID);
+          this->AddFileID2Keyword(mIndexes[token], fileID);
+        }
       });
       T_LOG("class", "class path %d", vClassPath.size());
       std::string classPath = serialize(vClassPath);
       this->AddFileID2Class(existID, classPath);
       vIndexes.emplace_back(vClassPath);
+      
     }
     for (auto fileID : existID) {
       void* pData = nullptr;
@@ -218,6 +228,10 @@ namespace caxios {
     std::for_each(mIndexes.begin(), mIndexes.end(), [this, &existID](std::pair<std::string, WordIndex> item) {
       AddTagPY(item.first, item.second);
       AddFileID2Tag(existID, item.second);
+      for (FileID fileID : existID) {
+        this->AddFileID2Keyword(fileID, item.second);
+        this->AddKeyword2File(item.second, fileID);
+      }
     });
     for (auto fileID : existID) {
       if (!IsFileExist(fileID)) continue;
@@ -284,7 +298,13 @@ namespace caxios {
         classes = GetWordByIndex(pWordIndex, len / sizeof(WordIndex));
       }
       // keyword
-      FileInfo fileInfo{ fileID, items, tags, classes, {}, {} };
+      Keywords keywords;
+      if (m_pDatabase->Get(m_mDBs[TABLE_FILE2KEYWORD], fileID, pData, len)) {
+        WordIndex* pWordIndex = (WordIndex*)pData;
+        keywords = GetWordByIndex(pWordIndex, len / sizeof(WordIndex));
+        T_LOG("files", "keyword[%d]: %s", keywords.size(), format_vector(keywords).c_str());
+      }
+      FileInfo fileInfo{ fileID, items, tags, classes, {}, keywords };
       filesInfo.emplace_back(fileInfo);
     }
     return true;
@@ -447,12 +467,36 @@ namespace caxios {
   bool DBManager::Query(const std::string& query, std::vector< FileInfo>& filesInfo)
   {
     namespace pegtl = TAO_PEGTL_NAMESPACE;
-    QueryAction action;
+    QueryAction::Init();
+    QueryAction action(this);
     pegtl::memory_input input(query, "");
+    T_LOG("query", "sql: %s", query.c_str());
     if (pegtl::parse< caxios::QueryGrammar, caxios::action>(input, action)) {
-      return true;
+      std::vector<FileID> vFilesID = action.GetResult();
+      return GetFilesInfo(vFilesID, filesInfo);
     }
+    T_LOG("query", "Fail sql: %s", query.c_str());
     return false;
+  }
+
+  bool DBManager::QueryKeyword(const std::string& tableName, const std::string& value, std::vector<FileID>& outFilesID)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    T_LOG("query", "table: %s, DBI: %d, keyword: %s", tableName.c_str(), m_mDBs[tableName], value.c_str());
+    if (!m_pDatabase->Get(m_mDBs[tableName], value, pData, len)) return false;
+    if (len) {
+      outFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
+    }
+    return true;
+  }
+
+  void DBManager::ValidVersion()
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    if (m_pDatabase->Get(m_mDBs[TABLE_SCHEMA], SCHEMA_VERSION, pData, len)) {
+    }
   }
 
   bool DBManager::AddFile(FileID fileid, const MetaItems& meta, const Keywords& keywords)
@@ -492,7 +536,7 @@ namespace caxios {
     }
     // counts
     SetSnapStep(fileid, BIT_INIT_OFFSET);
-    //UpdateCount1(CT_UNCALSSIFY, 1);
+    // keyword
     return true;
   }
 
@@ -509,6 +553,49 @@ namespace caxios {
       sFilesID.insert(vFilesID.begin(), vFilesID.end());
       std::vector<FileID> vID(sFilesID.begin(), sFilesID.end());
       m_pDatabase->Put(m_mDBs[TABLE_TAG2FILE], index, (void*)vID.data(), vID.size() * sizeof(FileID));
+    }
+    return true;
+  }
+
+  bool DBManager::AddFileID2Keyword(FileID fileID, WordIndex keyword)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2FILE], keyword, pData, len);
+    if (len > 0) {
+      FileID* pIDs = (FileID*)pData;
+      size_t cnt = len / sizeof(FileID);
+      std::vector<FileID> vFilesID(pIDs, pIDs + cnt);
+      auto ptr = std::lower_bound(vFilesID.begin(), vFilesID.end(), fileID);
+      if (*ptr == fileID) return true;  // file id exist
+      vFilesID.insert(ptr, fileID);
+      if (!m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2FILE], keyword, &(vFilesID[0]), sizeof(FileID) * vFilesID.size())) return false;
+    }
+    else {
+      if (!m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2FILE], keyword, &fileID, sizeof(FileID))) return false;
+    }
+    return true;
+  }
+
+  bool DBManager::AddKeyword2File(WordIndex keyword, FileID fileID)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    m_pDatabase->Get(m_mDBs[TABLE_FILE2KEYWORD], fileID, pData, len);
+    T_LOG("keyword", "add keyword Index: %d, len: %d", keyword, len);
+    if (len > 0) {
+      WordIndex* pWords = (WordIndex*)pData;
+      size_t cnt = len / sizeof(WordIndex);
+      std::vector<WordIndex> vWordIndx(pWords, pWords + cnt);
+      auto ptr = std::lower_bound(vWordIndx.begin(), vWordIndx.end(), fileID);
+      if (*ptr == keyword) return true;  // file id exist
+      vWordIndx.insert(ptr, keyword);
+      T_LOG("keyword", "add keywords: %d, fileID: %d", keyword, fileID);
+      if (!m_pDatabase->Put(m_mDBs[TABLE_FILE2KEYWORD], fileID, &(vWordIndx[0]), sizeof(WordIndex) * vWordIndx.size())) return false;
+    }
+    else {
+      if (!m_pDatabase->Put(m_mDBs[TABLE_FILE2KEYWORD], fileID, &keyword, sizeof(WordIndex))) return false;
+      T_LOG("keyword", "add new keywords: %d, fileID: %d", keyword, fileID);
     }
     return true;
   }
