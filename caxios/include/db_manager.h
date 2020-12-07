@@ -58,6 +58,7 @@ namespace caxios {
     void SetSnapStep(FileID fileID, int bit);
     char GetSnapStep(FileID fileID, nlohmann::json&);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
+    WordIndex GetWordIndex(const std::string& word);
     std::vector<std::string> GetWordByIndex(const WordIndex* const wordsIndx, size_t cnt);
     template<typename Itr>
     std::map<WordIndex, std::string> GetWordByIndex(const Itr start, const Itr end) {

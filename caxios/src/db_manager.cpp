@@ -484,7 +484,9 @@ namespace caxios {
     void* pData = nullptr;
     uint32_t len = 0;
     T_LOG("query", "table: %s, DBI: %d, keyword: %s", tableName.c_str(), m_mDBs[tableName], value.c_str());
-    if (!m_pDatabase->Get(m_mDBs[tableName], value, pData, len)) return false;
+    WordIndex index = GetWordIndex(value);
+    if (index == 0) return false;
+    if (!m_pDatabase->Get(m_mDBs[tableName], index, pData, len)) return false;
     if (len) {
       outFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
     }
@@ -856,6 +858,14 @@ namespace caxios {
     //  return false;
     //});
     return std::move(mIndexes);
+  }
+
+  WordIndex DBManager::GetWordIndex(const std::string& word)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    if (!m_pDatabase->Get(m_mDBs[TABLE_KEYWORD_INDX], word, pData, len)) return 0;
+    return *(WordIndex*)pData;
   }
 
   std::vector<std::string> DBManager::GetWordByIndex(const WordIndex* const wordsIndx, size_t cnt)
