@@ -4,10 +4,10 @@
       <el-tab-pane label="资源" name="resources">
         <el-scrollbar style="height:95vh;">
           <table rules="none" cellspacing=0 >
-            <tr class="item" @click="handleResourceClick(headOptions[0])"><i :class="headOptions[0].icon"></i><td>全部</td><td /></tr>
-            <tr class="item" @click="handleResourceClick(headOptions[1])"><i :class="headOptions[1].icon"></i><td>未分类</td><td>{{unclasses}}</td></tr>
-            <tr class="item" @click="handleResourceClick(headOptions[2])"><i :class="headOptions[2].icon"></i><td>未标签</td><td>{{untags}}</td></tr>
-            <tr class="item" @click="handleResourceClick(headOptions[3])"><i :class="headOptions[3].icon"></i><td>标签管理</td><td></td></tr>
+            <tr @click="handleResourceClick(headOptions[0], 0)"><i :class="{icon: headOptions[0].icon, selected: headOptions[0].isSelected, item: !headOptions[0].isSelected}"></i><td>全部</td><td /></tr>
+            <tr @click="handleResourceClick(headOptions[1], 1)"><i :class="{icon: headOptions[1].icon, selected: headOptions[1].isSelected, item: !headOptions[1].isSelected}"></i><td>未分类</td><td>{{unclasses}}</td></tr>
+            <tr @click="handleResourceClick(headOptions[2], 2)"><i :class="{icon: headOptions[2].icon, selected: headOptions[2].isSelected, item: !headOptions[2].isSelected}"></i><td>未标签</td><td>{{untags}}</td></tr>
+            <tr @click="handleResourceClick(headOptions[3], 3)"><i :class="{icon: headOptions[3].icon, selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"></i><td>标签管理</td><td></td></tr>
           </table>
           <TreePanel :isActive="true">
             <FolderTree :data="category"></FolderTree>
@@ -42,24 +42,28 @@ export default {
         {
           label: '全部',
           name: 'all',
-          icon: 'el-icon-suitcase'
+          icon: 'el-icon-suitcase',
+          isSelected: false
         },
         {
           label: '未分类',
           name: 'unclass',
           icon: 'el-icon-copy-document',
-          value: 0
+          value: 0,
+          isSelected: false
         },
         {
           label: '未标签',
           name: 'untag',
           icon: 'el-icon-collection-tag',
-          value: 0
+          value: 0,
+          isSelected: false
         },
         {
           label: '标签管理',
           name: 'manageTag',
-          icon: 'el-icon-collection'
+          icon: 'el-icon-collection',
+          isSelected: false
         }
       ],
       newFolder: false,
@@ -117,7 +121,14 @@ export default {
         </span>
       )
     },
-    handleResourceClick(node) {
+    resetSelected(idx) {
+      for (let i = 0; i < 4; ++i) {
+        if (i === idx) this.headOptions[i].isSelected = !this.headOptions[i].isSelected
+        else this.headOptions[i].isSelected = false
+      }
+    },
+    handleResourceClick(node, idx) {
+      this.resetSelected(idx)
       switch (node.name) {
         case 'manageTag':
           this.$router.push({path: '/tagManager', query: {name: node.label, cmd: 'manage-tag'}})
@@ -175,13 +186,17 @@ el-tab-pane {
   padding: 0 10px;
 }
 .item:hover {
-  background-color:rgb(16, 125, 197);
+  background-color:rgb(55, 80, 97);
   -webkit-user-select: none;
 }
 .item {
   font-size: 14px;
 }
-
+.selected {
+  /* width: 100%; */
+  /* display: inline-block; */
+  background-color:rgb(16, 125, 197);
+}
 table {
   width: 100%;
 }

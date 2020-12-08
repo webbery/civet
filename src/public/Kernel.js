@@ -57,7 +57,7 @@ export default {
   getUnClassifyFiles: () => { return kernel().getUnClassifyFiles() },
   getAllClasses: () => { return kernel().getAllClasses() },
   getAllTags: () => { return kernel().getAllTags() },
-  findFiles: (condition) => { return kernel().findFiles(condition) },
+  query: (condition) => { return kernel().query(condition) },
   writeLog: (str) => { kernel.writeLog(str) },
   // 以下接口为可写接口
   generateFilesID: (num) => { return kernel().generateFilesID(num) },
@@ -67,6 +67,7 @@ export default {
   setTags: (filesID, tags) => { return kernel().setTags({id: filesID, tag: tags}) },
   removeTags: (filesID, tags) => { return kernel().removeTags({id: filesID, tag: tags}) },
   addClasses: (sql) => { return kernel().addClasses(sql) },
+  removeClasses: (classes) => { return kernel().removeClasses(classes)},
   undateFile: (sql) => { return kernel().updateFile(sql) },
   undateClassName: (classPath, newPath) => { return kernel().undateClassName(classPath, newPath) },
   release: () => {

@@ -3,6 +3,7 @@
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #elif defined(WIN32)
 #include <direct.h>
 #include <io.h>
@@ -169,7 +170,7 @@ namespace caxios {
     }
     len = datum.mv_size;
     pData = datum.mv_data;
-    T_LOG("database", "mdb_get %d, key: %u, len: %d", dbi, k, len);
+    T_LOG("database", "mdb_get %d, key: %s, len: %d", dbi, k.c_str(), len);
     return true;
   }
 

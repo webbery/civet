@@ -20,14 +20,14 @@
         >
         </el-option>
       </el-select>
-      <el-dropdown>
+      <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
           <RangeInput label="宽" firstPlaceholder="最小" lastPlaceholder="最大"></RangeInput>
           <RangeInput label="高" firstPlaceholder="最小" lastPlaceholder="最大"></RangeInput>
         </el-dropdown-menu>
       </el-dropdown>
-      <el-dropdown>
+      <el-dropdown trigger="click">
         <el-button size="mini">大小<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
           <RangeInput firstPlaceholder="最小" lastPlaceholder="最大" unit="Kb"></RangeInput>

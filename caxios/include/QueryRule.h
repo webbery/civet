@@ -15,13 +15,21 @@ namespace caxios {
   //struct literal_quote : sor< str_impl< '\'' >, str_impl< '"' > > {};
   struct literal_value_impl : sor<literal_string_cn, literal_keyword> {};
   struct literal_string_value : seq<literal_quote, literal_value_impl, literal_quote > {};
-  struct literal_number : ranges<'0', '9'> {};
+  struct literal_single_number : ranges<'0', '9'> {};
+  struct literal_int_part: seq<literal_single_number> {};
   struct literal_sign : one<'+', '-'> {};
-  struct literal_int : seq<opt<literal_sign>, plus<literal_number>> {};
+  struct literal_int : seq<opt<literal_sign>, plus<literal_int_part>> {};
+  struct literal_year: seq<one<'0', '1', '2'>, literal_single_number, literal_single_number, literal_single_number> {};
+  
   struct literal_gt : string<'$', 'g', 't'> {};
+  struct literal_gte : string<'$', 'g', 't', 'e'> {};
   struct literal_lt : string<'$', 'l', 't'> {};
+  struct literal_lte : string<'$', 'l', 't', 'e'> {};
+  struct literal_ne : string<'$', 'n', 'e'> {};
   struct literal_eq : one<':'> {};
-  struct literal_op : sor< literal_gt, literal_lt> {};
+  struct literal_and : one<','> {};
+  struct literal_or : string<'$', 'o', 'r'> {};
+  struct literal_op : sor< literal_lte, literal_gte, literal_gt, literal_lt, literal_ne> {};
   struct literal_key : sor<literal_op, literal_keyword> {};
   struct literal_string_key : seq<literal_quote, literal_key, literal_quote > {};
   struct literal_value : sor< literal_int, literal_string_value, literal_value> {};
