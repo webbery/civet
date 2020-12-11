@@ -26,14 +26,14 @@ namespace caxios {
     bool GetUntagFiles(std::vector<FileID>& filesID);
     bool GetUnClassifyFiles(std::vector<FileID>& filesID);
     bool GetTagsOfFiles(const std::vector<FileID>& filesID, std::vector<Tags>& tags);
-    bool GetAllClasses(nlohmann::json& classes);
+    bool GetClasses(const std::string& parent, nlohmann::json& classes);
     bool GetAllTags(TagTable& tags);
     bool UpdateFilesClasses(const std::vector<FileID>& filesID, const std::vector<std::string>& classes);
     bool UpdateClassName(const std::string& oldName, const std::string& newName);
     bool Query(const std::string& query, std::vector< FileInfo>& filesInfo);
 
   public: // will be implimented in ITable
-    bool QueryKeyword(const std::string& tableName, const std::string& value, std::vector<FileID>& outFilesID);
+    bool QueryKeyword(const std::string& tableName, const std::vector<std::string>& value, std::vector<FileID>& outFilesID);
 
   private:
     void ValidVersion();
@@ -42,7 +42,10 @@ namespace caxios {
     bool AddFileID2Keyword(FileID, WordIndex);
     bool AddKeyword2File(WordIndex, FileID);
     bool AddTagPY(const std::string& tag, WordIndex indx);
-    bool AddFileID2Class(const std::vector<FileID>& vFilesID, const std::string&);
+    bool MapClass2FileID(uint32_t, const std::vector<FileID>& vFilesID);
+    bool MapFileID2Class(const std::vector<FileID>&, uint32_t);
+    void MapHash2Class(uint32_t clsID, const std::string& name);
+    std::vector<uint32_t> AddClassImpl(const std::vector<std::string>& classes);
     bool RemoveFile(FileID);
     bool RemoveTag(FileID, const Tags& tags);
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
@@ -50,13 +53,19 @@ namespace caxios {
     std::vector<FileID> GetFilesByClass(const std::vector<WordIndex>& clazz);
     bool IsFileExist(FileID fileID);
     bool IsClassExist(const std::string& clazz);
-    uint32_t GenerateClassHash(const std::vector<WordIndex>& clazz);
+    uint32_t GenerateClassHash(const std::string& clazz);
     uint32_t GetClassHash(const std::string& clazz);
+    uint32_t GetClassParent(const std::string& clazz);
+    std::pair<uint32_t, std::string> EncodePath2Hash(const std::string& classPath);
+    std::vector<uint32_t> GetClassChildren(const std::string& clazz);
+    std::string GetClassByHash(uint32_t);
+    std::vector<FileID> GetFilesOfClass(uint32_t clsID);
     std::vector<FileID> mapExistFiles(const std::vector<FileID>&);
     void ParseMeta(const std::string& meta);
     void UpdateCount1(CountType ct, int cnt);
     void SetSnapStep(FileID fileID, int bit);
     char GetSnapStep(FileID fileID, nlohmann::json&);
+    Snap GetFileSnap(FileID);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
     WordIndex GetWordIndex(const std::string& word);
     std::vector<std::string> GetWordByIndex(const WordIndex* const wordsIndx, size_t cnt);

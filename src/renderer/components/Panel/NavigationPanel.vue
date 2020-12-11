@@ -1,7 +1,7 @@
 <template>
   <div class="organize">
-    <el-tabs v-model="activeName" class="custom">
-      <el-tab-pane label="资源" name="resources">
+    <el-tabs v-model="activeName" class="custom" tab-position="top" >
+      <el-tab-pane name="resources"><span slot="label"><i class="el-icon-document"></i></span>
         <el-scrollbar style="height:95vh;">
           <table rules="none" cellspacing=0 >
             <tr @click="handleResourceClick(headOptions[0], 0)"><i :class="{icon: headOptions[0].icon, selected: headOptions[0].isSelected, item: !headOptions[0].isSelected}"></i><td>全部</td><td /></tr>

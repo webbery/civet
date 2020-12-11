@@ -65,9 +65,9 @@ namespace caxios {
     return m_pDBManager->GetTagsOfFiles(filesID, tags);
   }
 
-  bool CAxios::GetAllClasses(nlohmann::json& classes)
+  bool CAxios::GetClasses(const std::string& parent, nlohmann::json& classes)
   {
-    return m_pDBManager->GetAllClasses(classes);
+    return m_pDBManager->GetClasses(parent, classes);
   }
 
   bool CAxios::GetAllTags(TagTable& tags)

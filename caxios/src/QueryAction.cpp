@@ -14,6 +14,7 @@ namespace caxios {
       //m_mKeywords[TB_Annotation] = TABLE_KEYWORD2FILE;
       m_mKeywords[TB_FileID] = TABLE_FILESNAP;
     }
+    return true;
   }
 
   QueryAction::QueryAction(DBManager* pDB)
@@ -34,11 +35,12 @@ namespace caxios {
   void QueryAction::AddCondition(const std::string& cond)
   {
     T_LOG("query", "condition: %s", cond.c_str());
-    m_pDBManager->QueryKeyword(m_mKeywords[m_sKeyword], cond, m_vFilesID);
+    m_sConditions.emplace_back(cond);
   }
 
   std::vector<caxios::FileID> QueryAction::GetResult()
   {
+    m_pDBManager->QueryKeyword(m_mKeywords[m_sKeyword], m_sConditions, m_vFilesID);
     return std::move(m_vFilesID);
   }
 

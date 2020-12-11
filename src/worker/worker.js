@@ -65,7 +65,7 @@ const ReplyType = {
   REPLY_IMAGE_INFO: 'replyImageInfo',
   REPLY_ALL_TAGS: 'replyAllTags',
   REPLY_ALL_TAGS_WITH_IMAGES: 'replyAllTagsWithImages',
-  REPLY_FIND_IMAGE_WITH_KEYWORD: 'replyFindImageResult',
+  REPLY_QUERY_FILES: 'replyQueryFilesResult',
   REPLAY_ALL_CATEGORY: 'replyAllCategory',
   REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
   REPLY_UNTAG_IMAGES: 'replyUntagImages',
@@ -202,10 +202,10 @@ const messageProcessor = {
     console.info('allTags', allTags)
     reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
-  'findImageWithKeyword': (keywords) => {
-    let allID = storage.searchFiles(keywords)
-    // console.info('reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
-    reply2Renderer(ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD, allID)
+  'queryFiles': (nsql) => {
+    let allFiles = storage.query(nsql)
+    console.info(nsql, 'reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
+    reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
   },
   'addCategory': (categoryName, chain, imageID) => {
     return storage.addClasses(categoryName, chain, imageID)

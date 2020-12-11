@@ -398,10 +398,14 @@ namespace caxios {
     }
     return info.Env().Undefined();
   }
-  Napi::Value getAllClasses(const Napi::CallbackInfo& info) {
+  Napi::Value getClasses(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {
+      std::string sParent("/");
+      if (info.Length() != 0) {
+        sParent = info[0].As<Napi::String>();
+      }
       nlohmann::json classes;
-      g_pCaxios->GetAllClasses(classes);
+      g_pCaxios->GetClasses(sParent, classes);
       Napi::Env env = info.Env();
       auto arry = Classes2Array(env, classes);
       return arry;
@@ -511,7 +515,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(getAllTags);
   EXPORT_JS_FUNCTION_PARAM(getUnTagFiles);
   EXPORT_JS_FUNCTION_PARAM(getUnClassifyFiles);
-  EXPORT_JS_FUNCTION_PARAM(getAllClasses);
+  EXPORT_JS_FUNCTION_PARAM(getClasses);
   EXPORT_JS_FUNCTION_PARAM(getTagsOfFiles);
   EXPORT_JS_FUNCTION_PARAM(removeFiles);
   EXPORT_JS_FUNCTION_PARAM(removeTags);

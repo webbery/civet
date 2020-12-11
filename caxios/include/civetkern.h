@@ -22,7 +22,7 @@ namespace caxios{
     bool GetUntagFiles(std::vector<FileID>& filesID);
     bool GetUnclassifyFiles(std::vector<FileID>& filesID);
     bool GetTagsOfFiles(const std::vector<FileID>& filesID, std::vector<Tags>& tags);
-    bool GetAllClasses(nlohmann::json& classes);
+    bool GetClasses(const std::string& parent, nlohmann::json& classes);
     bool GetAllTags(TagTable& tags);
     bool UpdateFilesClasses(const std::vector<FileID>& filesID, const std::vector<std::string>& classes);
     bool UpdateClassName(const std::string& oldName, const std::string& newName);

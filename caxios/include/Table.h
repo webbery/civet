@@ -1,5 +1,6 @@
 #pragma once 
 #include <string>
+#include <variant>
 #include "datum_type.h"
 
 #define TABLE_SCHEMA        "dbinfo"
@@ -30,6 +31,11 @@ namespace caxios {
   enum CountType {
     CT_UNCALSSIFY = 1
   };
+
+  typedef std::string ClassName;
+  typedef std::vector<FileID> ChildrenFile;
+  typedef std::vector<ClassName> ChildrenClass;
+  typedef std::variant<ClassName, ChildrenFile, ChildrenClass> UpdateValue;
   class ITable {
   public:
     //std::string Name() { return _table; }
@@ -37,9 +43,9 @@ namespace caxios {
     virtual ~ITable() {}
 
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid) = 0;
-    virtual bool Update() = 0;
+    virtual bool Update(const std::string& current, const UpdateValue& value) = 0;
     virtual bool Delete(const std::string& k, FileID fileID) = 0;
-    virtual bool Query(const std::string& k, std::vector<FileID>& filesID) = 0;
+    virtual bool Query(const std::string& k, std::vector<FileID>& filesID, std::vector<std::string>& vChildren) = 0;
   protected:
     CDatabase* _pDatabase = nullptr;
   };

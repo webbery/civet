@@ -15,7 +15,7 @@ namespace caxios {
     return true;
   }
 
-  bool TableTag::Update()
+  bool TableTag::Update(const std::string& current, const UpdateValue& value)
   {
     return true;
   }
@@ -26,7 +26,7 @@ namespace caxios {
     return true;
   }
 
-  bool TableTag::Query(const std::string& k, std::vector<FileID>& filesID)
+  bool TableTag::Query(const std::string& k, std::vector<FileID>& filesID, std::vector<std::string>& vChildren)
   {
 
     return true;

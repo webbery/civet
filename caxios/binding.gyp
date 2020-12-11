@@ -15,6 +15,7 @@
         "src/QueryAction.cpp",
         "src/table/TableTag.cpp",
         "src/table/TableMeta.cpp",
+        "src/table/TableClass.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",

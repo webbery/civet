@@ -30,7 +30,7 @@ namespace caxios {
 
     std::string m_sKeyword;
     QueryType m_qType = QueryType::QT_EQUAL;
-    std::string m_sCondition;
+    std::vector<std::string> m_sConditions;
     DBManager* m_pDBManager = nullptr;
     std::vector<FileID> m_vFilesID;
   };

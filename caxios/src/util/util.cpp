@@ -60,18 +60,20 @@ namespace caxios {
     }
   }
 
-  int32_t encode(const std::string& str)
+  uint32_t encode(const std::string& str)
   {
-    int32_t hash, idx;
+    if (str == "/") return 0;
+    uint32_t hash, idx;
     for (hash = str.size(), idx = 0; idx < str.size(); ++idx) {
       hash = (hash << 4) ^ (hash >> 28) ^ str[idx];
     }
-    return hash % std::numeric_limits<int32_t>::max();
+    return hash % std::numeric_limits<uint32_t>::max();
   }
 
   std::string serialize(const std::vector<WordIndex>& classes)
   {
     std::string s;
+    if (classes.size() == 0) return "/";
     for (const WordIndex& wi : classes) {
       char c4 = wi & (CHAR_BIT << 24);
       s.push_back(c4);

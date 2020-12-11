@@ -67,7 +67,7 @@ export default {
   setTags: (filesID, tags) => { return kernel().setTags({id: filesID, tag: tags}) },
   removeTags: (filesID, tags) => { return kernel().removeTags({id: filesID, tag: tags}) },
   addClasses: (sql) => { return kernel().addClasses(sql) },
-  removeClasses: (classes) => { return kernel().removeClasses(classes)},
+  removeClasses: (classes) => { return kernel().removeClasses(classes) },
   undateFile: (sql) => { return kernel().updateFile(sql) },
   undateClassName: (classPath, newPath) => { return kernel().undateClassName(classPath, newPath) },
   release: () => {

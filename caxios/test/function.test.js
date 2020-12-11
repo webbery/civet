@@ -64,11 +64,11 @@ describe('civetkern add test', function() {
   })
   it('get untag files again', function() {
     let untags = instance.getUnTagFiles()
-    expect(untags).to.have.lengthOf(1)
+    expect(untags).to.have.lengthOf(0)
   })
   it('get unclassify files', function() {
     const unclasses = instance.getUnClassifyFiles()
-    expect(unclasses).to.have.lengthOf(0)
+    expect(unclasses).to.have.lengthOf(1)
   })
   it('add class', function() {
     let result = instance.addClasses(['class1', 'class2', 'class1/class3'])
@@ -126,12 +126,12 @@ describe('civetkern read only test', function() {
     expect(tags['T']).to.lengthOf(1)
     expect(tags['B']).to.lengthOf(1)
   })
-  it('get all classes', function() {
-    const allClasses = instance.getAllClasses()
-    console.info(allClasses)
-    //expect(allClasses).to.lengthOf(6)
+  it('get classes', function() {
+    const rootClasses = instance.getClasses()
+    console.info(rootClasses)
+    expect(rootClasses).to.lengthOf(5)
     // [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: clz/jpg, children: []}]
-    for (let clazz of allClasses) {
+    for (let clazz of rootClasses) {
       if (clazz.type === 'clz') {
         if (clazz.children&&clazz.children.length) {
           console.info(clazz.children[0])
@@ -145,7 +145,7 @@ describe('civetkern read only test', function() {
     expect(result).to.lengthOf(1)
   })
   it('search files', function() {
-    let result = instance.query({keyword: '标签'})
+    let result = instance.query({keyword: ['标签']})
     console.info(result)
     // instance.findFiles({size: {$gt: 10240, $lt: 21000}})
   })

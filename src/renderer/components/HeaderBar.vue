@@ -3,9 +3,9 @@
       <el-col :span="4">
         <el-button @click="onClickConfig" type="text" size="mini" icon="el-icon-setting" circle></el-button>
         <el-dropdown>
-          <el-button @click="onClickResource" size="mini" round>资源库<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+          <el-button @click="onClickResource" size="mini" round>{{resource}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>默认</el-dropdown-item>
+            <el-dropdown-item>{{resource}}</el-dropdown-item>
             <el-dropdown-item divided>最近使用</el-dropdown-item>
             <el-dropdown-item divided>新建资源库</el-dropdown-item>
           </el-dropdown-menu>
@@ -44,6 +44,7 @@ import bus from './utils/Bus'
 import ViewFilter from '@/components/ViewFilter'
 import ImageOperator from '@/components/ImageOperator'
 import Service from '@/components/utils/Service'
+import { CivetConfig } from '@/../public/CivetConfig'
 
 export default {
   name: 'header-bar',
@@ -52,6 +53,7 @@ export default {
       comName: ViewFilter,
       scaleValue: 20,
       keyword: '',
+      resource: '资源库',
       viewDesc: '全部'
     }
   },
@@ -61,6 +63,10 @@ export default {
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
+    const config = new CivetConfig()
+    const resource = config.getCurrentResource()
+    console.info('header', resource)
+    this.resource = resource.name
   },
   methods: {
     onClickResource() {},
@@ -110,18 +116,18 @@ export default {
     async onSearch() {
       const keywords = this.keyword.split(' ')
       console.info('keywords', keywords)
-      const imagesID = await this.$ipcRenderer.get(Service.FIND_IMAGES_BY_KEYWORD, keywords)
-      console.info('imagesID', imagesID)
-      const images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO, imagesID)
-      console.info('images', images)
-      let updateImages = []
-      for (let idx in images) {
-        const item = images[idx]
-        updateImages.push({id: imagesID[idx], label: item.label, path: item.path, thumbnail: item.thumbnail})
-      }
-      this.$store.dispatch('clearImages')
-      // console.info('updateImages:', updateImages)
-      this.$store.dispatch('updateImageList', updateImages)
+      this.$store.dispatch('query', {keyword: keywords})
+      // const imagesID = await this.$ipcRenderer.get(Service.FIND_IMAGES_BY_KEYWORD, keywords)
+      // console.info('imagesID', imagesID)
+      // const images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO, imagesID)
+      // console.info('images', images)
+      // let updateImages = []
+      // for (let idx in images) {
+      //   const item = images[idx]
+      //   updateImages.push({id: imagesID[idx], label: item.label, path: item.path, thumbnail: item.thumbnail})
+      // }
+      // this.$store.dispatch('clearImages')
+      // this.$store.dispatch('updateImageList', updateImages)
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})
     }
   }

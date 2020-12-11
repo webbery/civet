@@ -36,7 +36,7 @@ namespace caxios {
     return true;
   }
 
-  bool TableMeta::Update()
+  bool TableMeta::Update(const std::string& current, const UpdateValue& value)
   {
     return true;
   }
@@ -46,7 +46,7 @@ namespace caxios {
     return true;
   }
 
-  bool TableMeta::Query(const std::string& k, std::vector<FileID>& filesID)
+  bool TableMeta::Query(const std::string& k, std::vector<FileID>& filesID, std::vector<std::string>& vChildren)
   {
     // 等于语义
     void* pData = nullptr;

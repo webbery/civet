@@ -79,7 +79,7 @@
     }
   },
   "dependencies": {
-    "civetkern": "0.0.42",
+    "civetkern": "0.0.43",
     "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",
     "element-ui": "^2.13.2",

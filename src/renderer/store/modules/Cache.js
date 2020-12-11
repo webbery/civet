@@ -95,8 +95,9 @@ const mutations = {
     state.unclasses = unclasses.length
   },
   query(state, query) {
-    //   console.info('++++++')
+    //   console.info('++++++')QUERY_FILES
     state.query = query
+    Service.getServiceInstance().get(Service.QUERY_FILES, state.query)
   },
   async addTag(state, mutation) {
     const {fileID, tag} = mutation

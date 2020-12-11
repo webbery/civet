@@ -56,6 +56,13 @@ export class CivetConfig {
     return resources
   }
 
+  getCurrentResource() {
+    for (let resource of this.config.resources) {
+      if (resource.name === this.config.app.default) return resource
+    }
+    return null
+  }
+
   addResource(name, path) {
     for (let resource of this.config.resources) {
       if (resource.name === name) {

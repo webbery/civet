@@ -48,7 +48,24 @@ namespace caxios {
     return std::move(ret);
   }
   // use hash to encode string
-  int32_t encode(const std::string& str);
+  uint32_t encode(const std::string& str);
+  template<typename T>
+  bool addUniqueDataAndSort(std::vector<T>& pDest, T src) {
+    auto ptr = std::lower_bound(pDest.begin(), pDest.end(), src);
+    if (ptr == pDest.end() || *ptr != src) {
+      pDest.insert(ptr, src);
+      return false;
+    }
+    return true;  // file id exist
+  }
+
+  template<typename T>
+  void addUniqueDataAndSort(std::vector<T>& pDest, const std::vector <T>& src) {
+    for (auto& item: src)
+    {
+      addUniqueDataAndSort(pDest, item);
+    }
+  }
 }
 
 #endif
