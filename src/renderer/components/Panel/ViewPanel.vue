@@ -7,7 +7,7 @@
           <JImage :src="getImage(image)" :interact="false" class="preview" 
             @dblclick.native="onImageDbClick(image)"
             @keydown.ctrl.67.native="onFileCopyOut(image)"
-            @contextmenu.native="onImageClick($event, $root, image)" @click.native="onImageClick($event, $root, image)"
+            @contextmenu.native="onImageClick($event, $root, image)" @mousedown.native="onImageClick($event, $root, image)" 
           >
           </JImage>
           <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
@@ -177,17 +177,20 @@ export default {
       }
     },
     dragStart(event) {
-      console.info('drag start')
-      event.dataTransfer.setData('my-info', 'file://F:/Image/N1NtaWlwTDRsa0xTbnpiNjlOVTVLbjNGTDR0NGRDTk9QcVl3YjVnanEvL3NlQmRaREpIbjlnPT0.jpg')
+      event.target.style.opacity = '0.5'
+      const fileisID = Object.keys(this.lastSelections)
+      console.info('drag start', fileisID)
+      event.dataTransfer.setData('civet', JSON.stringify(fileisID))
       // event.dataTransfer.setData('application/octet-stream', 'file://F:/Image/N1NtaWlwTDRsa0xTbnpiNjlOVTVLbjNGTDR0NGRDTk9QcVl3YjVnanEvL3NlQmRaREpIbjlnPT0.jpg')
       // event.dataTransfer.effectAllowed = 'copy'
     },
     dragEnd(event) {
       console.info('dragEnd', event.dataTransfer)
-      // event.preventDefault()
+      event.target.style.opacity = ''
+      event.preventDefault()
       // event.stopPropagation()
-      const url = event.dataTransfer.getData('my-info')
-      console.info('copy URI:', url)
+      // const url = event.dataTransfer.getData('text/plain')
+      // console.info('copy URI:', url)
     },
     onRemoveFiles(removeIDs) {
       for (let id of removeIDs) {

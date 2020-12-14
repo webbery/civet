@@ -55,7 +55,7 @@ export default {
   getFilesInfo: (filesID) => { return kernel().getFilesInfo(filesID) },
   getUnTagFiles: () => { return kernel().getUnTagFiles() },
   getUnClassifyFiles: () => { return kernel().getUnClassifyFiles() },
-  getAllClasses: () => { return kernel().getAllClasses() },
+  getClasses: (parent) => { return kernel().getClasses(parent) },
   getAllTags: () => { return kernel().getAllTags() },
   query: (condition) => { return kernel().query(condition) },
   writeLog: (str) => { kernel.writeLog(str) },

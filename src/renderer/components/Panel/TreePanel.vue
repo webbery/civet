@@ -11,8 +11,8 @@
         </div>
         <div role="tabpanel" aria-labelledby="el-collapse-head-2660" id="el-collapse-content-2660" class="el-collapse-item__wrap" v-if="isActive" data-old-padding-top="" data-old-padding-bottom="" data-old-overflow="" aria-hidden="true">
           <div class="el-collapse-item__content">
-            <slot></slot>
-            <IconFolder icon="el-icon-folder" enableInput="true" v-if="newClass" @onblur="onBlur" :label="newCategoryName"></IconFolder>
+            <slot v-bind:enableEdit="enableEdit"></slot>
+            <IconFolder icon="el-icon-folder" enableInput="true" v-if="enableEdit" @onblur="onBlur" :label="newCategoryName"></IconFolder>
           </div>
         </div>
       </div>
@@ -26,8 +26,7 @@ export default {
   components: { IconFolder },
   data() {
     return {
-      newClass: false,
-      newCategoryName: ''
+      enableEdit: false
     }
   },
   props: {
@@ -57,13 +56,13 @@ export default {
     },
     onAddClassify(event) {
       event.stopPropagation()
-      this.newClass = true
+      this.enableEdit = true
     },
     onBlur(newClass) {
+      this.enableEdit = false
       if (newClass.trim() === '') return
-      this.$store.dispatch('addClass', newClass)
-      this.newClass = false// 同时更新缓存
-      this.newCategoryName = ''
+      this.$store.dispatch('addClass', [newClass])
+      this.newCategoryName = ''// 同时更新缓存
     }
   }
 }

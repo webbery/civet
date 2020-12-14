@@ -9,6 +9,7 @@
           <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()" size="mini"></el-button>
         </el-input>
       </div>
+      <div class="error">{{msg}}</div>
     <el-button @click="onStartCivet()" size="mini" type="success" :disabled="isDisable">完成</el-button>
     </dialog>
   </div>
@@ -24,7 +25,8 @@ export default {
     return {
       resourceName: '',
       resourceDBPath: '',
-      isDisable: true
+      isDisable: true,
+      msg: ''
     }
   },
   mounted() {
@@ -45,6 +47,13 @@ export default {
     },
     onStartCivet() {
       if (this.resourceName.trim().length === 0 || this.resourceDBPath.length === 0) return
+      // is file exist?
+      const fs = require('fs')
+      if (fs.existsSync(this.resourceDBPath + '/' + this.resourceName)) {
+        // file exist
+        this.msg = '文件已存在'
+        return
+      }
       const config = new CivetConfig()
       config.addResource(this.resourceName, this.resourceDBPath)
       config.save()
@@ -77,5 +86,8 @@ export default {
   font-size: 14px;
   font-weight: 600;
   color: aliceblue;
+}
+.error {
+  color: rgb(199, 12, 12);
 }
 </style>

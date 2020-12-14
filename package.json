@@ -79,7 +79,7 @@
     }
   },
   "dependencies": {
-    "civetkern": "0.0.43",
+    "civetkern": "0.0.46",
     "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",
     "element-ui": "^2.13.2",
@@ -90,9 +90,10 @@
     "segment": "^0.1.3",
     "sharp": "^0.26.2",
     "uuid": "^8.3.1",
-    "vue": "^2.5.16",
+    "vue": "^2.6.12",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.4.1",
+    "vue-template-compiler": "^2.6.12",
     "vuex": "^3.5.1",
     "workerpool": "^6.0.3"
   },
@@ -173,7 +174,6 @@
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^15.9.5",
     "vue-style-loader": "^4.1.0",
-    "vue-template-compiler": "^2.5.16",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4",

@@ -6,7 +6,8 @@ import Vue from 'vue'
 const state = {
   query: {},
   cache: [],
-  classes: [{name: 'test.jpg', type: 'jpg', id: 1}, {name: 'test', type: 'clz', id: 1, children: [{name: 'test2.jpg', type: 'jpg', id: 1}]}],
+  classes: [{name: 'test.jpg', type: 'jpg', id: 1}, {name: 'test', type: 'clz', id: 2, children: [{name: 'test2.jpg', type: 'jpg', id: 3}]}],
+  classesName: ['test'],
   viewItems: [],
   tags: {},
   untags: 0,
@@ -30,6 +31,7 @@ const getters = {
       return files
     }
   },
+  classesName: state => { return state.classesName },
   untags: state => { return state.untags },
   unclasses: state => { return state.unclasses },
   tags: state => { return state.tags }
@@ -65,7 +67,7 @@ const mutations = {
       Vue.set(state.viewItems, idx, state.cache[idx])
     }
     // get classes
-    const cls = Kernel.getAllClasses()
+    const cls = Kernel.getClasses('/')
     if (cls) {
       for (let idx = 0; idx < cls.length; ++idx) {
         Vue.set(state.classes, idx, cls[idx])
@@ -73,11 +75,15 @@ const mutations = {
     }
     // count
     const untags = Kernel.getUnTagFiles()
+    console.info('untags:', untags)
     state.untags = untags.length
     const unclasses = Kernel.getUnClassifyFiles()
+    console.info('unclassify:', unclasses)
     state.unclasses = unclasses.length
     // tags
-    state.tags = Kernel.getAllTags()
+    const tags = Kernel.getAllTags()
+    console.info('tags', tags)
+    state.tags = tags
   },
   addFiles(state, files) {
     for (let file of files) {
@@ -116,7 +122,22 @@ const mutations = {
     state.tags = await remote.recieveTags()
   },
   addClass(state, mutation) {
+    console.info('add class', mutation)
     Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
+    const isClassExist = function (clsPath, classes, parent) {
+      for (let item of classes) {
+        if (item.type === 'clz') {
+          const name = parent + '/' + item.name
+          if (name === clsPath) return true
+          if (item.children && item.children.length !== 0) {
+            return isClassExist(clsPath, item.children, name)
+          }
+        }
+      }
+      return false
+    }
+    if (isClassExist(mutation[0], state.classes, '')) return
+    state.classes.push({name: mutation[0], type: 'clz', children: []})
   },
   removeFiles(state, query) {},
   update(state, sql) {}

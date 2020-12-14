@@ -31,7 +31,7 @@
       ></el-input>
       <el-button v-else class="button-new-tag" size="mini" @click="showInput">添加标签</el-button>
     </fieldset>
-    <!-- <fieldset>
+    <fieldset>
       <legend class="title">分类</legend>
       <div>
         <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz.name}}</IconTag>
@@ -40,14 +40,14 @@
           width="160"
           v-model="visible">
           <div>
-            <div v-for="(clazz,idx) in candidateClasses" :key="clazz">
-              <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini" @change="onCategoryChange"></el-checkbox>
+            <div v-for="(clazz,idx) in candidateClasses" :key="idx">
+              <el-checkbox v-model="checkValue[idx]" :label="clazz" border size="mini" @change="onCategoryChange"></el-checkbox>
             </div>
           </div>
           <el-button slot="reference" size="mini">+</el-button>
         </el-popover>
       </div>
-    </fieldset> -->
+    </fieldset>
     <fieldset>
       <legend class="title">基本信息</legend>
     <el-row class="desc">
@@ -71,6 +71,7 @@ import JImage from '../JImage'
 import ImgTool from '../utils/ImgTool'
 import log from '@/../public/Logger'
 import { CivetConfig } from '@/../public/CivetConfig'
+import { mapState } from 'vuex'
 
 export default {
   name: 'property-panel',
@@ -91,14 +92,15 @@ export default {
   components: {
     IconTag, JImage
   },
-  computed: {
+  computed: mapState({
     // candidateClasses() {
     //   return this.$store.getters.classesName
     // },
     // imageClasses() {
     //   return this.classes
     // }
-  },
+    candidateClasses: state => state.Cache.classesName
+  }),
   mounted() {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
   },

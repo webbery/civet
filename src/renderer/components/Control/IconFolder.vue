@@ -1,7 +1,7 @@
 <template>
   <div :class="{item: !isSelected, selected: isSelected}">
     <i :class="icon"></i>
-    <span class="class-name" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick">{{label}}</span>
+    <span :path="parent" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick" @click="onItemClick()">{{label}}</span>
     <input v-if="enableInput" @blur="onSave()" v-model="folderName" ref="folderInput"/>
   </div>
 </template>
@@ -29,6 +29,9 @@ export default {
     }
   },
   methods: {
+    onItemClick() {
+      console.info('iconFolder', this.isSelected)
+    },
     onEdit() {
       // console.info('edit')
       this.folderName = this.label

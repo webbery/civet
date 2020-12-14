@@ -95,6 +95,16 @@ namespace caxios {
     return m_pDBManager->RemoveTags(files, tags);
   }
 
+  bool CAxios::RemoveClasses(const std::vector<std::string>& classes)
+  {
+    return m_pDBManager->RemoveClasses(classes);
+  }
+
+  bool CAxios::RemoveClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID)
+  {
+    return m_pDBManager->RemoveClasses(classes, filesID);
+  }
+
   bool CAxios::Query(const std::string& query, std::vector< FileInfo>& filesInfo)
   {
     return m_pDBManager->Query(query, filesInfo);

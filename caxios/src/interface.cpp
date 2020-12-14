@@ -163,6 +163,7 @@ namespace caxios {
    */
   Napi::Value addFiles(const Napi::CallbackInfo& info) {
     if (g_pCaxios != nullptr) {
+      auto env = info.Env();
       std::vector <std::tuple< FileID, MetaItems, Keywords >> vFiles;
       FileID fileID = 0;
       MetaItems metaItems;
@@ -172,8 +173,10 @@ namespace caxios {
         fileID = AttrAsUint32(item.As<Napi::Object>(), "id");
         //T_LOG("FileID: %d", fileID);
       };
-      mMetaProccess["meta"] = [&metaItems](Napi::Value v) {
+      mMetaProccess["meta"] = [&metaItems, &env](Napi::Value v) {
         Napi::Array array = AttrAsArray(v.As<Napi::Object>(), "meta");
+        //std::string sArr = Stringify(env, array);
+        //T_LOG("file", "process meta: %s", sArr.c_str());
         ForeachArray(array, [&metaItems](Napi::Value item) {
           if (item.IsObject()) {
             MetaItem meta;
@@ -207,6 +210,7 @@ namespace caxios {
       };
       ForeachArray(info[0], [&vFiles, &fileID, &metaItems, &keywords, &mMetaProccess](Napi::Value item) {
         if (item.IsObject()) {
+          metaItems.clear();
           ForeachObject(item, [&](const std::string& k, Napi::Value v) {
             if (mMetaProccess.find(k) != mMetaProccess.end()) mMetaProccess[k](v);
             else {
@@ -407,8 +411,9 @@ namespace caxios {
       nlohmann::json classes;
       g_pCaxios->GetClasses(sParent, classes);
       Napi::Env env = info.Env();
-      auto arry = Classes2Array(env, classes);
-      return arry;
+      return Parse(env, classes.dump());
+      //auto arry = Classes2Array(env, classes);
+      //return arry;
     }
     return Napi::Value();
   }
@@ -451,7 +456,19 @@ namespace caxios {
   }
   Napi::Value removeClasses(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {
-      return Napi::Boolean::From(info.Env(), true);
+      bool result = false;
+      if (info[0].IsArray()) {
+        Napi::Array arr = info[0].As<Napi::Array>();
+        auto classes = ArrayAsStringVector(arr);
+        result = g_pCaxios->RemoveClasses(classes);
+      }
+      else if (info[0].IsObject()) {
+        Napi::Object obj = info[0].As<Napi::Object>();
+        auto aFilesID = AttrAsUint32Vector(obj, "id");
+        auto aClasses = AttrAsStringVector(obj, "class");
+        result = g_pCaxios->RemoveClasses(aClasses, aFilesID);
+      }
+      return Napi::Boolean::From(info.Env(), result);
     }
     return Napi::Boolean::From(info.Env(), false);
   }

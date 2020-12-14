@@ -4,13 +4,13 @@
       <el-tab-pane name="resources"><span slot="label"><i class="el-icon-document"></i></span>
         <el-scrollbar style="height:95vh;">
           <table rules="none" cellspacing=0 >
-            <tr @click="handleResourceClick(headOptions[0], 0)"><i :class="{icon: headOptions[0].icon, selected: headOptions[0].isSelected, item: !headOptions[0].isSelected}"></i><td>全部</td><td /></tr>
-            <tr @click="handleResourceClick(headOptions[1], 1)"><i :class="{icon: headOptions[1].icon, selected: headOptions[1].isSelected, item: !headOptions[1].isSelected}"></i><td>未分类</td><td>{{unclasses}}</td></tr>
-            <tr @click="handleResourceClick(headOptions[2], 2)"><i :class="{icon: headOptions[2].icon, selected: headOptions[2].isSelected, item: !headOptions[2].isSelected}"></i><td>未标签</td><td>{{untags}}</td></tr>
-            <tr @click="handleResourceClick(headOptions[3], 3)"><i :class="{icon: headOptions[3].icon, selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"></i><td>标签管理</td><td></td></tr>
+            <tr @click="handleResourceClick(headOptions[0], 0)" :class="{selected: headOptions[0].isSelected, item: !headOptions[0].isSelected}"><td><i :class="headOptions[0].icon"></i>全部</td><td /></tr>
+            <tr @click="handleResourceClick(headOptions[1], 1)" :class="{selected: headOptions[1].isSelected, item: !headOptions[1].isSelected}"><td><i :class="headOptions[1].icon"></i>未分类</td><td>{{unclasses}}</td></tr>
+            <tr @click="handleResourceClick(headOptions[2], 2)" :class="{selected: headOptions[2].isSelected, item: !headOptions[2].isSelected}"><td><i :class="headOptions[2].icon"></i>未标签</td><td>{{untags}}</td></tr>
+            <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
           </table>
           <TreePanel :isActive="true">
-            <FolderTree :data="category"></FolderTree>
+            <FolderTree :data="category" parent="/"></FolderTree>
           </TreePanel>
         </el-scrollbar>
       </el-tab-pane>
@@ -42,27 +42,27 @@ export default {
         {
           label: '全部',
           name: 'all',
-          icon: 'el-icon-suitcase',
+          icon: 'el-icon-menu',
           isSelected: false
         },
         {
           label: '未分类',
           name: 'unclass',
-          icon: 'el-icon-copy-document',
+          icon: 'el-icon-document',
           value: 0,
           isSelected: false
         },
         {
           label: '未标签',
           name: 'untag',
-          icon: 'el-icon-collection-tag',
+          icon: 'el-icon-news',
           value: 0,
           isSelected: false
         },
         {
           label: '标签管理',
           name: 'manageTag',
-          icon: 'el-icon-collection',
+          icon: 'el-icon-tickets',
           isSelected: false
         }
       ],
@@ -193,6 +193,7 @@ el-tab-pane {
   font-size: 14px;
 }
 .selected {
+  font-size: 14px;
   /* width: 100%; */
   /* display: inline-block; */
   background-color:rgb(16, 125, 197);

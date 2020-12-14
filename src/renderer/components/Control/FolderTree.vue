@@ -1,16 +1,19 @@
-<template>
-  <div class="tree" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
+<template v-slot:enableAddClass="enableEdit">
+  <div class="tree" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" draggable="true" @drop="dropFiles($event)" @dragover.prevent>
     <PopMenu :list="menus" :underline="true" @ecmcb="onSelectMenu" tag="tree"></PopMenu>
-    <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)" @click="onItemClick(idx)">
+    <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)" @click="onItemClick($event, idx, item)"
+      @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
       <!-- {{item}} -->
         <i class="el-icon-caret-right" v-if="item.children && !(expandTree[idx])"></i>
         <i class="el-icon-caret-bottom" v-if="item.children  && (expandTree[idx])"></i>
         <span class="el-icon-caret-right caret-hidden" v-if="item.type==='clz' && !item.children"></span>
-        <IconFolder :icon="item.icon?item.icon:'el-icon-folder'" :isSelected="selections[idx]" :label="item.name" :parent="chain"></IconFolder>
+        <!-- {{parent}} -->
+        <IconFolder :icon="item.icon?item.icon:'el-icon-goods'" :isSelected="selections[idx]" :label="item.name" :parent="parent"></IconFolder>
         <div v-if="item.children && item.children.length > 0 && (expandTree[idx])" class="children">
           <FolderTree :data="item.children" :parent="(parent===undefined ? item.name : parent + '/' +item.name)"></FolderTree>
         </div>
     </div>
+    <IconFolder icon="el-icon-folder" enableInput="true" v-if="enableAddClass" @onblur="onBlur" :label="newCategoryName"></IconFolder>
   </div>
 </template>
 <script>
@@ -35,11 +38,13 @@ export default {
     }
     console.info('folder tree:', this.data)
     return {
+      newCategoryName: '',
+      // enableAddClass: false,
       expandTree: expandTree,
       selections: selections,
       lastSelections: [],
       menus: [
-        // {text: '添加子类', cb: this.onAddClass},
+        {text: '添加分类', cb: this.onAddClass},
         {text: '重命名', cb: this.onChangeName},
         {text: '删除', cb: this.onDeleteItem}
       ],
@@ -54,14 +59,15 @@ export default {
     bus.on(bus.EVENT_REMOVE_ITEM, this.onRemoveItems)
   },
   methods: {
-    onItemClick: function(idx) {
-      console.info(idx, this.expandTree[idx])
+    onItemClick: function(e, idx, item) {
+      console.info(idx, this.expandTree[idx], item)
       this.$set(this.expandTree, idx, !this.expandTree[idx])
       for (let indx of this.lastSelections) {
         this.selections[indx] = false
       }
       this.selections[idx] = true
       this.lastSelections = [idx]
+      e.stopPropagation()
     },
     onPopMenu: function(event, root, parent, indx) {
       this.selection = event.toElement.innerText
@@ -113,7 +119,25 @@ export default {
       console.info(this.selection, newName, parent, index)
       // this.$ipcRenderer.send(Service.UPDATE_CATEGORY_NAME, {oldname: this.selection, newname: newName})
     },
-    getChildren: function () {}
+    getChildren: function () {},
+    dropFiles: function(event) {
+      event.preventDefault()
+      let sourcesID = event.dataTransfer.getData('civet')
+      console.info('dropFiles files to navigation:', sourcesID, 'target', event.target)
+      const path = event.target.getAttribute('path')
+      console.info('path', path)
+      sourcesID = JSON.parse(sourcesID)
+      let filesID = []
+      for (let fid of sourcesID) {
+        filesID.push(parseInt(fid))
+      }
+      this.$store.dispatch('addClass', {id: filesID, class: [path]})
+    },
+    dragEnd: function(event) {
+      event.preventDefault()
+      // const sourcesID = event.dataTransfer.getData('text/plain')
+      // console.info('dragEnd files to navigation:', sourcesID)
+    }
   }
 }
 </script>

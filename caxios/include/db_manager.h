@@ -20,6 +20,8 @@ namespace caxios {
     bool AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
     bool RemoveFiles(const std::vector<FileID>& filesID);
     bool RemoveTags(const std::vector<FileID>& files, const Tags& tags);
+    bool RemoveClasses(const std::vector<std::string>& classes);
+    bool RemoveClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
     bool SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
     bool GetFilesSnap(std::vector< Snap >& snaps);
@@ -48,6 +50,7 @@ namespace caxios {
     std::vector<uint32_t> AddClassImpl(const std::vector<std::string>& classes);
     bool RemoveFile(FileID);
     bool RemoveTag(FileID, const Tags& tags);
+    bool RemoveClassImpl(const std::string& classPath);
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);
     std::vector<FileID> GetFilesByClass(const std::vector<WordIndex>& clazz);
@@ -57,7 +60,7 @@ namespace caxios {
     uint32_t GetClassHash(const std::string& clazz);
     uint32_t GetClassParent(const std::string& clazz);
     std::pair<uint32_t, std::string> EncodePath2Hash(const std::string& classPath);
-    std::vector<uint32_t> GetClassChildren(const std::string& clazz);
+    std::vector<ClassID> GetClassChildren(const std::string& clazz);
     std::string GetClassByHash(uint32_t);
     std::vector<FileID> GetFilesOfClass(uint32_t clsID);
     std::vector<FileID> mapExistFiles(const std::vector<FileID>&);

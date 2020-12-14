@@ -207,12 +207,13 @@ const messageProcessor = {
     console.info(nsql, 'reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
     reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
   },
-  'addCategory': (categoryName, chain, imageID) => {
-    return storage.addClasses(categoryName, chain, imageID)
+  'addCategory': (mutation) => {
+    return storage.addClasses(mutation)
   },
-  'getAllCategory': async () => {
+  'getAllCategory': (parent) => {
+    const category = storage.getClasses(parent)
     // let category = await CategoryArray.loadFromDB()
-    // reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
+    reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
   'getUncategoryImages': async () => {
     let uncateimgs = storage.getUnClassifyFiles()

@@ -184,6 +184,28 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::RemoveClasses(const std::vector<std::string>& classes)
+  {
+    WRITE_BEGIN();
+    for (auto& classPath : classes) {
+      // get children of class
+      ClassID clsID;
+      std::string clsKey;
+      std::tie(clsID, clsKey) = EncodePath2Hash(classPath);
+      std::vector< ClassID> vIDs = GetClassChildren(clsKey);
+      // get children of files
+
+    }
+    
+    WRITE_END();
+    return true;
+  }
+
+  bool DBManager::RemoveClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID)
+  {
+    return true;
+  }
+
   bool DBManager::SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags)
   {
     if (_flag == ReadOnly) return false;
@@ -491,12 +513,13 @@ namespace caxios {
     using namespace nlohmann;
     json dbMeta;
     dbMeta = meta;
+    T_LOG("file", "debug %s", dbMeta.dump().c_str());
     std::string value = to_string(dbMeta);
+    T_LOG("file", "Write ID: %d, Meta Info: %s", fileid, value.c_str());
     if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, (void*)(value.data()), value.size())) {
       T_LOG("file", "Put TABLE_FILE_META Fail %s", value.c_str());
       return false;
     }
-    T_LOG("file", "Write ID: %d, Meta Info: %s", fileid, value.c_str());
     //snap
     json snaps;
     for (MetaItem m: meta)
@@ -752,6 +775,18 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::RemoveClassImpl(const std::string& classPath)
+  {
+    ClassID clsID;
+    std::string clsKey;
+    std::tie(clsID, clsKey) = EncodePath2Hash(classPath);
+    auto children = GetClassChildren(clsKey);
+    for (auto cID: children)
+    {
+    }
+    return true;
+  }
+
   bool DBManager::GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno)
   {
     // meta
@@ -925,6 +960,7 @@ namespace caxios {
   {
     nlohmann::json jSnap;
     int step = GetSnapStep(fileID, jSnap);
+    T_LOG("snap", "step: %d, offset: %d, result: %d", step, offset, step & (1 << offset));
     if (step & (1 << offset)) return;
     step |= (1 << offset);
     jSnap["step"] = step;
@@ -940,6 +976,7 @@ namespace caxios {
     m_pDatabase->Get(m_mDBs[TABLE_FILESNAP], fileID, pData, len);
     if (len == 0) return 0;
     std::string snap((char*)pData, len);
+    T_LOG("snap", "snap: %s", snap.c_str());
     jSnap = nlohmann::json::parse(snap);
     int step = atoi(jSnap["step"].dump().c_str());
     return step;
