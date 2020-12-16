@@ -49,7 +49,7 @@ export default {
       case 'path': return '路径'
       case 'filename': return '文件名'
       case 'size': return '大小'
-      case 'datetime': return '创建时间'
+      case 'createtime': return '创建时间'
       case 'specs': return '尺寸'
       case 'author': return '作者'
       case 'tag': return '标签'

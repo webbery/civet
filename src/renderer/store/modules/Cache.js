@@ -5,9 +5,9 @@ import Vue from 'vue'
 
 const state = {
   query: {},
-  cache: [],
-  classes: [{name: 'test.jpg', type: 'jpg', id: 1}, {name: 'test', type: 'clz', id: 2, children: [{name: 'test2.jpg', type: 'jpg', id: 3}]}],
-  classesName: ['test'],
+  cache: {},
+  classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
+  classesName: [],
   viewItems: [],
   tags: {},
   untags: 0,
@@ -21,11 +21,12 @@ const getters = {
   classes: state => { return state.classes },
   getFiles: (state, getters) => {
     return (filesID) => {
+      console.info('get files: ', filesID)
       let files = []
       for (let fileID of filesID) {
-        const file = state.cache.filter(file => file.id === fileID)
+        const file = state.cache[fileID]
         if (file !== null) {
-          files.push(file[0])
+          files.push(file)
         }
       }
       return files
@@ -55,23 +56,37 @@ const mutations = {
     let imagesID = []
     for (let snap of snaps) {
       imagesID.push(snap.id)
+      // if (imagesID.length > 40) break
     }
     const images = Kernel.getFilesInfo(imagesID)
     for (let image of images) {
-      state.cache.push(new FileBase(image))
-      // console.info(image)
+      state.cache[image.id] = new FileBase(image)
     }
-    const len = state.cache.length
+    // const len = state.cache.length
     // setting view panel item
-    for (let idx = 0; idx < len; ++idx) {
-      Vue.set(state.viewItems, idx, state.cache[idx])
+    let idx = 0
+    for (let k in state.cache) {
+      Vue.set(state.viewItems, idx, state.cache[k])
+      idx += 1
     }
     // get classes
     const cls = Kernel.getClasses('/')
     if (cls) {
       for (let idx = 0; idx < cls.length; ++idx) {
-        Vue.set(state.classes, idx, cls[idx])
+        // Vue.set(state.classes, idx, cls[idx])
       }
+    }
+    // init classes name
+    let candidates = [].concat(state.classes)
+    for (let idx = 0; idx < candidates.length;) {
+      let front = candidates.shift()
+      if (front.children) {
+        const children = front.children.map(element => {
+          return {name: front.name + '/' + element.name, id: element.id, children: element.children}
+        })
+        candidates = candidates.concat(children)
+      }
+      state.classesName.push({name: front.name, id: front.id})
     }
     // count
     const untags = Kernel.getUnTagFiles()
@@ -86,13 +101,13 @@ const mutations = {
     state.tags = tags
   },
   addFiles(state, files) {
+    let idx = 0
     for (let file of files) {
-      state.cache.push(new FileBase(file))
-    }
-    // setting view panel item
-    for (let idx = 0; idx < files.length; ++idx) {
+      if (state.cache.hasOwnProperty(file.id)) continue
+      state.cache[file.id] = new FileBase(file)
+      // setting view panel item
       const pos = state.viewItems.length + idx
-      Vue.set(state.viewItems, pos, state.cache[pos])
+      Vue.set(state.viewItems, pos, state.cache[file.id])
     }
     // count
     const untags = Kernel.getUnTagFiles()
@@ -108,7 +123,7 @@ const mutations = {
   async addTag(state, mutation) {
     const {fileID, tag} = mutation
     console.info('cache add tag:', fileID, tag)
-    const files = state.cache.filter(file => file.id === fileID)
+    const files = state.cache[fileID]
     if (files.length === 0) {
       Kernel.writeLog('cache add tag 0, fileID=' + fileID)
       return
@@ -124,20 +139,49 @@ const mutations = {
   addClass(state, mutation) {
     console.info('add class', mutation)
     Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
-    const isClassExist = function (clsPath, classes, parent) {
+    // update navigation panel data
+    const findClass = function (clsPath, classes, parent) {
       for (let item of classes) {
         if (item.type === 'clz') {
           const name = parent + '/' + item.name
-          if (name === clsPath) return true
+          if (name === clsPath) return item
           if (item.children && item.children.length !== 0) {
-            return isClassExist(clsPath, item.children, name)
+            return findClass(clsPath, item.children, name)
           }
         }
       }
-      return false
+      return null
     }
-    if (isClassExist(mutation[0], state.classes, '')) return
-    state.classes.push({name: mutation[0], type: 'clz', children: []})
+    const addChildClass = function (item, parent) {
+      console.info(item.name)
+    }
+    const addChildFiles = function (item, parent, state) {
+      console.info('add files', item)
+      if (!parent.children) {
+        Vue.set(parent, 'children', [])
+      }
+      const start = parent.children.length
+      for (let offset = 0; offset < item.length; ++offset) {
+        const file = state.cache[item[offset]]
+        Vue.set(parent.children, start + offset, {name: file.filename, id: file.id, type: file.type, icon: 'el-icon-picture'})
+      }
+    }
+    let classpath = null
+    let files = []
+    if (typeof mutation === 'object') {
+      classpath = mutation.class
+      files = mutation.id
+    } else {
+      classpath = mutation
+    }
+    for (let clsPath of classpath) {
+      let clazz = findClass(clsPath, state.classes, '')
+      if (clazz && files.length > 0) {
+        addChildFiles(files, clazz, state)
+      } else {
+        addChildClass({name: clsPath, type: 'clz', children: files}, state.classes)
+      }
+    }
   },
   removeFiles(state, query) {},
   update(state, sql) {}

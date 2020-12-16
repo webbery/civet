@@ -5,10 +5,10 @@ const init = (function() {
   function _init() {
     if (!_pool) {
       const cpus = require('os').cpus().length
-      pool = workerpool.pool({minWokers: cpus > 4 ? 4 : cpus, workerType: 'process'})
+      _pool = workerpool.pool({minWokers: cpus > 4 ? 4 : cpus, workerType: 'process'})
     }
   }
-  
+
   let _queue = []
   return function() {
     if (!_pool) {
@@ -19,7 +19,7 @@ const init = (function() {
         _queue.push([task, params])
       },
       exec: async () => {
-        if( _queue.length > 0) {
+        if (_queue.length > 0) {
           const job = _queue.pop()
           return _pool.exec(job[0], job[1])
         }

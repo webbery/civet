@@ -10,7 +10,7 @@
 #define TABLE_INDX_KEYWORD  "indx2keyword"
 #define TABLE_KEYWORD2FILE  "keyword2file"
 #define TABLE_FILE2KEYWORD  "file2keyword"
-#define TABLE_TAG           "tag"           // fileID -> tag
+#define TABLE_FILE2TAG      "tag"           // fileID -> tag
 #define TABLE_TAG2FILE      "tags"          // tag -> fileID
 #define TABLE_TAG_INDX      "tag_indx"      // alphabet -> tag indx
 #define TABLE_CLASS2HASH    "class2hash"    // class -> hash, so that when class name change, hash can not be change
@@ -30,6 +30,32 @@ namespace caxios {
 
   enum CountType {
     CT_UNCALSSIFY = 1
+  };
+
+  class Date {
+  public:
+    Date(double value)
+    :_value(value){}
+
+    Date(const std::string& s)
+    :_value(0){
+      size_t where = s.find("date(");
+      if (where != std::string::npos) {
+        _value = atof(s.substr(5, s.size() - 6).c_str());
+      }
+    }
+
+    std::string toString() {
+      return std::string("date(") + std::to_string(_value) + ")";
+    }
+
+    std::string toLocalString() {
+      std::string lcs;
+      return std::move(lcs);
+    }
+    double Value() { return _value; }
+  private:
+    double _value;
   };
 
   typedef std::string ClassName;

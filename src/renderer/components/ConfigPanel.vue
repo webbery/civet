@@ -7,9 +7,28 @@
       </el-input>
       <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
     </div>
-  <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button>
-  <!-- <div class="modules">
-    <el-divider content-position="left">可用插件</el-divider>
+  <!-- <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button> -->
+    <div class="modules">
+      <el-collapse accordion>
+        <el-collapse-item title="基本信息" name="1">
+          <el-row :gutter="20">
+            <el-col :span="6"><div>键</div></el-col>
+            <el-col :span="6"><div>名称</div></el-col>
+            <el-col :span="6"><div>是否展示</div></el-col>
+            <el-col :span="6"><div>是否可查询</div></el-col>
+          </el-row>
+          <el-divider></el-divider>
+          <div v-for="(item, idx) of properties" :key="idx">
+            <el-row :gutter="20">
+              <el-col :span="6"><div>{{item.name}}</div></el-col>
+              <el-col :span="6"><div>{{item.value}}</div></el-col>
+              <el-col :span="6"><div>{{item.display}}</div></el-col>
+              <el-col :span="6"><div>{{item.query}}</div></el-col>
+            </el-row>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
+    <!-- <el-divider content-position="left">可用插件</el-divider>
     <el-collapse v-model="valiablePlugins" @change="handlePluginChange">
       <div v-for="(item, idx) of valiablePlugins" :key="idx">
       <el-collapse-item :title="item.name" :name="idx">
@@ -42,8 +61,8 @@
           <el-checkbox v-model="checked">子图</el-checkbox>
         </div>
       </el-collapse-item>
-    </el-collapse>
-  </div> -->
+    </el-collapse> -->
+  </div>
   </div>
 </template>
 
@@ -53,7 +72,7 @@ import { remote } from 'electron'
 import Service from './utils/Service'
 import Folder from './utils/Folder'
 import fs from 'fs'
-import Plugins from '@/../public/Plugin'
+// import Plugins from '@/../public/Plugin'
 import { CivetConfig } from '@/../public/CivetConfig'
 
 export default {
@@ -65,6 +84,7 @@ export default {
       tansferMessage: '开始迁移',
       oldConfig: '',
       config: '',
+      properties: [],
       valiablePlugins: [
         {path: '', name: 'image', version: '0.0.1', valid: true}
       ],
@@ -78,17 +98,21 @@ export default {
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '配置', cmd: 'cfg'})
     const config = new CivetConfig()
     this.config = config.getDBPath()
-    console.info('confog:', this.config)
     this.loadPlugins()
+    const schema = config.schema()
+    for (let s of schema) {
+      this.properties.push(s)
+    }
+    // console.info('schema', this.properties)
   },
   methods: {
     loadPlugins: () => {
-      this.valiablePlugins = []
-      const modules = Plugins.load()
-      for (let plg of modules) {
-        let item = {path: '', name: plg.name, version: plg.version, valid: true}
-        this.valiablePlugins.push(item)
-      }
+      // this.valiablePlugins = []
+      // const modules = Plugins.load()
+      // for (let plg of modules) {
+      //   let item = {path: '', name: plg.name, version: plg.version, valid: true}
+      //   this.valiablePlugins.push(item)
+      // }
     },
     onSelectResourcePath: () => {
       console.info('select resource Path')

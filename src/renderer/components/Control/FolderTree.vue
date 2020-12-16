@@ -4,13 +4,13 @@
     <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)" @click="onItemClick($event, idx, item)"
       @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
       <!-- {{item}} -->
-        <i class="el-icon-caret-right" v-if="item.children && !(expandTree[idx])"></i>
-        <i class="el-icon-caret-bottom" v-if="item.children  && (expandTree[idx])"></i>
         <span class="el-icon-caret-right caret-hidden" v-if="item.type==='clz' && !item.children"></span>
         <!-- {{parent}} -->
-        <IconFolder :icon="item.icon?item.icon:'el-icon-goods'" :isSelected="selections[idx]" :label="item.name" :parent="parent"></IconFolder>
+        <IconFolder :expand="expandTree[idx]" :icon="item.icon?item.icon:'el-icon-goods'" 
+          :isSelected="selections[idx]" :data="item" :parent="(item.type==='clz'? parent + '/' + item.name : parent)" :level="level">
+        </IconFolder>
         <div v-if="item.children && item.children.length > 0 && (expandTree[idx])" class="children">
-          <FolderTree :data="item.children" :parent="(parent===undefined ? item.name : parent + '/' +item.name)"></FolderTree>
+          <FolderTree :data="item.children" :parent="(parent===undefined ? item.name : parent + '/' +item.name)" :level="(parent===undefined ? 0 : level + 1)"></FolderTree>
         </div>
     </div>
     <IconFolder icon="el-icon-folder" enableInput="true" v-if="enableAddClass" @onblur="onBlur" :label="newCategoryName"></IconFolder>
@@ -53,7 +53,8 @@ export default {
   },
   props: {
     data: Array,
-    parent: String
+    parent: String,
+    level: Number
   },
   mounted() {
     bus.on(bus.EVENT_REMOVE_ITEM, this.onRemoveItems)

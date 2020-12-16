@@ -34,14 +34,14 @@
     <fieldset>
       <legend class="title">分类</legend>
       <div>
-        <IconTag v-for="clz in imageClasses" :key="clz" icon="el-icon-folder">{{clz.name}}</IconTag>
+        <el-tag v-for="clz of dynamicClass" :key="clz" size="mini" closable>{{clz.name||clz}}</el-tag>
         <el-popover
           placement="left"
           width="160"
-          v-model="visible">
+        >
           <div>
             <div v-for="(clazz,idx) in candidateClasses" :key="idx">
-              <el-checkbox v-model="checkValue[idx]" :label="clazz" border size="mini" @change="onCategoryChange"></el-checkbox>
+              <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini" @change="onCategoryChange"></el-checkbox>
             </div>
           </div>
           <el-button slot="reference" size="mini">+</el-button>
@@ -77,13 +77,13 @@ export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, width: 0, height: 0, size: 0, colors: ['#FF2277', '#179577', '#179577', '#179577', '#179577', '#179527'] },
+      picture: { id: null, width: 0, height: 0, size: 0, colors: ['#FF2277', '#179577', '#179677', '#279577', '#179517', '#174527'] },
       imagepath: '',
       dynamicTags: [],
+      dynamicClass: [],
       inputVisible: false,
       inputValue: '',
       checkValue: [],
-      classes: [],
       filename: '',
       metaNames: [],
       metaValues: []
@@ -93,12 +93,6 @@ export default {
     IconTag, JImage
   },
   computed: mapState({
-    // candidateClasses() {
-    //   return this.$store.getters.classesName
-    // },
-    // imageClasses() {
-    //   return this.classes
-    // }
     candidateClasses: state => state.Cache.classesName
   }),
   mounted() {
@@ -122,20 +116,34 @@ export default {
       log.info('PropertyPanel', files)
       if (files.length === 1) {
         let file = files[0]
-        console.info(file)
         this.picture.descsize = getSize(parseInt(file.size))
         const config = new CivetConfig()
         const schema = config.meta()
         let names = []
         let values = []
-        for (let item of file.meta) {
+        console.info(schema)
+        const getItem = function (k, meta) {
+          for (let item of meta) {
+            if (item.name === k) return item
+          }
+          return null
+        }
+        for (let item of schema) {
           if (item.name === 'filename') {
-            this.filename = item.value
+            const meta = getItem(item.name, file.meta)
+            this.filename = meta.value
             continue
           }
-          if (config.isMetaDisplay(item.name, schema)) {
+          if (item.name === 'color') continue
+          if (item.display) {
+            console.info('propterty name:', item.name)
             names.push(JString.i18n(item.name))
-            values.push(item.value)
+            const meta = getItem(item.name, file.meta)
+            if (!meta) {
+              values.push('unknow')
+            } else {
+              values.push(meta.value)
+            }
           }
         }
         this.metaNames = names
@@ -143,35 +151,8 @@ export default {
         this.picture.id = file.id
         this.imagepath = file.path
         this.dynamicTags = file.tag ? file.tag.slice(0) : []
+        this.dynamicClass = file.category
       }
-      // this.classes.length = 0
-      // for (let c of image.category) {
-      //   this.classes.push(c)
-      // }
-      // let colors = []
-      // if (image.colors) {
-      //   for (let color of image.colors) {
-      //     colors.push('#' + JString.formatColor16(color[0]) + JString.formatColor16(color[1]) + JString.formatColor16(color[2]))
-      //   }
-      //   this.picture.colors = colors
-      // }
-      // const clazzName = this.$store.getters.classesName
-      // // console.info('clear', clazzName)
-      // for (let idx in clazzName) {
-      //   this.checkValue[idx] = false
-      // }
-      // if (image.category) {
-      //   for (let idx in clazzName) {
-      //     for (let n of image.category) {
-      //       // console.info(n, image.category)
-      //       if (n.name === clazzName[idx].name) {
-      //         this.checkValue[idx] = true
-      //         break
-      //       }
-      //     }
-      //   }
-      // }
-      // // image.desccolors = colors
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
@@ -179,6 +160,7 @@ export default {
       this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
     },
     showInput() {
+      if (!this.picture.id) return
       this.inputVisible = true
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus()
@@ -206,50 +188,35 @@ export default {
         console.info('not support os')
       }
     },
-    async onCategoryChange(val) {
-      const isCategoryExist = (arr, category) => {
-        for (let item of arr) {
-          if (item.name === category.name) return true
+    onCategoryChange(val) {
+      let selectItem = []
+      for (let idx in this.checkValue) {
+        if (this.checkValue[idx] === true) {
+          const classid = this.candidateClasses[idx].id
+          selectItem.push([classid, this.candidateClasses[idx].name])
+        }
+      }
+      const isClassExist = function (cid, classes) {
+        for (let idx = 0; idx < classes.length;) {
+          if (cid === classes[idx][0]) {
+            classes.splice(idx, 1)
+            return true
+          }
+          idx += 1
         }
         return false
       }
-      // 更新本地缓存分类
-      const img = this.$store.getters.image(this.picture.id)
-      let selClasses = img.category ? img.category.slice(0) : []
-      const originalClz = this.$store.getters.classesName
-      for (let idx in this.checkValue) {
-        if (this.checkValue.hasOwnProperty(idx)) {
-          console.info(originalClz[idx])
-          let parent = originalClz[idx].name
-          if (originalClz[idx].parent !== '') parent = originalClz[idx].parent + '.' + parent
-          if (val === true && this.checkValue[idx] === true) {
-            this.$store.commit('addImage2Category', {id: this.picture.id, label: this.picture.label, parent: parent})
-            if (!isCategoryExist(selClasses, originalClz[idx])) {
-              // console.info('not exist', originalClz[idx])
-              selClasses.push(originalClz[idx])
-            }
-          } else if (val === false && this.checkValue[idx] === false) {
-            for (let pos in selClasses) {
-              if (selClasses[pos].name === originalClz[idx].name && originalClz[idx].parent === selClasses[pos].parent) {
-                if (selClasses.length > 1) selClasses.splice(pos, 1)
-                else selClasses = []
-                break
-              }
-            }
-            this.$store.commit('removeImageFromCategory', {id: this.picture.id, name: this.picture.label, parent: parent})
-          }
+      this.$store.dispatch('addClass', {id: [this.picture.id], class: selectItem})
+      // remove not exist
+      for (let idx = this.dynamicClass.length - 1; idx >= 0; --idx) {
+        if (!isClassExist(this.dynamicClass[idx].id, selectItem)) {
+          this.dynamicClass.splice(idx, 1)
         }
       }
-      this.$store.commit('updateImageProperty', {id: this.picture.id, key: 'category', value: selClasses})
-      if (selClasses.length === 0) {
-        bus.emit(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, -1)
-      } else if (img.category.length === 0) {
-        bus.emit(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, 1)
+      // add not exist
+      for (let item of selectItem) {
+        this.dynamicClass.push({name: item[1], id: item[0]})
       }
-      // console.info('get category', img.category)
-      this.classes = img.category
-      // console.info('get category', v)
-      this.$ipcRenderer.send(Service.UPDATE_IMAGE_CATEGORY, {imageID: this.picture.id, category: img.category})
     },
     getSrc(image) {
       console.info('++++++++', ImgTool.getSrc(image))

@@ -10,7 +10,7 @@
             <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
           </table>
           <TreePanel :isActive="true">
-            <FolderTree :data="category" parent="/"></FolderTree>
+            <FolderTree :data="category" parent=""></FolderTree>
           </TreePanel>
         </el-scrollbar>
       </el-tab-pane>

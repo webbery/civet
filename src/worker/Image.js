@@ -9,7 +9,9 @@ import { imageHash } from 'image-hash'
 import util from 'util'
 import storage from '../public/Kernel'
 // import WorkerPool from './WorkerPool/WorkerPool'
+const jpegasm = require('jpeg-asm')
 
+const jpegEncode = util.promisify(jpegasm.encode)
 const pHash = util.promisify(imageHash)
 export class ImageParser {
   constructor(fullpath) {
@@ -133,14 +135,22 @@ class ImageMetaParser extends ImageParseBase {
   }
 
   getImageThumbnail(meta) {
-    if (meta['Thumbnail']) return meta['Thumbnail'].base64
+    if (meta['Thumbnail']) {
+      const buffer = _translateBase64ToArrayBuffer( meta['Thumbnail'].base64)
+      const options = {
+        width: this.getImageWidth(meta),
+        height: this.getImageHeight(meta),
+        quality: 80
+      }
+      return jpegEncode(buffer, options)
+    }
     console.info('thumbnail', meta)
     return undefined
   }
 
   getImageFormat(str) {
     console.info('format', str)
-    switch (str) {
+    switch (str.toLowerCase()) {
       case 'jpg':
       case 'jpeg':
         return 'jpeg'
@@ -156,6 +166,25 @@ class ImageMetaParser extends ImageParseBase {
       default:
         return 'unknow'
     }
+  }
+
+  _translateArrayBufferToBase64(buffer){
+    let binaryStr = ''
+    const bytes = new Uint8Array(buffer)
+    for(let i=0, len = bytes.byteLength; i < len; i++) {
+      binaryStr += String.fromCharCode(bytes[i])
+    }
+    return window.btoa(binaryStr)
+  }
+
+  _translateBase64ToArrayBuffer(base64){
+    const binaryStr = window.atob(base64)
+    const byteLength = binaryStr.length
+    const bytes = new Uint8Array(byteLength)
+    for(let i = 0; i < byteLength; i++){
+      bytes[i] = binary.charCodeAt(i)
+    }
+    return bytes.buffer
   }
 }
 

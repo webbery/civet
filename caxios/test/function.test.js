@@ -33,7 +33,7 @@ describe('civetkern add test', function() {
   it('generate files id',  function() {
 	  fileids = instance.generateFilesID(genCount)
     expect(fileids).to.have.lengthOf(genCount)
-    let t = new Date()
+    let t = new Date("Sun Sep 20 2020 12:58:14 GMT+0800 (中国标准时间)")
     willBeAdd.push({
       'id': fileids[0],
       'meta': [
@@ -65,7 +65,6 @@ describe('civetkern add test', function() {
     })
   })
   it('add files', function() {
-    const t = new Date("Sun Sep 20 2020 12:58:14 GMT+0800 (中国标准时间)");
     const result = instance.addFiles(willBeAdd)
     assert(result === true)
   })
@@ -103,16 +102,24 @@ describe('civetkern add test', function() {
   })
   it('update file meta info', function() {
     instance.updateFile({id: [fileids[0]], filename: '测试'})
+    let info = instance.getFilesInfo([fileids[0]])
+    let meta = info[0]['meta']
+    for (let item of meta) {
+        if (item.name === 'filename'){
+            expect(item.value).to.equal('测试')
+            break
+        }
+    }
   })
   it('update files tags', function() {
     instance.updateFileTags({id: [fileids[0]], tag: ['newTag']})
   })
-  it('update files class', function() {
-    let result = instance.updateFileClass({id: [fileids[0]], class: ['newClass', 'class1/class3']})
-    expect(result).to.equal(true)
-  })
+  //it('update files class', function() {
+    //let result = instance.updateFileClass({id: [fileids[0]], class: ['/newClass', 'class1/class3']})
+    //expect(result).to.equal(true)
+  //})
   it('update class name', function() {
-    instance.updateClassName('newClass', '新分类')
+    instance.updateClassName('type1', '新分类')
   })
   after(function() {
     instance.release()
@@ -134,6 +141,12 @@ describe('civetkern read only test', function() {
     let filesInfo = instance.getFilesInfo([snaps[0].id])
     console.info(filesInfo)
     expect(filesInfo).to.lengthOf(1)
+    // for (let item of filesInfo[0]['meta']) {
+    //   console.info(item)
+    //   if (item.type === 'date') {
+    //     console.info(item.value.toString())
+    //   }
+    // }
     expect(filesInfo[0]['tag']).to.exist
     expect(filesInfo[0]['tag']).to.not.include('test')
     expect(filesInfo[0]['tag']).to.not.include('标签')
@@ -147,17 +160,19 @@ describe('civetkern read only test', function() {
   })
   it('get classes', function() {
     const rootClasses = instance.getClasses()
-    console.info(rootClasses)
+    // console.info(rootClasses)
     expect(rootClasses).to.lengthOf(5)
     expect(rootClasses[0]).to.have.property('children')
     expect(rootClasses[2]).to.not.have.property('children')
     expect(rootClasses[3]).to.not.have.property('children')
     expect(rootClasses[4]).to.have.property('children')
+    expect(rootClasses[4]['children']).to.lengthOf(1)
     // [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: clz/jpg, children: []}]
   })
   it('get file tags', function() {
     let result = instance.getTagsOfFiles({id: [snaps[0].id]})
     expect(result).to.lengthOf(1)
+    expect(result[0]).to.equal('newTag')
   })
   it('search files', function() {
     let result = instance.query({keyword: ['标签']})
@@ -176,11 +191,26 @@ describe('civetkern clean test', function() {
   let snaps = null
   it('remove file class', function() {
     snaps = instance.getFilesSnap(-1)
-    assert(snaps.length === 1)
-    instance.removeClasses({id: [snaps[0].id], class: ['新分类']})
+    assert(snaps.length >= 1)
+    let finfo = instance.getFilesInfo([snaps[0].id])
+    // console.info(finfo);
+    instance.removeClasses({id: [snaps[0].id], class: ['新分类', 'type1', 'class3']})
+    finfo = instance.getFilesInfo([snaps[0].id])
+    // console.info(finfo);
   })
   it('remove classes', function() {
-    instance.removeClasses(['新分类'])
+    let rootClasses = instance.getClasses()
+    expect(rootClasses).to.lengthOf(4)
+    // console.info(rootClasses)
+    instance.removeClasses(['class1'])
+    rootClasses = instance.getClasses()
+    console.info(rootClasses)
+    expect(rootClasses).to.lengthOf(3)
+    let finfo = instance.getFilesInfo([snaps[0].id])
+    // console.info(finfo);
+    expect(finfo[0].class).to.include('type2')
+    //const rootClasses = instance.getClasses()
+    //console.info(rootClasses)
   })
   it('remove file tags', function() {
     instance.removeTags({id: [snaps[0].id], tag: ['test']})

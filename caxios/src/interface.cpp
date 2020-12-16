@@ -25,7 +25,18 @@ namespace caxios {
       for (unsigned int idx = 0; idx < metaCnt; ++idx) {
         Napi::Object prop = Napi::Object::New(env);
         for (auto itr = metaInfo[idx].begin(); itr != metaInfo[idx].end(); ++itr) {
-          prop.Set(itr->first, itr->second);
+          if (itr->second[0] == '^') { // datetime
+            std::string num = itr->second.substr(1);
+            if (isNumber(num)) {
+              double dTime = atof(num.c_str());
+              auto date = Napi::Date::New(env, dTime);
+              prop.Set(itr->first, date);
+              T_LOG("file", "date %f", dTime);
+            }
+          }
+          else {
+            prop.Set(itr->first, itr->second);
+          }
         }
         meta.Set(idx, prop);
       }
@@ -190,10 +201,12 @@ namespace caxios {
                 auto num = obj.As<Napi::Number>().Uint32Value();
                 sVal = std::to_string(num);
               }
-#if NAPI_VERSION > 5
+#if NAPI_VERSION >= 5
               else if( obj.IsDate()) {
+                //std::string sVal = obj.As<Napi::Date>().As<Napi::String>();
                 double timestamp = obj.As<Napi::Date>().ValueOf();
-                sVal = std::to_string(timestamp);
+                sVal = std::string("^") + std::to_string(timestamp);
+                T_LOG("file", "add file, date value: %s", sVal.c_str());
               }
 #endif
               else if (obj.IsArray()) {
@@ -410,6 +423,7 @@ namespace caxios {
       }
       nlohmann::json classes;
       g_pCaxios->GetClasses(sParent, classes);
+      T_LOG("class", "get class interface: %s", classes.dump().c_str());
       Napi::Env env = info.Env();
       return Parse(env, classes.dump());
       //auto arry = Classes2Array(env, classes);
@@ -473,15 +487,6 @@ namespace caxios {
     return Napi::Boolean::From(info.Env(), false);
   }
 
-  Napi::Value searchFiles(const Napi::CallbackInfo& info) {
-    if (g_pCaxios) {
-      auto str = Stringify(info.Env(), info[0].As<Napi::Object>());
-      nlohmann::json query = nlohmann::json::parse(str);
-      std::vector<FileInfo> vFiles;
-    }
-    return Napi::Value();
-  }
-  
   Napi::Value query(const Napi::CallbackInfo& info) {
     if (g_pCaxios != nullptr) {
       if (!info[0].IsUndefined()) {
@@ -537,7 +542,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(removeFiles);
   EXPORT_JS_FUNCTION_PARAM(removeTags);
   EXPORT_JS_FUNCTION_PARAM(removeClasses);
-  EXPORT_JS_FUNCTION_PARAM(searchFiles);
   EXPORT_JS_FUNCTION_PARAM(query);
   EXPORT_JS_FUNCTION_PARAM(writeLog);
   return exports;

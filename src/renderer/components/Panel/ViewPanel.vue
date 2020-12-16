@@ -38,7 +38,6 @@ export default {
   data() {
     return {
       firstLoad: true,
-      // imageList: [],
       lastSelections: {},
       enableInput: false,
       imageSelected: false,
@@ -113,7 +112,7 @@ export default {
       }
     },
     onImageClick(e, root, image) {
-      console.info('onImageClick')
+      console.info('onImageClick', image)
       this.imageSelected = true
       if (!Global.ctrlPressed) {
         bus.emit(bus.EVENT_SELECT_IMAGE, image.id)

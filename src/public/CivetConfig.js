@@ -79,6 +79,7 @@ export class CivetConfig {
   }
 
   isMetaDisplay(name, meta) {
+    console.info('meta name:', name)
     for (let item of meta) {
       if (item.name === name && item.display === true) return true
     }
@@ -93,10 +94,11 @@ export class CivetConfig {
   schema() {
     return [
       {name: 'color', value: '主色', type: 'val/array', query: true, size: 3, display: true},
+      {name: 'size', value: '大小', type: 'str', query: true, display: true},
       {name: 'path', value: '路径', type: 'str', display: true},
       {name: 'filename', value: '文件名', type: 'str', display: true},
       {name: 'type', value: '类型', type: 'str', query: true, display: true},
-      {name: 'createtime', value: '创建时间', type: 'str', query: true, display: true},
+      {name: 'datetime', value: '创建时间', type: 'str', query: true, display: true},
       {name: 'width', value: '宽', type: 'str', display: true},
       {name: 'height', value: '高', type: 'str', display: true}
     ]

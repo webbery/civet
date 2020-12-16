@@ -10,7 +10,7 @@
 #endif
 #include "log.h"
 
-#define MAX_NUM_DATABASE  32
+#define MAX_NUM_DATABASE  64
 #define LIN_DELIMITER '/'
 #define WIN_DELIMITER '\\'
 
@@ -226,6 +226,22 @@ namespace caxios {
     MDB_val key, datum = { 0 };
     key.mv_data = reinterpret_cast<void*>(&k);
     key.mv_size = sizeof(uint32_t);
+
+    if (int rc = mdb_del(m_pTransaction, dbi, &key, NULL)) {
+      T_LOG("database", "mdb_del fail: %s", err2str(rc).c_str());
+      return false;
+    }
+    if (m_dOperator == NORMAL) {
+      m_dOperator = TRANSACTION;
+    }
+    return true;
+  }
+
+  bool CDatabase::Del(MDB_dbi dbi, const std::string& k)
+  {
+    MDB_val key, datum = { 0 };
+    key.mv_data = (void*)(k.data());
+    key.mv_size = k.size();
 
     if (int rc = mdb_del(m_pTransaction, dbi, &key, NULL)) {
       T_LOG("database", "mdb_del fail: %s", err2str(rc).c_str());

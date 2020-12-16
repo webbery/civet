@@ -1,17 +1,21 @@
 <template>
-  <div :class="{item: !isSelected, selected: isSelected}">
-    <i :class="icon"></i>
-    <span :path="parent" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick" @click="onItemClick()">{{label}}</span>
+  <div :class="{item: !isSelected, selected: isSelected}" :level="level">
+    <i class="el-icon-caret-right" v-if="data.count!=0 && !expand"></i>
+    <i class="el-icon-caret-bottom" v-if="data.count!=0 && expand"></i>
+    <i :class="data.icon"></i>
+    <span :path="parent" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick" @click="onItemClick()">{{data.name}}</span>
     <input v-if="enableInput" @blur="onSave()" v-model="folderName" ref="folderInput"/>
+    <span class="count">{{data.count}}</span>
   </div>
 </template>
 <script>
 export default {
   name: 'icon-folder',
   props: {
-    icon: { type: String },
-    label: { type: String },
-    parent: { type: String },
+    data: {type: Object},
+    parent: {type: String},
+    expand: {type: Boolean, default: false},
+    level: {type: Number, default: 0},
     isSelected: {type: Boolean, default: false},
     enableInput: { type: Boolean, default: false }
   },
@@ -72,6 +76,17 @@ input {
 .selected {
   width: 100%;
   display: inline-block;
+  font-size: 13px;
   background-color:rgb(16, 125, 197);
 }
+.count {
+  position:absolute;
+  right: 0;
+}
+/* [level=1] {
+  left: 5px;
+}
+[level=2] {
+  left: 5px;
+} */
 </style>

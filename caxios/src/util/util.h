@@ -6,6 +6,9 @@
 #include <functional>
 #include "datum_type.h"
 
+#define ROOT_CLASS_PATH   "/"
+#define ROOT_CLASS_ID     0
+
 namespace caxios {
   bool HasAttr(Napi::Object obj, std::string attr);
   std::string AttrAsStr(Napi::Object obj, const std::string& attr);
@@ -34,6 +37,8 @@ namespace caxios {
 
   std::string trunc(const std::string& elm);
   std::vector<std::string> split(const std::string& str, char delim);
+  bool isNumber(const std::string&);
+  bool isHex(const std::string&);
 
   bool exist(const std::string& filepath);
   std::string serialize(const std::vector< std::vector<WordIndex> >& classes);
@@ -64,6 +69,23 @@ namespace caxios {
     for (auto& item: src)
     {
       addUniqueDataAndSort(pDest, item);
+    }
+  }
+
+  template<typename T>
+  bool eraseData(std::vector<T>& vDest, T tgt) {
+    auto ptr = std::lower_bound(vDest.begin(), vDest.end(), tgt);
+    if (ptr != vDest.end() && *ptr == tgt) {
+      vDest.erase(ptr);
+      return true;
+    }
+    return false;
+  }
+
+  template<typename T>
+  void eraseData(std::vector<T>& vDest, const std::vector <T>& tgt) {
+    for (auto& item : tgt) {
+      eraseData(vDest, item);
     }
   }
 }

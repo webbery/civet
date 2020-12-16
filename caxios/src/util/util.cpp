@@ -10,6 +10,7 @@
 #include <direct.h>
 #include <io.h>
 #endif
+#include <regex>
 #define CHAR_BIT  255
 
 namespace caxios {
@@ -73,7 +74,7 @@ namespace caxios {
   std::string serialize(const std::vector<WordIndex>& classes)
   {
     std::string s;
-    if (classes.size() == 0) return "/";
+    if (classes.size() == 0) return ROOT_CLASS_PATH;
     for (const WordIndex& wi : classes) {
       char c4 = wi & (CHAR_BIT << 24);
       s.push_back(c4);
@@ -284,7 +285,7 @@ namespace caxios {
     size_t start = 0;
     for (size_t idx = 0; idx < str.size(); ++idx)
     {
-      if (str[idx] == delim) {
+      if (str[idx] == delim && idx > start) {
         auto t = str.substr(start, idx - start);
         vStr.emplace_back(t);
         start = idx + 1;
@@ -292,6 +293,12 @@ namespace caxios {
     }
     vStr.emplace_back(str.substr(start, str.size() - start));
     return vStr;
+  }
+
+  bool isNumber(const std::string& input)
+  {
+    std::regex reg("[0-9]+.[0-9]*");
+    return regex_match(input, reg);
   }
 
   void Call(Napi::Env env, const std::string& func, const std::vector<std::string>& params)
