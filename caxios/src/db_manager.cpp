@@ -252,11 +252,11 @@ namespace caxios {
         T_LOG("files", "Get TABLE_FILE_META Fail: %d", fileID);
         continue;
       }
-      std::string sMeta((char*)pData, len);
-      std::string sDebug((char*)pData, 500 <len? 500: len);
-      T_LOG("files", "meta: %s", sDebug.c_str());
+      std::vector<uint8_t> sMeta((uint8_t*)pData, (uint8_t*)pData + len);
+      // std::string sDebug((char*)pData, 500 <len? 500: len);
+      // T_LOG("files", "meta: %s", sDebug.c_str());
       using namespace nlohmann;
-      json meta = json::parse(sMeta);
+      json meta = json::from_cbor(sMeta);
       MetaItems items;
       for (auto value: meta) {
         MetaItem item;
@@ -513,11 +513,11 @@ namespace caxios {
     using namespace nlohmann;
     json dbMeta;
     dbMeta = meta;
-    T_LOG("file", "debug %s", dbMeta.dump().c_str());
     std::string value = to_string(dbMeta);
     T_LOG("file", "Write ID: %d, Meta Info: %s", fileid, value.c_str());
-    if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, (void*)(value.data()), value.size())) {
-      T_LOG("file", "Put TABLE_FILE_META Fail %s", value.c_str());
+    auto vData = json::to_cbor(dbMeta);
+    T_LOG("file", "debug 2");
+    if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, (void*)(&vData[0]), vData.size())) {
       return false;
     }
     //snap
@@ -736,8 +736,8 @@ namespace caxios {
       return false;
     }
     T_LOG("file", "meta len: %d", len);
-    std::string info((char*)pData, len);
-    json meta = json::parse(info);
+    std::vector<uint8_t> info((uint8_t*)pData, (uint8_t*)pData + len);
+    json meta = json::from_cbor(info);
     // meta
     for (MetaItem m : meta) {
       std::string& name = m["name"];

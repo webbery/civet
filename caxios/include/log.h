@@ -3,6 +3,10 @@
 #include <string>
 #include <vector>
 
+#if defined(__linux__) || defined(__APPLE__)
+#define sprintf_s snprintf
+#endif
+
 #ifdef _DEBUG
 #define T_LOG(module, fmt, ...) \
   printf("[%s] [%s:%d] [%u] [%s] [%s] "##fmt "\n",\
