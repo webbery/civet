@@ -1,47 +1,107 @@
 #include "QueryAction.h"
 #include "Table.h"
 #include "db_manager.h"
+#include "util/util.h"
+#include "log.h"
 
 namespace caxios {
-  std::map<std::string, std::string> QueryAction::m_mKeywords;
+  namespace {
+    typedef std::vector<FileID> QueryFunc(DBManager* pDB, const std::vector<QueryCondition>& conditions, const std::vector<FileID>&);
 
-  bool QueryAction::Init()
-  {
-    if (m_mKeywords.size() == 0) {
-      m_mKeywords[TB_Keyword] = TABLE_KEYWORD2FILE;
-      m_mKeywords[TB_Tag] = TABLE_TAG2FILE;
-      m_mKeywords[TB_Class] = TABLE_CLASS2FILE;
-      //m_mKeywords[TB_Annotation] = TABLE_KEYWORD2FILE;
-      m_mKeywords[TB_FileID] = TABLE_FILESNAP;
+    std::vector<FileID> queryKeywords(DBManager* pDB, const std::vector<QueryCondition>& conditions, const std::vector<FileID>&) {
+      std::vector<FileID> vf = pDB->QueryImpl(TABLE_KEYWORD2FILE, conditions);
+      return std::move(vf);
     }
-    return true;
+
+    bool compare(const system_time::time_point& pt, const system_time::time_point& start, const system_time::time_point& end) {
+      return true;
+    }
+
+    void init_map(std::map<std::string, std::function<QueryFunc>>& m) {
+      if (m.size() != 0) return;
+      m[TB_Keyword] = queryKeywords;
+      //m[TB_Tag] = TABLE_TAG2FILE;
+      //m[TB_Class] = TABLE_CLASS2FILE;
+      //m[TB_Annotation] = TABLE_KEYWORD2FILE;
+      //m[TB_FileID] = TABLE_FILESNAP;
+    }
+    std::map<std::string, std::function<QueryFunc>> g_mFuncations;
   }
 
-  QueryAction::QueryAction(DBManager* pDB)
+  QueryCondition::QueryCondition()
+  {
+  }
+
+  QueryCondition::QueryCondition(const std::string& s)
+  {
+    m_sCondition = s;
+  }
+
+  QueryCondition::QueryCondition(const system_time::time_point& s)
+  {
+    m_sCondition = s;
+  }
+
+  //std::vector<caxios::FileID> QueryAction::query(DBManager* pDB)
+  //{
+  //  std::vector<caxios::FileID> q;
+  //  if (m_query._f != nullptr) {
+  //    q = m_query._f(pDB, m_sConditions, m_vQuerySet);
+  //  }
+  //  return std::move(q);
+  //}
+
+  //void QueryAction::constraint(const std::vector<FileID>& subset)
+  //{
+  //  m_vQuerySet = subset;
+  //}
+
+  //void QueryAction::AddCondition(const std::string& cond)
+  //{
+  //  T_LOG("query", "condition: %s", cond.c_str());
+  //  m_sConditions.emplace_back(cond);
+  //}
+
+  QueryActions::QueryActions(DBManager* pDB)
     :m_pDBManager(pDB)
   {
-
+    init_map(g_mFuncations);
   }
 
-  void QueryAction::AddKeyword(const std::string& kw)
+  QueryActions::~QueryActions()
   {
-    m_sKeyword = kw;
+    for (auto ptr : m_vActions) {
+      delete ptr;
+    }
   }
 
-  void QueryAction::AddCondition(QueryType qt)
+  void QueryActions::open()
   {
+    if (m_bClose == true) {
+      m_bClose = false;
+    }
   }
 
-  void QueryAction::AddCondition(const std::string& cond)
+  void QueryActions::close()
   {
-    T_LOG("query", "condition: %s", cond.c_str());
-    m_sConditions.emplace_back(cond);
+    if (m_bClose == true) return;
+    m_bClose = false;
   }
 
-  std::vector<caxios::FileID> QueryAction::GetResult()
+  std::vector<caxios::FileID> QueryActions::invoke()
   {
-    m_pDBManager->QueryKeyword(m_mKeywords[m_sKeyword], m_sConditions, m_vFilesID);
-    return std::move(m_vFilesID);
+    std::vector<caxios::FileID> result;
+    size_t idx = m_vActions.size() - 1;
+    while (idx>=0)
+    {
+      auto back = m_vActions[idx];
+      m_vActions.pop_back();
+      idx -= 1;
+      result = back->query(m_pDBManager);
+      if(m_vActions.size() == 0) break;
+      //m_vActions.back().constraint(result);
+    }
+    return std::move(result);
   }
 
-}
+  }

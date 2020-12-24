@@ -88,6 +88,9 @@ namespace caxios {
       eraseData(vDest, item);
     }
   }
+
+  bool isDate(const std::string& input);
+  time_t str2time(const std::string& input);
 }
 
 #endif

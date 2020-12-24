@@ -55,7 +55,7 @@ describe('civetkern add test', function() {
         {"name":"path","type":"str","value":"C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg"},
         {"name":"filename","type":"str","value":"06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg"},
         {"name":"size","type":"int","value":267028},
-        {"name":"datetime","type":"date","value":t.getTime()},
+        //{"name":"datetime","type":"date","value":t.getTime()},
         {"name":"hash","type":"str","value":"unknow"},
         {"name":"type","type":"str","value":"unknow"},
         {"name":"width","type":"int","value":650},
@@ -111,9 +111,9 @@ describe('civetkern add test', function() {
         }
     }
   })
-  it('update files tags', function() {
-    instance.updateFileTags({id: [fileids[0]], tag: ['newTag']})
-  })
+  //it('update files tags', function() {
+  //  instance.updateFileTags({id: [fileids[0]], tag: ['newTag']})
+  //})
   //it('update files class', function() {
     //let result = instance.updateFileClass({id: [fileids[0]], class: ['/newClass', 'class1/class3']})
     //expect(result).to.equal(true)
@@ -172,12 +172,18 @@ describe('civetkern read only test', function() {
   it('get file tags', function() {
     let result = instance.getTagsOfFiles({id: [snaps[0].id]})
     expect(result).to.lengthOf(1)
-    expect(result[0]).to.equal('newTag')
   })
   it('search files', function() {
     let result = instance.query({keyword: ['标签']})
-    console.info(result)
-    // instance.findFiles({size: {$gt: 10240, $lt: 21000}})
+    // console.info(result)
+    expect(result).to.lengthOf(2)
+    //for (let info of result[0].meta) {
+    //    console.info(info)
+    //}
+    //result = instance.query({size: {$gt: 10240, $lt: 21000}})
+    //expect(result).to.lengthOf(1)
+    result = instance.findFiles({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
+    expect(result).to.lengthOf(1)
   })
   after(function() {
     instance.release()

@@ -11,6 +11,8 @@
 #include <io.h>
 #endif
 #include <regex>
+#include <iomanip>
+#include <sstream>
 #define CHAR_BIT  255
 
 namespace caxios {
@@ -69,6 +71,20 @@ namespace caxios {
       hash = (hash << 4) ^ (hash >> 28) ^ str[idx];
     }
     return hash % std::numeric_limits<uint32_t>::max();
+  }
+
+  bool isDate(const std::string& input)
+  {
+    std::regex reg("\^[0-9]+|[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+:[0-9]+.[0-9]+Z");
+    return std::regex_match(input, reg);
+  }
+
+  time_t str2time(const std::string& input)
+  {
+    std::istringstream iss(input);
+    std::tm stm = {};
+    iss >> std::get_time(&stm, "%Y-%m-%dT%H:%M:%SZ");
+    return std::mktime(&stm);
   }
 
   std::string serialize(const std::vector<WordIndex>& classes)

@@ -4,6 +4,7 @@
 #include <map>
 #include <Table.h>
 #include "log.h"
+#include "QueryAction.h"
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
@@ -35,7 +36,11 @@ namespace caxios {
     bool Query(const std::string& query, std::vector< FileInfo>& filesInfo);
 
   public: // will be implimented in ITable
-    bool QueryKeyword(const std::string& tableName, const std::vector<std::string>& value, std::vector<FileID>& outFilesID);
+    std::vector<FileID> QueryImpl(const std::string& tableName, const std::vector<QueryCondition>& values);
+    bool Query(const std::string& tableName,std::vector<FileID>& subset, std::function<bool(uint32_t, uint32_t, const std::vector<QueryCondition>&)>);
+    bool Query(const std::string& tableName,const std::vector<FileID>& subset, const system_time::time_point& start, const system_time::time_point& end,
+      std::vector<FileID>& out,
+      std::function<bool(const system_time::time_point& pt, const system_time::time_point& start, const system_time::time_point& end)>);
 
   private:
     void ValidVersion();

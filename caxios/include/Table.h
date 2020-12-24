@@ -2,6 +2,7 @@
 #include <string>
 #include <variant>
 #include "datum_type.h"
+#include "database.h"
 
 #define TABLE_SCHEMA        "dbinfo"
 #define TABLE_FILESNAP      "file_snap"
@@ -32,30 +33,58 @@ namespace caxios {
     CT_UNCALSSIFY = 1
   };
 
-  class Date {
+  class Iterator {
   public:
-    Date(double value)
-    :_value(value){}
-
-    Date(const std::string& s)
-    :_value(0){
-      size_t where = s.find("date(");
-      if (where != std::string::npos) {
-        _value = atof(s.substr(5, s.size() - 6).c_str());
+    Iterator() {
+      _refs = new int(0);
+    }
+    Iterator(const Iterator& other)
+      :_refs(other._refs)
+    {
+      *_refs += 1;
+    }
+    Iterator(CDatabase* pDatabase, MDB_dbi dbi)
+      :_end(false)
+    {
+      _cursor = pDatabase->OpenCursor(dbi);
+    }
+    ~Iterator(){
+      *_refs -= 1;
+      if (*_refs == 0 && _pDatabase) {
+        _pDatabase->CloseCursor(_cursor);
+        delete _refs;
       }
     }
-
-    std::string toString() {
-      return std::string("date(") + std::to_string(_value) + ")";
+    
+    Iterator& operator++() {
+      if (_pDatabase->MoveNext(_cursor, _key, _datum)) {
+        _end = true;
+      }
+      return *this;
     }
 
-    std::string toLocalString() {
-      std::string lcs;
-      return std::move(lcs);
+    std::pair< MDB_val, MDB_val> operator*() {
+      return std::make_pair(_key, _datum);
     }
-    double Value() { return _value; }
+
+    bool operator == (const Iterator& other) {
+      if (!_end) {
+        if (_key.mv_size != other._key.mv_size) return false;
+        if (memcmp(_key.mv_data, other._key.mv_data, _key.mv_size) == 0) return true;
+        return false;
+      }
+      return true;
+    }
+    bool operator!=(const Iterator& other) {
+      return !this->operator==(other);
+    }
   private:
-    double _value;
+    bool _end = true;
+    int* _refs = nullptr;
+    MDB_val _key;
+    MDB_val _datum;
+    CDatabase* _pDatabase = nullptr;
+    MDB_cursor* _cursor = nullptr;
   };
 
   typedef std::string ClassName;
@@ -71,7 +100,8 @@ namespace caxios {
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid) = 0;
     virtual bool Update(const std::string& current, const UpdateValue& value) = 0;
     virtual bool Delete(const std::string& k, FileID fileID) = 0;
-    virtual bool Query(const std::string& k, std::vector<FileID>& filesID, std::vector<std::string>& vChildren) = 0;
+    virtual Iterator begin() = 0;
+    virtual Iterator end() = 0;
   protected:
     CDatabase* _pDatabase = nullptr;
   };

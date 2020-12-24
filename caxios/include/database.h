@@ -34,6 +34,9 @@ namespace caxios{
     bool Filter(MDB_dbi dbi, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb);
     bool Del(MDB_dbi dbi, uint32_t key);
     bool Del(MDB_dbi dbi, const std::string& key);
+    MDB_cursor* OpenCursor(MDB_dbi);
+    int MoveNext(MDB_cursor*, MDB_val&, MDB_val&);
+    void CloseCursor(MDB_cursor*);
     MDB_txn* Begin();
     bool Commit();
 

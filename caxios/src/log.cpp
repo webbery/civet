@@ -109,10 +109,11 @@ namespace caxios {
   private:
     FILE* _file = nullptr; 
   };
-  static FLog s_log;
+
+  FLog* pLog = nullptr;
   void log2file(const std::string& log)
   {
-    s_log.Write(log);
+    if (pLog) pLog->Write(log);
   }
 
   std::string format_vector(const std::vector<std::string>& vi)
@@ -135,7 +136,12 @@ namespace caxios {
     return ret;
   }
 
-  bool init_log(bool flag) {
-    return s_log.Open(flag);
+  bool init_log(bool flag, bool enable) {
+    if (enable) {
+      pLog = new FLog();
+      bool success = pLog->Open(flag);
+      if (success) return pLog;
+    }
+    return false;
   }
 }

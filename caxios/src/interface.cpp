@@ -5,6 +5,7 @@
 #include <iostream>
 #include <napi.h>
 #include <functional>
+#include <locale.h>
 #include "json.hpp"
 #include "log.h"
 
@@ -130,12 +131,13 @@ namespace caxios {
   }
   Napi::Value init(const Napi::CallbackInfo& info) {
     if (g_pCaxios) return Napi::Value::From(info.Env(), true);
+    //setlocale(LC_ALL, "");
     Napi::Object options = info[0].As<Napi::Object>();
-    int32_t flag = 0;
+    int32_t readOnly = 0;
     if (!info[1].IsUndefined()) {
-      flag = info[1].As<Napi::Number>().Int32Value();
+      readOnly = info[1].As<Napi::Number>().Int32Value();
     }
-    init_log(flag);
+    init_log(readOnly);
     std::string defaultName = AttrAsStr(options, "/app/default");
     Napi::Object resource = FindObjectFromArray(options.Get("resources").As<Napi::Object>(), [&defaultName](Napi::Object obj)->bool {
       if (AttrAsStr(obj, "name") == defaultName) return true;
@@ -143,10 +145,10 @@ namespace caxios {
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
       std::string meta;
-      if (flag == 0) { //
+      if (readOnly == 0) { //
         meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
       }
-      g_pCaxios = new CAxios(path, flag, meta);
+      g_pCaxios = new CAxios(path, readOnly, meta);
       T_LOG("interface", "init success");
     }
     return Napi::Value::From(info.Env(), true);

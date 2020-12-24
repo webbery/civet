@@ -253,6 +253,27 @@ namespace caxios {
     return true;
   }
 
+  MDB_cursor* CDatabase::OpenCursor(MDB_dbi dbi)
+  {
+    MDB_cursor* cursor = nullptr;
+    this->Begin();
+    if (int rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
+      T_LOG("database", "mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
+      return nullptr;
+    }
+    return cursor;
+  }
+
+  int CDatabase::MoveNext(MDB_cursor* cursor, MDB_val& key, MDB_val& datum)
+  {
+    return mdb_cursor_get(cursor, &key, &datum, MDB_NEXT);
+  }
+
+  void CDatabase::CloseCursor(MDB_cursor* cursor)
+  {
+    mdb_cursor_close(cursor);
+  }
+
   MDB_txn* CDatabase::Begin()
   {
     if (m_pTransaction == nullptr) {

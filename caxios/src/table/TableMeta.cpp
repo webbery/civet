@@ -2,6 +2,7 @@
 #include "database.h"
 #include <regex>
 #include "log.h"
+#include "util/util.h"
 
 namespace caxios {
 
@@ -22,18 +23,22 @@ namespace caxios {
 
   bool TableMeta::Add(const std::string& value, const std::vector<FileID>& fileid)
   {
-    // value做键, fileid做值
-#ifdef _DEBUG
-    std::string sID;
-    for (auto item: fileid)
-    {
-      sID += std::to_string(item) + ",";
+    std::string sKey(value);
+    if (isDate(value)) {
+      double dKey = atof(value.substr(1).c_str());
+      sKey = std::string((char*)&dKey, sizeof(double));
+      T_LOG("meta", "meta key: %s", sKey.c_str());
     }
-    T_LOG("meta", "Add Key: %s, files: %s", value.c_str(), sID.c_str());
-#endif
-    // 分辨value的类型,确定key的真正类型
-    std::regex integer("[0-9]+"), color("#[0-9A-Fa-f]{6}"), decimal("[0-9]+.[0-9]+");
-    return true;
+    // value做键, fileid做值
+    void* pData = nullptr;
+    uint32_t len = 0;
+    _pDatabase->Get(_dbi, sKey, pData, len);
+    std::vector<FileID> vFilesID;
+    if (len) {
+      vFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
+    }
+    addUniqueDataAndSort(vFilesID, fileid);
+    return _pDatabase->Put(_dbi, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
   }
 
   bool TableMeta::Update(const std::string& current, const UpdateValue& value)
@@ -46,18 +51,15 @@ namespace caxios {
     return true;
   }
 
-  bool TableMeta::Query(const std::string& k, std::vector<FileID>& filesID, std::vector<std::string>& vChildren)
+  Iterator TableMeta::begin()
   {
-    // 等于语义
-    void* pData = nullptr;
-    uint32_t len = 0;
-    if (len > 0) {
-      for (int idx = 0; idx < len / sizeof(FileID); ++idx) {
-        filesID.emplace_back(((FileID*)pData)[idx]);
-      }
-      return true;
-    }
-    return false;
+    Iterator itr(_pDatabase, _dbi);
+    return std::move(itr);
+  }
+
+  Iterator TableMeta::end()
+  {
+    return Iterator();
   }
 
   bool TableMeta::AddFileIDByInteger(const std::string& value, const std::vector<FileID>& fileID)
