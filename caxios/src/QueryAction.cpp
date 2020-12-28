@@ -26,6 +26,7 @@ namespace caxios {
       //m[TB_FileID] = TABLE_FILESNAP;
     }
     std::map<std::string, std::function<QueryFunc>> g_mFuncations;
+
   }
 
   QueryCondition::QueryCondition()
@@ -34,11 +35,13 @@ namespace caxios {
 
   QueryCondition::QueryCondition(const std::string& s)
   {
+    m_qType = QT_String;
     m_sCondition = s;
   }
 
   QueryCondition::QueryCondition(const system_time::time_point& s)
   {
+    m_qType = QT_DateTime;
     m_sCondition = s;
   }
 
@@ -86,6 +89,22 @@ namespace caxios {
   {
     if (m_bClose == true) return;
     m_bClose = false;
+    // create action now
+    IAction* pAction = IFactory::create(m_vCond, m_ctype);
+    m_vActions.emplace_back(pAction);
+  }
+
+  void QueryActions::push(const std::string& key)
+  {
+    m_sKey = key;
+  }
+  void QueryActions::push(const QueryCondition& cond)
+  {
+    m_vCond.emplace_back(cond);
+  }
+  void QueryActions::push(const CompareType qt)
+  {
+    m_ctype = qt;
   }
 
   std::vector<caxios::FileID> QueryActions::invoke()

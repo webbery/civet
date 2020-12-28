@@ -5,6 +5,7 @@
 #include <functional>
 #include <variant>
 #include "lmdb/lmdb.h"
+#include "util/util.h"
 
 namespace caxios {
 
@@ -37,23 +38,12 @@ namespace caxios {
     T As() const {
       return std::get<T>(m_sCondition);
     }
+
+    QueryType type() {return m_qType;}
   private:
+    QueryType m_qType;
     std::variant< std::string, system_time::time_point, double> m_sCondition;
   };
-
-  //template<enum caxios::QueryType> struct QueryTypeTraits;
-  //template<> struct QueryTypeTraits< QT_DateTime> {
-  //  typedef system_time::time_point type;
-  //};
-
-  //template<QueryType QT, enum caxios::CompareType> struct QueryFuncTraits;
-  //template<QueryType QT> struct QueryFuncTraits<QT, CT_GREAT_THAN> {
-  //  typedef QueryTypeTraits< enum QueryType >::type type;
-  //  typedef bool func(const type& pt, const type& start, const type& end);
-  //  static bool impl(const type& pt, const type& start, const type& end) {
-  //    return true;
-  //  }
-  //};
 
   enum class Priority : int {};
   template<QueryType QT, CompareType CT> struct Query;
@@ -78,6 +68,7 @@ namespace caxios {
   template<QueryType QT,CompareType CT>
   class QueryAction : public IAction {
   public:
+    QueryAction(const std::vector<QueryCondition>&);
     void push(const std::string& kw) {
       m_sKeyword = trunc(kw);
     }
@@ -85,7 +76,7 @@ namespace caxios {
       m_sConditions.emplace_back(cond);
     }
     std::vector<FileID> query(DBManager* pDB) {
-      m_query._f()
+      // m_query._f()
     }
 
     void constraint(const std::vector<FileID>&);
@@ -101,6 +92,22 @@ namespace caxios {
   template<> struct ActionTraits<std::string> {
     enum {Kind = QT_String};
   };
+
+  class IFactory {
+  public:
+    static IAction* create(std::vector<QueryCondition>, CompareType);
+  };
+  
+  template<QueryType QT, CompareType CT> struct Factory{
+    static IAction* create(){ return nullptr; }
+  };
+  template<> struct Factory<QT_DateTime, CT_GREAT_THAN>{
+    // typedef bool func(const system_time::time_point& pt, const system_time::time_point& start, const system_time::time_point& end);
+    static IAction* create(){
+      return new QueryAction<QT_DateTime, CT_GREAT_THAN>();
+    }
+  };
+
   class QueryActions {
   public:
     QueryActions(DBManager* pDB);
@@ -110,23 +117,14 @@ namespace caxios {
     // close a query
     void close();
 
-    template<typename T>
-    void push(const T& t) {
-      if (m_cIndx == 0) {
-        //m_sKey = t;
-        m_cIndx = 1;
-      }
-      else {
-        m_cIndx = 0;
-        //new QueryAction<
-      }
-      m_vActions.back()->push(t);
-    }
+    void push(const std::string& key);
+    void push(const QueryCondition& cond);
+    void push(const CompareType ct);
     std::vector<FileID> invoke();
   private:
-    char m_cIndx = 0;
     std::string m_sKey;
-    std::variant<std::string, system_time::time_point> m_vCond;
+    std::vector<QueryCondition> m_vCond;
+    CompareType m_ctype;
 
     DBManager* m_pDBManager;
     bool m_bClose = true;

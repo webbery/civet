@@ -609,7 +609,7 @@ namespace caxios {
       auto itr = std::begin(*(itrTable->second));
       auto end = Iterator();
       for (; itr != end; ++itr) {
-        auto& item = *itr;
+        auto item = *itr;
         double timestamp = *(double*)(item.first.mv_data);
         system_time::time_point pt = system_time::from_time_t(timestamp);
         //std::string sTime = std::put_time(std::localtime(&timestamp));
