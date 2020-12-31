@@ -12,6 +12,7 @@
 namespace caxios {
   bool HasAttr(Napi::Object obj, std::string attr);
   std::string AttrAsStr(Napi::Object obj, const std::string& attr);
+  std::string AttrAsStr(Napi::Object obj, unsigned int const attr);
   uint32_t AttrAsUint32(Napi::Object obj, std::string attr);
   uint32_t AttrAsUint32(Napi::Object obj, unsigned int const attr);
   int32_t AttrAsInt32(Napi::Object obj, std::string attr);
@@ -91,6 +92,8 @@ namespace caxios {
 
   bool isDate(const std::string& input);
   time_t str2time(const std::string& input);
+
+
 }
 
 #endif

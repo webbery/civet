@@ -75,7 +75,7 @@ namespace caxios {
 
   bool isDate(const std::string& input)
   {
-    std::regex reg("\^[0-9]+|[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+:[0-9]+.[0-9]+Z");
+    std::regex reg("\\\^[0-9]+.[0-9]*|[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+:[0-9]+.[0-9]+Z");
     return std::regex_match(input, reg);
   }
 
@@ -132,6 +132,11 @@ namespace caxios {
   {
     //T_LOG("display: %s", attrs.c_str());
     return obj.Get(attrs).As<Napi::String>();
+  }
+
+  std::string AttrAsStr(Napi::Object obj, unsigned int const attr)
+  {
+    return obj.Get(attr).As<Napi::String>();
   }
 
   uint32_t AttrAsUint32(Napi::Object obj, std::string attr)

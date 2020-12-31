@@ -58,6 +58,8 @@ namespace caxios {
       std::cerr << "new CDatabase fail.\n";
       return;
     }
+    // init map
+    InitMap();
     // open all database
     int cnt = sizeof(g_tables) / sizeof(char*);
     for (int idx = 0; idx < cnt; ++idx) {
@@ -332,6 +334,7 @@ namespace caxios {
     std::for_each(mIndexes.begin(), mIndexes.end(), [this, &existID](std::pair<std::string, WordIndex> item) {
       AddTagPY(item.first, item.second);
       AddFileID2Tag(existID, item.second);
+      T_LOG("tag", "exist ID: %s", format_vector(existID).c_str());
       for (FileID fileID : existID) {
         this->AddFileID2Keyword(fileID, item.second);
         this->AddKeyword2File(item.second, fileID);
@@ -500,11 +503,21 @@ namespace caxios {
         uint32_t childID;
         std::string sChild;
         std::tie(childID, sChild) = EncodePath2Hash(sParent + name);
-        auto children = GetClassChildren(sChild);
+        if (childID == parentID) continue;
+        auto clzChildren = GetClassChildren(sChild);
         auto files = GetFilesOfClass(childID);
-        children.insert(children.end(), files.begin(),files.end());
-        T_LOG("class", "%d children %s", childID, format_vector(children).c_str());
-        if (children.size()) {
+        T_LOG("class", "clsID:%lld, parentID: %lld,  %d children %s", clsID, parentID, childID, format_vector(clzChildren).c_str());
+        if (clzChildren.size()|| files.size()) {
+          nlohmann::json children;
+          for (auto& clzID : clzChildren) {
+            nlohmann::json clz;
+            clz["id"] = clzID;
+            clz["type"] = "clz";
+            children.push_back(clz);
+          }
+          for (auto& fileID : files) {
+            children.push_back(fileID);
+          }
           jCls["children"] = children;
         }
         jCls["type"] = "clz";
@@ -574,70 +587,74 @@ namespace caxios {
     return true;
   }
 
+  bool DBManager::UpdateFileMeta(const std::vector<FileID>& filesID, const nlohmann::json& mutation)
+  {
+    WRITE_BEGIN();
+    auto existFiles = mapExistFiles(filesID);
+    void* pData = nullptr;
+    uint32_t len = 0;
+    using namespace nlohmann;
+    for (FileID fileID : existFiles)
+    {
+      for (auto itr = mutation.begin(); itr != mutation.end(); ++itr) {
+        T_LOG("file", "mutation item[%s]=%s", itr.key().c_str(), itr.value().dump().c_str());
+        if (itr.key() == "filename") {
+          // if mutaion is filename, update snap
+          m_pDatabase->Get(m_mDBs[TABLE_FILESNAP], fileID, pData, len);
+          std::string s((char*)pData, len);
+          T_LOG("file", "mutation snap: %s", s.c_str());
+          json jsn = json::parse(s);
+          jsn["name"] = itr.value().dump();
+          s = to_string(jsn);
+          m_pDatabase->Put(m_mDBs[TABLE_FILESNAP], fileID, s.data(), s.size());
+          // TODO: how to update keyword
+        }
+        m_pDatabase->Get(m_mDBs[TABLE_FILE_META], fileID, pData, len);
+        std::vector<uint8_t> sMeta((uint8_t*)pData, (uint8_t*)pData + len);
+        json meta = json::from_cbor(sMeta);
+        //T_LOG("file", "mutation meta: %s", meta.dump().c_str());
+        for (auto& m : meta) {
+          if (m["name"] == itr.key()) {
+            m["value"] = itr.value();
+            break;
+          }
+        }
+        sMeta = json::to_cbor(meta);
+        m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileID, sMeta.data(), sMeta.size());
+      }
+    }
+    WRITE_END();
+    return true;
+  }
+
   bool DBManager::Query(const std::string& query, std::vector<FileInfo>& filesInfo)
   {
     namespace pegtl = TAO_PEGTL_NAMESPACE;
     QueryActions actions(this);
     pegtl::memory_input input(query, "");
     T_LOG("query", "sql: %s", query.c_str());
-    if (pegtl::parse< caxios::QueryGrammar, caxios::action>(input, actions)) {
+    if (pegtl::parse<caxios::QueryGrammar, caxios::action>(input, actions)) {
       std::vector<FileID> vFilesID = actions.invoke();
       T_LOG("query", "result files: %s", format_vector(vFilesID).c_str());
       return GetFilesInfo(vFilesID, filesInfo);
     }
-    T_LOG("query", "Fail sql: %s", query.c_str());
+    T_LOG("query", "fail sql: %s", query.c_str());
     return false;
   }
 
-  bool DBManager::Query(const std::string& tableName, std::vector<FileID>& outFilesID,
-    std::function<bool(uint32_t, uint32_t, const std::vector<QueryCondition>& value)>)
+  std::vector<caxios::FileID> DBManager::Query(const std::string& tableName, const std::vector<time_t>& values)
   {
-    //std::tm dt;
-    //auto tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
-    return true;
+    std::vector<FileID> outFilesID;
+    return outFilesID;
   }
 
-  bool DBManager::Query(const std::string& tableName,const std::vector<FileID>& subset, const system_time::time_point& start, const system_time::time_point& tend,
-    std::vector<FileID>& out,
-    std::function<bool(const system_time::time_point& pt, const system_time::time_point& start, const system_time::time_point& end)> op)
-  {
-    auto itr = m_mDBs.find(tableName);
-    if (itr == m_mDBs.end()) {
-      // meta
-      auto itrTable = m_mTables.find(tableName);
-      if (itrTable == m_mTables.end()) return false;
-      auto itr = std::begin(*(itrTable->second));
-      auto end = Iterator();
-      for (; itr != end; ++itr) {
-        auto item = *itr;
-        double timestamp = *(double*)(item.first.mv_data);
-        system_time::time_point pt = system_time::from_time_t(timestamp);
-        //std::string sTime = std::put_time(std::localtime(&timestamp));
-        T_LOG("meta", "query by time %f", timestamp);
-        if (op(pt, start, tend)) {
-          out.emplace_back(*(FileID*)(item.second.mv_data));
-        }
-      }
-    }
-    else {
-      MDB_dbi dbi = m_mDBs[tableName];
-      if (subset.empty()) {
-
-      }
-      else {
-      }
-    }
-    return true;
-  }
-
-  std::vector<FileID> DBManager::QueryImpl(const std::string& tableName, const std::vector<QueryCondition>& values)
+  std::vector<FileID> DBManager::Query(const std::string& tableName, const std::vector<std::string>& values)
   {
     std::vector<FileID> outFilesID;
     std::vector<std::string> vKeywords;
     for (auto& cond: values)
     {
-      std::string s = cond.As<std::string>();
-      vKeywords.emplace_back(s);
+      vKeywords.emplace_back(cond);
     }
     T_LOG("query", "table: %s, DBI: %d, keyword: %s", tableName.c_str(), m_mDBs[tableName], format_vector(vKeywords).c_str());
     auto indexes = GetWordsIndex(vKeywords);
@@ -664,6 +681,15 @@ namespace caxios {
     }
   }
 
+  void DBManager::InitMap()
+  {
+    m_mKeywordMap[TB_Keyword] = TABLE_KEYWORD2FILE;
+    m_mKeywordMap[TB_Tag] = TABLE_TAG2FILE;
+    m_mKeywordMap[TB_Class] = TABLE_CLASS2FILE;
+    //m_mKeywordMap[TB_Annotation] = TABLE_KEYWORD2FILE;
+    m_mKeywordMap[TB_FileID] = TABLE_FILE_META;
+  }
+
   bool DBManager::AddFile(FileID fileid, const MetaItems& meta, const Keywords& keywords)
   {
     using namespace nlohmann;
@@ -672,7 +698,6 @@ namespace caxios {
     std::string value = to_string(dbMeta);
     T_LOG("file", "Write ID: %d, Meta Info: %s", fileid, value.c_str());
     auto vData = json::to_cbor(dbMeta);
-    T_LOG("file", "debug 2");
     if (!m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fileid, (void*)(&vData[0]), vData.size())) {
       return false;
     }
@@ -695,10 +720,10 @@ namespace caxios {
     // meta
     for (MetaItem m : meta) {
       std::string& name = m["name"];
-      T_LOG("file", "add meta(%s): %s, %d", name.c_str(), m["value"].c_str(), fileid);
       if (m_mTables.find(name) == m_mTables.end()) continue;
       std::vector<FileID> vID;
       vID.emplace_back(fileid);
+      T_LOG("file", "add meta(%s): %s, %d", name.c_str(), m["value"].c_str(), fileid);
       m_mTables[name]->Add(m["value"], vID);
     }
     // counts
@@ -732,6 +757,7 @@ namespace caxios {
       size_t cnt = len / sizeof(FileID);
       std::vector<FileID> vFilesID(pIDs, pIDs + cnt);
       if (addUniqueDataAndSort(vFilesID, fileID)) return true;
+      T_LOG("keyword", "add fileID: %d", fileID);
       if (!m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2FILE], keyword, &(vFilesID[0]), sizeof(FileID) * vFilesID.size())) return false;
     }
     else {
@@ -900,21 +926,32 @@ namespace caxios {
       m_mTables[name]->Delete(m["value"], fileID);
     }
     // tag
-    m_pDatabase->Get(m_mDBs[TABLE_FILE2TAG], fileID, pData, len);
-    std::vector<WordIndex> vTagsID((WordIndex*)pData, (WordIndex*)pData + len / sizeof(WordIndex));
-    m_pDatabase->Del(m_mDBs[TABLE_FILE2TAG], fileID);
-    for (auto tagID:vTagsID)
-    {
-      m_pDatabase->Get(m_mDBs[TABLE_TAG2FILE], tagID, pData, len);
-      std::vector<FileID> vFiles((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
-      eraseData(vFiles, fileID);
-      m_pDatabase->Put(m_mDBs[TABLE_TAG2FILE], tagID, vFiles.data(), vFiles.size() * sizeof(FileID));
-    }
+    RemoveFile(fileID, TABLE_FILE2TAG, TABLE_TAG2FILE);
+    // class
+    RemoveFile(fileID, TABLE_FILE2CLASS, TABLE_CLASS2FILE);
     // snap
     m_pDatabase->Del(m_mDBs[TABLE_FILESNAP], fileID);
     m_pDatabase->Del(m_mDBs[TABLE_FILE_META], fileID);
+    // TODO: keyword match files
+    RemoveFileIDFromKeyword(fileID);
     // TODO: 回收键值
     return true;
+  }
+
+  void DBManager::RemoveFile(FileID fileID, const std::string& file2type, const std::string& type2file)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    m_pDatabase->Get(m_mDBs[file2type], fileID, pData, len);
+    std::vector<WordIndex> vTypesID((WordIndex*)pData, (WordIndex*)pData + len / sizeof(WordIndex));
+    for (auto typeID : vTypesID)
+    {
+      m_pDatabase->Get(m_mDBs[type2file], typeID, pData, len);
+      std::vector<FileID> vFiles((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
+      eraseData(vFiles, fileID);
+      m_pDatabase->Put(m_mDBs[type2file], typeID, vFiles.data(), vFiles.size() * sizeof(FileID));
+    }
+    m_pDatabase->Del(m_mDBs[file2type], fileID);
   }
 
   bool DBManager::RemoveTag(FileID fileID, const Tags& tags)
@@ -976,6 +1013,27 @@ namespace caxios {
         std::vector<FileID> vFsID((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
         eraseData(vFsID, filesID);
         m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2FILE], item.second, vFsID.data(), vFsID.size() * sizeof(FileID));
+      }
+    }
+    return true;
+  }
+
+  bool DBManager::RemoveFileIDFromKeyword(FileID fileID)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    m_pDatabase->Get(m_mDBs[TABLE_FILE2KEYWORD], fileID, pData, len);
+    if (len) {
+      std::vector<WordIndex> vIndexes((WordIndex*)pData, (WordIndex*)pData + len/sizeof(WordIndex));
+      for (auto indx: vIndexes)
+      {
+        m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2FILE], indx, pData, len);
+        if (len) {
+          std::vector<FileID> vFilesID((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
+          eraseData(vFilesID, fileID);
+          T_LOG("file", "remove %d result: %s", fileID, format_vector(vFilesID).c_str());
+          m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2FILE], indx, vFilesID.data(), vFilesID.size() * sizeof(FileID));
+        }
       }
     }
     return true;
@@ -1073,9 +1131,9 @@ namespace caxios {
     return std::make_pair(hash, sKey);
   }
 
-  std::vector<uint32_t> DBManager::GetClassChildren(const std::string& clazz)
+  std::vector<ClassID> DBManager::GetClassChildren(const std::string& clazz)
   {
-    std::vector<uint32_t> vChildren;
+    std::vector<ClassID> vChildren;
     void* pData = nullptr;
     uint32_t len = 0;
     m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], clazz, pData, len);
@@ -1123,7 +1181,12 @@ namespace caxios {
   {
     std::vector<caxios::FileID> vFiles;
     for (auto fileID : filesID) {
-      vFiles.emplace_back(fileID);
+      void* pData = nullptr;
+      uint32_t len = 0;
+      m_pDatabase->Get(m_mDBs[TABLE_FILE_META], fileID, pData, len);
+      if (len) {
+        vFiles.emplace_back(fileID);
+      }
     }
     return std::move(vFiles);
   }
@@ -1136,7 +1199,7 @@ namespace caxios {
       if (item["db"] == true) {
         std::string name = trunc(item["name"].dump());
         m_mTables[name] = new TableMeta(m_pDatabase, name, trunc(item["type"].dump()));
-        //T_LOG("schema: %s", item["name"].dump().c_str());
+        T_LOG("query", "schema: %s", item["name"].dump().c_str());
       }
     }
     T_LOG("construct", "schema: %s", meta.c_str());

@@ -144,10 +144,7 @@ namespace caxios {
     });
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
-      std::string meta;
-      if (readOnly == 0) { //
-        meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
-      }
+      std::string meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
       g_pCaxios = new CAxios(path, readOnly, meta);
       T_LOG("interface", "init success");
     }
@@ -288,8 +285,25 @@ namespace caxios {
   Napi::Value updateFile(const Napi::CallbackInfo& info) {
     // 0: query, 1: new value
     if (!g_pCaxios) return Napi::Boolean::From(info.Env(), false);
-    auto query = info[0].As<Napi::Object>();
-    auto newValue = info[1].As<Napi::Object>();
+    auto obj = info[0].As<Napi::Object>();
+    auto filesID = AttrAsUint32Vector(obj, "id");
+    auto props = obj.GetPropertyNames();
+    nlohmann::json meta;
+    for (int idx = 1; idx<props.Length(); ++idx)
+    {
+      std::string key = props.Get(idx).As<Napi::String>();
+      auto value = obj.Get(key);
+      if (value.IsString()) {
+        std::string s = value.As<Napi::String>();
+        T_LOG("file", "string: %s", s.c_str());
+        meta[key] = s;
+      }
+      else {
+        T_LOG("file", "unknow meta, key: %s", key.c_str());
+      }
+    }
+    T_LOG("file", "mutation: %s", meta.dump().c_str());
+    g_pCaxios->UpdateFileMeta(filesID, meta);
     return Napi::Boolean::From(info.Env(), true);
   }
   Napi::Value updateFileKeywords(const Napi::CallbackInfo& info) {
@@ -423,9 +437,10 @@ namespace caxios {
       if (info.Length() != 0) {
         sParent = info[0].As<Napi::String>();
       }
+      T_LOG("class", "get classes");
       nlohmann::json classes;
       g_pCaxios->GetClasses(sParent, classes);
-      T_LOG("class", "get class interface: %s", classes.dump().c_str());
+      T_LOG("class", "get %s class interface: %s", sParent.c_str(), classes.dump().c_str());
       Napi::Env env = info.Env();
       return Parse(env, classes.dump());
       //auto arry = Classes2Array(env, classes);

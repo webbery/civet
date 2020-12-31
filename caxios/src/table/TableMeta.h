@@ -18,6 +18,7 @@ namespace caxios {
     virtual Iterator end();
 
   private:
+    std::string prepareKey(const std::string& k);
     bool AddFileIDByInteger(const std::string& value, const std::vector<FileID>& fileID);
 
     template<typename T>

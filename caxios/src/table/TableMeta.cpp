@@ -23,12 +23,7 @@ namespace caxios {
 
   bool TableMeta::Add(const std::string& value, const std::vector<FileID>& fileid)
   {
-    std::string sKey(value);
-    if (isDate(value)) {
-      double dKey = atof(value.substr(1).c_str());
-      sKey = std::string((char*)&dKey, sizeof(double));
-      T_LOG("meta", "meta key: %s", sKey.c_str());
-    }
+    std::string sKey = prepareKey(value);
     // value做键, fileid做值
     void* pData = nullptr;
     uint32_t len = 0;
@@ -38,6 +33,7 @@ namespace caxios {
       vFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
     }
     addUniqueDataAndSort(vFilesID, fileid);
+    T_LOG("meta", "add meta, cur data: %s", format_vector(vFilesID).c_str());
     return _pDatabase->Put(_dbi, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
   }
 
@@ -48,7 +44,20 @@ namespace caxios {
 
   bool TableMeta::Delete(const std::string& k, FileID fileID)
   {
-    return true;
+    std::string sKey = prepareKey(k);
+    void* pData = nullptr;
+    uint32_t len = 0;
+    T_LOG("meta", "remove key: %s", sKey.c_str());
+    _pDatabase->Get(_dbi, sKey, pData, len);
+    std::vector<FileID> vFilesID;
+    if (len) {
+      vFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
+    }
+    eraseData(vFilesID, fileID);
+    if (vFilesID.size() == 0) {
+      return _pDatabase->Del(_dbi, sKey);
+    }
+    return _pDatabase->Put(_dbi, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
   }
 
   Iterator TableMeta::begin()
@@ -60,6 +69,18 @@ namespace caxios {
   Iterator TableMeta::end()
   {
     return Iterator();
+  }
+
+  std::string TableMeta::prepareKey(const std::string& k)
+  {
+    std::string sKey(k);
+    if (isDate(k)) {
+      double dKey = atof(k.substr(1).c_str());
+      time_t t = dKey;
+      sKey = std::string((char*)&t, sizeof(time_t));
+      T_LOG("meta", "meta key: %s", sKey.c_str());
+    }
+    return sKey;
   }
 
   bool TableMeta::AddFileIDByInteger(const std::string& value, const std::vector<FileID>& fileID)

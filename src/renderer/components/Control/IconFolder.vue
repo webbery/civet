@@ -1,11 +1,13 @@
 <template>
   <div :class="{item: !isSelected, selected: isSelected}" :level="level">
-    <i class="el-icon-caret-right" v-if="data.count!=0 && !expand"></i>
-    <i class="el-icon-caret-bottom" v-if="data.count!=0 && expand"></i>
-    <i :class="data.icon"></i>
-    <span :path="parent" v-if="!enableInput" @dblclick="onEdit()" @contextmenu.prevent="onRightClick" @click="onItemClick()">{{data.name}}</span>
     <input v-if="enableInput" @blur="onSave()" v-model="folderName" ref="folderInput"/>
-    <span class="count">{{data.count}}</span>
+    <span v-if="!enableInput">
+      <i class="el-icon-caret-right" v-if="data.count!=0 && !expand"></i>
+      <i class="el-icon-caret-bottom" v-if="data.count!=0 && expand"></i>
+      <i :class="data.icon"></i>
+      <span :path="parent" @dblclick="onEdit()" @contextmenu.prevent="onRightClick" @click="onItemClick()">{{data.name}}</span>
+      <span class="count">{{data.count}}</span>
+    </span>
   </div>
 </template>
 <script>

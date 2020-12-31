@@ -75,6 +75,11 @@ namespace caxios {
     return m_pDBManager->GetAllTags(tags);
   }
 
+  bool CAxios::UpdateFileMeta(const std::vector<FileID>& filesID, const nlohmann::json& mutation)
+  {
+    return m_pDBManager->UpdateFileMeta(filesID, mutation);
+  }
+
   bool CAxios::UpdateFilesClasses(const std::vector<FileID>& filesID, const std::vector<std::string>& classes)
   {
     return m_pDBManager->UpdateFilesClasses(filesID, classes);

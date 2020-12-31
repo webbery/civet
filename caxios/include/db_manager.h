@@ -9,7 +9,11 @@
 #define TABLE_FILEID        32    // "file_cur_id"
 
 namespace caxios {
-
+#define TB_Keyword    "keyword"
+#define TB_Tag        "tag"
+#define TB_Class      "class"
+#define TB_Annotation "annotation"
+#define TB_FileID     "fileid"
   class DBManager {
   public:
     DBManager(const std::string& dbdir, int flag, const std::string& meta = "");
@@ -33,17 +37,43 @@ namespace caxios {
     bool GetAllTags(TagTable& tags);
     bool UpdateFilesClasses(const std::vector<FileID>& filesID, const std::vector<std::string>& classes);
     bool UpdateClassName(const std::string& oldName, const std::string& newName);
+    bool UpdateFileMeta(const std::vector<FileID>& filesID, const nlohmann::json& mutation);
     bool Query(const std::string& query, std::vector< FileInfo>& filesInfo);
 
   public: // will be implimented in ITable
-    std::vector<FileID> QueryImpl(const std::string& tableName, const std::vector<QueryCondition>& values);
-    bool Query(const std::string& tableName,std::vector<FileID>& subset, std::function<bool(uint32_t, uint32_t, const std::vector<QueryCondition>&)>);
-    bool Query(const std::string& tableName,const std::vector<FileID>& subset, const system_time::time_point& start, const system_time::time_point& end,
-      std::vector<FileID>& out,
-      std::function<bool(const system_time::time_point& pt, const system_time::time_point& start, const system_time::time_point& end)>);
+    template<typename F>
+    std::vector<FileID> QueryImpl(const std::string& keyword, F& compare, std::vector<FileID>& subset = std::vector<FileID>())
+    {
+      std::vector<FileID> vOut;
+      auto itr = m_mTables.find(keyword);
+      if (itr != m_mTables.end()) {
+        // meta
+        auto cursor = std::begin(*(itr->second));
+        auto end = Iterator();
+        for (; cursor != end; ++cursor) {
+          auto item = *cursor;
+          F::type val = *(F::type*)(item.first.mv_data);
+          if (compare(val)) {
+            FileID* start = (FileID*)(item.second.mv_data);
+            vOut.insert(vOut.end(), start, start + item.second.mv_size / sizeof(FileID));
+          }
+        }
+      }
+      else {
+        if (keyword == TB_Keyword) return this->Query(m_mKeywordMap[keyword], compare.condition());
+        MDB_dbi dbi = m_mDBs[m_mKeywordMap[keyword]];
+        //if (subset.empty()) {
+        //  
+        //}
+        //else {
+        //}
+      }
+      return vOut;
+    }
 
   private:
     void ValidVersion();
+    void InitMap();
     bool AddFile(FileID, const MetaItems&, const Keywords&);
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
     bool AddFileID2Keyword(FileID, WordIndex);
@@ -54,9 +84,11 @@ namespace caxios {
     void MapHash2Class(uint32_t clsID, const std::string& name);
     std::vector<uint32_t> AddClassImpl(const std::vector<std::string>& classes);
     bool RemoveFile(FileID);
+    void RemoveFile(FileID, const std::string& file2type, const std::string& type2file);
     bool RemoveTag(FileID, const Tags& tags);
     bool RemoveClassImpl(const std::string& classPath);
     bool RemoveKeywords(const std::vector<FileID>& filesID, const std::vector<std::string>& keyword);
+    bool RemoveFileIDFromKeyword(FileID fileID);
     bool GetFileInfo(FileID fileID, MetaItems& meta, Keywords& keywords, Tags& tags, Annotations& anno);
     bool GetFileTags(FileID fileID, Tags& tags);
     std::vector<FileID> GetFilesByClass(const std::vector<WordIndex>& clazz);
@@ -99,9 +131,14 @@ namespace caxios {
     std::vector<std::vector<FileID>> GetFilesIDByTagIndex(const WordIndex* const wordsIndx, size_t cnt);
 
   private:
+    std::vector<FileID> Query(const std::string& tableName, const std::vector<std::string>& values);
+    std::vector<FileID> Query(const std::string& tableName, const std::vector<time_t>& values);
+
+  private:
     DBFlag _flag = ReadWrite;
     CDatabase* m_pDatabase = nullptr;
     std::map<std::string, MDB_dbi > m_mDBs;
+    std::map<std::string, std::string> m_mKeywordMap;
     std::map<std::string, ITable*> m_mTables;
   };
 }

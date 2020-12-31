@@ -8,18 +8,14 @@ namespace caxios {
   namespace {
     typedef std::vector<FileID> QueryFunc(DBManager* pDB, const std::vector<QueryCondition>& conditions, const std::vector<FileID>&);
 
-    std::vector<FileID> queryKeywords(DBManager* pDB, const std::vector<QueryCondition>& conditions, const std::vector<FileID>&) {
-      std::vector<FileID> vf = pDB->QueryImpl(TABLE_KEYWORD2FILE, conditions);
-      return std::move(vf);
-    }
-
-    bool compare(const system_time::time_point& pt, const system_time::time_point& start, const system_time::time_point& end) {
-      return true;
-    }
+    //std::vector<FileID> queryKeywords(DBManager* pDB, const std::vector<QueryCondition>& conditions, const std::vector<FileID>&) {
+    //  std::vector<FileID> vf = pDB->QueryImpl(TABLE_KEYWORD2FILE, conditions);
+    //  return std::move(vf);
+    //}
 
     void init_map(std::map<std::string, std::function<QueryFunc>>& m) {
       if (m.size() != 0) return;
-      m[TB_Keyword] = queryKeywords;
+      //m[TB_Keyword] = queryKeywords;
       //m[TB_Tag] = TABLE_TAG2FILE;
       //m[TB_Class] = TABLE_CLASS2FILE;
       //m[TB_Annotation] = TABLE_KEYWORD2FILE;
@@ -27,6 +23,15 @@ namespace caxios {
     }
     std::map<std::string, std::function<QueryFunc>> g_mFuncations;
 
+    //struct creator {
+    //  creator(){}
+    //  IAction* operator()(const std::string& key, const std::vector<QueryCondition>& conds) {
+
+    //  }
+    //private:
+
+    //};
+    //std::map<QueryType, std::map<CompareType, creator>> g_mActionFactory;
   }
 
   QueryCondition::QueryCondition()
@@ -39,36 +44,30 @@ namespace caxios {
     m_sCondition = s;
   }
 
-  QueryCondition::QueryCondition(const system_time::time_point& s)
+  QueryCondition::QueryCondition(time_t s)
   {
     m_qType = QT_DateTime;
     m_sCondition = s;
   }
 
-  //std::vector<caxios::FileID> QueryAction::query(DBManager* pDB)
-  //{
-  //  std::vector<caxios::FileID> q;
-  //  if (m_query._f != nullptr) {
-  //    q = m_query._f(pDB, m_sConditions, m_vQuerySet);
-  //  }
-  //  return std::move(q);
-  //}
-
-  //void QueryAction::constraint(const std::vector<FileID>& subset)
-  //{
-  //  m_vQuerySet = subset;
-  //}
-
-  //void QueryAction::AddCondition(const std::string& cond)
-  //{
-  //  T_LOG("query", "condition: %s", cond.c_str());
-  //  m_sConditions.emplace_back(cond);
-  //}
+  IAction* Factory::create(const std::string& k, const std::vector<QueryCondition> conds, CompareType ct)
+  {
+    if (conds.size() == 0) return nullptr;
+    auto type = conds[0].type();
+    if (type == QT_DateTime && ct == CT_GREAT_THAN) {
+      return new QueryAction<QT_DateTime, CT_GREAT_THAN>(k, conds);
+    }
+    else if (type == QT_String && ct == CT_IN) {
+      return new QueryAction<QT_String, CT_IN>(k, conds);
+    }
+    T_LOG("query", "create action fail, type: %d, compare: %d", type, ct);
+    //g_mActionFactory[QT_DateTime][CT_GREAT_THAN](k, conds);
+    return nullptr;
+  }
 
   QueryActions::QueryActions(DBManager* pDB)
     :m_pDBManager(pDB)
   {
-    init_map(g_mFuncations);
   }
 
   QueryActions::~QueryActions()
@@ -90,13 +89,13 @@ namespace caxios {
     if (m_bClose == true) return;
     m_bClose = false;
     // create action now
-    IAction* pAction = IFactory::create(m_vCond, m_ctype);
+    IAction* pAction = Factory::create(m_sKey, m_vCond, m_ctype);
     m_vActions.emplace_back(pAction);
   }
 
   void QueryActions::push(const std::string& key)
   {
-    m_sKey = key;
+    m_sKey = trunc(key);
   }
   void QueryActions::push(const QueryCondition& cond)
   {
@@ -110,7 +109,7 @@ namespace caxios {
   std::vector<caxios::FileID> QueryActions::invoke()
   {
     std::vector<caxios::FileID> result;
-    size_t idx = m_vActions.size() - 1;
+    int idx = m_vActions.size() - 1;
     while (idx>=0)
     {
       auto back = m_vActions[idx];

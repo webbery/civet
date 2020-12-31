@@ -139,7 +139,7 @@ describe('civetkern read only test', function() {
   it('get files info', function() {
     // console.info('file id', snaps[0])
     let filesInfo = instance.getFilesInfo([snaps[0].id])
-    console.info(filesInfo)
+    // console.info(filesInfo)
     expect(filesInfo).to.lengthOf(1)
     // for (let item of filesInfo[0]['meta']) {
     //   console.info(item)
@@ -148,9 +148,8 @@ describe('civetkern read only test', function() {
     //   }
     // }
     expect(filesInfo[0]['tag']).to.exist
-    expect(filesInfo[0]['tag']).to.not.include('test')
-    expect(filesInfo[0]['tag']).to.not.include('标签')
-    expect(filesInfo[0]['tag']).to.include('newTag')
+    expect(filesInfo[0]['tag']).to.include('test')
+    expect(filesInfo[0]['tag']).to.include('标签')
   })
   it('get all tags', function() {
     const tags = instance.getAllTags()
@@ -161,12 +160,12 @@ describe('civetkern read only test', function() {
   it('get classes', function() {
     const rootClasses = instance.getClasses()
     // console.info(rootClasses)
-    expect(rootClasses).to.lengthOf(5)
+    expect(rootClasses).to.lengthOf(4)
     expect(rootClasses[0]).to.have.property('children')
-    expect(rootClasses[2]).to.not.have.property('children')
-    expect(rootClasses[3]).to.not.have.property('children')
-    expect(rootClasses[4]).to.have.property('children')
-    expect(rootClasses[4]['children']).to.lengthOf(1)
+    expect(rootClasses[1]).to.not.have.property('children')
+    expect(rootClasses[2]).to.have.property('children')
+    expect(rootClasses[3]).to.have.property('children')
+    expect(rootClasses[3]['children']).to.lengthOf(1)
     // [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: clz/jpg, children: []}]
   })
   it('get file tags', function() {
@@ -182,7 +181,7 @@ describe('civetkern read only test', function() {
     //}
     //result = instance.query({size: {$gt: 10240, $lt: 21000}})
     //expect(result).to.lengthOf(1)
-    result = instance.findFiles({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
+    result = instance.query({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
     expect(result).to.lengthOf(1)
   })
   after(function() {
@@ -209,8 +208,9 @@ describe('civetkern clean test', function() {
     expect(rootClasses).to.lengthOf(4)
     // console.info(rootClasses)
     instance.removeClasses(['class1'])
+    // console.info('----------------')
     rootClasses = instance.getClasses()
-    console.info(rootClasses)
+    // console.info(rootClasses)
     expect(rootClasses).to.lengthOf(3)
     let finfo = instance.getFilesInfo([snaps[0].id])
     // console.info(finfo);

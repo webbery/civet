@@ -9,15 +9,11 @@
 
 namespace caxios {
 
-#define TB_Keyword    "keyword"
-#define TB_Tag        "tag"
-#define TB_Class      "class"
-#define TB_Annotation "annotation"
-#define TB_FileID     "fileid"
-
   class DBManager;
   enum CompareType {
     CT_EQUAL = 0,
+    CT_IN,
+    CT_GREAT_EQUAL,
     CT_GREAT_THAN,
     CT_LESS_THAN
   };
@@ -32,51 +28,127 @@ namespace caxios {
   public:
     QueryCondition();
     QueryCondition(const std::string& s);
-    QueryCondition(const system_time::time_point& s);
+    QueryCondition(time_t s);
 
     template <typename T>
     T As() const {
       return std::get<T>(m_sCondition);
     }
 
-    QueryType type() {return m_qType;}
+    QueryType type() const {return m_qType;}
   private:
     QueryType m_qType;
-    std::variant< std::string, system_time::time_point, double> m_sCondition;
+    std::variant< std::string, time_t, double> m_sCondition;
+  };
+
+  template<typename Ret>
+  std::vector<Ret> Cast(const std::vector<QueryCondition>& conds) {
+    std::vector<Ret> vRet;
+    for (const QueryCondition& cond : conds) {
+      vRet.emplace_back(cond.As<Ret>());
+    }
+    return std::move(vRet);
+  }
+
+  class GreaterThan {
+  public:
+    GreaterThan(time_t point):_point(point)
+    {
+      //T_LOG("query", "GreaterThan condition: %lld", _point);
+    }
+    bool operator()(time_t val) {
+      //auto pt = std::chrono::system_clock::from_time_t(val);
+      //auto sec = std::chrono::duration_cast<std::chrono::duration<int>>(pt - _point).count();
+      T_LOG("query", "input %lld - point: %lld is %d", val, _point, (bool)(val - _point)>0);
+      return (val - _point) > 0;
+    }
+    std::vector<time_t> condition() {
+      std::vector<time_t> vt;
+      vt.emplace_back(_point);
+      return vt;
+    }
+
+  private:
+    time_t _point;
+  };
+
+  class GreaterEqual {
+  public:
+    GreaterEqual(time_t point)
+    {
+      _range.emplace_back(point);
+    }
+    bool operator()(time_t val) {
+      return true;
+    }
+    std::vector<time_t> condition() { return _range; }
+
+  private:
+    std::vector<time_t> _range;
+  };
+
+  class In {
+  public:
+    In(const std::vector<std::string>& strs)
+    :_strs(strs){}
+
+    bool operator()(const std::string& val) {
+      return true;
+    }
+
+    std::vector<std::string> condition() { return _strs; }
+  private:
+    std::vector<std::string> _strs;
   };
 
   enum class Priority : int {};
   template<QueryType QT, CompareType CT> struct Query;
-  //struct Query {
-  //  Priority _p;
-  //  std::function<QueryFuncTraits<QT, CT>::func> _f;
-  //};
-
-  template<> struct Query<QT_DateTime, CT_GREAT_THAN> {
+  template<> struct Query<QT_String, CT_IN> : public In {
+    typedef std::string type;
+    Query(const std::vector<QueryCondition>& conditions)
+    :In(Cast<std::string>(conditions)){}
+  private:
     Priority _p;
-    std::function<bool (const system_time::time_point&, const system_time::time_point& , const system_time::time_point& )> _f;
+  };
+
+  template<> struct Query<QT_DateTime, CT_GREAT_THAN> : public GreaterThan {
+    typedef time_t type;
+    Query(const std::vector<QueryCondition>& conditions)
+      :GreaterThan(conditions[0].As<time_t>())
+    {
+    }
+  private:
+    Priority _p;
+  };
+
+  template<> struct Query<QT_DateTime, CT_GREAT_EQUAL> : public GreaterEqual {
+    typedef time_t type;
+    Query(const std::vector<QueryCondition>& conditions)
+      :GreaterEqual(conditions[0].As<time_t>())
+    {
+    }
+  private:
+    Priority _p;
   };
 
   class IAction {
   public:
     virtual ~IAction() {}
-    virtual void push(const std::string& kw) = 0;
-    virtual void push(const QueryCondition& cond) = 0;
+    //virtual void push(const std::string& kw) = 0;
+    //virtual void push(const QueryCondition& cond) = 0;
     virtual std::vector<FileID> query(DBManager*) = 0;
   };
 
-  template<QueryType QT,CompareType CT>
+  template<QueryType QT, CompareType CT>
   class QueryAction : public IAction {
   public:
-    QueryAction(const std::vector<QueryCondition>&);
-    void push(const std::string& kw) {
-      m_sKeyword = trunc(kw);
-    }
-    void push(const QueryCondition& cond) {
-      m_sConditions.emplace_back(cond);
-    }
+    QueryAction(const std::string& k, const std::vector<QueryCondition>& vCond)
+    :m_sKeyword(k)
+    , m_query(vCond)
+    { }
+
     std::vector<FileID> query(DBManager* pDB) {
-      // m_query._f()
+      return pDB->QueryImpl(m_sKeyword, m_query, m_vQuerySet);
     }
 
     void constraint(const std::vector<FileID>&);
@@ -84,7 +156,6 @@ namespace caxios {
   private:
     std::string m_sKeyword;
     Query< QT, CT > m_query;
-    std::vector<QueryCondition> m_sConditions;
     std::vector<FileID> m_vQuerySet;
   };
 
@@ -93,21 +164,11 @@ namespace caxios {
     enum {Kind = QT_String};
   };
 
-  class IFactory {
+  class Factory {
   public:
-    static IAction* create(std::vector<QueryCondition>, CompareType);
+    static IAction* create(const std::string& k, const std::vector<QueryCondition>, CompareType);
   };
   
-  template<QueryType QT, CompareType CT> struct Factory{
-    static IAction* create(){ return nullptr; }
-  };
-  template<> struct Factory<QT_DateTime, CT_GREAT_THAN>{
-    // typedef bool func(const system_time::time_point& pt, const system_time::time_point& start, const system_time::time_point& end);
-    static IAction* create(){
-      return new QueryAction<QT_DateTime, CT_GREAT_THAN>();
-    }
-  };
-
   class QueryActions {
   public:
     QueryActions(DBManager* pDB);
@@ -124,7 +185,7 @@ namespace caxios {
   private:
     std::string m_sKey;
     std::vector<QueryCondition> m_vCond;
-    CompareType m_ctype;
+    CompareType m_ctype = CT_EQUAL;
 
     DBManager* m_pDBManager;
     bool m_bClose = true;
@@ -155,7 +216,7 @@ namespace caxios {
     static void apply(const ActionInput& in, QueryActions& actions) {
       if (!in.empty()) {
         time_t ct = str2time(in.string());
-        QueryCondition cond(std::chrono::system_clock::from_time_t(ct));
+        QueryCondition cond(ct);
         actions.push(cond);
       }
     }
@@ -171,6 +232,22 @@ namespace caxios {
     template< typename ActionInput >
     static void apply(const ActionInput& in, QueryActions& actions) {
       if (!in.empty()) {
+      }
+    }
+  };
+  template<> struct action< literal_gt > {
+    template< typename ActionInput >
+    static void apply(const ActionInput& in, QueryActions& actions) {
+      if (!in.empty()) {
+        actions.push(CT_GREAT_THAN);
+      }
+    }
+  };
+  template<> struct action< literal_array> {
+    template< typename ActionInput >
+    static void apply(const ActionInput& in, QueryActions& actions) {
+      if (!in.empty()) {
+        actions.push(CT_IN);
       }
     }
   };

@@ -40,13 +40,21 @@ namespace caxios {
     }
     Iterator(const Iterator& other)
       :_refs(other._refs)
+      , _pDatabase(other._pDatabase)
+      ,_end(other._end)
+      ,_key(other._key)
+      ,_datum(other._datum)
+      ,_cursor(other._cursor)
     {
       *_refs += 1;
     }
     Iterator(CDatabase* pDatabase, MDB_dbi dbi)
       :_end(false)
+      , _pDatabase(pDatabase)
     {
+      _refs = new int(1);
       _cursor = pDatabase->OpenCursor(dbi);
+      pDatabase->MoveNext(_cursor, _key, _datum);
     }
     ~Iterator(){
       *_refs -= 1;

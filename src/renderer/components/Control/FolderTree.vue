@@ -13,7 +13,8 @@
           <FolderTree :data="item.children" :parent="(parent===undefined ? item.name : parent + '/' +item.name)" :level="(parent===undefined ? 0 : level + 1)"></FolderTree>
         </div>
     </div>
-    <IconFolder icon="el-icon-folder" enableInput="true" v-if="enableAddClass" @onblur="onBlur" :label="newCategoryName"></IconFolder>
+    <IconFolder icon="el-icon-folder" :enableInput="enableAddClass" :label="newCategoryName"></IconFolder>
+    <!-- <IconFolder icon="el-icon-folder" enableInput="true" v-if="enableAddClass" @onblur="onBlur" :label="newCategoryName"></IconFolder> -->
   </div>
 </template>
 <script>
@@ -39,7 +40,7 @@ export default {
     console.info('folder tree:', this.data)
     return {
       newCategoryName: '',
-      // enableAddClass: false,
+      enableAddClass: false,
       expandTree: expandTree,
       selections: selections,
       lastSelections: [],
