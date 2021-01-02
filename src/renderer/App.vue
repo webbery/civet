@@ -8,7 +8,7 @@
 <script>
 import LandingPage from '@/components/LandingPage'
 import Guider from '@/components/Guider'
-import CV from '@/../public/ImageProcess'
+// import CV from '@/../public/ImageProcess'
 import { CivetConfig } from '@/../public/CivetConfig'
 import Service from '@/components/utils/Service'
 
@@ -19,10 +19,10 @@ export default {
     Guider
   },
   mounted() {
-    const test = [240, 0, 0, 250, 235, 215]
+    // const test = [240, 0, 0, 250, 235, 215]
     // rgb2hsv(test, 2)
-    let data = {data: test, info: {width: 2, height: 1}}
-    CV.sumaryColors(data)
+    // let data = {data: test, info: {width: 2, height: 1}}
+    // CV.sumaryColors(data)
     const config = new CivetConfig()
     if (config.isFirstTime()) {
       const guider = this.$refs.guider

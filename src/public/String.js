@@ -58,7 +58,7 @@ export default {
       case 'width': return '宽'
       case 'height': return '高'
       case 'type': return '类型'
-      default: return '其他'
+      default: return en
     }
   }
 }

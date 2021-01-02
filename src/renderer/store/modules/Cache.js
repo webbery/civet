@@ -42,12 +42,15 @@ const remote = {
   async recieveCounts() {
     const uncalsses = await Service.getServiceInstance().get(Service.GET_UNCATEGORY_IMAGES)
     const untags = await Service.getServiceInstance().get(Service.GET_UNTAG_IMAGES)
+    console.info('untag is', untags)
     return {uncalsses: uncalsses, untags: untags}
   },
   async recieveTags() {
     return Service.getServiceInstance().get(Service.GET_ALL_TAGS)
   }
 }
+
+const maxCacheSize = 40 + 20 + 10
 
 const mutations = {
   init(state, data) {
@@ -61,6 +64,7 @@ const mutations = {
     const images = Kernel.getFilesInfo(imagesID)
     for (let image of images) {
       state.cache[image.id] = new FileBase(image)
+      if (state.cache.length > maxCacheSize) break
     }
     // const len = state.cache.length
     // setting view panel item
@@ -73,7 +77,7 @@ const mutations = {
     const cls = Kernel.getClasses('/')
     if (cls) {
       for (let idx = 0; idx < cls.length; ++idx) {
-        // Vue.set(state.classes, idx, cls[idx])
+        Vue.set(state.classes, idx, cls[idx])
       }
     }
     // init classes name
@@ -106,6 +110,7 @@ const mutations = {
       if (state.cache.hasOwnProperty(file.id)) continue
       state.cache[file.id] = new FileBase(file)
       // setting view panel item
+      if (state.cache.length > maxCacheSize) break
       const pos = state.viewItems.length + idx
       Vue.set(state.viewItems, pos, state.cache[file.id])
     }

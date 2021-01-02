@@ -1,21 +1,39 @@
 <template>
-    <div id="main-content" @drop="dropFiles($event)" @dragover.prevent >
+    <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
     <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
     <el-scrollbar style="height:96vh;" @click.native="onPanelClick($event)">
-        <div v-for="(image,idx) in imageList" :key="idx" class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
+      <Waterfall :line-gap="200" :max-line-gap="700" :scrollReachBottom="onRequestNewData" :watch="imageList">
+        <WaterfallSlot v-for="(item, index) in imageList" :width="item.width" :height="item.height + 40" :order="index" :key="item.id">
+          <div class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
+            <el-card :body-style="{ padding: '0px' }" style="position: relative">
+              <Preview :src="getImage(item)" class="preview" 
+                @dblclick.native="onImageDbClick(item)"
+                @keydown.ctrl.67.native="onFileCopyOut(props)"
+                @contextmenu.native="onImageClick($event, $root, item)" @mousedown.native="onImageClick($event, $root, item)" 
+              >
+              </Preview>
+              <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
+                <span class="name" >{{item.filename}}</span>
+                <input v-if="enableInput"/>
+              </div>
+            </el-card>
+          </div>
+        </WaterfallSlot>
+      </Waterfall>
+        <!-- <div v-for="(image,idx) in imageList" :key="idx" class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
           <el-card :body-style="{ padding: '0px' }" style="position: relative">
-          <JImage :src="getImage(image)" :interact="false" class="preview" 
+          <Preview :src="getImage(image)" :interact="false" class="preview" 
             @dblclick.native="onImageDbClick(image)"
             @keydown.ctrl.67.native="onFileCopyOut(image)"
             @contextmenu.native="onImageClick($event, $root, image)" @mousedown.native="onImageClick($event, $root, image)" 
           >
-          </JImage>
+          </Preview>
           <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
             <span class="name" >{{image.filename}}</span>
             <input v-if="enableInput"/>
           </div>
         </el-card>
-        </div>
+        </div> -->
       </el-scrollbar>
     </div>
 </template>
@@ -23,17 +41,19 @@
 <script>
 import bus from '../utils/Bus'
 import Service from '../utils/Service'
-import JImage from '../JImage'
+import Preview from '../Control/Preview'
 import ImgTool from '../utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
 import Global from '../utils/Global'
 import { mapState } from 'vuex'
 import PluginManager from '@/../public/PluginManager'
+import Waterfall from 'vue-waterfall/lib/waterfall'
+import WaterfallSlot from 'vue-waterfall/lib/waterfall-slot'
 
 export default {
   name: 'view-panel',
   components: {
-    JImage, PopMenu
+    Preview, PopMenu, Waterfall, WaterfallSlot
   },
   data() {
     return {
@@ -45,7 +65,10 @@ export default {
         {text: '导出到计算机', cb: this.onChangeName},
         {text: '重命名', cb: this.onChangeName},
         {text: '删除', cb: this.onDeleteItem}
-      ]
+      ],
+      width: 400,
+      height: 800,
+      testData: [{src: '111', href: '2222'}]
     }
   },
   async mounted() {
@@ -69,6 +92,9 @@ export default {
     // }
     // bus.on(bus.EVENT_REMOVE_FILES, this.onRemoveFiles)
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+    this.width = document.getElementById('main-content').offsetWidth
+    this.height = document.getElementById('main-content').offsetHeight
+    console.info('width: ', this.width, 'height:', this.height)
   },
   computed: mapState({
     imageList: (state) => state.Cache.viewItems
@@ -104,6 +130,14 @@ export default {
     }
   },
   methods: {
+    onRequestNewData(item, itemIndex, groupIndex) {
+      console.info('onRequestNewData', item)
+      // item['x'] = (itemIndex % 2) * 110
+      // item['y'] = parseInt(itemIndex / 2) * 160
+      // const { data, ...sizeAndPosition } = item
+      // return sizeAndPosition
+      return this.imageList
+    },
     onPanelClick(event) {
       console.info('onPanelClick')
       if (this.imageSelected) this.imageSelected = false
@@ -158,15 +192,21 @@ export default {
       const String = require('../../../public/String').default
       const h = this.$createElement
       for (let item of files) {
-        const ext = String.getFormatType(item.path)
-        if (PluginManager.getModuleByExt(ext) === null) {
-          this.$notify.error({
-            title: '不支持的格式',
-            dangerouslyUseHTMLString: true,
-            message: h('div', {style: 'color: white; font-size: 12px;'}, item.path),
-            // duration: 0,
-            position: 'bottom_right'
-          })
+        const fs = require('fs')
+        const stat = fs.statSync(item.path)
+        if (stat.isFile()) {
+          const ext = String.getFormatType(item.path)
+          if (PluginManager.getModuleByExt(ext) === null) {
+            this.$notify.error({
+              title: '不支持的格式',
+              dangerouslyUseHTMLString: true,
+              message: h('div', {style: 'color: white; font-size: 12px;'}, item.path),
+              // duration: 0,
+              position: 'bottom_right'
+            })
+            continue
+          }
+        } else if (!stat.isDirectory()) {
           continue
         }
         paths.push(item.path)
@@ -204,6 +244,9 @@ export default {
       bus.emit(Service.EVENT_REMOVE_ITEM, [fileid])
       this.$ipcRenderer.send(Service.REMOVE_FILES, [fileid])
     },
+    onFileLoad() {
+      console.info('on file load')
+    },
     getImage(image) {
       console.info('getImage:', image)
       return ImgTool.getSrc(image)
@@ -232,9 +275,7 @@ export default {
   z-index: 9;
 }
 .image {
-  max-width: 19%;
   margin: 0 0 0 6px;
-  display: inline-block;
 }
 
 .clearfix:before,

@@ -10,11 +10,10 @@
           :isSelected="selections[idx]" :data="item" :parent="(item.type==='clz'? parent + '/' + item.name : parent)" :level="level">
         </IconFolder>
         <div v-if="item.children && item.children.length > 0 && (expandTree[idx])" class="children">
-          <FolderTree :data="item.children" :parent="(parent===undefined ? item.name : parent + '/' +item.name)" :level="(parent===undefined ? 0 : level + 1)"></FolderTree>
+          <FolderTree :data="item.children" :parent="(parent===undefined ? item.name : parent + '/' +item.name)" :level="(parent===undefined ? 0 : level + 1)" @onChildClick="onChildClick"></FolderTree>
         </div>
     </div>
-    <IconFolder icon="el-icon-folder" :enableInput="enableAddClass" :label="newCategoryName"></IconFolder>
-    <!-- <IconFolder icon="el-icon-folder" enableInput="true" v-if="enableAddClass" @onblur="onBlur" :label="newCategoryName"></IconFolder> -->
+    <IconFolder icon="el-icon-folder" v-if="enableAddClass" :enableInput="true" :label="newCategoryName" @onblur="onBlur"></IconFolder>
   </div>
 </template>
 <script>
@@ -37,7 +36,7 @@ export default {
         selections.push(false)
       }
     }
-    console.info('folder tree:', this.data)
+    // console.info('folder tree:', this.data)
     return {
       newCategoryName: '',
       enableAddClass: false,
@@ -69,7 +68,14 @@ export default {
       }
       this.selections[idx] = true
       this.lastSelections = [idx]
+      this.$emit('onChildClick', idx)
       e.stopPropagation()
+    },
+    onChildClick: function(idx) {
+      for (let idx = 0; idx < this.data.length; ++idx) {
+        this.$set(this.selections, idx, false)
+      }
+      this.$emit('onChildClick', -1)
     },
     onPopMenu: function(event, root, parent, indx) {
       this.selection = event.toElement.innerText
@@ -90,6 +96,10 @@ export default {
     },
     onAddClass: function (name) {
       console.info(name)
+      this.enableAddClass = true
+    },
+    onBlur: function (clzName) {
+      this.enableAddClass = false
     },
     onDeleteItem: function (name, parent, index) {
       const item = this.data[index]

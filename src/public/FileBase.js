@@ -7,7 +7,11 @@ export default class FileBase {
     this.tag = json.tag || []
     for (let item of json.meta) {
       // console.info(item)
-      this[item['name']] = item['value']
+      if (item['name'] === 'width' || item['name'] === 'height') {
+        this[item['name']] = parseInt(item['value'])
+      } else {
+        this[item['name']] = item['value']
+      }
     }
   }
 
@@ -27,8 +31,18 @@ export default class FileBase {
   }
 
   metaType(value) {
-    if (typeof value === 'number') return 'value'
-    if (value[0] === '#') return 'value'
+    switch (typeof value) {
+      case 'number': return 'value'
+      case 'object':
+        if (value === null) return 'undefined'
+        if (value instanceof Array) {
+          if (value[0] === '#') return 'value'
+          return 'array'
+        }
+        break
+      case 'undefined': return 'undefined'
+      default: break
+    }
     return 'str'
   }
 }

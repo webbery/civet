@@ -4,15 +4,15 @@ import ExifReader from 'exifreader'
 import JString from '../public/String'
 // import CV from '../public/ImageProcess'
 import fs from 'fs'
-import { imageHash } from 'image-hash'
-// import sharp from 'sharp'
-import util from 'util'
+// import { imageHash } from 'image-hash'
+import sharp from 'sharp'
+// import util from 'util'
 import storage from '../public/Kernel'
 // import WorkerPool from './WorkerPool/WorkerPool'
-const jpegasm = require('jpeg-asm')
+// const jpegasm = require('jpeg-asm')
 
-const jpegEncode = util.promisify(jpegasm.encode)
-const pHash = util.promisify(imageHash)
+// const jpegEncode = util.promisify(jpegasm.encode)
+// const pHash = util.promisify(imageHash)
 export class ImageParser {
   constructor(fullpath) {
     this.fullpath = fullpath
@@ -75,9 +75,6 @@ class ImageMetaParser extends ImageParseBase {
   async parse(image) {
     const fullpath = image.path
     const buffer = fs.readFileSync(fullpath)
-    const hashValue = await pHash({ext: 'image/jpeg', data: buffer}, 16, true)
-    console.info('hash: ', hashValue)
-    image.addMeta('hash', hashValue)
     // const liklyFiles = Storage.findFiles({hash: hashValue})
     // if (liklyFiles && liklyFiles.length > 0) {
     //   console.info('comparing ...')
@@ -90,6 +87,12 @@ class ImageMetaParser extends ImageParseBase {
     } else {
       type = JString.getFormatType(meta['format'].description)
     }
+    // const thumbnail = this.getImageThumbnail(buffer)
+    // image.addMeta('thumbnail', thumbnail)
+    // const hashValue = await pHash({ext: 'image/jpeg', data: thumbnail}, 16, true)
+    // console.info('hash: ', hashValue)
+    // image.addMeta('hash', hashValue)
+
     if (meta['DateTime'] !== undefined && meta['DateTime'].value) {
       // image.datetime = meta['DateTime'].value[0]
       image.addMeta('datetime', meta['DateTime'].value[0])
@@ -97,10 +100,6 @@ class ImageMetaParser extends ImageParseBase {
     image.addMeta('type', this.getImageFormat(type))
     image.addMeta('width', this.getImageWidth(meta))
     image.addMeta('height', this.getImageHeight(meta))
-    if (image.size > 5 * 1024 * 1024) {
-      const thumbnail = this.getImageThumbnail(meta)
-      image.addMeta('thumbnail', thumbnail)
-    }
     try {
       storage.addFiles([image])
     } catch (err) {
@@ -123,7 +122,7 @@ class ImageMetaParser extends ImageParseBase {
   }
 
   getImageHeight(meta) {
-    if (meta['Image Height']) return meta['Image Width'].value
+    if (meta['Image Height']) return meta['Image Height'].value
     if (meta['ImageLength']) return meta['ImageLength'].value
   }
 
@@ -134,18 +133,22 @@ class ImageMetaParser extends ImageParseBase {
     console.info('image time error', meta)
   }
 
-  getImageThumbnail(meta) {
-    if (meta['Thumbnail']) {
-      const buffer = _translateBase64ToArrayBuffer( meta['Thumbnail'].base64)
-      const options = {
-        width: this.getImageWidth(meta),
-        height: this.getImageHeight(meta),
-        quality: 80
-      }
-      return jpegEncode(buffer, options)
+  getImageThumbnail(width, height, buffer) {
+    const minVal = Math.min(width, height)
+    if (minVal < 200) {
+      return sharp(buffer).jpeg({quantisationTable: 8}).toBuffer()
     }
-    console.info('thumbnail', meta)
-    return undefined
+    if (width < height) {
+      const scale = width / 200.0
+      const newHeight = parseInt(height / scale)
+      const newWidth = 200
+      return sharp(buffer).resize(newWidth, newHeight).jpeg({quantisationTable: 8}).toBuffer()
+    } else {
+      const scale = height / 200.0
+      const newHeight = 200
+      const newWidth = parseInt(width / scale)
+      return sharp(buffer).resize(newWidth, newHeight).jpeg({quantisationTable: 8}).toBuffer()
+    }
   }
 
   getImageFormat(str) {
@@ -168,21 +171,21 @@ class ImageMetaParser extends ImageParseBase {
     }
   }
 
-  _translateArrayBufferToBase64(buffer){
+  _translateArrayBufferToBase64(buffer) {
     let binaryStr = ''
     const bytes = new Uint8Array(buffer)
-    for(let i=0, len = bytes.byteLength; i < len; i++) {
+    for (let i = 0, len = bytes.byteLength; i < len; i++) {
       binaryStr += String.fromCharCode(bytes[i])
     }
     return window.btoa(binaryStr)
   }
 
-  _translateBase64ToArrayBuffer(base64){
+  _translateBase64ToArrayBuffer(base64) {
     const binaryStr = window.atob(base64)
     const byteLength = binaryStr.length
     const bytes = new Uint8Array(byteLength)
-    for(let i = 0; i < byteLength; i++){
-      bytes[i] = binary.charCodeAt(i)
+    for (let i = 0; i < byteLength; i++) {
+      bytes[i] = binaryStr.charCodeAt(i)
     }
     return bytes.buffer
   }

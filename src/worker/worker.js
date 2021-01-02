@@ -29,7 +29,7 @@ Array.prototype.remove = function (val) {
   }
 }
 
-const threshodMode = false
+const threshodMode = true
 // your background code here
 const fs = require('fs')
 const timer = (function () {

@@ -11,7 +11,7 @@ const kernel = (function () {
     const config = cfg.getConfig()
     if (config.resources.length === 0) return false
     try {
-      if (!instance.civetkern.init(config, flag)) {
+      if (!instance.civetkern.init(config, flag, false)) {
         console.info('init fail')
         return false
       }

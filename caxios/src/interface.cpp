@@ -137,7 +137,11 @@ namespace caxios {
     if (!info[1].IsUndefined()) {
       readOnly = info[1].As<Napi::Number>().Int32Value();
     }
-    init_log(readOnly);
+    bool enableLog = true;
+    if (!info[2].IsUndefined()) {
+      enableLog = info[2].As<Napi::Boolean>();
+    }
+    init_log(readOnly, enableLog);
     std::string defaultName = AttrAsStr(options, "/app/default");
     Napi::Object resource = FindObjectFromArray(options.Get("resources").As<Napi::Object>(), [&defaultName](Napi::Object obj)->bool {
       if (AttrAsStr(obj, "name") == defaultName) return true;
