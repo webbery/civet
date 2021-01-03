@@ -150,7 +150,7 @@ namespace caxios {
     { }
 
     std::vector<FileID> query(caxios::DBManager* pDB) {
-      return pDB->QueryImpl(m_sKeyword, m_query, m_vQuerySet);
+      return pDB->QueryImpl(m_sKeyword, m_query/*, m_vQuerySet*/);
     }
 
     void constraint(const std::vector<FileID>&);

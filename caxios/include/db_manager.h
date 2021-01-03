@@ -5,7 +5,7 @@
 #include <map>
 #include <Table.h>
 #include "log.h"
-#include "QueryAction.h"
+// #include "QueryAction.h"
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
