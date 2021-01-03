@@ -24,7 +24,7 @@ namespace caxios {
   bool TableMeta::Add(const std::string& value, const std::vector<FileID>& fileid)
   {
     std::string sKey = prepareKey(value);
-    // value做键, fileid做值
+    // value as key, fileid as value
     void* pData = nullptr;
     uint32_t len = 0;
     _pDatabase->Get(_dbi, sKey, pData, len);

@@ -13,7 +13,7 @@
 #include <regex>
 #include <iomanip>
 #include <sstream>
-#define CHAR_BIT  255
+#define CHAR_BIT_S  255
 
 namespace caxios {
   
@@ -89,16 +89,17 @@ namespace caxios {
 
   std::string serialize(const std::vector<WordIndex>& classes)
   {
+    // TODO: 序列化冲突时的处理
     std::string s;
     if (classes.size() == 0) return ROOT_CLASS_PATH;
     for (const WordIndex& wi : classes) {
-      char c4 = wi & (CHAR_BIT << 24);
+      char c4 = wi & (CHAR_BIT_S << 24);
       s.push_back(c4);
-      char c3 = wi & (CHAR_BIT << 16);
+      char c3 = wi & (CHAR_BIT_S << 16);
       s.push_back(c3);
-      char c2 = wi & (CHAR_BIT << 8);
+      char c2 = wi & (CHAR_BIT_S << 8);
       s.push_back(c2);
-      char c1 = wi & CHAR_BIT;
+      char c1 = wi & CHAR_BIT_S;
       s.push_back(c1);
     }
     T_LOG("util", "serialize %s(%d, %d)", format_x16(s).c_str(), classes.size(), s.size());
