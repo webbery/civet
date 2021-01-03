@@ -3,6 +3,7 @@
 #include <variant>
 #include "datum_type.h"
 #include "database.h"
+#include <string.h>
 
 #define TABLE_SCHEMA        "dbinfo"
 #define TABLE_FILESNAP      "file_snap"

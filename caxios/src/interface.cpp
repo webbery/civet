@@ -30,8 +30,10 @@ namespace caxios {
             std::string num = itr->second.substr(1);
             if (isNumber(num)) {
               double dTime = atof(num.c_str());
+#if NAPI_VERSION >= 5
               auto date = Napi::Date::New(env, dTime);
               prop.Set(itr->first, date);
+#endif
               T_LOG("file", "date %f", dTime);
             }
           }
