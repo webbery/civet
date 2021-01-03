@@ -1,15 +1,17 @@
-#pragma once
+#ifndef _QUERY_ACTION_H_
+#define _QUERY_ACTION_H_
 #include "QueryRule.h"
+#include "db_manager.h"
 #include <map>
 #include "datum_type.h"
 #include <functional>
 #include <variant>
 #include "lmdb/lmdb.h"
 #include "util/util.h"
+#include <vector>
 
 namespace caxios {
 
-  class DBManager;
   enum CompareType {
     CT_EQUAL = 0,
     CT_IN,
@@ -136,7 +138,7 @@ namespace caxios {
     virtual ~IAction() {}
     //virtual void push(const std::string& kw) = 0;
     //virtual void push(const QueryCondition& cond) = 0;
-    virtual std::vector<FileID> query(DBManager*) = 0;
+    virtual std::vector<FileID> query(caxios::DBManager*) = 0;
   };
 
   template<QueryType QT, CompareType CT>
@@ -147,7 +149,7 @@ namespace caxios {
     , m_query(vCond)
     { }
 
-    std::vector<FileID> query(DBManager* pDB) {
+    std::vector<FileID> query(caxios::DBManager* pDB) {
       return pDB->QueryImpl(m_sKeyword, m_query, m_vQuerySet);
     }
 
@@ -171,7 +173,7 @@ namespace caxios {
   
   class QueryActions {
   public:
-    QueryActions(DBManager* pDB);
+    QueryActions(caxios::DBManager* pDB);
     ~QueryActions();
     // start a query
     void open();
@@ -259,3 +261,5 @@ namespace caxios {
     }
   };
 }
+
+#endif

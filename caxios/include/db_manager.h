@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _CAXIOS_DB_MANAGER_H_
+#define _CAXIOS_DB_MANAGER_H_
 #include "database.h"
 #include "json.hpp"
 #include <map>
@@ -8,12 +9,13 @@
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
-namespace caxios {
 #define TB_Keyword    "keyword"
 #define TB_Tag        "tag"
 #define TB_Class      "class"
 #define TB_Annotation "annotation"
 #define TB_FileID     "fileid"
+
+namespace caxios {
   class DBManager {
   public:
     DBManager(const std::string& dbdir, int flag, const std::string& meta = "");
@@ -42,7 +44,7 @@ namespace caxios {
 
   public: // will be implimented in ITable
     template<typename F>
-    std::vector<FileID> QueryImpl(const std::string& keyword, F& compare, std::vector<FileID>& subset = std::vector<FileID>())
+    std::vector<FileID> QueryImpl(const std::string& keyword, F& compare)
     {
       std::vector<FileID> vOut;
       auto itr = m_mTables.find(keyword);
@@ -52,7 +54,7 @@ namespace caxios {
         auto end = Iterator();
         for (; cursor != end; ++cursor) {
           auto item = *cursor;
-          F::type val = *(F::type*)(item.first.mv_data);
+          typename F::type val = *(typename F::type*)(item.first.mv_data);
           if (compare(val)) {
             FileID* start = (FileID*)(item.second.mv_data);
             vOut.insert(vOut.end(), start, start + item.second.mv_size / sizeof(FileID));
@@ -142,3 +144,5 @@ namespace caxios {
     std::map<std::string, ITable*> m_mTables;
   };
 }
+
+#endif
