@@ -864,8 +864,7 @@ namespace caxios {
       std::for_each(vTokens.begin(), vTokens.end(), [&mIndexes, &vClassPath](const std::string& token) {
         T_LOG("class", "class token: %s, %d", token.c_str(), mIndexes[token]);
         vClassPath.emplace_back(mIndexes[token]);
-        });
-      // TODO: 序列化冲突时的处理
+      });
       std::string sChild = serialize(vClassPath);
       T_LOG("class", "serialize result: %s", format_x16(sChild).c_str());
       uint32_t child = GenerateClassHash(sChild);

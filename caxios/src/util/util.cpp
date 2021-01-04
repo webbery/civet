@@ -65,6 +65,7 @@ namespace caxios {
 
   uint32_t encode(const std::string& str)
   {
+    // TODO: avoid hash clide
     if (str == "/") return 0;
     uint32_t hash, idx;
     for (hash = str.size(), idx = 0; idx < str.size(); ++idx) {
@@ -89,7 +90,6 @@ namespace caxios {
 
   std::string serialize(const std::vector<WordIndex>& classes)
   {
-    // TODO: 序列化冲突时的处理
     std::string s;
     if (classes.size() == 0) return ROOT_CLASS_PATH;
     for (const WordIndex& wi : classes) {
