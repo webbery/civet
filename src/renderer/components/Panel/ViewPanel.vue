@@ -3,9 +3,9 @@
     <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
     <el-scrollbar style="height:96vh;" @click.native="onPanelClick($event)">
       <Waterfall :line-gap="200" :max-line-gap="700" :scrollReachBottom="onRequestNewData" :watch="imageList">
-        <WaterfallSlot v-for="(item, index) in imageList" :width="item.width" :height="item.height + 40" :order="index" :key="item.id">
+        <WaterfallSlot v-for="(item, index) in imageList" :width="item.width" :height="item.height" :order="index" :key="item.id">
           <div class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
-            <el-card :body-style="{ padding: '0px' }" style="position: relative">
+            <el-card :body-style="{ padding: '0px' }" >
               <Preview :src="getImage(item)" class="preview" 
                 @dblclick.native="onImageDbClick(item)"
                 @keydown.ctrl.67.native="onFileCopyOut(props)"
@@ -47,8 +47,8 @@ import PopMenu from '@/components/Menu/PopMenu'
 import Global from '../utils/Global'
 import { mapState } from 'vuex'
 import PluginManager from '@/../public/PluginManager'
-import Waterfall from 'vue-waterfall/lib/waterfall'
-import WaterfallSlot from 'vue-waterfall/lib/waterfall-slot'
+import Waterfall from '../Layout/waterfall'
+import WaterfallSlot from '../Layout/waterfall-slot'
 
 export default {
   name: 'view-panel',

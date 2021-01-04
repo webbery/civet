@@ -21,7 +21,7 @@
     "test": "cd caxios && npm install && npm run rebuild && npm run test",
     "pack:worker": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.worker.config.js",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "npm run lint:fix",
+    "postinstall": "npm run lint:fix && electron-builder install-app-deps",
     "publish": "node_modules/.bin/publish"
   },
   "build": {
@@ -79,7 +79,7 @@
     }
   },
   "dependencies": {
-    "civetkern": "0.0.48",
+    "civetkern": "0.0.52",
     "electron-log": "^4.2.2",
     "electron-simple-updater": "^2.0.8",
     "element-ui": "^2.14.1",
@@ -176,7 +176,6 @@
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^15.9.5",
     "vue-style-loader": "^4.1.0",
-    "vue-waterfall": "^1.0.6",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4",
