@@ -71,7 +71,12 @@ namespace caxios {
     for (hash = str.size(), idx = 0; idx < str.size(); ++idx) {
       hash = (hash << 4) ^ (hash >> 28) ^ str[idx];
     }
-    return hash % std::numeric_limits<uint32_t>::max();
+    return createHash(hash);
+  }
+
+  uint32_t createHash(uint32_t hs, uint32_t di) 
+  {
+    return (hs + di) % std::numeric_limits<uint32_t>::max();
   }
 
   bool isDate(const std::string& input)

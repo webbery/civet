@@ -1094,6 +1094,16 @@ namespace caxios {
   {
     if (IsClassExist(clazz)) return GetClassHash(clazz);
     auto e = encode(clazz);
+    uint32_t offset = 1;
+    do {
+      void* pData = nullptr;
+      uint32_t len = 0;
+      m_pDatabase->Get(m_mDBs[TABLE_HASH2CLASS], e, pData, len);
+      if (len == 0) {
+        break;
+      }
+      e = createHash(e, offset);
+    } while (++offset);
     T_LOG("class", "hash: %u", e);
     return e;
   }

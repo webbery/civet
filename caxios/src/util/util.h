@@ -55,6 +55,8 @@ namespace caxios {
   }
   // use hash to encode string
   uint32_t encode(const std::string& str);
+  uint32_t createHash(uint32_t hs, uint32_t di = 0);
+
   template<typename T>
   bool addUniqueDataAndSort(std::vector<T>& pDest, T src) {
     auto ptr = std::lower_bound(pDest.begin(), pDest.end(), src);

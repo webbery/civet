@@ -8,6 +8,14 @@
 #include <locale.h>
 #include "json.hpp"
 #include "log.h"
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#elif defined(WIN32)
+#include <direct.h>
+#include <io.h>
+#endif
 
 // https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
 #define EXPORT_JS_FUNCTION_PARAM(name) exports.Set(#name, Napi::Function::New(env, caxios::name));
@@ -150,6 +158,7 @@ namespace caxios {
     });
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
+      if (readOnly != 0 && access(path.c_str(), 0) == 0) return Napi::Value::From(info.Env(), false);
       std::string meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
       g_pCaxios = new CAxios(path, readOnly, meta);
       T_LOG("interface", "init success");
