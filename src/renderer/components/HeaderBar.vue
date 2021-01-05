@@ -63,6 +63,7 @@ export default {
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
+    bus.on(bus.EVENT_INIT_RESOURCE_DB, this.onInitResourceDB)
     const config = new CivetConfig()
     const resource = config.getCurrentResource()
     console.info('header', resource)
@@ -70,6 +71,9 @@ export default {
   },
   methods: {
     onClickResource() {},
+    onInitResourceDB(dbname) {
+      this.resource = dbname
+    },
     onClickImport() {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
         properties: ['openDirectory', 'openFile']

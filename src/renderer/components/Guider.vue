@@ -18,6 +18,7 @@
 import { remote } from 'electron'
 import { CivetConfig } from '../../public/CivetConfig'
 import Service from './utils/Service'
+import bus from './utils/Bus'
 
 export default {
   name: 'Guider',
@@ -59,6 +60,7 @@ export default {
       config.save()
       const cfg = document.getElementById('guider-config')
       cfg.close()
+      bus.emit(bus.EVENT_INIT_RESOURCE_DB, this.resourceName)
       this.$ipcRenderer.send(Service.REINIT_DB)
     },
     onSelectDBPath() {

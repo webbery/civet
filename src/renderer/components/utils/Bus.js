@@ -20,5 +20,6 @@ export default {
   EVENT_DISPLAY_IMAGE: 'displayImage',
   EVENT_DISPLAY_SEARCH_RESULT: 'showSearchResult',
   EVENT_UPDATE_UNCATEGORY_IMAGES: 'updateUncategoryImages',
-  EVENT_SCALE_IMAGE: 'scaleImage'
+  EVENT_SCALE_IMAGE: 'scaleImage',
+  EVENT_INIT_RESOURCE_DB: 'initResourceDB'
 }
