@@ -16,7 +16,7 @@ const kernel = (function () {
         return false
       }
       _isInit = true
-      console.info(config, flag)
+      console.info(config, flag, instance.civetkern)
       return true
     } catch (exception) {
       console.info('init civetkern exception:', exception)

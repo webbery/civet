@@ -206,16 +206,17 @@ class ImageTextParser extends ImageParseBase {
     const fullpath = image.path + '/' + image.filename
     // WorkerPool.addTask(this.task, fullpath)
     image.tag = NLP.getNouns(fullpath)
-    image.keyword = image.tag
-    console.info('ImageTextParser', image.tag)
-    try {
-      console.info(image)
-      storage.setTags([image.id], image.tag)
-    } catch (err) {
-      console.info('parse text error', err)
+    if (image.tag !== 0) {
+      image.keyword = image.tag
+      console.info('ImageTextParser', image.tag)
+      try {
+        console.info(image)
+        storage.setTags([image.id], image.tag)
+      } catch (err) {
+        console.info('parse text error', err)
+      }
     }
     // image.stepCallback(undefined, image)
-
     if (this.next !== undefined) {
       this.next.parse(image, buffer)
     }

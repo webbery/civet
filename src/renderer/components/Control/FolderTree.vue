@@ -4,8 +4,6 @@
     <div v-for="(item, idx) of data" :key="idx"  @contextmenu="onPopMenu($event, $root, parent, idx)" @click="onItemClick($event, idx, item)"
       @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
       <!-- {{item}} -->
-        <span class="el-icon-caret-right caret-hidden" v-if="item.type==='clz' && !item.children"></span>
-        <!-- {{parent}} -->
         <IconFolder :expand="expandTree[idx]" :icon="item.icon?item.icon:'el-icon-goods'" 
           :isSelected="selections[idx]" :data="item" :parent="(item.type==='clz'? parent + '/' + item.name : parent)" :level="level">
         </IconFolder>

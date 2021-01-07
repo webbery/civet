@@ -561,12 +561,12 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(release);
   EXPORT_JS_FUNCTION_PARAM(generateFilesID);
   EXPORT_JS_FUNCTION_PARAM(addFiles);
-  EXPORT_JS_FUNCTION_PARAM(setTags);            // 否决的
+  EXPORT_JS_FUNCTION_PARAM(setTags);            // depreciate
   EXPORT_JS_FUNCTION_PARAM(addClasses);
   EXPORT_JS_FUNCTION_PARAM(updateFile);
-  EXPORT_JS_FUNCTION_PARAM(updateFileKeywords); // 否决的
-  EXPORT_JS_FUNCTION_PARAM(updateFileTags);     // 否决的
-  EXPORT_JS_FUNCTION_PARAM(updateFileClass);    // 否决的
+  EXPORT_JS_FUNCTION_PARAM(updateFileKeywords); // depreciate
+  EXPORT_JS_FUNCTION_PARAM(updateFileTags);     // depreciate
+  EXPORT_JS_FUNCTION_PARAM(updateFileClass);    // depreciate
   EXPORT_JS_FUNCTION_PARAM(updateClassName);
   EXPORT_JS_FUNCTION_PARAM(getFilesInfo);
   EXPORT_JS_FUNCTION_PARAM(getFilesSnap);

@@ -6,10 +6,12 @@ import Vue from 'vue'
 const state = {
   query: {},
   cache: {},
-  classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
+  classes: [],
+  // classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
   classesName: [],
   viewItems: [],
   tags: {},
+  allCount: 0,
   untags: 0,
   unclasses: 0
 }
@@ -35,15 +37,16 @@ const getters = {
   classesName: state => { return state.classesName },
   untags: state => { return state.untags },
   unclasses: state => { return state.unclasses },
-  tags: state => { return state.tags }
+  tags: state => { return state.tags },
+  allCount: state => { return state.allCount }
 }
 
 const remote = {
   async recieveCounts() {
     const uncalsses = await Service.getServiceInstance().get(Service.GET_UNCATEGORY_IMAGES)
     const untags = await Service.getServiceInstance().get(Service.GET_UNTAG_IMAGES)
-    console.info('untag is', untags)
-    return {uncalsses: uncalsses, untags: untags}
+    console.info('untag is', untags, 'unclasses:', uncalsses)
+    return {unclasses: uncalsses, untags: untags}
   },
   async recieveTags() {
     return Service.getServiceInstance().get(Service.GET_ALL_TAGS)
@@ -93,18 +96,15 @@ const mutations = {
       state.classesName.push({name: front.name, id: front.id})
     }
     // count
-    const untags = Kernel.getUnTagFiles()
-    console.info('untags:', untags)
-    state.untags = untags.length
-    const unclasses = Kernel.getUnClassifyFiles()
-    console.info('unclassify:', unclasses)
-    state.unclasses = unclasses.length
+    state.unclasses = data['unclasses'].length
+    state.untags = data['untags'].length
+    state.allCount = snaps.length
     // tags
     const tags = Kernel.getAllTags()
     console.info('tags', tags)
     state.tags = tags
   },
-  addFiles(state, files) {
+  async addFiles(state, files) {
     let idx = 0
     for (let file of files) {
       if (state.cache.hasOwnProperty(file.id)) continue
@@ -115,15 +115,17 @@ const mutations = {
       Vue.set(state.viewItems, pos, state.cache[file.id])
     }
     // count
-    const untags = Kernel.getUnTagFiles()
-    state.untags = untags.length
-    const unclasses = Kernel.getUnClassifyFiles()
+    const {unclasses, untags} = await remote.recieveCounts()
     state.unclasses = unclasses.length
+    state.untags = untags.length
   },
-  query(state, query) {
+  async query(state, result) {
     //   console.info('++++++')QUERY_FILES
-    state.query = query
-    Service.getServiceInstance().get(Service.QUERY_FILES, state.query)
+    state.query = result
+    state.viewItems.splice(0, state.viewItems.length)
+    for (let idx = 0; idx < state.query.length; ++idx) {
+      Vue.set(state.viewItems, idx, state.cache[result[idx].id])
+    }
   },
   async addTag(state, mutation) {
     const {fileID, tag} = mutation
@@ -142,7 +144,16 @@ const mutations = {
     state.tags = await remote.recieveTags()
   },
   addClass(state, mutation) {
-    console.info('add class', mutation)
+    let classpath = null
+    let files = []
+    if (Array.isArray(mutation)) {
+      classpath = mutation
+    } else if (typeof mutation === 'object') {
+      classpath = mutation.class
+      files = mutation.id
+    } else {
+      return
+    }
     Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
     // update navigation panel data
     const findClass = function (clsPath, classes, parent) {
@@ -155,10 +166,11 @@ const mutations = {
           }
         }
       }
-      return null
+      return classes
     }
     const addChildClass = function (item, parent) {
-      console.info(item.name)
+      console.info(item.name, 'parent:', parent)
+      parent.push(item)
     }
     const addChildFiles = function (item, parent, state) {
       console.info('add files', item)
@@ -171,33 +183,32 @@ const mutations = {
         Vue.set(parent.children, start + offset, {name: file.filename, id: file.id, type: file.type, icon: 'el-icon-picture'})
       }
     }
-    let classpath = null
-    let files = []
-    if (typeof mutation === 'object') {
-      classpath = mutation.class
-      files = mutation.id
-    } else {
-      classpath = mutation
-    }
+    console.info('----------2---------', classpath, mutation)
     for (let clsPath of classpath) {
       let clazz = findClass(clsPath, state.classes, '')
+      console.info('class:', clazz)
       if (clazz && files.length > 0) {
         addChildFiles(files, clazz, state)
       } else {
-        addChildClass({name: clsPath, type: 'clz', children: files}, state.classes)
+        addChildClass({name: clsPath, type: 'clz', children: files}, clazz)
       }
     }
+    console.info('classes', state.classes)
   },
+  removeClass(state, mutation) {},
   removeFiles(state, query) {},
   update(state, sql) {}
 }
 
 const actions = {
-  init({ commit }, flag) {
-    commit('init', flag)
+  async init({ commit }, flag) {
+    const {unclasses, untags} = await remote.recieveCounts()
+    commit('init', {unclasses, untags})
   },
-  query({commit}, query) {
-    commit('query', query)
+  async query({commit}, query) {
+    const result = await Service.getServiceInstance().get(Service.QUERY_FILES, query)
+    // console.info('query result', result)
+    commit('query', result)
   },
   removeFiles({commit}, files) {
     commit('removeFiles', files)
@@ -210,6 +221,9 @@ const actions = {
   },
   addClass({commit}, mutation) {
     commit('addClass', mutation)
+  },
+  removeClass({commit}, mutation) {
+    commit('removeClass', mutation)
   },
   update({commit}, sql) {
     /*

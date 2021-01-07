@@ -208,7 +208,7 @@ const messageProcessor = {
   },
   'queryFiles': (nsql) => {
     let allFiles = storage.query(nsql)
-    console.info(nsql, 'reply: ', ReplyType.REPLY_FIND_IMAGE_WITH_KEYWORD)
+    console.info(nsql, 'reply: ', allFiles)
     reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
   },
   'addCategory': (mutation) => {
@@ -222,10 +222,12 @@ const messageProcessor = {
   'getUncategoryImages': async () => {
     let uncateimgs = storage.getUnClassifyFiles()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
+    console.info('unclasses', uncateimgs)
   },
   'getUntagImages': () => {
     let untagimgs = storage.getUnTagFiles()
     reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
+    console.info('untag', untagimgs)
   },
   'updateImageCategory': (data) => {
     storage.updateFileClass(data.imageID, data.category)

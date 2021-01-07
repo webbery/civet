@@ -4,13 +4,13 @@
       <el-tab-pane name="resources"><span slot="label"><i class="el-icon-document"></i></span>
         <el-scrollbar style="height:95vh;">
           <table rules="none" cellspacing=0 >
-            <tr @click="handleResourceClick(headOptions[0], 0)" :class="{selected: headOptions[0].isSelected, item: !headOptions[0].isSelected}"><td><i :class="headOptions[0].icon"></i>全部</td><td /></tr>
+            <tr @click="handleResourceClick(headOptions[0], 0)" :class="{selected: headOptions[0].isSelected, item: !headOptions[0].isSelected}"><td><i :class="headOptions[0].icon"></i>全部</td><td>{{allcount}}</td></tr>
             <tr @click="handleResourceClick(headOptions[1], 1)" :class="{selected: headOptions[1].isSelected, item: !headOptions[1].isSelected}"><td><i :class="headOptions[1].icon"></i>未分类</td><td>{{unclasses}}</td></tr>
             <tr @click="handleResourceClick(headOptions[2], 2)" :class="{selected: headOptions[2].isSelected, item: !headOptions[2].isSelected}"><td><i :class="headOptions[2].icon"></i>未标签</td><td>{{untags}}</td></tr>
             <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
           </table>
           <TreePanel :isActive="true">
-            <FolderTree :data="category" parent=""></FolderTree>
+            <FolderTree :data="category"></FolderTree>
           </TreePanel>
         </el-scrollbar>
       </el-tab-pane>
@@ -43,6 +43,7 @@ export default {
           label: '全部',
           name: 'all',
           icon: 'el-icon-menu',
+          value: 0,
           isSelected: false
         },
         {
@@ -66,7 +67,6 @@ export default {
           isSelected: false
         }
       ],
-      newFolder: false,
       // category: [{name: 'test.jpg', type: 'jpg', id: 1}, {name: 'test', type: 'dir', id: 1, children: [{name: 'test2.jpg', type: 'jpg', id: 1}]}], // [{label: name, type: dir/jpg, children: []}]
       newCategoryName: ''
     }
@@ -81,7 +81,8 @@ export default {
     // },
     category: state => state.Cache.classes,
     untags: state => state.Cache.untags,
-    unclasses: state => state.Cache.unclasses
+    unclasses: state => state.Cache.unclasses,
+    allcount: state => state.Cache.allCount
   }),
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
@@ -145,10 +146,6 @@ export default {
           this.$router.push({path: '/', query: {cmd: 'display-all'}})
           break
       }
-    },
-    onAddFolder() {
-      // 添加一个分类文件夹
-      this.newFolder = true
     }
   }
 }

@@ -5,14 +5,14 @@
       <Waterfall :line-gap="200" :max-line-gap="700" :scrollReachBottom="onRequestNewData" :watch="imageList">
         <WaterfallSlot v-for="(item, index) in imageList" :width="item.width" :height="item.height" :order="index" :key="item.id">
           <div class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
-            <el-card :body-style="{ padding: '0px' }" >
+            <el-card :body-style="{ padding: '0px'}" shadow="never" style="border: 0px;">
               <Preview :src="getImage(item)" class="preview" 
                 @dblclick.native="onImageDbClick(item)"
                 @keydown.ctrl.67.native="onFileCopyOut(props)"
                 @contextmenu.native="onImageClick($event, $root, item)" @mousedown.native="onImageClick($event, $root, item)" 
               >
               </Preview>
-              <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
+              <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;text-align: center;">
                 <span class="name" >{{item.filename}}</span>
                 <input v-if="enableInput"/>
               </div>
@@ -275,7 +275,7 @@ export default {
   z-index: 9;
 }
 .image {
-  margin: 0 0 0 6px;
+  margin: 0 6px 0 0;
 }
 
 .clearfix:before,
