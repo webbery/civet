@@ -6,6 +6,7 @@ import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
 import storage from '../public/Kernel'
+import { TabPane } from 'element-ui'
 
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
@@ -55,7 +56,7 @@ const timer = (function () {
     }
   }
 })()
-let queue = []
+let queue = {}
 
 const ReplyType = {
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
@@ -130,7 +131,10 @@ function readDir(path) {
 function reply2Renderer(type, value) {
   if (threshodMode === true) {
     // 首先存到队列中，如果定时器关闭，启动定时器
-    queue.push({type: type, data: value})
+    if (!queue[type]) {
+      queue[type] = []
+    }
+    queue[type].push(value)
     // console.info('queue input ', queue.length)
     timer.start(() => {
       // console.info('queue task', queue.length)
@@ -138,15 +142,15 @@ function reply2Renderer(type, value) {
         timer.stop()
         return
       }
-      const range = queue.splice(0, queue.length)
       // console.info(range.length)
-      for (let msg of range) {
+      for (let tp in queue) {
         // console.info('send', msg)
-        ipcRenderer.send('message-from-worker', msg)
+        ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
+        queue[tp] = []
       }
     }, 1000)
   } else {
-    ipcRenderer.send('message-from-worker', {type: type, data: value})
+    ipcRenderer.send('message-from-worker', {type: type, data: [value]})
   }
 }
 
@@ -241,4 +245,22 @@ ipcRenderer.on('message-from-main', (event, arg) => {
   console.info('arg', arg)
   console.info('==================')
   messageProcessor[arg.type](arg.data)
+})
+
+ipcRenderer.on('checking-for-update', (event, arg) => {
+})
+
+ipcRenderer.on('update-available', (event, arg) => {
+})
+
+ipcRenderer.on('update-not-available', (event, arg) => {
+})
+
+ipcRenderer.on('error', (event, arg) => {
+})
+
+ipcRenderer.on('download-progress', (event, arg) => {
+})
+
+ipcRenderer.on('update-downloaded', (event, arg) => {
 })

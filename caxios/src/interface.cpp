@@ -158,7 +158,11 @@ namespace caxios {
     });
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
-      if (readOnly != 0 && access(path.c_str(), 0) == 0) return Napi::Value::From(info.Env(), false);
+      if (readOnly != 0 && access(path.c_str(), 0) == 0) {
+        Napi::Error::New(info.Env(), "db file(" + path + ") not exist")
+          .ThrowAsJavaScriptException();
+        return Napi::Value::From(info.Env(), false);
+      }
       std::string meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
       g_pCaxios = new CAxios(path, readOnly, meta);
       T_LOG("interface", "init success");

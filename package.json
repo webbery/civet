@@ -76,12 +76,19 @@
       "createStartMenuShortcut": true,
       "perMachine": true,
       "unicode": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "webbery",
+        "repo": "civet"
+      }
+    ]
   },
   "dependencies": {
     "civetkern": "0.0.52",
     "electron-log": "^4.2.2",
-    "electron-simple-updater": "^2.0.8",
+    "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
     "exifreader": "^3.9.0",
     "image-hash": "^4.0.1",
@@ -174,7 +181,7 @@
     "style-loader": "^0.21.0",
     "url-loader": "^1.0.1",
     "vue-html-loader": "^1.2.4",
-    "vue-loader": "^15.9.5",
+    "vue-loader": "^15.9.6",
     "vue-style-loader": "^4.1.0",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
