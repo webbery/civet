@@ -17,6 +17,7 @@ let cfg = {
           {name: 'color', value: '主色', type: 'color', db: true},
           {name: 'datetime', value: '创建日期', type: 'date', db: true},
           {name: 'size', value: '大小', type: 'int', db: true},
+          {name: 'type', value: '类型', type: 'str', db: true},
           {name: 'filename', value: '文件名', type: 'str', db: false}
       ]
       }
@@ -42,7 +43,7 @@ describe('civetkern add test', function() {
         {"name":"size","type":"int","value":207879},
         {"name":"datetime","type":"date","value":t},
         {"name":"hash","type":"str","value":"unknow"},
-        {"name":"type","type":"str","value":"unknow"},
+        {"name":"type","type":"str","value":"jpeg"},
         {"name":"width","type":"int","value":650},
         {"name":"height","type":"int","value":650}
       ],
@@ -172,7 +173,7 @@ describe('civetkern read only test', function() {
     let result = instance.getTagsOfFiles({id: [snaps[0].id]})
     expect(result).to.lengthOf(1)
   })
-  it('search files', function() {
+  it('search files by keyword', function() {
     let result = instance.query({keyword: ['标签']})
     // console.info(result)
     expect(result).to.lengthOf(2)
@@ -181,7 +182,20 @@ describe('civetkern read only test', function() {
     //}
     //result = instance.query({size: {$gt: 10240, $lt: 21000}})
     //expect(result).to.lengthOf(1)
-    result = instance.query({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
+  })
+  it('search files by datetime', function() {
+    let result = instance.query({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
+    expect(result).to.lengthOf(1)
+    let day = new Date(new Date().toLocaleDateString())
+    day.setMonth(8, 20)
+    result = instance.query({datetime: {$gt: day}})
+    expect(result).to.lengthOf(1)
+    day.setMonth(10, 20)
+    result = instance.query({datetime: {$gt: day}})
+    expect(result).to.lengthOf(0)
+  })
+  it('search files by file type', function() {
+    let result = instance.query({type: 'jpeg'})
     expect(result).to.lengthOf(1)
   })
   after(function() {

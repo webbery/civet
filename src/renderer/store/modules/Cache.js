@@ -13,7 +13,9 @@ const state = {
   tags: {},
   allCount: 0,
   untags: 0,
-  unclasses: 0
+  unclasses: 0,
+  // router histories count
+  histories: 0
 }
 
 const getters = {
@@ -38,7 +40,8 @@ const getters = {
   untags: state => { return state.untags },
   unclasses: state => { return state.unclasses },
   tags: state => { return state.tags },
-  allCount: state => { return state.allCount }
+  allCount: state => { return state.allCount },
+  histories: state => { return state.histories }
 }
 
 const remote = {
@@ -71,11 +74,7 @@ const mutations = {
     }
     // const len = state.cache.length
     // setting view panel item
-    let idx = 0
-    for (let k in state.cache) {
-      Vue.set(state.viewItems, idx, state.cache[k])
-      idx += 1
-    }
+    mutations.display(state, data)
     // get classes
     const cls = Kernel.getClasses('/')
     if (cls) {
@@ -119,6 +118,14 @@ const mutations = {
     state.unclasses = unclasses.length
     state.untags = untags.length
   },
+  display(state, data) {
+    let idx = 0
+    for (let k in state.cache) {
+      Vue.set(state.viewItems, idx, state.cache[k])
+      idx += 1
+      if (idx > maxCacheSize) break
+    }
+  },
   async query(state, result) {
     //   console.info('++++++')QUERY_FILES
     state.query = result
@@ -126,22 +133,24 @@ const mutations = {
     for (let idx = 0; idx < state.query.length; ++idx) {
       Vue.set(state.viewItems, idx, state.cache[result[idx].id])
     }
+    console.info(state.viewItems, result)
   },
   async addTag(state, mutation) {
     const {fileID, tag} = mutation
     console.info('cache add tag:', fileID, tag)
-    const files = state.cache[fileID]
-    if (files.length === 0) {
+    const file = state.cache[fileID]
+    if (!file) {
       Kernel.writeLog('cache add tag 0, fileID=' + fileID)
       return
     }
-    files[0].tag.push(tag)
-    Service.getServiceInstance().send(Service.SET_TAG, {id: [fileID], tag: files[0].tag})
-    const {unclasses, untags} = await remote.recieveCounts()
-    state.untags = untags.length
-    state.uncalsses = unclasses.length
+    file.tag.push(tag)
+    Service.getServiceInstance().send(Service.SET_TAG, {id: [fileID], tag: file.tag})
+    // const {unclasses, untags} = await remote.recieveCounts()
+    if (file.tag.length === 1) {
+      state.untags += 1
+    }
     // update tags
-    state.tags = await remote.recieveTags()
+    // state.tags = await remote.recieveTags()
   },
   addClass(state, mutation) {
     let classpath = null
@@ -197,7 +206,15 @@ const mutations = {
   },
   removeClass(state, mutation) {},
   removeFiles(state, query) {},
-  update(state, sql) {}
+  removeTags(state, mutation) {
+    Service.getServiceInstance().send(Service.REMOVE_TAG, {tag: [mutation.tag], filesID: [mutation.id]})
+    let file = state.cache[mutation.id]
+    file.tag.splice(file.tag.indexOf(mutation.tag), 1)
+  },
+  update(state, sql) {},
+  updateHistoryLength(state, value) {
+    state.histories = value
+  }
 }
 
 const actions = {
@@ -207,8 +224,11 @@ const actions = {
   },
   async query({commit}, query) {
     const result = await Service.getServiceInstance().get(Service.QUERY_FILES, query)
-    // console.info('query result', result)
+    console.info('query: ', query, 'result: ', result)
     commit('query', result)
+  },
+  display({commit}, data) {
+    commit('display', data)
   },
   removeFiles({commit}, files) {
     commit('removeFiles', files)
@@ -225,6 +245,11 @@ const actions = {
   removeClass({commit}, mutation) {
     commit('removeClass', mutation)
   },
+  removeTags({commit}, mutation) {
+    commit('removeTags', mutation)
+  },
+  changeFileName({commit}, mutation) {},
+  changeClassName({commit}, mutation) {},
   update({commit}, sql) {
     /*
      *  sql like: {query:'', $set:{}}, {query:'', $unset:{}}
@@ -241,6 +266,9 @@ const actions = {
     /*
      *  sql like: {query:'', value: {}}
      */
+  },
+  updateHistoryLength({commit}, value) {
+    commit('updateHistoryLength', value)
   }
 }
 

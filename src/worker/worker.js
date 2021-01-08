@@ -6,7 +6,6 @@ import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
 import storage from '../public/Kernel'
-import { TabPane } from 'element-ui'
 
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
@@ -137,20 +136,23 @@ function reply2Renderer(type, value) {
     queue[type].push(value)
     // console.info('queue input ', queue.length)
     timer.start(() => {
-      // console.info('queue task', queue.length)
-      if (queue.length === 0) {
+      console.info('queue task', queue.length, Object.keys(queue))
+      if (Object.keys(queue).length === 0) {
         timer.stop()
         return
       }
-      // console.info(range.length)
+      console.info(queue.length)
       for (let tp in queue) {
-        // console.info('send', msg)
-        ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
-        queue[tp] = []
+        if (queue[tp].length === 1) {
+          ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp][0]})
+        } else {
+          ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
+        }
       }
+      queue = {}
     }, 1000)
   } else {
-    ipcRenderer.send('message-from-worker', {type: type, data: [value]})
+    ipcRenderer.send('message-from-worker', {type: type, data: value})
   }
 }
 
@@ -195,7 +197,8 @@ const messageProcessor = {
     storage.removeFiles(filesID)
   },
   'removeTag': (data) => {
-    storage.removeTags(data.tagName, data.imageID)
+    console.info(data)
+    storage.removeTags(data.filesID, data.tag)
   },
   'getAllTags': (data) => {
     let allTags = storage.getAllTags()

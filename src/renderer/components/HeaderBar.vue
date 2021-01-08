@@ -13,7 +13,7 @@
         <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
         </el-col>
     <el-col :span="5" class="custom">
-      <el-page-header @back="goBack" :content="viewDesc"></el-page-header>
+      <el-page-header @back="goBack" :content="viewDesc" :style="[disabled?style:'']"></el-page-header>
     </el-col>
     <el-col :span="9" class="custom">
       <component :is="comName"></component>
@@ -54,7 +54,12 @@ export default {
       scaleValue: 20,
       keyword: '',
       resource: '资源库',
-      viewDesc: '全部'
+      viewDesc: '全部',
+      disabled: true,
+      style: {
+        'pointer-events': 'none',
+        'color': 'gray'
+      }
     }
   },
   components: {
@@ -101,6 +106,7 @@ export default {
       switch (query.cmd) {
         case 'display-tag':
         case 'display-all':
+        case 'display-keyword':
           this.comName = ViewFilter
           break
         case 'display':
@@ -109,29 +115,27 @@ export default {
         default:
           break
       }
+      this.$nextTick(() => {
+        if (this.$store.state.Cache.histories === 0) {
+          console.info('disable back')
+          this.disabled = true
+        } else {
+          this.disabled = false
+        }
+      })
     },
     goBack() {
-      if (window.history.length === 0) {
+      if (this.$store.state.Cache.histories === 0) {
         console.info('no more page')
         return
       }
+      this.$store.dispatch('updateHistoryLength', this.$store.state.Cache.histories - 1)
       this.$router.go(-1)
     },
     async onSearch() {
       const keywords = this.keyword.split(' ')
       console.info('keywords', keywords)
       this.$store.dispatch('query', {keyword: keywords})
-      // const imagesID = await this.$ipcRenderer.get(Service.FIND_IMAGES_BY_KEYWORD, keywords)
-      // console.info('imagesID', imagesID)
-      // const images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO, imagesID)
-      // console.info('images', images)
-      // let updateImages = []
-      // for (let idx in images) {
-      //   const item = images[idx]
-      //   updateImages.push({id: imagesID[idx], label: item.label, path: item.path, thumbnail: item.thumbnail})
-      // }
-      // this.$store.dispatch('clearImages')
-      // this.$store.dispatch('updateImageList', updateImages)
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})
     }
   }
@@ -163,7 +167,11 @@ export default {
 }
 .el-page-header__left {
   display:inline;
+  cursor:default;
   padding-right: 5px;
+}
+.el-page-header__left:hover{
+  color: rgb(84, 155, 236);
 }
 .el-page-header__title {
   display:inline;

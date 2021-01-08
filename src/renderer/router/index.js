@@ -1,8 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import store from '../store'
 
 const originalPush = Router.prototype.push
 Router.prototype.push = function push(location) {
+  let histories = store.state.Cache.histories
+  console.info('ROUTER push', histories)
+  store.dispatch('updateHistoryLength', histories + 1)
   return originalPush.call(this, location).catch(err => err)
 }
 

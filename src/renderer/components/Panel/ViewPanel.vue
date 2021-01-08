@@ -20,20 +20,6 @@
           </div>
         </WaterfallSlot>
       </Waterfall>
-        <!-- <div v-for="(image,idx) in imageList" :key="idx" class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
-          <el-card :body-style="{ padding: '0px' }" style="position: relative">
-          <Preview :src="getImage(image)" :interact="false" class="preview" 
-            @dblclick.native="onImageDbClick(image)"
-            @keydown.ctrl.67.native="onFileCopyOut(image)"
-            @contextmenu.native="onImageClick($event, $root, image)" @mousedown.native="onImageClick($event, $root, image)" 
-          >
-          </Preview>
-          <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;">
-            <span class="name" >{{image.filename}}</span>
-            <input v-if="enableInput"/>
-          </div>
-        </el-card>
-        </div> -->
       </el-scrollbar>
     </div>
 </template>
@@ -108,9 +94,7 @@ export default {
       }
       switch (to.path) {
         case '/':
-          // let images = await this.$ipcRenderer.get(Service.GET_IMAGES_INFO)
-          // console.info('all images:', images)
-          // this.$store.dispatch('updateImageList', images)
+          this.$store.dispatch('display')
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break
         case '/uncategory':
@@ -119,6 +103,9 @@ export default {
           switch (to.query.type) {
             case 'tag':
               bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-tag'})
+              break
+            case 'keyword':
+              bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-keyword'})
               break
             default:
               break

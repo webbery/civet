@@ -64,7 +64,6 @@
 
 <script>
 import bus from '../utils/Bus'
-import Service from '../utils/Service'
 import IconTag from '@/components/IconTag'
 import JString from '@/../public/String'
 import JImage from '../JImage'
@@ -156,8 +155,8 @@ export default {
     },
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
-      this.$ipcRenderer.send(Service.REMOVE_TAG, {tagName: tag, imageID: this.picture.id})
-      this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
+      // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
+      this.$store.dispatch('removeTags', {id: this.picture.id, tag: tag})
     },
     showInput() {
       if (!this.picture.id) return

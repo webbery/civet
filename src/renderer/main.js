@@ -16,12 +16,17 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(VueLazyload, {
-  lazyComponent: true
+  lazyComponent: true,
+  dispatchEvent: true
 })
 
 Vue.prototype.$ipcRenderer = Service.getServiceInstance()
 
 Vue.prototype.$kernel = Kernel
+
+router.afterEach((to, from) => {
+  console.info('afterEach, from', from.fullPath, ', to', to.fullPath)
+})
 
 /* eslint-disable no-new */
 new Vue({
