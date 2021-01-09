@@ -654,7 +654,7 @@ namespace caxios {
   {
     std::vector<FileID> outFilesID;
     std::vector<std::string> vKeywords;
-    auto& conditions = values.condition();
+    std::vector<std::string> conditions = values.condition();
     for (auto& cond: conditions)
     {
       vKeywords.emplace_back(cond);

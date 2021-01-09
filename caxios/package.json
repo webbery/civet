@@ -2,14 +2,14 @@
     "name": "civetkern",
     "version": "0.1.0",
     "description": "",
-  "scripts": {
-    "install": "prebuild-install || node-gyp rebuild",
-    "prebuild": "prebuild --all --strip",
-    "rebuild": "node-gyp rebuild --verbose",
-    "build": "node-gyp configure && node-gyp build",
-    "test": "node_modules/.bin/mocha test/function.test.js",
-    "test:query": "node_modules/.bin/mocha test/query.test.js"
-  },
+    "scripts": {
+        "install": "prebuild-install || node-gyp rebuild",
+        "prebuild": "prebuild --all --strip",
+        "rebuild": "node-gyp rebuild --verbose",
+        "build": "node-gyp configure && node-gyp build",
+        "test": "node_modules/.bin/mocha test/function.test.js",
+        "test:query": "node_modules/.bin/mocha test/query.test.js"
+    },
     "main": "index.js",
     "keywords": [
         "nodejs",

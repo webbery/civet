@@ -133,6 +133,7 @@ describe('civetkern add test', function() {
 describe('civetkern read only test', function() {
   before(function() {
     assert(instance.init(cfg, 1) === true)
+    console.info('====')
   })
   let snaps = null
   it('get file snaps success', function() {

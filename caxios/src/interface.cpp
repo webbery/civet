@@ -158,7 +158,13 @@ namespace caxios {
     });
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");
-      if (readOnly != 0 && access(path.c_str(), 0) == 0) {
+      if (readOnly != 0 &&
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+        access(path.c_str(), 0) != 0
+#elif defined(WIN32)
+        _access(path.c_str(), 0) == ENOENT
+#endif
+      ) {
         Napi::Error::New(info.Env(), "db file(" + path + ") not exist")
           .ThrowAsJavaScriptException();
         return Napi::Value::From(info.Env(), false);
