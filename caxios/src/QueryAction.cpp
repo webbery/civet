@@ -60,6 +60,9 @@ namespace caxios {
     else if (type == QT_String && ct == CT_IN) {
       return new QueryAction<QT_String, CT_IN>(k, conds);
     }
+    else if (type == QT_String && ct == CT_EQUAL) {
+      return new QueryAction<QT_String, CT_EQUAL>(k, conds);
+    }
     T_LOG("query", "create action fail, type: %d, compare: %d", type, ct);
     //g_mActionFactory[QT_DateTime][CT_GREAT_THAN](k, conds);
     return nullptr;

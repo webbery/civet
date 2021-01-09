@@ -5,7 +5,7 @@
 #include <map>
 #include <Table.h>
 #include "log.h"
-// #include "QueryAction.h"
+#include "QueryAction.h"
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
@@ -16,6 +16,11 @@
 #define TB_FileID     "fileid"
 
 namespace caxios {
+  //enum CompareType;
+  //enum QueryType;
+  //template<QueryType Q, CompareType C> struct CQuery;
+  //template<> struct CQuery<QT_String, CT_IN>;
+
   class DBManager {
   public:
     DBManager(const std::string& dbdir, int flag, const std::string& meta = "");
@@ -44,7 +49,7 @@ namespace caxios {
 
   public: // will be implimented in ITable
     template<typename F>
-    std::vector<FileID> QueryImpl(const std::string& keyword, F& compare)
+    std::vector<FileID> QueryImpl(const std::string& keyword, const F& compare)
     {
       std::vector<FileID> vOut;
       auto itr = m_mTables.find(keyword);
@@ -54,7 +59,7 @@ namespace caxios {
         auto end = Iterator();
         for (; cursor != end; ++cursor) {
           auto item = *cursor;
-          typename F::type val = *(typename F::type*)(item.first.mv_data);
+          typename F::type val = CQueryType<typename F::type>::policy(item.first);
           if (compare(val)) {
             FileID* start = (FileID*)(item.second.mv_data);
             vOut.insert(vOut.end(), start, start + item.second.mv_size / sizeof(FileID));
@@ -62,7 +67,7 @@ namespace caxios {
         }
       }
       else {
-        if (keyword == TB_Keyword) return this->Query(m_mKeywordMap[keyword], compare.condition());
+        if (keyword == TB_Keyword) return this->_Query(m_mKeywordMap[keyword], compare);
         MDB_dbi dbi = m_mDBs[m_mKeywordMap[keyword]];
         //if (subset.empty()) {
         //  
@@ -105,7 +110,6 @@ namespace caxios {
     std::vector<FileID> GetFilesOfClass(uint32_t clsID);
     std::vector<FileID> mapExistFiles(const std::vector<FileID>&);
     void ParseMeta(const std::string& meta);
-    void UpdateCount1(CountType ct, int cnt);
     void SetSnapStep(FileID fileID, int bit, bool set=true);
     char GetSnapStep(FileID fileID, nlohmann::json&);
     Snap GetFileSnap(FileID);
@@ -133,8 +137,12 @@ namespace caxios {
     std::vector<std::vector<FileID>> GetFilesIDByTagIndex(const WordIndex* const wordsIndx, size_t cnt);
 
   private:
-    std::vector<FileID> Query(const std::string& tableName, const std::vector<std::string>& values);
-    std::vector<FileID> Query(const std::string& tableName, const std::vector<time_t>& values);
+    std::vector<FileID> _Query(const std::string& tableName, const CQuery<QT_String, CT_IN>& values);
+    template<typename FAIL>
+    std::vector<FileID> _Query(const std::string& tableName, FAIL& values) {
+      std::vector<FileID> v;
+      return std::move(v);
+    }
 
   private:
     DBFlag _flag = ReadWrite;

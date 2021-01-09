@@ -87,10 +87,16 @@ namespace caxios {
 
   time_t str2time(const std::string& input)
   {
+    size_t pos = input.find_last_of('.');
+    int milliSec = 0;
+    if (pos != std::string::npos) {
+      std::string mill = input.substr(pos + 1, 3);
+      milliSec = atoi(mill.c_str());
+    }
     std::istringstream iss(input);
     std::tm stm = {};
     iss >> std::get_time(&stm, "%Y-%m-%dT%H:%M:%SZ");
-    return std::mktime(&stm);
+    return std::mktime(&stm)*1000 + milliSec;
   }
 
   std::string serialize(const std::vector<WordIndex>& classes)

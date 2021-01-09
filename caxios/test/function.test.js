@@ -35,6 +35,7 @@ describe('civetkern add test', function() {
 	  fileids = instance.generateFilesID(genCount)
     expect(fileids).to.have.lengthOf(genCount)
     let t = new Date("Sun Sep 20 2020 12:58:14 GMT+0800 (中国标准时间)")
+    console.info(t.getTime())
     willBeAdd.push({
       'id': fileids[0],
       'meta': [
@@ -120,7 +121,9 @@ describe('civetkern add test', function() {
     //expect(result).to.equal(true)
   //})
   it('update class name', function() {
-    instance.updateClassName('type1', '新分类')
+    // 如果新类名存在，则返回失败; 因为该函数只支持改名, 不支持将旧类别下的所有文件移动到新类别下
+    const result = instance.updateClassName('type1', '新分类')
+    assert(result === true)
   })
   after(function() {
     instance.release()
@@ -187,10 +190,11 @@ describe('civetkern read only test', function() {
     let result = instance.query({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
     expect(result).to.lengthOf(1)
     let day = new Date(new Date().toLocaleDateString())
-    day.setMonth(8, 20)
+    day.setFullYear(2020, 8, 20)
     result = instance.query({datetime: {$gt: day}})
     expect(result).to.lengthOf(1)
     day.setMonth(10, 20)
+    console.info(day.getTime())
     result = instance.query({datetime: {$gt: day}})
     expect(result).to.lengthOf(0)
   })
@@ -219,9 +223,9 @@ describe('civetkern clean test', function() {
   })
   it('remove classes', function() {
     let rootClasses = instance.getClasses()
-    expect(rootClasses).to.lengthOf(4)
     // console.info(rootClasses)
-    instance.removeClasses(['class1'])
+    expect(rootClasses).to.lengthOf(4)
+    instance.removeClasses(['新分类'])
     // console.info('----------------')
     rootClasses = instance.getClasses()
     // console.info(rootClasses)

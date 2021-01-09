@@ -164,6 +164,7 @@ namespace caxios {
         return Napi::Value::From(info.Env(), false);
       }
       std::string meta = Stringify(info.Env(), resource.Get("meta").As<Napi::Object>());
+      T_LOG("init", "schema: %s", meta.c_str());
       g_pCaxios = new CAxios(path, readOnly, meta);
       T_LOG("interface", "init success");
     }

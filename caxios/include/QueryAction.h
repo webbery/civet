@@ -1,7 +1,6 @@
 #ifndef _QUERY_ACTION_H_
 #define _QUERY_ACTION_H_
 #include "QueryRule.h"
-#include "db_manager.h"
 #include <map>
 #include "datum_type.h"
 #include <functional>
@@ -9,8 +8,11 @@
 #include "lmdb/lmdb.h"
 #include "util/util.h"
 #include <vector>
+//#include "db_manager.h"
+#include <iostream>
 
 namespace caxios {
+  class DBManager;
 
   enum CompareType {
     CT_EQUAL = 0,
@@ -58,11 +60,11 @@ namespace caxios {
     {
       //T_LOG("query", "GreaterThan condition: %lld", _point);
     }
-    bool operator()(time_t val) {
+    bool operator()(time_t val) const {
       //auto pt = std::chrono::system_clock::from_time_t(val);
       //auto sec = std::chrono::duration_cast<std::chrono::duration<int>>(pt - _point).count();
-      T_LOG("query", "input %lld - point: %lld is %d", val, _point, (bool)(val - _point)>0);
-      return (val - _point) > 0;
+      T_LOG("query", "input %lld - point: %lld is %d", val, _point, val > _point);
+      return val > _point;
     }
     std::vector<time_t> condition() {
       std::vector<time_t> vt;
@@ -80,10 +82,10 @@ namespace caxios {
     {
       _range.emplace_back(point);
     }
-    bool operator()(time_t val) {
+    bool operator()(time_t val) const {
       return true;
     }
-    std::vector<time_t> condition() { return _range; }
+    //std::vector<time_t> condition() { return _range; }
 
   private:
     std::vector<time_t> _range;
@@ -94,28 +96,43 @@ namespace caxios {
     In(const std::vector<std::string>& strs)
     :_strs(strs){}
 
-    bool operator()(const std::string& val) {
+    bool operator()(const std::string& val) const {
       return true;
     }
 
     std::vector<std::string> condition() { return _strs; }
+    std::vector<std::string> condition() const { return _strs; }
   private:
     std::vector<std::string> _strs;
   };
 
+  class Equal {
+  public:
+    Equal(const std::string& str)
+    :_str(str){}
+
+    bool operator()(const std::string& val) const {
+      return val == _str;
+    }
+
+    //std::vector<std::string> condition() { return _str; }
+  private:
+    std::string _str;
+  };
+
   enum class Priority : int {};
-  template<QueryType QT, CompareType CT> struct Query;
-  template<> struct Query<QT_String, CT_IN> : public In {
+  template<QueryType QT, CompareType CT> struct CQuery;
+  template<> struct CQuery<QT_String, CT_IN> : public In {
     typedef std::string type;
-    Query(const std::vector<QueryCondition>& conditions)
+    CQuery(const std::vector<QueryCondition>& conditions)
     :In(Cast<std::string>(conditions)){}
   private:
     Priority _p;
   };
 
-  template<> struct Query<QT_DateTime, CT_GREAT_THAN> : public GreaterThan {
+  template<> struct CQuery<QT_DateTime, CT_GREAT_THAN> : public GreaterThan {
     typedef time_t type;
-    Query(const std::vector<QueryCondition>& conditions)
+    CQuery(const std::vector<QueryCondition>& conditions)
       :GreaterThan(conditions[0].As<time_t>())
     {
     }
@@ -123,9 +140,9 @@ namespace caxios {
     Priority _p;
   };
 
-  template<> struct Query<QT_DateTime, CT_GREAT_EQUAL> : public GreaterEqual {
+  template<> struct CQuery<QT_DateTime, CT_GREAT_EQUAL> : public GreaterEqual {
     typedef time_t type;
-    Query(const std::vector<QueryCondition>& conditions)
+    CQuery(const std::vector<QueryCondition>& conditions)
       :GreaterEqual(conditions[0].As<time_t>())
     {
     }
@@ -133,12 +150,29 @@ namespace caxios {
     Priority _p;
   };
 
+  template<> struct CQuery<QT_String, CT_EQUAL> : public Equal {
+    typedef std::string type;
+    CQuery(const std::vector<QueryCondition>& conditions)
+      :Equal(conditions[0].As<std::string>()) {}
+  };
+
+  template<typename Q> struct CQueryType {
+    static Q policy(MDB_val& val) {
+      return *(Q*)val.mv_data;
+    }
+  };
+  template<> struct CQueryType<std::string> {
+    static std::string policy(MDB_val& val) {
+      return std::string((char*)val.mv_data, val.mv_size);
+    }
+  };
+
   class IAction {
   public:
     virtual ~IAction() {}
     //virtual void push(const std::string& kw) = 0;
     //virtual void push(const QueryCondition& cond) = 0;
-    virtual std::vector<FileID> query(caxios::DBManager*) = 0;
+    virtual std::vector<FileID> query(DBManager*) = 0;
   };
 
   template<QueryType QT, CompareType CT>
@@ -149,7 +183,7 @@ namespace caxios {
     , m_query(vCond)
     { }
 
-    std::vector<FileID> query(caxios::DBManager* pDB) {
+    std::vector<FileID> query(DBManager* pDB) {
       return pDB->QueryImpl(m_sKeyword, m_query/*, m_vQuerySet*/);
     }
 
@@ -157,7 +191,7 @@ namespace caxios {
 
   private:
     std::string m_sKeyword;
-    Query< QT, CT > m_query;
+    CQuery< QT, CT > m_query;
     std::vector<FileID> m_vQuerySet;
   };
 

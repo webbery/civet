@@ -566,9 +566,17 @@ namespace caxios {
 
   bool DBManager::UpdateClassName(const std::string& oldName, const std::string& newName)
   {
-    WRITE_BEGIN();
+    std::vector<std::string> vWords = split(newName, '/');
     std::vector<std::string> names({ oldName, newName });
     auto mIndexes = GetWordsIndex(names);
+    std::vector<WordIndex> vIndexes;
+    vIndexes.resize(vWords.size());
+    std::transform(vWords.begin(), vWords.end(), vIndexes.begin(), [&mIndexes](const std::string& word)->WordIndex {
+      return mIndexes[word];
+    });
+    std::string sNew = serialize(vIndexes);
+    if (IsClassExist(sNew)) return false;
+    WRITE_BEGIN();
     auto oldPath = EncodePath2Hash(oldName);
     auto newPath = EncodePath2Hash(newName);
     void* pData = nullptr;
@@ -642,17 +650,12 @@ namespace caxios {
     return false;
   }
 
-  std::vector<caxios::FileID> DBManager::Query(const std::string& tableName, const std::vector<time_t>& values)
-  {
-    std::vector<FileID> outFilesID;
-    return outFilesID;
-  }
-
-  std::vector<FileID> DBManager::Query(const std::string& tableName, const std::vector<std::string>& values)
+  std::vector<FileID> DBManager::_Query(const std::string& tableName, const CQuery<QT_String, CT_IN>& values)
   {
     std::vector<FileID> outFilesID;
     std::vector<std::string> vKeywords;
-    for (auto& cond: values)
+    auto& conditions = values.condition();
+    for (auto& cond: conditions)
     {
       vKeywords.emplace_back(cond);
     }
@@ -1212,17 +1215,6 @@ namespace caxios {
       }
     }
     T_LOG("construct", "schema: %s", meta.c_str());
-  }
-
-  void DBManager::UpdateCount1(CountType ct, int value)
-  {
-    void* pData = nullptr;
-    uint32_t len = 0;
-    uint32_t cnt = 0;
-    m_pDatabase->Get(m_mDBs[TABLE_COUNT], CT_UNCALSSIFY, pData, len);
-    if (pData) cnt = *(uint32_t*)pData;
-    cnt += value;
-    m_pDatabase->Put(m_mDBs[TABLE_COUNT], CT_UNCALSSIFY, (void*)&cnt, sizeof(uint32_t));
   }
 
   void DBManager::SetSnapStep(FileID fileID, int offset, bool bSet)

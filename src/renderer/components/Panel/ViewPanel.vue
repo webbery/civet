@@ -12,7 +12,7 @@
                 @contextmenu.native="onImageClick($event, $root, item)" @mousedown.native="onImageClick($event, $root, item)" 
               >
               </Preview>
-              <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;text-align: center;">
+              <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;text-align: center;" @dblclick.native="onClickName(index)">
                 <span class="name" >{{item.filename}}</span>
                 <input v-if="enableInput"/>
               </div>
@@ -164,6 +164,10 @@ export default {
         console.info('debug:', imageInfo)
         this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.filename, cmd: 'display'}})
       }
+    },
+    onClickName: function (index) {
+      console.info(index)
+      enableInput = true
     },
     onSelectMenu: function (indexList) {
       console.info(indexList)
