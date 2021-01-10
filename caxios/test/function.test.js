@@ -164,7 +164,7 @@ describe('civetkern read only test', function() {
   })
   it('get classes', function() {
     const rootClasses = instance.getClasses()
-    // console.info(rootClasses)
+    console.info(rootClasses)
     expect(rootClasses).to.lengthOf(4)
     expect(rootClasses[0]).to.have.property('children')
     expect(rootClasses[1]).to.not.have.property('children')

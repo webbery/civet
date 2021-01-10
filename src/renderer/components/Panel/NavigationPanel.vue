@@ -67,7 +67,6 @@ export default {
           isSelected: false
         }
       ],
-      // category: [{name: 'test.jpg', type: 'jpg', id: 1}, {name: 'test', type: 'dir', id: 1, children: [{name: 'test2.jpg', type: 'jpg', id: 1}]}], // [{label: name, type: dir/jpg, children: []}]
       newCategoryName: ''
     }
   },
@@ -87,7 +86,6 @@ export default {
   mounted() {
     bus.on(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, this.updateLoadingDirectories)
     bus.on(bus.EVENT_UPDATE_UNCATEGORY_IMAGES, this.updateUncategoryImages)
-    this.init()
   },
   methods: {
     updateLoadingDirectories(dir) {
@@ -105,14 +103,6 @@ export default {
     //   const unclasses = this.$kernel.getUnClassifyFiles()
     //   this.headOptions[1].value = unclasses.length
     // },
-    init() {
-      const snaps = this.$kernel.getFilesSnap()
-      let category = []
-      for (let item of snaps) {
-        category.push({label: item.display, id: item.id, step: item.step})
-      }
-      this.category = category
-    },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)
       return (

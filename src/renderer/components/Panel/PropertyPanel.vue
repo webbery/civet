@@ -18,7 +18,7 @@
         v-for="tag in dynamicTags"
         size="mini" closable
         :disable-transitions="false"
-        @close="handleClose(tag)"
+        @close="onDeleteTag(tag)"
       >{{tag}}</el-tag>
       <el-input
         class="input-new-tag"
@@ -34,14 +34,14 @@
     <fieldset>
       <legend class="title">分类</legend>
       <div>
-        <el-tag v-for="clz of dynamicClass" :key="clz" size="mini" closable>{{clz.name||clz}}</el-tag>
+        <el-tag v-for="clz of dynamicClass" :key="clz" size="mini" @close="onDeleteClass(clz)" closable>{{clz.name||clz}}</el-tag>
         <el-popover
           placement="left"
           width="160"
         >
           <div>
             <div v-for="(clazz,idx) in candidateClasses" :key="idx">
-              <el-checkbox v-model="checkValue[idx]" :label="clazz.name" border size="mini" @change="onCategoryChange"></el-checkbox>
+              <el-checkbox v-model="checkValue[idx]" :label="clazz" border size="mini" @change="onCategoryChange"></el-checkbox>
             </div>
           </div>
           <el-button slot="reference" size="mini">+</el-button>
@@ -151,12 +151,30 @@ export default {
         this.imagepath = file.path
         this.dynamicTags = file.tag ? file.tag.slice(0) : []
         this.dynamicClass = file.category
+        const isClassExist = function (clsName, dynamicClass) {
+          for (let name of dynamicClass) {
+            if (name === clsName) return true
+          }
+          return false
+        }
+        for (let idx = 0; idx < this.candidateClasses.length; ++idx) {
+          const candidate = this.candidateClasses[idx]
+          if (isClassExist(candidate.substr(1), this.dynamicClass)) {
+            this.checkValue.push(true)
+          } else {
+            this.checkValue.push(false)
+          }
+        }
+        console.info('check state:', this.checkValue)
       }
     },
-    handleClose(tag) {
+    onDeleteTag(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
       // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
       this.$store.dispatch('removeTags', {id: this.picture.id, tag: tag})
+    },
+    onDeleteClass(clazz) {
+      this.dynamicClass.splice(this.dynamicClass.indexOf(clazz), 1)
     },
     showInput() {
       if (!this.picture.id) return
@@ -191,31 +209,31 @@ export default {
       let selectItem = []
       for (let idx in this.checkValue) {
         if (this.checkValue[idx] === true) {
-          const classid = this.candidateClasses[idx].id
-          selectItem.push([classid, this.candidateClasses[idx].name])
+          selectItem.push(this.candidateClasses[idx].name)
         }
       }
-      const isClassExist = function (cid, classes) {
-        for (let idx = 0; idx < classes.length;) {
-          if (cid === classes[idx][0]) {
-            classes.splice(idx, 1)
-            return true
-          }
-          idx += 1
-        }
-        return false
-      }
+      console.info('class candidate', this.candidateClasses)
+      // const isClassExist = function (clsName, classes) {
+      //   for (let idx = 0; idx < classes.length;) {
+      //     if (clsName === classes[idx]) {
+      //       classes.splice(idx, 1)
+      //       return true
+      //     }
+      //     idx += 1
+      //   }
+      //   return false
+      // }
       this.$store.dispatch('addClass', {id: [this.picture.id], class: selectItem})
       // remove not exist
-      for (let idx = this.dynamicClass.length - 1; idx >= 0; --idx) {
-        if (!isClassExist(this.dynamicClass[idx].id, selectItem)) {
-          this.dynamicClass.splice(idx, 1)
-        }
-      }
+      // for (let idx = this.dynamicClass.length - 1; idx >= 0; --idx) {
+      //   if (!isClassExist(this.dynamicClass[idx], selectItem)) {
+      //     this.dynamicClass.splice(idx, 1)
+      //   }
+      // }
       // add not exist
-      for (let item of selectItem) {
-        this.dynamicClass.push({name: item[1], id: item[0]})
-      }
+      // for (let item of selectItem) {
+      //   this.dynamicClass.push({name: item})
+      // }
     },
     getSrc(image) {
       console.info('++++++++', ImgTool.getSrc(image))

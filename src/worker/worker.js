@@ -200,6 +200,10 @@ const messageProcessor = {
     console.info(data)
     storage.removeTags(data.filesID, data.tag)
   },
+  'removeClasses': (mutation) => {
+    console.info(mutation)
+    storage.removeClasses(mutation)
+  },
   'getAllTags': (data) => {
     let allTags = storage.getAllTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
@@ -209,6 +213,7 @@ const messageProcessor = {
     console.info('allTags', allTags)
     reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
+  'getCategoryDetail': (category) => {},
   'queryFiles': (nsql) => {
     let allFiles = storage.query(nsql)
     console.info(nsql, 'reply: ', allFiles)
@@ -238,6 +243,7 @@ const messageProcessor = {
   'updateCategoryName': (oldName, newName) => {
     storage.updateClassName(oldName, newName)
   },
+  'updateFileName': (data) => {},
   'reInitDB': async (data) => {
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)

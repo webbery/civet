@@ -8,8 +8,8 @@
 ### 下载
 
 开发进度  
-![72%](https://progress-bar.dev/72/?title=检索模块)
-![73%](https://progress-bar.dev/73/?title=界面逻辑)
+![75%](https://progress-bar.dev/75/?title=检索模块)
+![80%](https://progress-bar.dev/80/?title=界面逻辑)
 ![90%](https://progress-bar.dev/90/?title=存储模块)
 
 项目讨论区(https://www.yuque.com/g/webberg/dacstu/docs)  

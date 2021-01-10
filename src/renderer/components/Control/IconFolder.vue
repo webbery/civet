@@ -6,7 +6,7 @@
       <i class="el-icon-caret-bottom" v-if="data.count!=0 && expand"></i>
       <i :class="data.icon"></i>
       <span :path="parent" @dblclick="onEdit()" @contextmenu.prevent="onRightClick" @click="onItemClick()">{{data.name}}</span>
-      <span class="count">{{data.count}}</span>
+      <span class="count">{{data.count?data.count:(data.children?data.children.length:0)}}</span>
     </span>
   </div>
 </template>
@@ -14,7 +14,7 @@
 export default {
   name: 'icon-folder',
   props: {
-    data: {type: Object},
+    data: {type: Object, default: {count: 0}},
     parent: {type: String},
     expand: {type: Boolean, default: false},
     level: {type: Number, default: 0},

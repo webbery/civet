@@ -79,6 +79,7 @@ export default{
   GET_ALL_TAGS: 'getAllTags',
   GET_ALL_TAGS_WITH_IMAGES: 'getAllTagsWithImages',
   GET_ALL_CATEGORY: 'getAllCategory',
+  GET_CATEGORY_DETAIL: 'getCategoryDetail',
   GET_UNCATEGORY_IMAGES: 'getUncategoryImages',
   GET_UNTAG_IMAGES: 'getUntagImages',
   ADD_IMAGES_BY_DIRECORY: 'addImagesByDirectory',
@@ -87,9 +88,11 @@ export default{
   ADD_CATEGORY: 'addCategory',
   REMOVE_TAG: 'removeTag',
   REMOVE_FILES: 'removeFiles',
+  REMOVE_CLASSES: 'removeClasses',
   QUERY_FILES: 'queryFiles',
   ON_IMAGE_UPDATE: 'updateImageList',
   UPDATE_IMAGE_CATEGORY: 'updateImageCategory',
   UPDATE_CATEGORY_NAME: 'updateCategoryName',
+  UPDATE_FILE_NAME: 'updateFileName',
   REINIT_DB: 'reInitDB'
 }

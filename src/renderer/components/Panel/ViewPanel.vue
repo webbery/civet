@@ -167,7 +167,7 @@ export default {
     },
     onClickName: function (index) {
       console.info(index)
-      enableInput = true
+      this.enableInput = true
     },
     onSelectMenu: function (indexList) {
       console.info(indexList)
