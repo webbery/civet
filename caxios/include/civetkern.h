@@ -3,10 +3,11 @@
 #include <node.h>
 #include <node_object_wrap.h>
 #include <string>
-#include "db_manager.h"
+#include <json.hpp>
 #include "datum_type.h"
 
 namespace caxios{
+  class DBManager;
   class CAxios {
   public:
     explicit CAxios(const std::string& str, int flag, const std::string& meta = "");

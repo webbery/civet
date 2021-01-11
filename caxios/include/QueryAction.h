@@ -8,42 +8,13 @@
 #include "lmdb/lmdb.h"
 #include "util/util.h"
 #include <vector>
-//#include "db_manager.h"
+#include "db_manager.h"
 #include <iostream>
 
 namespace caxios {
   class DBManager;
 
-  enum CompareType {
-    CT_EQUAL = 0,
-    CT_IN,
-    CT_GREAT_EQUAL,
-    CT_GREAT_THAN,
-    CT_LESS_THAN
-  };
-
-  enum QueryType {
-    QT_String,
-    QT_DateTime,
-  };
-
   using system_time = std::chrono::system_clock;
-  class QueryCondition {
-  public:
-    QueryCondition();
-    QueryCondition(const std::string& s);
-    QueryCondition(time_t s);
-
-    template <typename T>
-    T As() const {
-      return std::get<T>(m_sCondition);
-    }
-
-    QueryType type() const {return m_qType;}
-  private:
-    QueryType m_qType;
-    std::variant< std::string, time_t, double> m_sCondition;
-  };
 
   template<typename Ret>
   std::vector<Ret> Cast(const std::vector<QueryCondition>& conds) {
@@ -156,43 +127,10 @@ namespace caxios {
       :Equal(conditions[0].As<std::string>()) {}
   };
 
-  template<typename Q> struct CQueryType {
-    static Q policy(MDB_val& val) {
-      return *(Q*)val.mv_data;
-    }
-  };
   template<> struct CQueryType<std::string> {
     static std::string policy(MDB_val& val) {
       return std::string((char*)val.mv_data, val.mv_size);
     }
-  };
-
-  class IAction {
-  public:
-    virtual ~IAction() {}
-    //virtual void push(const std::string& kw) = 0;
-    //virtual void push(const QueryCondition& cond) = 0;
-    virtual std::vector<FileID> query(DBManager*) = 0;
-  };
-
-  template<QueryType QT, CompareType CT>
-  class QueryAction : public IAction {
-  public:
-    QueryAction(const std::string& k, const std::vector<QueryCondition>& vCond)
-    :m_sKeyword(k)
-    , m_query(vCond)
-    { }
-
-    std::vector<FileID> query(DBManager* pDB) {
-      return pDB->QueryImpl(m_sKeyword, m_query/*, m_vQuerySet*/);
-    }
-
-    void constraint(const std::vector<FileID>&);
-
-  private:
-    std::string m_sKeyword;
-    CQuery< QT, CT > m_query;
-    std::vector<FileID> m_vQuerySet;
   };
 
   template<typename T> struct ActionTraits;

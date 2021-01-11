@@ -2,6 +2,8 @@
 #include <iostream>
 #include "util/util.h"
 #include "log.h"
+#include "db_manager.h"
+
 #define JS_CLASS_NAME  "Caxios"
 
 using namespace v8;

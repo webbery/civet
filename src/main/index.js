@@ -100,9 +100,9 @@ function createWorkerWindow (bFirst) {
 
 app.on('window-all-closed', async () => {
   console.info('---------close 2------------')
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  // if (process.platform !== 'darwin') {
+  app.quit()
+  // }
 })
 
 app.on('activate', () => {
@@ -188,11 +188,6 @@ function sendWindowMessage(targetWindow, message, payload) {
 }
 
 app.on('ready', async () => {
-  // 检查配置数据是否存在
-  const cfg = new CivetConfig()
-  if (cfg.isFirstTime()) {
-    // 进入第一次配置页面
-  }
   Menu.setApplicationMenu(null)
   createWorkerWindow()
   ipcMain.on('message-from-worker', (event, arg) => {

@@ -115,7 +115,6 @@ export default {
       log.info('PropertyPanel', files)
       if (files.length === 1) {
         let file = files[0]
-        this.picture.descsize = getSize(parseInt(file.size))
         const config = new CivetConfig()
         const schema = config.meta()
         let names = []
@@ -141,7 +140,11 @@ export default {
             if (!meta) {
               values.push('unknow')
             } else {
-              values.push(meta.value)
+              if (item.name === 'size') {
+                values.push(getSize(parseInt(file.size)))
+              } else {
+                values.push(meta.value)
+              }
             }
           }
         }
