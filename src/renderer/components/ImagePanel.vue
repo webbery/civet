@@ -1,6 +1,8 @@
 <template>
   <div class="image-panel">
-      <JImage :src="image.path" ref="display"></JImage>
+    <viewer :images="images"></viewer>
+      <!-- <JImage :src="image.path" ref="display"></JImage> -->
+      <img v-for="file of images" :src="file.path" :key="file.path">
       <div>
         <button @click="onRoate90">Rotate90</button>
       </div>
@@ -8,12 +10,17 @@
 </template>
 
 <script>
+import 'viewerjs/dist/viewer.css'
+import Viewer from 'v-viewer'
+import Vue from 'vue'
 import bus from './utils/Bus'
-import JImage from './JImage'
+// import JImage from './JImage'
+
+Vue.use(Viewer)
 
 export default {
   name: 'image-panel',
-  components: { JImage },
+  // components: { JImage },
   data() {
     return {
       image: null
