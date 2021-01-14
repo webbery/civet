@@ -39,6 +39,12 @@ export default {
     root += path
     return root
   },
+  isEmpty: (val) => {
+    if (!val) return true
+    const result = val.replace(/(^\s*)|(\s*$)/g, '')
+    if (result === '') return true
+    return false
+  },
   formatColor16: (val) => {
     let s = parseInt(val).toString(16)
     if (s.length === 1) s = '0' + s

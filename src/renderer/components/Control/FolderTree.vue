@@ -15,7 +15,7 @@
         </div>
         <div v-if="enableClassEditor[idx]">
           <IconFolder class="children"
-            :enableInput="enableClassEditor[idx]"
+            :enableInput="true"
             :label="newCategoryName"
             @onblur="onBlur">
           </IconFolder>
@@ -27,6 +27,7 @@
 import IconFolder from './IconFolder'
 import PopMenu from '@/components/Menu/PopMenu'
 import bus from '@/components/utils/Bus'
+import JString from '@/../public/String'
 
 export default {
   name: 'FolderTree',
@@ -103,7 +104,7 @@ export default {
       console.info(indexList)
     },
     onAddClass: function (name, parent, indx) {
-      console.info('onAddClass', name, parent, indx)
+      console.info('onAddClass', name, parent, indx, this.level)
       this.$set(this.enableClassEditor, indx, true)
       this.lastSelections = [indx]
       this.$set(this.expandTree, indx, true)
@@ -111,6 +112,7 @@ export default {
     onBlur: function (clzName) {
       const index = this.lastSelections[0]
       this.$set(this.enableClassEditor, index, false)
+      if (JString.isEmpty(clzName)) return
       // this.enableClassEditor, index, false)
       // this.$set(this.expandTree, index, false)
       // this.lastSelections = []

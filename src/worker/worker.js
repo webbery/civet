@@ -133,7 +133,11 @@ function reply2Renderer(type, value) {
     if (!queue[type]) {
       queue[type] = []
     }
-    queue[type].push(value)
+    if (Array.isArray(value)) {
+      queue[type].concat(value)
+    } else {
+      queue[type].push(value)
+    }
     // console.info('queue input ', queue.length)
     timer.start(() => {
       console.info('queue task', queue.length, Object.keys(queue))
@@ -146,6 +150,7 @@ function reply2Renderer(type, value) {
         if (queue[tp].length === 1) {
           ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp][0]})
         } else {
+          console.info('send ', queue[tp].length, 'to renderer')
           ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
         }
       }

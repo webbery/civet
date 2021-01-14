@@ -112,8 +112,9 @@ const mutations = {
     console.info('tags', tags)
     state.tags = tags
   },
-  async addFiles(state, files) {
+  addFiles(state, files) {
     let idx = 0
+    console.info('addFiles:', files)
     for (let file of files) {
       if (state.cache.hasOwnProperty(file.id)) continue
       state.cache[file.id] = new FileBase(file)
@@ -122,10 +123,6 @@ const mutations = {
       const pos = state.viewItems.length + idx
       Vue.set(state.viewItems, pos, state.cache[file.id])
     }
-    // count
-    const {unclasses, untags} = await remote.recieveCounts()
-    state.unclasses = unclasses.length
-    state.untags = untags.length
   },
   display(state, data) {
     let idx = 0
@@ -276,6 +273,11 @@ const mutations = {
   update(state, sql) {},
   updateHistoryLength(state, value) {
     state.histories = value
+  },
+  updateCount(state, counts) {
+    // count
+    state.unclasses = counts.unclasses.length
+    state.untags = counts.untags.length
   }
 }
 
@@ -297,8 +299,11 @@ const actions = {
   removeFiles({commit}, files) {
     commit('removeFiles', files)
   },
-  addFiles({commit}, files) {
+  async addFiles({commit}, files) {
     commit('addFiles', files)
+    // count
+    const counts = await remote.recieveCounts()
+    commit('updateCounts', counts)
   },
   addTag({commit}, mutation) {
     commit('addTag', mutation)

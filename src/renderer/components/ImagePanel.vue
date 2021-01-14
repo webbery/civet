@@ -1,29 +1,21 @@
 <template>
   <div class="image-panel">
-    <viewer :images="images"></viewer>
-      <!-- <JImage :src="image.path" ref="display"></JImage> -->
-      <img v-for="file of images" :src="file.path" :key="file.path">
-      <div>
-        <button @click="onRoate90">Rotate90</button>
-      </div>
+    <div class="prev"></div>
+    <div class="next"></div>
+    <img :src="image.path" id="file-viewer">
   </div>
 </template>
 
 <script>
-import 'viewerjs/dist/viewer.css'
-import Viewer from 'v-viewer'
-import Vue from 'vue'
+import Viewer from 'viewerjs'
 import bus from './utils/Bus'
-// import JImage from './JImage'
-
-Vue.use(Viewer)
 
 export default {
   name: 'image-panel',
-  // components: { JImage },
   data() {
     return {
-      image: null
+      image: null,
+      viewer: null
     }
   },
   created() {
@@ -33,11 +25,22 @@ export default {
   mounted() {
     this.image = this.$route.params
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '图片显示', cmd: 'display'})
+    if (!this.viewer) {
+      this.viewer = new Viewer(document.getElementById('file-viewer'), {
+        toolbar: 1,
+        zoomable: true,
+        rotatable: true,
+        viewed() {
+          this.viewer.zoomTo(1)
+        }
+      })
+    }
+    bus.on(bus.EVENT_SCALE_IMAGE, this.scaleImage)
+    bus.on(bus.EVENT_ROTATE_IMAGE, this.rotateImage)
   },
   methods: {
-    onRoate90() {
-      this.$refs.display.rotateClockwise()
-    }
+    scaleImage: (scale) => {},
+    rotateImage: (angle) => {}
   }
 }
 </script>
@@ -46,5 +49,36 @@ export default {
 .image-panel{
   height: 85vh;
   text-align:center;
+  align-items:center;
+}
+.prev{
+  width: 25px;
+  height: 40px;
+  background: darkslateblue;
+  line-height: 40px;
+  font-family: 'element-icons' !important;
+  float: left;
+  position: absolute;
+  top: 40%;
+}
+.prev::before{
+  content: "\E600";
+}
+.next {
+  /* position: fixed; */
+  top: 50%;
+  height: 50%;
+  -webkit-transform: translateY(-50%);
+  width: 25px;
+  height: 40px;
+  background: darkslateblue;
+  line-height: 40px;
+  font-family: 'element-icons' !important;
+  margin-left:auto;
+  margin-right: 0;
+  position:relative;
+}
+.next::before{
+  content: "\E604";
 }
 </style>

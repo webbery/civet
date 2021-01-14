@@ -1,6 +1,9 @@
 <template>
   <div>
-      <el-slider v-model="scaleValue" @input="scaleChange()" size="mini"></el-slider>
+      <span class="el-icon-zoom-out"></span>
+      <span class="el-icon-zoom-in"></span>
+      <span class="el-icon-refresh-right"></span>
+      <span class="el-icon-zoom-in"></span>
   </div>
 </template>
 <script>
