@@ -203,6 +203,16 @@ describe('civetkern read only test', function() {
     let result = instance.query({type: 'jpeg'})
     expect(result).to.lengthOf(1)
   })
+  it('search by tag', function() {
+    let result = instance.query({tag: '标签'})
+    expect(result).to.lengthOf(2)
+  })
+  it('search by class', function () {
+    let result = instance.query({class: 'type1'})
+    expect(result).to.lengthOf(0)
+    let result = instance.query({class: '新分类'})
+    expect(result).to.lengthOf(1)
+  })
   after(function() {
     instance.release()
   })

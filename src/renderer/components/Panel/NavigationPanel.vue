@@ -10,7 +10,23 @@
             <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
           </table>
           <TreePanel :isActive="true">
-            <FolderTree :data="category"></FolderTree>
+            <!-- <FolderTree :data="category"></FolderTree> -->
+            <vue-tree-list
+              @click="onClick"
+              @change-name="onChangeName"
+              @delete-node="onDel"
+              @add-node="onAddNode"
+              :model="data"
+              default-tree-node-name="新分类"
+              default-leaf-node-name="新分类"
+              v-bind:default-expanded="false"
+            >
+              <template v-slot:leafNameDisplay="slotProps">
+                <span>
+                  {{ slotProps.model.name }} <span class="muted">#{{ slotProps.model.id }}</span>
+                </span>
+              </template>
+            </vue-tree-list>
           </TreePanel>
         </el-scrollbar>
       </el-tab-pane>
@@ -25,14 +41,14 @@
 
 <script>
 import bus from '../utils/Bus'
-import FolderTree from '@/components/Control/FolderTree'
+// import FolderTree from '@/components/Control/FolderTree'
 import TreePanel from '@/components/Panel/TreePanel'
 import { mapState } from 'vuex'
 
 export default {
   name: 'navigation-panel',
   components: {
-    FolderTree,
+    // FolderTree,
     TreePanel
   },
   data() {

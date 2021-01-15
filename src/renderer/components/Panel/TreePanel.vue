@@ -11,7 +11,8 @@
         </div>
         <div role="tabpanel" aria-labelledby="el-collapse-head-2660" id="el-collapse-content-2660" class="el-collapse-item__wrap" v-if="isActive" data-old-padding-top="" data-old-padding-bottom="" data-old-overflow="" aria-hidden="true">
           <div class="el-collapse-item__content">
-            <slot v-bind:enableEdit="enableEdit"></slot>
+            <slot></slot>
+            <!-- <slot v-bind:enableEdit="enableEdit"></slot> -->
             <IconFolder icon="el-icon-folder" enableInput="true" v-if="enableEdit" @onblur="onBlur" :label="newCategoryName"></IconFolder>
           </div>
         </div>
