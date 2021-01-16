@@ -57,7 +57,7 @@ export default {
     },
     onAddClassify(event) {
       event.stopPropagation()
-      this.enableEdit = true
+      this.$emit('addRootClass')
     },
     onBlur(newClass) {
       this.enableEdit = false

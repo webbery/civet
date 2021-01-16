@@ -10,15 +10,13 @@ import 'element-theme-dark'
 import Service from './components/utils/Service'
 import VueLazyload from 'vue-lazyload'
 import Kernel from '../public/Kernel'
-import VueTreeList from 'vue-tree-list'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 // Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 Vue.use(ElementUI)
-Vue.use(VueTreeList)
 Vue.use(VueLazyload, {
-  lazyComponent: true,
-  dispatchEvent: true
+  // lazyComponent: true,
+  // dispatchEvent: true
 })
 
 Vue.prototype.$ipcRenderer = Service.getServiceInstance()

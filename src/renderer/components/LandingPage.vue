@@ -72,6 +72,7 @@ export default {
   background-color: #333b46;
   color: rgb(248, 241, 241);
   height: 30px !important;
+  padding: 0;
 }
 .display{
   border: 1px rgb(200, 240, 247);

@@ -9,9 +9,9 @@
             <tr @click="handleResourceClick(headOptions[2], 2)" :class="{selected: headOptions[2].isSelected, item: !headOptions[2].isSelected}"><td><i :class="headOptions[2].icon"></i>未标签</td><td>{{untags}}</td></tr>
             <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
           </table>
-          <TreePanel :isActive="true">
+          <TreePanel :isActive="true" @addRootClass="addRootClass">
             <!-- <FolderTree :data="category"></FolderTree> -->
-            <vue-tree-list
+            <VueTreeList
               @click="onClick"
               @change-name="onChangeName"
               @delete-node="onDel"
@@ -26,7 +26,7 @@
                   {{ slotProps.model.name }} <span class="muted">#{{ slotProps.model.id }}</span>
                 </span>
               </template>
-            </vue-tree-list>
+            </VueTreeList>
           </TreePanel>
         </el-scrollbar>
       </el-tab-pane>
@@ -44,11 +44,14 @@ import bus from '../utils/Bus'
 // import FolderTree from '@/components/Control/FolderTree'
 import TreePanel from '@/components/Panel/TreePanel'
 import { mapState } from 'vuex'
+import { Tree, TreeNode } from '@/components/Control/Tree'
+import VueTreeList from '@/components/Control/VueTreeList'
 
 export default {
   name: 'navigation-panel',
   components: {
     // FolderTree,
+    VueTreeList,
     TreePanel
   },
   data() {
@@ -83,6 +86,7 @@ export default {
           isSelected: false
         }
       ],
+      data: new Tree([]),
       newCategoryName: ''
     }
   },
@@ -111,14 +115,11 @@ export default {
     updateUncategoryImages(updateValue) {
       this.headOptions[1].value += updateValue
     },
-    // updateUntagFiles() {
-    //   const untags = this.$kernel.getUnTagFiles()
-    //   this.headOptions[2].value = untags.length
-    // },
-    // updateUnclassifyFiles() {
-    //   const unclasses = this.$kernel.getUnClassifyFiles()
-    //   this.headOptions[1].value = unclasses.length
-    // },
+    addRootClass() {
+      let root = new TreeNode({name: '新分类', isLeaf: false})
+      if (!this.data.children) this.data.children = []
+      this.data.addChildren(root)
+    },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)
       return (

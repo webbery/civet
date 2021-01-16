@@ -3,7 +3,7 @@
       <span class="el-icon-zoom-out"></span>
       <span class="el-icon-zoom-in"></span>
       <span class="el-icon-refresh-right"></span>
-      <span class="el-icon-zoom-in"></span>
+      <span class="el-icon-refresh-left"></span>
   </div>
 </template>
 <script>

@@ -5,7 +5,7 @@
       <Waterfall :line-gap="200" :max-line-gap="700" :scrollReachBottom="onRequestNewData" :watch="imageList">
         <WaterfallSlot v-for="(item, index) in imageList" :width="item.width" :height="item.height" :order="index" :key="item.id">
           <div class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
-            <el-card :body-style="{ padding: '0px'}" shadow="never" style="border: 0px;">
+            <el-card :body-style="{ padding: '1px'}" shadow="never" style="border: 0px;">
               <Preview :src="getImage(item)" class="preview" 
                 @dblclick.native="onImageDbClick(item)"
                 @keydown.ctrl.67.native="onFileCopyOut(props)"
@@ -150,11 +150,11 @@ export default {
           // 框亮显示
           this.clearSelections()
           this.lastSelections[image.id] = e.target.parentNode
-          e.target.parentNode.style.border = '2px solid red'
+          e.target.parentNode.style.border = '1px solid red'
         }
       } else { // 多选
         this.lastSelections[image.id] = e.target.parentNode
-        e.target.parentNode.style.border = '2px solid red'
+        e.target.parentNode.style.border = '1px solid red'
       }
     },
     async onImageDbClick(image) {
@@ -244,7 +244,7 @@ export default {
     },
     clearSelections() {
       for (const k in this.lastSelections) {
-        this.lastSelections[k].style.border = '2px solid white'
+        this.lastSelections[k].style.border = '0'
       }
       this.lastSelections = {}
     }
@@ -279,7 +279,7 @@ export default {
     clear: both
 }
 .preview {
-  border:3px solid white;
+  /* border:3px solid white; */
   text-align: center;
 }
 .preview .image-top {
