@@ -134,11 +134,11 @@ function reply2Renderer(type, value) {
       queue[type] = []
     }
     if (Array.isArray(value)) {
-      queue[type].concat(value)
+      queue[type].push.apply(queue[type], value)
     } else {
       queue[type].push(value)
     }
-    // console.info('queue input ', queue.length)
+    console.info('queue value:', queue)
     timer.start(() => {
       console.info('queue task', queue.length, Object.keys(queue))
       if (Object.keys(queue).length === 0) {
@@ -148,12 +148,13 @@ function reply2Renderer(type, value) {
       console.info(queue.length)
       for (let tp in queue) {
         if (queue[tp].length === 1) {
-          ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp][0]})
+          ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
         } else {
           console.info('send ', queue[tp].length, 'to renderer')
           ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
         }
       }
+      console.info('clear queue')
       queue = {}
     }, 1000)
   } else {
@@ -206,7 +207,7 @@ const messageProcessor = {
     storage.removeTags(data.filesID, data.tag)
   },
   'removeClasses': (mutation) => {
-    console.info(mutation)
+    console.info('removeClasses', mutation)
     storage.removeClasses(mutation)
   },
   'getAllTags': (data) => {
@@ -225,11 +226,13 @@ const messageProcessor = {
     reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
   },
   'addCategory': (mutation) => {
+    console.info('add class', mutation)
     return storage.addClasses(mutation)
   },
   'getAllCategory': (parent) => {
     const category = storage.getClasses(parent)
     // let category = await CategoryArray.loadFromDB()
+    console.info('getAllCategory', category)
     reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
   'getUncategoryImages': async () => {
@@ -246,9 +249,12 @@ const messageProcessor = {
     storage.updateFileClass(data.imageID, data.category)
   },
   'updateCategoryName': (oldName, newName) => {
+    console.info('old:', oldName, 'new:', newName)
     storage.updateClassName(oldName, newName)
   },
-  'updateFileName': (data) => {},
+  'updateFileName': (data) => {
+    // storage.
+  },
   'reInitDB': async (data) => {
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)

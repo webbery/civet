@@ -1,12 +1,13 @@
 import FileBase from '@/../public/FileBase'
 import Kernel from '@/../public/Kernel'
 import Service from '@/components/utils/Service'
+import { Tree, TreeNode } from '@/components/Control/Tree'
 import Vue from 'vue'
 
 const state = {
   query: {},
   cache: {},
-  classes: [],
+  classes: new Tree([]),
   // classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
   classesName: [],
   viewItems: [],
@@ -76,15 +77,31 @@ const mutations = {
     // setting view panel item
     mutations.display(state, data)
     // get classes
-    const cls = data['allClasses']
+    let cls = data['allClasses']
+    console.info('allClasses', cls)
     if (cls) {
+      const addChildren = function (children, parent) {
+        if (children && children.length > 0) {
+          for (let i = 0; i < children.length; ++i) {
+            if (typeof children[i] === 'object') {
+              const child = new TreeNode({name: children[i].name, isLeaf: false})
+              parent.addChildren(child, true)
+              addChildren(children[i].children, child)
+            }
+          }
+        }
+      }
       for (let idx = 0; idx < cls.length; ++idx) {
         let clazz = cls[idx]
-        if (clazz['children'] && clazz['children'].length > 0 && typeof clazz['children'][0] === 'object') {
-          clazz.hasChild = true
+        console.info('clazz:', clazz)
+        // Vue.set(state.classes, idx, clazz)
+        const root = new TreeNode({name: clazz.name, isLeaf: false})
+        if (clazz['children'] && clazz['children'].length > 0) {
+          addChildren(clazz['children'], root)
         }
-        Vue.set(state.classes, idx, clazz)
+        state.classes.addChildren(root)
       }
+      console.info('class result', state.classes)
     }
     // init classes name
     let candidates = [].concat(state.classes)
@@ -159,76 +176,23 @@ const mutations = {
     // state.tags = await remote.recieveTags()
   },
   addClass(state, mutation) {
-    let classpath = null
-    let files = []
     if (Array.isArray(mutation)) {
-      classpath = mutation
+      if (!state.classes.children) state.classes.children = []
+      state.classes.addChildren(new TreeNode({name: mutation[0], isLeaf: false}))
+      Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
     } else if (typeof mutation === 'object') {
-      classpath = mutation.class
-      files = mutation.id
-    } else {
-      return
-    }
-    // update navigation panel data
-    const findClass = function (clsPath, classes, parent) {
-      for (let item of classes) {
-        if (item.type === 'clz') {
-          const name = parent + '/' + item.name
-          console.info('compare class:', name, clsPath)
-          if (name === clsPath) return item
-          if (item.children && item.children.length !== 0) {
-            const result = findClass(clsPath, item.children, name)
-            if (result) return result
-          }
-        }
+      let children = mutation.node
+      let parent = mutation.parent
+      parent.addChildren(children, true)
+      // make path
+      let classPath = ''
+      while (parent.parent !== null) {
+        classPath = parent.name + '/' + classPath
+        parent = parent.parent
       }
-      return null
+      console.info('classPath:', classPath)
+      Service.getServiceInstance().send(Service.ADD_CATEGORY, [classPath])
     }
-    const addChildClass = function (item, parent) {
-      console.info(item.name, 'parent:', parent)
-      if (!parent.children) parent.children = []
-      Vue.set(parent.children, parent.children.length, item)
-      parent.hasChild = true
-    }
-    const getParentAndName = function (classpath) {
-      if (classpath[0] !== '/') classpath = '/' + classpath
-      let idx = classpath.lastIndexOf('/')
-      let parent = classpath
-      let name = classpath
-      if (idx > 0) {
-        parent = classpath.substr(0, idx)
-        name = classpath.substr(idx + 1, classpath.length - idx - 1)
-      }
-      console.info('parent', parent, 'name', name)
-      return {parent: parent, name: name}
-    }
-    console.info('----------2---------', classpath, mutation, state.classes)
-    for (let clsPath of classpath) {
-      const {parent, name} = getParentAndName(clsPath)
-      console.info('path:', clsPath, 'parent:', parent)
-      let clazz = findClass(parent, state.classes, '')
-      console.info('class:', clazz)
-      if (!clazz) clazz = state.classes
-      if (!clazz.count) clazz.count = 1
-      else clazz.count += 1
-      addChildClass({name: name, type: 'clz', children: files}, clazz)
-    }
-
-    let classes = []
-    for (let clsPath of classpath) {
-      if (clsPath[0] === '/') classes.push(clsPath.substr(1))
-      else classes.push(clsPath)
-    }
-    let mutationWithoutRoot = {}
-    if (Array.isArray(mutation)) {
-      mutationWithoutRoot = classes
-    } else {
-      mutationWithoutRoot['id'] = files
-      mutationWithoutRoot['class'] = classes
-    }
-    console.info('send add category', mutationWithoutRoot)
-    // Service.getServiceInstance().send(Service.ADD_CATEGORY, mutationWithoutRoot)
-    console.info('classes', state.classes)
   },
   removeClass(state, mutation) {
     console.info('remove class', mutation)
@@ -252,17 +216,16 @@ const mutations = {
         }
       }
     } else {
-      for (let clsName of mutation) {
-        // remove from classes
-        for (let idx = state.classes.length - 1; idx >= 0; --idx) {
-          if (state.classes[idx].name === clsName) {
-            state.classes.count -= 1
-            break
-          }
-        }
+      let node = mutation
+      // class path
+      let classPath = node.name
+      while (node.parent !== null) {
+        classPath += node.parent.name + '/' + classPath
       }
+      console.info('delete class path:', classPath)
+      // Service.getServiceInstance().send(Service.REMOVE_CLASSES, mutation)
+      node.remove()
     }
-    Service.getServiceInstance().send(Service.REMOVE_CLASSES, mutation)
   },
   removeFiles(state, query) {},
   removeTags(state, mutation) {
@@ -311,14 +274,16 @@ const actions = {
   addClass({commit}, mutation) {
     commit('addClass', mutation)
   },
-  removeClass({commit}, mutation) {
-    commit('removeClass', mutation)
+  removeClass({commit}, node) {
+    commit('removeClass', node)
   },
   removeTags({commit}, mutation) {
     commit('removeTags', mutation)
   },
   changeFileName({commit}, mutation) {},
-  changeClassName({commit}, mutation) {},
+  changeClassName({commit}, mutation) {
+    commit('changeClassName', mutation)
+  },
   update({commit}, sql) {
     /*
      *  sql like: {query:'', $set:{}}, {query:'', $unset:{}}

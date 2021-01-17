@@ -244,6 +244,7 @@ describe('civetkern clean test', function() {
     let finfo = instance.getFilesInfo([snaps[0].id])
     // console.info(finfo);
     expect(finfo[0].class).to.include('type2')
+    expect(finfo[0].class).to.not.include('新分类')
     //const rootClasses = instance.getClasses()
     //console.info(rootClasses)
   })

@@ -12,18 +12,18 @@
           <TreePanel :isActive="true" @addRootClass="addRootClass">
             <!-- <FolderTree :data="category"></FolderTree> -->
             <VueTreeList
-              @click="onClick"
+              @click="onClickNode"
               @change-name="onChangeName"
-              @delete-node="onDel"
+              @delete-node="onDelNode"
               @add-node="onAddNode"
-              :model="data"
+              :model="category"
               default-tree-node-name="新分类"
               default-leaf-node-name="新分类"
               v-bind:default-expanded="false"
             >
               <template v-slot:leafNameDisplay="slotProps">
                 <span>
-                  {{ slotProps.model.name }} <span class="muted">#{{ slotProps.model.id }}</span>
+                  {{ slotProps.model.name }}
                 </span>
               </template>
             </VueTreeList>
@@ -44,7 +44,6 @@ import bus from '../utils/Bus'
 // import FolderTree from '@/components/Control/FolderTree'
 import TreePanel from '@/components/Panel/TreePanel'
 import { mapState } from 'vuex'
-import { Tree, TreeNode } from '@/components/Control/Tree'
 import VueTreeList from '@/components/Control/VueTreeList'
 
 export default {
@@ -86,18 +85,12 @@ export default {
           isSelected: false
         }
       ],
-      data: new Tree([]),
-      newCategoryName: ''
+      // data: new Tree([]),
+      newCategoryName: '',
+      index: 0
     }
   },
   computed: mapState({
-    // loadDirectory() {
-    //   console.info('computed：', this.$store.EventBus.importDirectory)
-    //   return this.$store.EventBus.importDirectory
-    // },
-    // categoryName() {
-    //   return this.$store.getters.classesName
-    // },
     category: state => state.Cache.classes,
     untags: state => state.Cache.untags,
     unclasses: state => state.Cache.unclasses,
@@ -116,9 +109,30 @@ export default {
       this.headOptions[1].value += updateValue
     },
     addRootClass() {
-      let root = new TreeNode({name: '新分类', isLeaf: false})
-      if (!this.data.children) this.data.children = []
-      this.data.addChildren(root)
+      let name = '新分类'
+      if (this.index !== 0) name = name + this.index
+      // let root = new TreeNode({name: name, isLeaf: false})
+      // if (!this.data.children) this.data.children = []
+      // this.data.addChildren(root)
+      this.index += 1
+      this.$store.dispatch('addClass', [name])
+    },
+    onAddNode(node, parent) {
+      console.info('onAddNode', node)
+      this.$store.dispatch('addClass', {parent, node})
+    },
+    onDelNode(node) {
+      console.info('onDelNode', node)
+      this.$store.dispatch('removeClass', node)
+    },
+    onClickNode(node) {
+      console.info('onClickNode', node)
+    },
+    onChangeName(params) {
+      if (params.eventType === 'blur') {
+        console.info('onChangeName', params)
+        this.$store.dispatch('changeClassName', {old: params.oldName, new: params.newName})
+      }
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)

@@ -31,12 +31,12 @@
           <i class="vtl-icon" :class="caretClass" @click.prevent.stop="toggle"></i>
         </span>
 
-        <span v-if="model.isLeaf">
+        <!-- <span v-if="model.isLeaf">
           <slot name="leafNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
             <i class="vtl-icon vtl-menu-icon vtl-icon-file"></i>
           </slot>
-        </span>
-        <span v-else>
+        </span> -->
+        <span>
           <slot name="treeNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
             <i class="vtl-icon vtl-menu-icon vtl-icon-folder"></i>
           </slot>
@@ -56,7 +56,7 @@
           @input="updateName"
           @blur="setUnEditable"
         />
-        <div class="vtl-operation" v-show="isHover">
+        <div class="vtl-operation" v-show="isHover && !editable">
           <span
             :title="defaultAddTreeNodeTitle"
             @click.stop.prevent="addChild(false)"
@@ -66,7 +66,7 @@
               <i class="vtl-icon vtl-icon-folder-plus-e"></i>
             </slot>
           </span>
-          <span
+          <!-- <span
             :title="defaultAddLeafNodeTitle"
             @click.stop.prevent="addChild(true)"
             v-if="!model.isLeaf && !model.addLeafNodeDisabled"
@@ -74,7 +74,7 @@
             <slot name="addLeafNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
               <i class="vtl-icon vtl-icon-plus"></i>
             </slot>
-          </span>
+          </span> -->
           <span title="edit" @click.stop.prevent="setEditable" v-if="!model.editNodeDisabled">
             <slot name="editNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
               <i class="vtl-icon vtl-icon-edit"></i>
@@ -153,7 +153,8 @@ export default {
       isDragEnterUp: false,
       isDragEnterBottom: false,
       isDragEnterNode: false,
-      expanded: this.defaultExpanded
+      expanded: this.defaultExpanded,
+      oldName: ''
     }
   },
   props: {
@@ -229,11 +230,12 @@ export default {
   },
   methods: {
     updateName(e) {
-      var oldName = this.model.name
+      // this.oldName = this.model.name
       this.model.changeName(e.target.value)
+      console.info('#new name: ', e.target.value)
       this.rootNode.$emit('change-name', {
         id: this.model.id,
-        oldName: oldName,
+        oldName: this.model.name,
         newName: e.target.value,
         node: this.model
       })
@@ -245,6 +247,7 @@ export default {
 
     setEditable() {
       this.editable = true
+      this.oldName = this.model.name
       this.$nextTick(() => {
         const $input = this.$refs.nodeInput
         $input.focus()
@@ -254,11 +257,12 @@ export default {
 
     setUnEditable(e) {
       this.editable = false
-      var oldName = this.model.name
+      // var oldName = this.model.name
+      // console.info('new name: ', e.target.value)
       this.model.changeName(e.target.value)
       this.rootNode.$emit('change-name', {
         id: this.model.id,
-        oldName: oldName,
+        oldName: this.oldName,
         newName: e.target.value,
         eventType: 'blur'
       })
@@ -287,11 +291,13 @@ export default {
     },
 
     addChild(isLeaf) {
-      const name = isLeaf ? this.defaultLeafNodeName : this.defaultTreeNodeName
+      let name = isLeaf ? this.defaultLeafNodeName : this.defaultTreeNodeName
+      name += this.model.children ? this.model.children.length : ''
       this.expanded = true
       var node = new TreeNode({ name, isLeaf })
-      this.model.addChildren(node, true)
-      this.rootNode.$emit('add-node', node)
+      // console.info('model:', this.model, 'node:', node)
+      // this.model.addChildren(node, true)
+      this.rootNode.$emit('add-node', node, this.model)
     },
 
     dragStart(e) {
@@ -463,14 +469,14 @@ export default {
 .vtl-node-main {
   display: flex;
   align-items: center;
-  padding: 5px 0 5px 1rem;
+  padding: 0px 0 0px 1rem;
   .vtl-input {
     border: none;
     max-width: 150px;
     border-bottom: 1px solid blue;
   }
   &:hover {
-    background-color: #f0f0f0;
+    background-color:rgb(55, 80, 97);
   }
   &.vtl-active {
     outline: 2px dashed pink;
@@ -488,6 +494,6 @@ export default {
   cursor: pointer;
 }
 .vtl-tree-margin {
-  margin-left: 2em;
+  margin-left: 1em;
 }
 </style>
