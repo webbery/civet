@@ -1,24 +1,26 @@
 <template>
   <div id="app">
     <Splash></Splash>
+    <DatabasePage ></DatabasePage>
   </div>
 </template>
 
 <script>
-// import DatabasePage from './components/DatabasePage'
+import DatabasePage from './components/DatabasePage'
 import Splash from './components/Splash'
-import { CivetConfig } from '../public/CivetConfig'
+import { config } from '../public/CivetConfig'
 
 export default {
   name: 'dbpage',
   components: {
-    Splash
+    Splash, DatabasePage
   },
   data() {
-    const config = new CivetConfig()
     console.info('isFist:', config.isFirstTime())
+    console.info('env:', process.env.NODE_ENV)
     return {
-      isFirst: config.isFirstTime()
+      isFirst: config.isFirstTime(),
+      isDevelop: process.env.NODE_ENV === 'development'
     }
   },
   mounted() {

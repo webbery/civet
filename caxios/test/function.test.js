@@ -1,4 +1,4 @@
-const {describe, it} = require('mocha')
+﻿const {describe, it} = require('mocha')
 const {expect, assert} = require('chai')
 const instance = require('../build/Release/civetkern')
 
@@ -35,7 +35,7 @@ describe('civetkern add test', function() {
 	  fileids = instance.generateFilesID(genCount)
     expect(fileids).to.have.lengthOf(genCount)
     let t = new Date("Sun Sep 20 2020 12:58:14 GMT+0800 (中国标准时间)")
-    console.info(t.getTime())
+    // console.info(t.getTime())
     willBeAdd.push({
       'id': fileids[0],
       'meta': [
@@ -80,7 +80,9 @@ describe('civetkern add test', function() {
     expect(untags).to.have.lengthOf(willBeAdd.length)
   })
   it('set file tag', function() {
-    assert(instance.setTags({id: fileids, tag: ['test','标签']}) === true)
+    expect(instance.setTags({id: [fileids[0]], tag: ['test','标签']})).to.equal(true)
+    expect(instance.setTags({id: [fileids[2]], tag: ['test','标签']})).to.equal(true)
+    // expect(instance.setTags({id: [fileids[1]], tag: ['test','标签']})).to.equal(false)
   })
   it('get untag files again', function() {
     let untags = instance.getUnTagFiles()
@@ -91,7 +93,7 @@ describe('civetkern add test', function() {
     expect(unclasses).to.have.lengthOf(willBeAdd.length)
   })
   it('add class', function() {
-    let result = instance.addClasses(['class1', 'class2', 'class1/class3'])
+    let result = instance.addClasses(['新分类', 'class2', '新分类/新分类'])
     expect(result).to.equal(true)
   })
   it('add files to class', function() {
@@ -122,8 +124,10 @@ describe('civetkern add test', function() {
   //})
   it('update class name', function() {
     // 如果新类名存在，则返回失败; 因为该函数只支持改名, 不支持将旧类别下的所有文件移动到新类别下
-    const result = instance.updateClassName('type1', '新分类')
-    assert(result === true)
+    let result = instance.updateClassName('type1', '新分类1')
+    expect(result).to.equal(true)
+    result = instance.addClasses(['新分类1/子类'])
+    expect(result).to.equal(true)
   })
   after(function() {
     instance.release()
@@ -133,7 +137,7 @@ describe('civetkern add test', function() {
 describe('civetkern read only test', function() {
   before(function() {
     assert(instance.init(cfg, 1) === true)
-    console.info('====')
+    // console.info('====')
   })
   let snaps = null
   it('get file snaps success', function() {
@@ -167,8 +171,12 @@ describe('civetkern read only test', function() {
     console.info(rootClasses)
     expect(rootClasses).to.lengthOf(4)
     expect(rootClasses[0]).to.have.property('children')
+    expect(rootClasses[0].children[0]).to.have.property('name')
+    console.info(rootClasses[0].children[0])
     expect(rootClasses[1]).to.not.have.property('children')
+    // 
     expect(rootClasses[2]).to.have.property('children')
+    expect(rootClasses[2].children).to.lengthOf(2)
     expect(rootClasses[3]).to.have.property('children')
     expect(rootClasses[3]['children']).to.lengthOf(1)
     // [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: clz/jpg, children: []}]
@@ -195,7 +203,7 @@ describe('civetkern read only test', function() {
     result = instance.query({datetime: {$gt: day}})
     expect(result).to.lengthOf(1)
     day.setMonth(10, 20)
-    console.info(day.getTime())
+    // console.info(day.getTime())
     result = instance.query({datetime: {$gt: day}})
     expect(result).to.lengthOf(0)
   })
@@ -210,7 +218,7 @@ describe('civetkern read only test', function() {
   it('search by class', function () {
     let result = instance.query({class: 'type1'})
     expect(result).to.lengthOf(0)
-    let result = instance.query({class: '新分类'})
+    result = instance.query({class: '新分类'})
     expect(result).to.lengthOf(1)
   })
   after(function() {
@@ -236,7 +244,7 @@ describe('civetkern clean test', function() {
     let rootClasses = instance.getClasses()
     // console.info(rootClasses)
     expect(rootClasses).to.lengthOf(4)
-    instance.removeClasses(['新分类'])
+    instance.removeClasses(['新分类1'])
     // console.info('----------------')
     rootClasses = instance.getClasses()
     // console.info(rootClasses)
@@ -244,7 +252,11 @@ describe('civetkern clean test', function() {
     let finfo = instance.getFilesInfo([snaps[0].id])
     // console.info(finfo);
     expect(finfo[0].class).to.include('type2')
-    expect(finfo[0].class).to.not.include('新分类')
+    expect(finfo[0].class).not.to.include('新分类1')
+    instance.removeClasses(['新分类1'])
+    rootClasses = instance.getClasses()
+    // console.info(rootClasses)
+    expect(rootClasses).to.lengthOf(3)//.withErrorMessage('should be keep 2 classes')
     //const rootClasses = instance.getClasses()
     //console.info(rootClasses)
   })

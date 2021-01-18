@@ -1,5 +1,4 @@
 import FileBase from '@/../public/FileBase'
-import Kernel from '@/../public/Kernel'
 import Service from '@/components/utils/Service'
 import { Tree, TreeNode } from '@/components/Control/Tree'
 import Vue from 'vue'
@@ -62,13 +61,13 @@ const maxCacheSize = 40 + 20 + 10
 const mutations = {
   init(state, data) {
     console.info('cache init')
-    let snaps = Kernel.getFilesSnap()
-    let imagesID = []
-    for (let snap of snaps) {
-      imagesID.push(snap.id)
-      // if (imagesID.length > 40) break
-    }
-    const images = Kernel.getFilesInfo(imagesID)
+    // let snaps = data.filesSnap
+    // let imagesID = []
+    // for (let snap of snaps) {
+    //   imagesID.push(snap.id)
+    //   // if (imagesID.length > 40) break
+    // }
+    const images = data.allImages
     for (let image of images) {
       state.cache[image.id] = new FileBase(image)
       if (state.cache.length > maxCacheSize) break
@@ -93,6 +92,7 @@ const mutations = {
       }
       for (let idx = 0; idx < cls.length; ++idx) {
         let clazz = cls[idx]
+        if (!clazz) continue
         console.info('clazz:', clazz)
         // Vue.set(state.classes, idx, clazz)
         const root = new TreeNode({name: clazz.name, isLeaf: false})
@@ -104,30 +104,29 @@ const mutations = {
       console.info('class result', state.classes)
     }
     // init classes name
-    let candidates = [].concat(state.classes)
-    for (let idx = 0; idx < candidates.length;) {
-      let front = candidates.shift()
-      if (front.children) {
-        const children = []
-        for (let element of front.children) {
-          if (typeof element !== 'object') continue
-          children.push({name: front.name + '/' + element.name, id: element.id, children: element.children})
-        }
-        candidates = candidates.concat(children)
+    const generateClassPath = (item, index, array) => {
+      if (!array[index].parent) return
+      let cpath
+      if (array[index].parent.name !== 'root') {
+        cpath = array[index].parent.name + '/' + item.name
+      } else {
+        cpath = item.name
       }
-      let className = front.name
-      if (className[0] !== '/') className = '/' + className
-      console.info('className in property:', className)
-      state.classesName.push(className)
+      // console.info('generateClassPath', cpath)
+      state.classesName.push(cpath)
+      let children = array[index].children
+      if (!children) return
+      children.map(generateClassPath)
+      // classesPath.unshift(cpath)
     }
+    let candidates = state.classes.children.map(generateClassPath)
+    console.info('candidates', candidates, state.classes.children)
     // count
     state.unclasses = data['unclasses'].length
     state.untags = data['untags'].length
-    state.allCount = snaps.length
+    state.allCount = data.filesSnap.length
     // tags
-    const tags = Kernel.getAllTags()
-    console.info('tags', tags)
-    state.tags = tags
+    state.tags = data.allTags
   },
   addFiles(state, files) {
     let idx = 0
@@ -163,7 +162,6 @@ const mutations = {
     console.info('cache add tag:', fileID, tag)
     const file = state.cache[fileID]
     if (!file) {
-      Kernel.writeLog('cache add tag 0, fileID=' + fileID)
       return
     }
     file.tag.push(tag)
@@ -179,23 +177,35 @@ const mutations = {
     if (Array.isArray(mutation)) {
       if (!state.classes.children) state.classes.children = []
       state.classes.addChildren(new TreeNode({name: mutation[0], isLeaf: false}))
+      state.classesName.push(mutation[0])
       Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
     } else if (typeof mutation === 'object') {
       let children = mutation.node
       let parent = mutation.parent
       parent.addChildren(children, true)
       // make path
-      let classPath = ''
+      let classPath = children.name
       while (parent.parent !== null) {
         classPath = parent.name + '/' + classPath
         parent = parent.parent
       }
+      state.classesName.push(classPath)
       console.info('classPath:', classPath)
       Service.getServiceInstance().send(Service.ADD_CATEGORY, [classPath])
     }
   },
+  addClassOfFile(state, mutation) {
+    const fileid = mutation.id
+    const classpath = mutation.path
+    console.info('addClassOfFile', fileid, classpath)
+    let file = state.cache[fileid]
+    console.info(file)
+    if (!file.category) file.category = []
+    file.category.push(classpath)
+    Service.getServiceInstance().send(Service.ADD_CATEGORY, {id: [fileid], class: [classpath]})
+  },
   removeClass(state, mutation) {
-    console.info('remove class', mutation)
+    console.info('remove class', mutation, state.classesName)
     if (Array.isArray(mutation)) {
       for (let clsName of mutation) {
         // remove from className
@@ -216,18 +226,49 @@ const mutations = {
         }
       }
     } else {
-      let node = mutation
+      let classPath = mutation.name
       // class path
-      let classPath = node.name
+      let node = mutation.parent
       while (node.parent !== null) {
-        classPath += node.parent.name + '/' + classPath
+        classPath = node.name + '/' + classPath
+        node = node.parent
       }
-      console.info('delete class path:', classPath)
-      // Service.getServiceInstance().send(Service.REMOVE_CLASSES, mutation)
-      node.remove()
+      console.info('delete class path:', classPath, 'node', mutation)
+      mutation.remove()
+      state.classesName.splice(state.classesName.indexOf(classPath), 1)
+      Service.getServiceInstance().send(Service.REMOVE_CLASSES, [classPath])
     }
   },
-  removeFiles(state, query) {},
+  removeClassOfFile(state, mutation) {
+    let fileid = mutation.id
+    let classpath = mutation.path
+    console.info('remove class of file', fileid, classpath)
+    let file = state.cache[fileid]
+    for (let idx = 0; idx < file.category.length; ++idx) {
+      if (file.category[idx] === classpath) {
+        file.category.splice(idx, 1)
+        Service.getServiceInstance().send(Service.REMOVE_CLASSES, {id: [fileid], class: [classpath]})
+        break
+      }
+    }
+  },
+  changeClassName(state, mutation) {
+    console.info('changeClassName', mutation, state.classesName)
+    const indx = state.classesName.indexOf(mutation.old)
+    state.classesName[indx] = mutation.new
+    Service.getServiceInstance().send(Service.UPDATE_CATEGORY_NAME, {oldName: mutation.old, newName: mutation.new})
+  },
+  changeFileName(state, mutation) {
+    console.info('changeFileName', mutation)
+  },
+  removeFiles(state, filesid) {
+    for (let idx = 0; idx < filesid.length; ++idx) {
+      // remove from cache
+      Vue.delete(state.cache, filesid[idx])
+    }
+    // remove from db
+    Service.getServiceInstance().send(Service.REMOVE_FILES, filesid)
+  },
   removeTags(state, mutation) {
     Service.getServiceInstance().send(Service.REMOVE_TAG, {tag: [mutation.tag], filesID: [mutation.id]})
     let file = state.cache[mutation.id]
@@ -249,7 +290,15 @@ const actions = {
     const {unclasses, untags} = await remote.recieveCounts()
     const allClasses = await Service.getServiceInstance().get(Service.GET_ALL_CATEGORY, '/')
     console.info('all classes:', allClasses)
-    commit('init', {unclasses, untags, allClasses})
+    const filesSnap = await Service.getServiceInstance().get(Service.GET_FILES_SNAP)
+    let imagesID = []
+    for (let snap of filesSnap) {
+      imagesID.push(snap.id)
+      if (imagesID.length > maxCacheSize) break
+    }
+    const allImages = await Service.getServiceInstance().get(Service.GET_IMAGES_INFO, imagesID)
+    const allTags = await Service.getServiceInstance().get(Service.GET_ALL_TAGS)
+    commit('init', {unclasses, untags, allClasses, filesSnap, allImages, allTags})
   },
   async query({commit}, query) {
     const result = await Service.getServiceInstance().get(Service.QUERY_FILES, query)
@@ -274,13 +323,21 @@ const actions = {
   addClass({commit}, mutation) {
     commit('addClass', mutation)
   },
+  async addClassOfFile({commit}, mutation) {
+    await commit('addClassOfFile', mutation)
+  },
   removeClass({commit}, node) {
     commit('removeClass', node)
+  },
+  async removeClassOfFile({commit}, mutation) {
+    await commit('removeClassOfFile', mutation)
   },
   removeTags({commit}, mutation) {
     commit('removeTags', mutation)
   },
-  changeFileName({commit}, mutation) {},
+  changeFileName({commit}, mutation) {
+    commit('changeFileName', mutation)
+  },
   changeClassName({commit}, mutation) {
     commit('changeClassName', mutation)
   },

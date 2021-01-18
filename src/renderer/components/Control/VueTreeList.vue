@@ -243,6 +243,7 @@ export default {
 
     delNode() {
       this.rootNode.$emit('delete-node', this.model)
+      console.info('del', this.model)
     },
 
     setEditable() {
@@ -264,6 +265,7 @@ export default {
         id: this.model.id,
         oldName: this.oldName,
         newName: e.target.value,
+        parent: this.model.parent,
         eventType: 'blur'
       })
     },
@@ -302,6 +304,7 @@ export default {
 
     dragStart(e) {
       if (!(this.model.dragDisabled || this.model.disabled)) {
+        console.info('dragStart')
         compInOperation = this
         // for firefox
         e.dataTransfer.setData('data', 'data')
@@ -315,19 +318,29 @@ export default {
     },
     dragOver(e) {
       e.preventDefault()
+      // console.info('drag over', e)
       return true
     },
-    dragEnter() {
-      if (!compInOperation) return
-      if (compInOperation.model.id === this.model.id || !compInOperation || this.model.isLeaf) {
-        return
+    dragEnter(e) {
+      console.info('dragEnter', e)
+      const dragData = e.dataTransfer.getData('civet')
+      console.info(dragData)
+      const item = JSON.parse(dragData)
+      if (item && Array.isArray(item)) {
+        console.info(dragData)
+      } else if (compInOperation) {
+        if (compInOperation.model.id === this.model.id || !compInOperation || this.model.isLeaf) {
+          return
+        }
+        this.isDragEnterNode = true
       }
-      this.isDragEnterNode = true
     },
     dragLeave() {
+      console.info('dragLeave')
       this.isDragEnterNode = false
     },
-    drop() {
+    drop(e) {
+      console.info('drop', e)
       if (!compInOperation) return
       const oldParent = compInOperation.model.parent
       compInOperation.model.moveInto(this.model)
@@ -340,18 +353,22 @@ export default {
     },
 
     dragEnterUp() {
+      console.info('dragEnterUp')
       if (!compInOperation) return
       this.isDragEnterUp = true
     },
     dragOverUp(e) {
       e.preventDefault()
+      console.info('dragOverUp')
       return true
     },
     dragLeaveUp() {
+      console.info('dragLeaveUp')
       if (!compInOperation) return
       this.isDragEnterUp = false
     },
     dropBefore() {
+      console.info('dropBefore')
       if (!compInOperation) return
       const oldParent = compInOperation.model.parent
       compInOperation.model.insertBefore(this.model)
@@ -364,6 +381,7 @@ export default {
     },
 
     dragEnterBottom() {
+      console.info('dragEnterBottom')
       if (!compInOperation) return
       this.isDragEnterBottom = true
     },

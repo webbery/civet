@@ -9,7 +9,7 @@
 import LandingPage from '@/components/LandingPage'
 import Guider from '@/components/Guider'
 // import CV from '@/../public/ImageProcess'
-import { CivetConfig } from '@/../public/CivetConfig'
+import { config } from '@/../public/CivetConfig'
 import Service from '@/components/utils/Service'
 
 export default {
@@ -23,8 +23,7 @@ export default {
     // rgb2hsv(test, 2)
     // let data = {data: test, info: {width: 2, height: 1}}
     // CV.sumaryColors(data)
-    const config = new CivetConfig()
-    if (config.isFirstTime()) {
+    if (config.isFirstTime() || !config.isDBExist()) {
       const guider = this.$refs.guider
       console.info('show model')
       guider.showModal()

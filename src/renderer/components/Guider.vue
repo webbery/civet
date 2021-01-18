@@ -16,7 +16,7 @@
 </template>
 <script>
 import { remote } from 'electron'
-import { CivetConfig } from '../../public/CivetConfig'
+import { config } from '../../public/CivetConfig'
 import Service from './utils/Service'
 import bus from './utils/Bus'
 
@@ -55,7 +55,6 @@ export default {
         this.msg = '文件已存在'
         return
       }
-      const config = new CivetConfig()
       config.addResource(this.resourceName, this.resourceDBPath)
       config.save()
       const cfg = document.getElementById('guider-config')

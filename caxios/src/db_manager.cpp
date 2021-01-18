@@ -215,12 +215,6 @@ namespace caxios {
   bool DBManager::RemoveClasses(const std::vector<std::string>& classes)
   {
     WRITE_BEGIN();
-    auto mIndexes = GetWordsIndex(classes);
-    std::vector<WordIndex> vWordsIndx;
-    std::for_each(mIndexes.begin(), mIndexes.end(), [&vWordsIndx](auto& item) {
-      vWordsIndx.emplace_back(item.second);
-    });
-
     nlohmann::json test;
     this->GetClasses("/", test);
     T_LOG("class", "debug: %s", test.dump().c_str());
@@ -232,6 +226,7 @@ namespace caxios {
       ClassID clsID;
       std::string clsKey;
       std::tie(clsID, clsKey) = EncodePath2Hash(classPath);
+      if (!IsClassExist(clsKey)) continue;
       vAllClasses.emplace_back(clsID);
       //auto children = GetClassChildren(clsKey);
       //vAllClasses.insert(vAllClasses.end(), children.begin(), children.end());
@@ -512,6 +507,7 @@ namespace caxios {
           for (auto& clzID : clzChildren) {
             nlohmann::json clz;
             clz["id"] = clzID;
+            clz["name"] = GetClassByHash(clzID);
             clz["type"] = "clz";
             children.push_back(clz);
           }
@@ -575,6 +571,7 @@ namespace caxios {
       return mIndexes[word];
     });
     std::string sNew = serialize(vIndexes);
+    T_LOG("class", "sNew: %s", format_x16(sNew).c_str());
     if (IsClassExist(sNew)) return false;
     WRITE_BEGIN();
     auto oldPath = EncodePath2Hash(oldName);

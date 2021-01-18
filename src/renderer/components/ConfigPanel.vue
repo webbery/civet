@@ -73,7 +73,7 @@ import Service from './utils/Service'
 import Folder from './utils/Folder'
 import fs from 'fs'
 // import Plugins from '@/../public/Plugin'
-import { CivetConfig } from '@/../public/CivetConfig'
+import { config } from '@/../public/CivetConfig'
 
 export default {
   name: 'config-page',
@@ -96,7 +96,6 @@ export default {
   },
   mounted() {
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '配置', cmd: 'cfg'})
-    const config = new CivetConfig()
     this.config = config.getDBPath()
     this.loadPlugins()
     const schema = config.schema()

@@ -17,7 +17,8 @@ const replyMessageMap = {
   'getAllCategory': 'replyAllCategory',
   'getUncategoryImages': 'replyUncategoryImages',
   'getUntagImages': 'replyUntagImages',
-  'reInitDB': 'replyReloadDBStatus'
+  'reInitDB': 'replyReloadDBStatus',
+  'getFilesSnap': 'replyFilesSnap'
 }
 
 let getServiceInstance = (function() {
@@ -76,6 +77,7 @@ export default{
   GET_IMAGES_INFO: 'getImagesInfo',
   GET_IMAGES_INDEXES: 'getImagesIndex',
   GET_IMAGES_DIRECTORY: 'getImagesWithDirectoryFormat',
+  GET_FILES_SNAP: 'getFilesSnap',
   GET_ALL_TAGS: 'getAllTags',
   GET_ALL_TAGS_WITH_IMAGES: 'getAllTagsWithImages',
   GET_ALL_CATEGORY: 'getAllCategory',

@@ -61,9 +61,9 @@
 </template>
 
 <script>
-import localStorage from '../LocalStorage'
-import { ImageParser } from '../Image'
-import util from 'util'
+import storage from '../../public/Kernel'
+// import { ImageParser } from '../Image'
+// import util from 'util'
 
 export default {
   data() {
@@ -73,7 +73,7 @@ export default {
       testImagesID: []
     }
   },
-  async mounted() {
+  mounted() {
     // const adapter = await navigator.gpu.requestAdapter()
     // if (adapter === undefined) {
     //   console.log('not support webgpu: 1')
@@ -82,8 +82,8 @@ export default {
     // if (device === undefined) {
     //   console.log('not support webgpu: 2')
     // }
-    await this.loadImages()
-    await this.loadOtherDisplayInfo()
+    // await this.loadImages()
+    this.loadOtherDisplayInfo()
   },
   methods: {
     convert(arr) {
@@ -121,99 +121,89 @@ export default {
       }
     },
     async loadImages() {
-      let snaps = await localStorage.getImagesSnap()
-      let data = []
-      for (let snapIdx in snaps) {
-        let img = {imageid: snapIdx, step: snaps[snapIdx].step, name: snaps[snapIdx].name}
-        let info = await localStorage.getImageInfo(snapIdx)
-        console.info('loadImages', info)
-        img.tag = this.convert(info.tag)
-        img.keyword = this.convert(info.keyword)
-        img.clazz = this.convert(info.category)
-        img.fullpath = info.path
-        img.size = info.size
-        img.box = 'width: ' + info.width + ', height: ' + info.height
-        img.type = info.type
-        data.push(img)
-      }
-      this.tableData = data
+      // let snaps = await localStorage.getImagesSnap()
+      // let data = []
+      // for (let snapIdx in snaps) {
+      //   let img = {imageid: snapIdx, step: snaps[snapIdx].step, name: snaps[snapIdx].name}
+      //   let info = await localStorage.getImageInfo(snapIdx)
+      //   console.info('loadImages', info)
+      //   img.tag = this.convert(info.tag)
+      //   img.keyword = this.convert(info.keyword)
+      //   img.clazz = this.convert(info.category)
+      //   img.fullpath = info.path
+      //   img.size = info.size
+      //   img.box = 'width: ' + info.width + ', height: ' + info.height
+      //   img.type = info.type
+      //   data.push(img)
+      // }
+      // this.tableData = data
     },
-    async loadOtherDisplayInfo() {
-      let unclazzImages = await localStorage.getUncategoryImages()
-      let untagImages = await localStorage.getUntagImages()
-      this.msg = '未分类: ' + unclazzImages.length + '\n未标签: ' + untagImages.length
+    loadOtherDisplayInfo() {
+      let unclazzImages = storage.getUnClassifyFiles()
+      let untagImages = storage.getUnTagFiles()
+      let classes = storage.getClasses('/')
+      this.msg = '未分类: ' + unclazzImages.length + '\n未标签: ' + untagImages.length + '\n'
+      this.msg += JSON.stringify(classes)
     },
-    async testCorrection() {
-      await this.testAddTag('标签测试')
-      await this.testRemoveTag('标签测试')
+    testCorrection() {
+      // await this.testAddTag('标签测试')
+      // await this.testRemoveTag('标签测试')
     },
-    async testAddImage() {
-      const fs = require('fs')
-      const os = require('os')
-      try {
-        let fullpath = 'F:/Image/熔岩/jr-korpa-Ud32uVNR23g-unsplash.jpg'
-        console.info('plateform', os.platform())
-        if (os.platform() === 'darwin') {
-          fullpath = '/Users/v_yuanwenbin/Pictures/照片图库.photoslibrary/resources/proxies/derivatives/00/00/3/UNADJUSTEDNONRAW_thumb_3.jpg'
-        }
-        const info = fs.statSync(fullpath)
-        const parser = new ImageParser()
-        let parse = util.promisify(parser.parse)
-        const img = await parse(fullpath, info)
-        console.info(img)
-        this.testImagesID.push(img.id)
-      } catch (err) {
-      }
-      await this.loadImages()
+    testAddImage() {
+      // const fs = require('fs')
+      // const os = require('os')
+      // try {
+      //   let fullpath = 'F:/Image/熔岩/jr-korpa-Ud32uVNR23g-unsplash.jpg'
+      //   console.info('plateform', os.platform())
+      //   if (os.platform() === 'darwin') {
+      //     fullpath = '/Users/v_yuanwenbin/Pictures/照片图库.photoslibrary/resources/proxies/derivatives/00/00/3/UNADJUSTEDNONRAW_thumb_3.jpg'
+      //   }
+      //   const info = fs.statSync(fullpath)
+      //   const parser = new ImageParser()
+      //   let parse = util.promisify(parser.parse)
+      //   const img = await parse(fullpath, info)
+      //   console.info(img)
+      //   this.testImagesID.push(img.id)
+      // } catch (err) {
+      // }
+      // await this.loadImages()
     },
-    async testRemoveImage() {
-      if (!this.testImagesID.length) return
-      for (let idx of this.testImagesID) {
-        await localStorage.removeImage(idx)
-      }
-      await this.loadImages()
+    testRemoveImage() {
+      // if (!this.testImagesID.length) return
+      // for (let idx of this.testImagesID) {
+      //   await localStorage.removeImage(idx)
+      // }
+      // await this.loadImages()
     },
-    async testAddTag(tag) {
-      if (!this.testImagesID.length) return
-      for (let idx of this.testImagesID) {
-        await localStorage.addTag(idx, tag)
-        const img = await localStorage.getImageInfo(idx)
-        this.arrayValidate(img.tag, img.label + ' tag error')
-        this.arrayAssert(img.tag.indexOf(tag) > -1, this.testImagesID[idx] + ' add tag fail')
-      }
-      await this.loadImages()
+    testAddTag(tag) {
+      // if (!this.testImagesID.length) return
+      // for (let idx of this.testImagesID) {
+      //   await localStorage.addTag(idx, tag)
+      //   const img = await localStorage.getImageInfo(idx)
+      //   this.arrayValidate(img.tag, img.label + ' tag error')
+      //   this.arrayAssert(img.tag.indexOf(tag) > -1, this.testImagesID[idx] + ' add tag fail')
+      // }
+      // await this.loadImages()
     },
-    async testRemoveTag(tag) {
-      if (!this.testImagesID.length) return
-      for (let idx of this.testImagesID) {
-        await localStorage.removeTag(tag, idx)
-        const img = await localStorage.getImageInfo(idx)
-        this.arrayValidate(img.tag, img.label + ' tag error')
-        this.arrayAssert(img.tag.indexOf(tag) < 0, this.testImagesID[idx] + ' remove tag fail')
-      }
-      await this.loadImages()
+    testRemoveTag(tag) {
+      // if (!this.testImagesID.length) return
+      // for (let idx of this.testImagesID) {
+      //   await localStorage.removeTag(tag, idx)
+      //   const img = await localStorage.getImageInfo(idx)
+      //   this.arrayValidate(img.tag, img.label + ' tag error')
+      //   this.arrayAssert(img.tag.indexOf(tag) < 0, this.testImagesID[idx] + ' remove tag fail')
+      // }
+      // await this.loadImages()
     },
-    async testAddClazz() {
-      if (!this.testImagesID.length) return
-      await localStorage.addCategory('undefined测试')
-      await localStorage.addCategory('分类测试', '')
-      for (let idx of this.testImagesID) {
-        await localStorage.addCategory('分类测试', '', idx)
-        await localStorage.addCategory('子分类', '父分类', idx)
-        await localStorage.addCategory('三级分类', '一级分类/二级分类', idx)
-        const img = await localStorage.getImageInfo(idx)
-        this.arrayValidate(img.category, img.label + ' class error')
-      }
-      let allCate = await localStorage.getAllCategory()
-      console.info('display all category', allCate)
-      await this.loadImages()
-      await this.loadOtherDisplayInfo()
+    testAddClazz() {
+      storage.addClasses(['新分类'])
+      storage.updateClassName('新分类', '剑网三')
+      storage.addClasses(['剑网三/万花'])
+      this.loadOtherDisplayInfo()
     },
-    async testRemoveClazz() {
-      await localStorage.removeCategory('分类测试')
-      await localStorage.removeCategory('分类测试', '')
-      await this.loadImages()
-      await this.loadOtherDisplayInfo()
+    testRemoveClazz() {
+      storage.removeClasses(['剑网三'])
+      this.loadOtherDisplayInfo()
     }
   }
 }

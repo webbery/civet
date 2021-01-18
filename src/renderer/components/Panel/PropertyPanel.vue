@@ -34,7 +34,7 @@
     <fieldset>
       <legend class="title">分类</legend>
       <div>
-        <el-tag v-for="clz of dynamicClass" :key="clz" size="mini" @close="onDeleteClass(clz)" closable>{{clz.name||clz}}</el-tag>
+        <el-tag v-for="clz of dynamicClass" :key="clz" size="mini" @close="onDeleteClass(clz)" closable>{{clz}}</el-tag>
         <el-popover
           placement="left"
           width="160"
@@ -69,7 +69,7 @@ import JString from '@/../public/String'
 import JImage from '../JImage'
 import ImgTool from '../utils/ImgTool'
 import log from '@/../public/Logger'
-import { CivetConfig } from '@/../public/CivetConfig'
+import { config } from '@/../public/CivetConfig'
 import { mapState } from 'vuex'
 
 export default {
@@ -113,9 +113,9 @@ export default {
       const files = this.$store.getters.getFiles([imageID])
       if (!files) return
       log.info('PropertyPanel', files)
+      const localize = new Intl.DateTimeFormat('zh-cn')
       if (files.length === 1) {
         let file = files[0]
-        const config = new CivetConfig()
         const schema = config.meta()
         let names = []
         let values = []
@@ -134,7 +134,7 @@ export default {
           }
           if (item.name === 'color') continue
           if (item.display) {
-            console.info('propterty name:', item.name)
+            console.info('propterty name:', item.name, 'type:', item.type)
             names.push(JString.i18n(item.name))
             const meta = getItem(item.name, file.meta)
             if (!meta) {
@@ -143,7 +143,13 @@ export default {
               if (item.name === 'size') {
                 values.push(getSize(parseInt(file.size)))
               } else {
-                values.push(meta.value)
+                if (item.type === 'date') {
+                  const dt = localize.format(new Date(meta.value))
+                  console.info('date: ', dt, meta.value)
+                  values.push(dt)
+                } else {
+                  values.push(meta.value)
+                }
               }
             }
           }
@@ -162,13 +168,14 @@ export default {
         }
         for (let idx = 0; idx < this.candidateClasses.length; ++idx) {
           const candidate = this.candidateClasses[idx]
-          if (isClassExist(candidate.substr(1), this.dynamicClass)) {
-            this.checkValue.push(true)
+          // console.info('candicate:', candidate)
+          if (isClassExist(candidate, this.dynamicClass)) {
+            this.$set(this.checkValue, idx, true)
           } else {
-            this.checkValue.push(false)
+            this.$set(this.checkValue, idx, false)
           }
         }
-        console.info('check state:', this.checkValue)
+        // console.info('check state:', this.checkValue)
       }
     },
     onDeleteTag(tag) {
@@ -176,8 +183,8 @@ export default {
       // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
       this.$store.dispatch('removeTags', {id: this.picture.id, tag: tag})
     },
-    onDeleteClass(clazz) {
-      this.dynamicClass.splice(this.dynamicClass.indexOf(clazz), 1)
+    async onDeleteClass(clazz) {
+      await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: clazz})
     },
     showInput() {
       if (!this.picture.id) return
@@ -208,35 +215,42 @@ export default {
         console.info('not support os')
       }
     },
-    onCategoryChange(val) {
+    async onCategoryChange(val) {
       let selectItem = []
       for (let idx in this.checkValue) {
         if (this.checkValue[idx] === true) {
-          selectItem.push(this.candidateClasses[idx].name)
+          selectItem.push(this.candidateClasses[idx])
         }
       }
-      console.info('class candidate', this.candidateClasses)
-      // const isClassExist = function (clsName, classes) {
-      //   for (let idx = 0; idx < classes.length;) {
-      //     if (clsName === classes[idx]) {
-      //       classes.splice(idx, 1)
-      //       return true
-      //     }
-      //     idx += 1
-      //   }
-      //   return false
-      // }
-      this.$store.dispatch('addClass', {id: [this.picture.id], class: selectItem})
-      // remove not exist
-      // for (let idx = this.dynamicClass.length - 1; idx >= 0; --idx) {
-      //   if (!isClassExist(this.dynamicClass[idx], selectItem)) {
-      //     this.dynamicClass.splice(idx, 1)
-      //   }
-      // }
+      console.info('class candidate', this.candidateClasses, 'selects:', selectItem)
+      // compare difference class
+      // find file that add to class
+      const isInClass = function (clsName, classes, clean = false) {
+        for (let idx = 0; idx < classes.length;) {
+          if (clsName === classes[idx]) {
+            if (clean === true) classes.splice(idx, 1)
+            return true
+          }
+          idx += 1
+        }
+        return false
+      }
+      // this.$store.dispatch('addClass', {id: [this.picture.id], class: selectItem})
+      // find file that remove from class
+      for (let idx = this.dynamicClass.length - 1; idx >= 0; --idx) {
+        if (!isInClass(this.dynamicClass[idx], selectItem, true)) {
+          // this.dynamicClass.splice(idx, 1)
+          await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: this.dynamicClass[idx]})
+        }
+      }
       // add not exist
-      // for (let item of selectItem) {
-      //   this.dynamicClass.push({name: item})
-      // }
+      for (let idx = selectItem.length - 1; idx >= 0; --idx) {
+        if (!isInClass(selectItem[idx], this.dynamicClass)) {
+          console.info(selectItem[idx], idx)
+          await this.$store.dispatch('addClassOfFile', {id: this.picture.id, path: selectItem[idx]})
+          // this.dynamicClass.push(selectItem[idx])
+        }
+      }
     },
     getSrc(image) {
       console.info('++++++++', ImgTool.getSrc(image))

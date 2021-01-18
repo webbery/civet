@@ -6,7 +6,7 @@
         <WaterfallSlot v-for="(item, index) in imageList" :width="item.width" :height="item.height" :order="index" :key="item.id">
           <div class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
             <el-card :body-style="{ padding: '1px'}" shadow="never" style="border: 0px;">
-              <Preview :src="getImage(item)" class="preview" 
+              <Preview :src="getImage(item)" class="f" 
                 @dblclick.native="onImageDbClick(item)"
                 @keydown.ctrl.67.native="onFileCopyOut(props)"
                 @contextmenu.native="onImageClick($event, $root, item)" @mousedown.native="onImageClick($event, $root, item)" 
@@ -59,24 +59,6 @@ export default {
   },
   async mounted() {
     console.info('mounted')
-    // if (this.firstLoad === true) {
-    //   this.firstLoad = false
-    // bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
-    //   const snaps = this.$kernel.getFilesSnap(-1)
-    //   console.info('View Panel', snaps)
-    //   let imagesID = []
-    //   for (let snap of snaps) {
-    //     imagesID.push(snap.id)
-    //   }
-    //   const images = this.$kernel.getFilesInfo(imagesID)
-    //   let list = []
-    //   for (let image of images) {
-    //     list.push(new FileBase(image))
-    //     console.info(image)
-    //   }
-    //   this.imageList = list
-    // }
-    // bus.on(bus.EVENT_REMOVE_FILES, this.onRemoveFiles)
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
     this.width = document.getElementById('main-content').offsetWidth
     this.height = document.getElementById('main-content').offsetHeight
@@ -215,25 +197,18 @@ export default {
       // event.dataTransfer.effectAllowed = 'copy'
     },
     dragEnd(event) {
-      console.info('dragEnd', event.dataTransfer)
+      console.info('dragEnd from view', event.dataTransfer)
       event.target.style.opacity = ''
       event.preventDefault()
       // event.stopPropagation()
       // const url = event.dataTransfer.getData('text/plain')
       // console.info('copy URI:', url)
     },
-    onRemoveFiles(removeIDs) {
-      for (let id of removeIDs) {
-        const index = this.imageList.findIndex((image) => { return image.id === id })
-        if (index !== -1) {
-          this.imageList.splice(index, 1)
-        }
-      }
-    },
     onDeleteItem(name, parent, fileid) {
-      this.onRemoveFiles([fileid])
-      bus.emit(Service.EVENT_REMOVE_ITEM, [fileid])
-      this.$ipcRenderer.send(Service.REMOVE_FILES, [fileid])
+      // this.onRemoveFiles([fileid])
+      // bus.emit(Service.EVENT_REMOVE_ITEM, [fileid])
+      // this.$ipcRenderer.send(Service.REMOVE_FILES, [fileid])
+      this.$store.dispatch('removeFiles', [fileid])
     },
     onFileLoad() {
       console.info('on file load')

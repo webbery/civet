@@ -31,7 +31,8 @@ export class ImageParser {
         { name: 'path', value: this.fullpath, type: 'str' },
         { name: 'filename', value: f.base, type: 'str' },
         { name: 'size', value: stat.size, type: 'value' },
-        { name: 'datetime', value: stat.atime.toString(), type: 'value' }
+        { name: 'datetime', value: stat.atime.toString(), type: 'date' },
+        { name: 'createtime', value: new Date().toString, type: 'date' }
       ]
     }
     return parseChain(fileInfo, stepFinishCB)
@@ -51,6 +52,10 @@ const parseChain = (fileInfo, stepFinishCB) => {
 }
 
 export class JImage extends FileBase {
+  constructor(json) {
+    super(json, 'image')
+  }
+
   toJson() {
     return JSON.parse(JSON.stringify(this))
   }
@@ -87,15 +92,15 @@ class ImageMetaParser extends ImageParseBase {
     } else {
       type = JString.getFormatType(meta['format'].description)
     }
-    const thumbnail = this.getImageThumbnail(buffer)
-    image.addMeta('thumbnail', thumbnail)
+    // const thumbnail = this.getImageThumbnail(buffer)
+    // image.addMeta('thumbnail', thumbnail)
     // const hashValue = await pHash({ext: 'image/jpeg', data: thumbnail}, 16, true)
     // console.info('hash: ', hashValue)
     // image.addMeta('hash', hashValue)
 
     if (meta['DateTime'] !== undefined && meta['DateTime'].value) {
       // image.datetime = meta['DateTime'].value[0]
-      image.addMeta('datetime', meta['DateTime'].value[0])
+      image.addMeta('datetime', meta['DateTime'].value[0], 'date')
     }
     image.addMeta('type', this.getImageFormat(type))
     image.addMeta('width', this.getImageWidth(meta))

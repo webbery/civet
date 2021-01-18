@@ -1,6 +1,8 @@
 <template>
   <lazy-component @show="handler">
+    <div class="frame">
     <img class="mini-cover" :src="src" width="100%">
+    </div>
   </lazy-component>
 </template>
 <script>
@@ -16,3 +18,12 @@ export default {
   }
 }
 </script>
+<style scoped>
+.mini-cover {
+  padding: 0px;
+}
+.frame {
+  border: 1px;
+  align-items: center;
+}
+</style>

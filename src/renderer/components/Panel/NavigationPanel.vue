@@ -16,6 +16,7 @@
               @change-name="onChangeName"
               @delete-node="onDelNode"
               @add-node="onAddNode"
+              @drop="onDropNode"
               :model="category"
               default-tree-node-name="新分类"
               default-leaf-node-name="新分类"
@@ -131,8 +132,19 @@ export default {
     onChangeName(params) {
       if (params.eventType === 'blur') {
         console.info('onChangeName', params)
-        this.$store.dispatch('changeClassName', {old: params.oldName, new: params.newName})
+        let newName = params.newName
+        let oldName = params.oldName
+        let sParent = ''
+        let parent = params.parent
+        while (parent.parent) {
+          sParent = parent.name + '/' + sParent
+          parent = parent.parent
+        }
+        this.$store.dispatch('changeClassName', {old: sParent + oldName, new: sParent + newName})
       }
+    },
+    onDropNode(params) {
+      console.info('onDropNode', params)
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)

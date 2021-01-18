@@ -44,7 +44,7 @@ import bus from './utils/Bus'
 import ViewFilter from '@/components/ViewFilter'
 import ImageOperator from '@/components/ImageOperator'
 import Service from '@/components/utils/Service'
-import { CivetConfig } from '@/../public/CivetConfig'
+import { config } from '@/../public/CivetConfig'
 
 export default {
   name: 'header-bar',
@@ -69,7 +69,7 @@ export default {
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
     bus.on(bus.EVENT_INIT_RESOURCE_DB, this.onInitResourceDB)
-    const config = new CivetConfig()
+    console.info(config)
     const resource = config.getCurrentResource()
     console.info('header', resource)
     this.resource = resource.name

@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, Menu, ipcMain } from 'electron'
-import { CivetConfig } from '../public/CivetConfig'
+// import { config } from '../public/CivetConfig'
 import { autoUpdater } from 'electron-updater'
 
 // import '../renderer/store'
@@ -51,8 +51,7 @@ function createRendererWindow() {
     return true
   }
   mainWindow.on('close', () => {
-    const cfg = new CivetConfig()
-    cfg.save()
+    // config.save()
     workerWindow.close()
     // mainWindow.close()
   })

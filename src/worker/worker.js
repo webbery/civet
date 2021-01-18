@@ -2,6 +2,7 @@ import JString from '../public/String'
 // import CV from '../public/CV'
 import { ImageParser, JImage } from './Image'
 // import { CategoryArray } from './Category'
+import ElementUI from 'element-ui'
 import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
@@ -13,7 +14,7 @@ const { ipcRenderer } = require('electron')
 // ready()
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
-// Vue.use(ElementUI)
+Vue.use(ElementUI)
 Vue.prototype.$ipcRenderer = ipcRenderer
 
 /* splash */
@@ -63,6 +64,7 @@ const ReplyType = {
   REPLY_IMAGES_DIRECTORY: 'replyImagesWithDirectory',
   REPLY_IMAGES_INFO: 'replyImagesInfo',
   REPLY_IMAGE_INFO: 'replyImageInfo',
+  REPLY_FILES_SNAP: 'replyFilesSnap',
   REPLY_ALL_TAGS: 'replyAllTags',
   REPLY_ALL_TAGS_WITH_IMAGES: 'replyAllTagsWithImages',
   REPLY_QUERY_FILES: 'replyQueryFilesResult',
@@ -188,6 +190,11 @@ const messageProcessor = {
     }
     reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
+  'getFilesSnap': (data) => {
+    // 全部图片信息
+    const imagesSnap = storage.getFilesSnap()
+    reply2Renderer(ReplyType.REPLY_FILES_SNAP, imagesSnap)
+  },
   'getImageInfo': (imageID) => {
     const img = storage.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
@@ -248,14 +255,17 @@ const messageProcessor = {
   'updateImageCategory': (data) => {
     storage.updateFileClass(data.imageID, data.category)
   },
-  'updateCategoryName': (oldName, newName) => {
-    console.info('old:', oldName, 'new:', newName)
-    storage.updateClassName(oldName, newName)
+  'updateCategoryName': (data) => {
+    console.info('old:', data.oldName, 'new:', data.newName)
+    storage.updateClassName(data.oldName, data.newName)
   },
   'updateFileName': (data) => {
-    // storage.
+    console.info('updateFileName id:', data.id, ', old:', data.oldName, 'new:', data.newName)
+    // {id: [fileids[0]], filename: '测试'}
+    storage.updateFile({id: [data.id], filename: data.newName})
   },
   'reInitDB': async (data) => {
+    console.info('init db')
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
   }
@@ -270,6 +280,7 @@ ipcRenderer.on('message-from-main', (event, arg) => {
 })
 
 ipcRenderer.on('checking-for-update', (event, arg) => {
+  console.info('checking-for-update, event:', event, arg)
 })
 
 ipcRenderer.on('update-available', (event, arg) => {

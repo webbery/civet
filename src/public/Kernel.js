@@ -6,9 +6,8 @@ const kernel = (function () {
   }
   let _isInit = false
   function _init() {
-    const CivetConfig = require('../public/CivetConfig').CivetConfig
-    const cfg = new CivetConfig()
-    const config = cfg.getConfig()
+    const cfg = require('../public/CivetConfig').config
+    const config = cfg.getConfig(true)
     if (config.resources.length === 0) return false
     try {
       if (!instance.civetkern.init(config, flag, false)) {
@@ -69,8 +68,8 @@ export default {
   removeTags: (filesID, tags) => { return kernel().removeTags({id: filesID, tag: tags}) },
   addClasses: (sql) => { return kernel().addClasses(sql) },
   removeClasses: (classes) => { return kernel().removeClasses(classes) },
-  undateFile: (sql) => { return kernel().updateFile(sql) },
-  undateClassName: (classPath, newPath) => { return kernel().undateClassName(classPath, newPath) },
+  updateFile: (sql) => { return kernel().updateFile(sql) },
+  updateClassName: (classPath, newPath) => { return kernel().updateClassName(classPath, newPath) },
   release: () => {
     kernel().release()
   }
