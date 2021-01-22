@@ -8,7 +8,7 @@ import fs from 'fs'
 import sharp from 'sharp'
 // import util from 'util'
 import storage from '../public/Kernel'
-// import WorkerPool from './WorkerPool/WorkerPool'
+import TaskManager from './WorkerPool/TaskManager'
 // const jpegasm = require('jpeg-asm')
 
 // const jpegEncode = util.promisify(jpegasm.encode)
@@ -87,8 +87,8 @@ class ImageMetaParser extends ImageParseBase {
     } else {
       type = JString.getFormatType(meta['format'].description)
     }
-    // const thumbnail = this.getImageThumbnail(buffer)
-    // image.addMeta('thumbnail', thumbnail)
+    const thumbnail = this.getImageThumbnail(buffer)
+    image.addMeta('thumbnail', thumbnail)
     // const hashValue = await pHash({ext: 'image/jpeg', data: thumbnail}, 16, true)
     // console.info('hash: ', hashValue)
     // image.addMeta('hash', hashValue)
@@ -204,8 +204,7 @@ class ImageTextParser extends ImageParseBase {
 
   async parse(image, buffer) {
     const fullpath = image.path + '/' + image.filename
-    // WorkerPool.addTask(this.task, fullpath)
-    image.tag = NLP.getNouns(fullpath)
+    image.tag = await TaskManager.exec(NLP.getNouns, [fullpath])
     if (image.tag !== 0) {
       image.keyword = image.tag
       console.info('ImageTextParser', image.tag)

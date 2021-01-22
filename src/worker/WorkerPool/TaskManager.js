@@ -9,20 +9,13 @@ const init = (function() {
     }
   }
 
-  let _queue = []
   return function() {
     if (!_pool) {
       _init()
     }
     return {
-      addTask: (task, params) => {
-        _queue.push([task, params])
-      },
-      exec: async () => {
-        if (_queue.length > 0) {
-          const job = _queue.pop()
-          return _pool.exec(job[0], job[1])
-        }
+      exec: async (task, params) => {
+        return _pool.exec(task, params)
       },
       release: () => {
         _pool.terminate(true)
@@ -31,10 +24,9 @@ const init = (function() {
   }
 })()
 export default {
-  addTask: async (task, params) => {
+  exec: async (task, params) => {
     const pool = init()
-    pool.addTask(task, params)
-    return pool.exec()
+    return pool.exec(task, params)
   },
   release: () => {
     const pool = init()
