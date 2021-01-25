@@ -85,6 +85,7 @@ namespace caxios {
       std::vector<FileID> vOut;
       auto itr = m_mTables.find(keyword);
       if (itr != m_mTables.end()) {
+        T_LOG("query", "meta(%s)", keyword.c_str());
         // meta
         auto cursor = std::begin(*(itr->second));
         auto end = Iterator();
@@ -98,8 +99,9 @@ namespace caxios {
         }
       }
       else {
-        if (keyword == TB_Keyword) return this->_Query(m_mKeywordMap[keyword], compare);
-        MDB_dbi dbi = m_mDBs[m_mKeywordMap[keyword]];
+        if (keyword == TB_Keyword || keyword == TB_Class || keyword == TB_Tag) {
+          return this->_Query(m_mKeywordMap[keyword], compare);
+        }
         //if (subset.empty()) {
         //  
         //}
@@ -121,6 +123,7 @@ namespace caxios {
     bool AddFileID2Class(const std::vector<FileID>&, uint32_t);
     void MapHash2Class(uint32_t clsID, const std::string& name);
     std::vector<uint32_t> AddClassImpl(const std::vector<std::string>& classes);
+    void InitClass(const std::string& key, uint32_t curClass, uint32_t parent);
     bool RemoveFile(FileID);
     void RemoveFile(FileID, const std::string& file2type, const std::string& type2file);
     bool RemoveTag(FileID, const Tags& tags);
@@ -169,11 +172,14 @@ namespace caxios {
 
   private:
     std::vector<FileID> _Query(const std::string& tableName, const CQuery<QT_String, CT_IN>& values);
+    std::vector<FileID> _Query(const std::string& tableName, const CQuery<QT_String, CT_EQUAL>& values);
     template<typename FAIL>
     std::vector<FileID> _Query(const std::string& tableName, FAIL& values) {
+      T_LOG("query", "fail, table: %s, query: %s", tableName.c_str(), typeid(values).name());
       std::vector<FileID> v;
       return std::move(v);
     }
+    std::vector<FileID> _QueryImpl(const std::string& tableName, const std::map<std::string, caxios::WordIndex>& wIndexes);
 
   private:
     DBFlag _flag = ReadWrite;

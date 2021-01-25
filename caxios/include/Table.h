@@ -12,6 +12,7 @@
 #define TABLE_INDX_KEYWORD  "indx2keyword"
 #define TABLE_KEYWORD2FILE  "keyword2file"
 #define TABLE_FILE2KEYWORD  "file2keyword"
+#define TABLE_KEYWORD2CLASS "keyword2class" // word index -> classes
 #define TABLE_FILE2TAG      "tag"           // fileID -> tag
 #define TABLE_TAG2FILE      "tags"          // tag -> fileID
 #define TABLE_TAG_INDX      "tag_indx"      // alphabet -> tag indx

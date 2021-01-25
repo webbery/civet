@@ -464,9 +464,8 @@ namespace caxios {
         sParent = info[0].As<Napi::String>();
       }
       T_LOG("class", "get classes");
-      nlohmann::json classes;
+      nlohmann::json classes = nlohmann::json::array();
       g_pCaxios->GetClasses(sParent, classes);
-      T_LOG("class", "get %s class interface: %s", sParent.c_str(), classes.dump().c_str());
       Napi::Env env = info.Env();
       return Parse(env, classes.dump());
       //auto arry = Classes2Array(env, classes);

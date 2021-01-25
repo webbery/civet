@@ -9,6 +9,8 @@
 #include "util/pinyin.h"
 #include "QueryAction.h"
 
+#define CHILD_START_OFFSET  2
+
 #define READ_BEGIN(dbname) \
   if (m_mDBs[dbname] == -1) {\
     m_mDBs[dbname] = m_pDatabase->OpenDatabase(dbname);\
@@ -35,6 +37,7 @@ namespace caxios {
     TABLE_INDX_KEYWORD,
     TABLE_KEYWORD2FILE,
     TABLE_FILE2KEYWORD,
+    TABLE_KEYWORD2CLASS,
     TABLE_FILE2TAG,
     TABLE_TAG2FILE,
     TABLE_TAG_INDX,
@@ -215,9 +218,6 @@ namespace caxios {
   bool DBManager::RemoveClasses(const std::vector<std::string>& classes)
   {
     WRITE_BEGIN();
-    nlohmann::json test;
-    this->GetClasses("/", test);
-    T_LOG("class", "debug: %s", test.dump().c_str());
 
     std::deque<ClassID> vAllClasses;
     std::map<ClassID, std::vector<FileID>> mFilesID;
@@ -329,7 +329,7 @@ namespace caxios {
     std::for_each(mIndexes.begin(), mIndexes.end(), [this, &existID](std::pair<std::string, WordIndex> item) {
       AddTagPY(item.first, item.second);
       AddFileID2Tag(existID, item.second);
-      T_LOG("tag", "exist ID: %s", format_vector(existID).c_str());
+      T_LOG("tag", "files ID: %s, tag index: %d", format_vector(existID).c_str(), item.second);
       for (FileID fileID : existID) {
         this->AddFileID2Keyword(fileID, item.second);
         this->AddKeyword2File(item.second, fileID);
@@ -477,7 +477,6 @@ namespace caxios {
   {
     READ_BEGIN(TABLE_CLASS2FILE);
     READ_BEGIN(TABLE_CLASS2HASH);
-    std::set<WordIndex> sIndexes;
     std::map<uint32_t, std::vector<FileID>> vFiles;
     uint32_t parentID = 0;
     std::string parentKey(ROOT_CLASS_PATH);
@@ -486,41 +485,45 @@ namespace caxios {
     }
     void* pData = nullptr;
     uint32_t len = 0;
-    m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], parentKey, pData, len);
-    size_t cnt = len / sizeof(WordIndex);
-    if (len) {
-      std::string sParent = (parent == ROOT_CLASS_PATH ? "" : parent + ROOT_CLASS_PATH);
-      for (size_t idx = 0; idx < cnt; ++idx) {
-        nlohmann::json jCls;
-        uint32_t clsID = *((uint32_t*)pData + idx);
-        std::string name = GetClassByHash(clsID);
-        jCls["name"] = name;
-        uint32_t childID;
-        std::string sChild;
-        std::tie(childID, sChild) = EncodePath2Hash(sParent + name);
-        if (childID == parentID) continue;
-        auto clzChildren = GetClassChildren(sChild);
-        auto files = GetFilesOfClass(childID);
-        T_LOG("class", "clsID:%lld, parentID: %lld,  %d children %s", clsID, parentID, childID, format_vector(clzChildren).c_str());
-        if (clzChildren.size()|| files.size()) {
-          nlohmann::json children;
-          for (auto& clzID : clzChildren) {
-            nlohmann::json clz;
-            clz["id"] = clzID;
-            clz["name"] = GetClassByHash(clzID);
-            clz["type"] = "clz";
-            children.push_back(clz);
+    auto children = GetClassChildren(parentKey);
+    std::string sParent = (parent == ROOT_CLASS_PATH ? "" : parent + ROOT_CLASS_PATH);
+      for (auto& clsID : children) {
+      nlohmann::json jCls;
+      std::string name = GetClassByHash(clsID);
+      jCls["name"] = name;
+      uint32_t childID;
+      std::string sChild;
+      std::tie(childID, sChild) = EncodePath2Hash(sParent + name);
+      if (childID == parentID) continue;
+      auto clzChildren = GetClassChildren(sChild);
+      auto files = GetFilesOfClass(childID);
+      T_LOG("class", "clsID:%u, parentID: %u,  %d children %s",
+        clsID, parentID, childID, format_vector(clzChildren).c_str());
+      if (clzChildren.size() || files.size()) {
+        nlohmann::json children;
+        for (auto& clzID : clzChildren) {
+          nlohmann::json clz;
+          clz["id"] = clzID;
+          std::string classPath = GetClassByHash(clzID);
+          size_t pos = classPath.rfind('/');
+          if (pos != std::string::npos) {
+            clz["name"] = classPath.substr(pos + 1);
           }
-          for (auto& fileID : files) {
-            children.push_back(fileID);
+          else {
+            clz["name"] = classPath;
           }
-          jCls["children"] = children;
+          clz["type"] = "clz";
+          children.push_back(clz);
         }
-        jCls["type"] = "clz";
-        classes.push_back(jCls);
+        for (auto& fileID : files) {
+          children.push_back(fileID);
+        }
+        jCls["children"] = children;
       }
+      jCls["type"] = "clz";
+      classes.push_back(jCls);
     }
-    m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], parentID, pData, len);
+      m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], parentID, pData, len);
     for (size_t idx = 0; idx < len / sizeof(FileID); ++idx) {
       FileID fid = *((FileID*)pData + idx);
       nlohmann::json jFile;
@@ -529,7 +532,9 @@ namespace caxios {
       jFile["name"] = std::get<1>(snap);
       classes.push_back(jFile);
     }
-    T_LOG("class", "parent: %s(%s), get class: %s", parent.c_str(), parentKey.c_str(), classes.dump().c_str());
+    if (!classes.empty()) {
+      T_LOG("class", "parent: %s(%s), get class: %d", parent.c_str(), parentKey.c_str(), classes.dump().c_str());
+    }
     return true;
   }
 
@@ -563,6 +568,7 @@ namespace caxios {
   bool DBManager::UpdateClassName(const std::string& oldName, const std::string& newName)
   {
     std::vector<std::string> vWords = split(newName, '/');
+    std::vector<std::string> vOldWords = split(oldName, '/');
     std::vector<std::string> names({ oldName, newName });
     auto mIndexes = GetWordsIndex(names);
     std::vector<WordIndex> vIndexes;
@@ -578,9 +584,22 @@ namespace caxios {
     auto newPath = EncodePath2Hash(newName);
     void* pData = nullptr;
     uint32_t len = 0;
+    // remove old
+    m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vOldWords[vOldWords.size() - 1]], pData, len);
+    if (len) {
+      std::vector<ClassID> vClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
+      eraseData(vClassesID, oldPath.first);
+      m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vOldWords[vOldWords.size() - 1]], vClassesID.data(), vClassesID.size()*sizeof(ClassID));
+    }
+    // add new
+    m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vWords[vWords.size() - 1]], pData, len);
+    std::vector<ClassID> vNewClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
+    addUniqueDataAndSort(vNewClassesID, newPath.first);
+    m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vWords[vWords.size() - 1]], vNewClassesID.data(), vNewClassesID.size() * sizeof(ClassID));
+
     m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], oldPath.second, pData, len);
     if (len) {
-      std::vector<uint32_t> vHash((uint32_t*)pData, (uint32_t*)pData + len / sizeof(uint32_t*));
+      std::vector<uint32_t> vHash((uint32_t*)pData, (uint32_t*)pData + len / sizeof(uint32_t));
       m_pDatabase->Put(m_mDBs[TABLE_CLASS2HASH], newPath.second, vHash.data(), vHash.size() * sizeof(uint32_t));
       m_pDatabase->Del(m_mDBs[TABLE_CLASS2HASH], oldPath.second);
     }
@@ -650,21 +669,44 @@ namespace caxios {
   std::vector<FileID> DBManager::_Query(const std::string& tableName, const CQuery<QT_String, CT_IN>& values)
   {
     std::vector<FileID> outFilesID;
-    std::vector<std::string> vKeywords;
     std::vector<std::string> conditions = values.condition();
-    for (auto& cond: conditions)
-    {
-      vKeywords.emplace_back(cond);
-    }
-    T_LOG("query", "table: %s, DBI: %d, keyword: %s", tableName.c_str(), m_mDBs[tableName], format_vector(vKeywords).c_str());
-    auto indexes = GetWordsIndex(vKeywords);
+    T_LOG("query", "table: %s, DBI: %d, keyword: %s", tableName.c_str(), m_mDBs[tableName], format_vector(conditions).c_str());
+    auto indexes = GetWordsIndex(conditions);
     if (indexes.size() == 0) return outFilesID;
+    return _QueryImpl(tableName, indexes);
+  }
+
+  std::vector<caxios::FileID> DBManager::_Query(const std::string& tableName, const CQuery<QT_String, CT_EQUAL>& values)
+  {
+    std::vector<FileID> outFilesID;
+    std::string condition = values.condition();
+    T_LOG("query", "table: %s, DBI: %d, keyword: %s", tableName.c_str(), m_mDBs[tableName], condition.c_str());
+    auto indexes = GetWordsIndex({ condition });
+    if (indexes.size() == 0) return outFilesID;
+    return _QueryImpl(tableName, indexes);
+  }
+
+  std::vector<caxios::FileID> DBManager::_QueryImpl(const std::string& tableName, const std::map<std::string, caxios::WordIndex>& wIndexes)
+  {
+    std::vector<caxios::FileID> outFilesID;
     std::set<FileID> sFilesID;
-    for (auto item: indexes)
+    std::vector<uint32_t> keys;
+    void* pData = nullptr;
+    uint32_t len = 0;
+    for (auto item : wIndexes)
     {
-      void* pData = nullptr;
-      uint32_t len = 0;
-      if (!m_pDatabase->Get(m_mDBs[tableName], item.second, pData, len)) return outFilesID;
+      uint32_t key = item.second;
+      if (tableName == TABLE_CLASS2FILE) {
+        m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], key, pData, len);
+        addUniqueDataAndSort(keys, std::vector((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID)));
+      }
+      else {
+        keys.push_back(key);
+      }
+    }
+    T_LOG("query", "query keys: %s", format_vector(keys).c_str());
+    for (auto k : keys) {
+      m_pDatabase->Get(m_mDBs[tableName], k, pData, len);
       if (len) {
         sFilesID.insert((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
       }
@@ -867,11 +909,23 @@ namespace caxios {
       });
       std::string sChild = serialize(vClassPath);
       T_LOG("class", "serialize result: %s", format_x16(sChild).c_str());
-      uint32_t child = GenerateClassHash(sChild);
+      ClassID child = GenerateClassHash(sChild);
+      if (child == 0) {
+        T_LOG("class", "error: %s", clazz.c_str());
+        continue;
+      }
       vClasses.emplace_back(child);
       MapHash2Class(child, clazz);
       uint32_t parent = ROOT_CLASS_ID;
       std::string sParent(ROOT_CLASS_PATH);
+      void* pData = nullptr;
+      uint32_t len = 0;
+      // add word map to class hash
+      m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], vClassPath[vClassPath.size() - 1], pData, len);
+      std::vector<ClassID> vClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
+      addUniqueDataAndSort(vClassesID, child);
+      m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], vClassPath[vClassPath.size() - 1], vClassesID.data(), vClassesID.size() * sizeof(ClassID));
+      T_LOG("class", "add keyword %s(%d) map to %s ", clazz.c_str(), vClassPath[vClassPath.size() - 1], format_vector(vClassesID).c_str());
       if (vClassPath.size() > 0) {
         vClassPath.pop_back();
         if (vClassPath.size() != 0) {
@@ -879,30 +933,38 @@ namespace caxios {
           parent = GenerateClassHash(sParent);
         }
         T_LOG("class", "parent(%llu): %s, %u", vClassPath.size(),(sParent).c_str(), parent);
-        if (parent == 0) {
-          //MapHash2Class(parent, "/");
-        }
       }
-      T_LOG("class", "add class to class, parent: %d, current: %d, name: %s", parent, child, clazz.c_str());
       // update parent 
-      void* pData = nullptr;
-      uint32_t len = 0;
       m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], sChild, pData, len);
       if (len == 0) {
         // add . and ..
-        std::vector<uint32_t> vCurrent({ child , parent });
-        m_pDatabase->Put(m_mDBs[TABLE_CLASS2HASH], sChild, vCurrent.data(), vCurrent.size() * sizeof(uint32_t));
+        InitClass(sChild, child, parent);
         T_LOG("class", "add class [%s] to hash [%u(%s), %u]", format_x16(sChild).c_str(), child, clazz.c_str(), parent);
       }
       m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], sParent, pData, len);
-      std::vector<uint32_t> children;
+      std::vector<uint32_t> children(len + 1);
       if (len) {
-        children.assign((uint32_t*)pData, (uint32_t*)pData + len / sizeof(uint32_t));
+        children.assign((uint32_t*)pData + CHILD_START_OFFSET, (uint32_t*)pData + len / sizeof(uint32_t));
       }
       addUniqueDataAndSort(children, child);
+      if (len) {
+        children.insert(children.begin(), (uint32_t*)pData, (uint32_t*)pData + CHILD_START_OFFSET);
+      }
+      else if (sParent == "/") {
+        children.insert(children.begin(), { 0, 0 });
+      }
+      T_LOG("class", "add class to class, parent: %d, current: %d, name: %s, children: %s", parent, child, clazz.c_str(), format_vector(children).c_str());
       m_pDatabase->Put(m_mDBs[TABLE_CLASS2HASH], sParent, children.data(), children.size() * sizeof(uint32_t));
+      
     }
     return std::move(vClasses);
+  }
+
+  void DBManager::InitClass(const std::string& key, uint32_t curClass, uint32_t parent)
+  {
+    // add . and ..
+    std::vector<uint32_t> vCurrent({ curClass , parent });
+    m_pDatabase->Put(m_mDBs[TABLE_CLASS2HASH], key, vCurrent.data(), vCurrent.size() * sizeof(uint32_t));
   }
 
   bool DBManager::RemoveFile(FileID fileID)
@@ -1108,12 +1170,13 @@ namespace caxios {
     return e;
   }
 
-  uint32_t DBManager::GetClassHash(const std::string& clazz)
+  ClassID DBManager::GetClassHash(const std::string& clazz)
   {
     void* pData = nullptr;
     uint32_t len = 0;
-    if (!m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], clazz, pData, len)) return 0;
-    return *(uint32_t*)pData;
+    m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], clazz, pData, len);
+    if (len == 0) return 0;
+    return *(ClassID*)pData;
   }
 
   uint32_t DBManager::GetClassParent(const std::string& clazz)
@@ -1135,7 +1198,7 @@ namespace caxios {
       return mIndexes[word];
       });
     std::string sKey = serialize(vIndexes);
-    uint32_t hash = GetClassHash(sKey);
+    uint32_t hash = GenerateClassHash(sKey);
     T_LOG("class", "encode path: %s to (%u, %s)", classPath.c_str(), hash, format_x16(sKey).c_str());
     return std::make_pair(hash, sKey);
   }
@@ -1147,8 +1210,9 @@ namespace caxios {
     uint32_t len = 0;
     m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], clazz, pData, len);
     size_t cnt = len / sizeof(uint32_t);
-    if (cnt > 2) {
-      vChildren.assign((uint32_t*)pData + 2, (uint32_t*)pData + cnt);
+    if (cnt > CHILD_START_OFFSET) {
+      T_LOG("class", "%s children count: %d", clazz.c_str(), cnt);
+      vChildren.assign((uint32_t*)pData + CHILD_START_OFFSET, (uint32_t*)pData + cnt);
     }
     T_LOG("class", "%s children: %s", clazz.c_str(), format_vector(vChildren).c_str());
     return std::move(vChildren);
@@ -1208,7 +1272,7 @@ namespace caxios {
       if (item["db"] == true) {
         std::string name = trunc(item["name"].dump());
         m_mTables[name] = new TableMeta(m_pDatabase, name, trunc(item["type"].dump()));
-        T_LOG("query", "schema: %s", item["name"].dump().c_str());
+        T_LOG("query", "schema[%s]: %s", name.c_str(), item["name"].dump().c_str());
       }
     }
     T_LOG("construct", "schema: %s", meta.c_str());

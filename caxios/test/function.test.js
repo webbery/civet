@@ -187,7 +187,7 @@ describe('civetkern read only test', function() {
   })
   it('search files by keyword', function() {
     let result = instance.query({keyword: ['标签']})
-    // console.info(result)
+    console.info(result)
     expect(result).to.lengthOf(2)
     //for (let info of result[0].meta) {
     //    console.info(info)
@@ -218,7 +218,7 @@ describe('civetkern read only test', function() {
   it('search by class', function () {
     let result = instance.query({class: 'type1'})
     expect(result).to.lengthOf(0)
-    result = instance.query({class: '新分类'})
+    result = instance.query({class: '新分类1'})
     expect(result).to.lengthOf(1)
   })
   after(function() {
@@ -257,6 +257,9 @@ describe('civetkern clean test', function() {
     rootClasses = instance.getClasses()
     // console.info(rootClasses)
     expect(rootClasses).to.lengthOf(3)//.withErrorMessage('should be keep 2 classes')
+    //instance.removeClasses(['新分类', 'class2', 'type2'])
+    //rootClasses = instance.getClasses()
+    //expect(rootClasses).to.lengthOf(0)
     //const rootClasses = instance.getClasses()
     //console.info(rootClasses)
   })

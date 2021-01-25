@@ -147,8 +147,8 @@ namespace caxios {
     key.mv_size = sizeof(uint32_t);
     this->Begin();
     if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
-      T_LOG("database", "mdb_get %d fail: %s", dbi, err2str(rc).c_str());
-      pData = nullptr;
+      T_LOG("database", "mdb_get %d fail: %s, key: %d", dbi, err2str(rc).c_str(), k);
+      //pData = nullptr;
       len = 0;
       return false;
     }

@@ -86,7 +86,7 @@ namespace caxios {
       return val == _str;
     }
 
-    //std::vector<std::string> condition() { return _str; }
+    std::string condition() const { return _str; }
   private:
     std::string _str;
   };
