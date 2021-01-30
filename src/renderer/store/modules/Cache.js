@@ -3,9 +3,12 @@ import Service from '@/components/utils/Service'
 import { Tree, TreeNode } from '@/components/Control/Tree'
 import Vue from 'vue'
 
-const state = {
+const Cache = {
   query: {},
-  cache: {},
+  files: {}
+}
+
+const state = {
   classes: new Tree([]),
   // classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
   classesName: [],
@@ -19,8 +22,14 @@ const state = {
 }
 
 const getters = {
-  viewItems: state => {
-    return state.viewItems
+  viewItems: state => (page = 0, size = 50) => {
+    if (state.viewItems.length < size) {
+      return state.viewItems
+    }
+    const start = page * size
+    if (start < state.viewItems.length) {
+      return state.viewItems
+    }
   },
   classes: state => { return state.classes },
   getFiles: (state, getters) => {
@@ -28,7 +37,7 @@ const getters = {
       console.info('get files: ', filesID)
       let files = []
       for (let fileID of filesID) {
-        const file = state.cache[fileID]
+        const file = Cache.files[fileID]
         if (file !== null) {
           files.push(file)
         }
@@ -69,8 +78,8 @@ const mutations = {
     // }
     const images = data.allImages
     for (let image of images) {
-      state.cache[image.id] = new FileBase(image)
-      if (state.cache.length > maxCacheSize) break
+      Cache.files[image.id] = new FileBase(image)
+      if (Cache.files.length > maxCacheSize) break
     }
     // const len = state.cache.length
     // setting view panel item
@@ -132,18 +141,18 @@ const mutations = {
     let idx = 0
     console.info('addFiles:', files)
     for (let file of files) {
-      if (state.cache.hasOwnProperty(file.id)) continue
-      state.cache[file.id] = new FileBase(file)
+      if (Cache.files.hasOwnProperty(file.id)) continue
+      Cache.files[file.id] = new FileBase(file)
       // setting view panel item
-      if (state.cache.length > maxCacheSize) break
+      if (Cache.files.length > maxCacheSize) break
       const pos = state.viewItems.length + idx
-      Vue.set(state.viewItems, pos, state.cache[file.id])
+      Vue.set(state.viewItems, pos, Cache.files[file.id])
     }
   },
   display(state, data) {
     let idx = 0
-    for (let k in state.cache) {
-      Vue.set(state.viewItems, idx, state.cache[k])
+    for (let k in Cache.files) {
+      Vue.set(state.viewItems, idx, Cache.files[k])
       idx += 1
       if (idx > maxCacheSize) break
     }
@@ -153,14 +162,14 @@ const mutations = {
     state.query = result
     state.viewItems.splice(0, state.viewItems.length)
     for (let idx = 0; idx < state.query.length; ++idx) {
-      Vue.set(state.viewItems, idx, state.cache[result[idx].id])
+      Vue.set(state.viewItems, idx, Cache.files[result[idx].id])
     }
     console.info(state.viewItems, result)
   },
   async addTag(state, mutation) {
     const {fileID, tag} = mutation
     console.info('cache add tag:', fileID, tag)
-    const file = state.cache[fileID]
+    const file = Cache.files[fileID]
     if (!file) {
       return
     }
@@ -198,7 +207,7 @@ const mutations = {
     const fileid = mutation.id
     const classpath = mutation.path
     console.info('addClassOfFile', fileid, classpath)
-    let file = state.cache[fileid]
+    let file = Cache.files[fileid]
     console.info(file)
     if (!file.category) file.category = []
     file.category.push(classpath)
@@ -218,8 +227,8 @@ const mutations = {
           }
         }
         // remove from relavent files
-        for (let fileid in state.cache) {
-          let file = state.cache[fileid]
+        for (let fileid in Cache.files) {
+          let file = Cache.files[fileid]
           // console.info(file)
           let pos = file.category.indexOf(clsName)
           if (pos >= 0) file.category.splice(pos, 1)
@@ -243,7 +252,7 @@ const mutations = {
     let fileid = mutation.id
     let classpath = mutation.path
     console.info('remove class of file', fileid, classpath)
-    let file = state.cache[fileid]
+    let file = Cache.files[fileid]
     for (let idx = 0; idx < file.category.length; ++idx) {
       if (file.category[idx] === classpath) {
         file.category.splice(idx, 1)
@@ -264,14 +273,14 @@ const mutations = {
   removeFiles(state, filesid) {
     for (let idx = 0; idx < filesid.length; ++idx) {
       // remove from cache
-      Vue.delete(state.cache, filesid[idx])
+      Vue.delete(Cache.files, filesid[idx])
     }
     // remove from db
     Service.getServiceInstance().send(Service.REMOVE_FILES, filesid)
   },
   removeTags(state, mutation) {
     Service.getServiceInstance().send(Service.REMOVE_TAG, {tag: [mutation.tag], filesID: [mutation.id]})
-    let file = state.cache[mutation.id]
+    let file = Cache.files[mutation.id]
     file.tag.splice(file.tag.indexOf(mutation.tag), 1)
   },
   update(state, sql) {},
@@ -363,6 +372,9 @@ const actions = {
   }
 }
 
+const utils = {
+  getFileFromCache: () => {}
+}
 export default {
   state,
   getters,

@@ -19,14 +19,14 @@
       <component :is="comName"></component>
     </el-col>
     <el-col :span="1">
-      <el-dropdown size="mini" >
+      <el-dropdown size="mini" trigger="click">
         <span class="selected">
-          所有<i class="el-icon-arrow-down el-icon--right"></i>
+          {{queryKinds[queryIdx].name}}<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item>所有</el-dropdown-item>
-          <el-dropdown-item>标签</el-dropdown-item>
-          <el-dropdown-item>分类</el-dropdown-item>
+          <el-dropdown-item :key="queryKind" v-for="queryKind of queryKinds">
+            {{queryKind.name}}
+          </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </el-col>
@@ -59,7 +59,13 @@ export default {
       style: {
         'pointer-events': 'none',
         'color': 'gray'
-      }
+      },
+      queryIdx: 0,
+      queryKinds: [
+        {name: '所有'},
+        {name: '标签'},
+        {name: '分类'}
+      ]
     }
   },
   components: {
