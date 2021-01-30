@@ -8,7 +8,7 @@ namespace caxios {
   struct literal_indent : ranges< 'a', 'z', 'A', 'Z', '0', '9' > {};
   struct literal_keyword : plus<literal_indent> {};
   struct literal_indent_cn : utf8::ranges< U'\u2E80', U'\u9FFF'> {};
-  struct literal_string_cn : plus < literal_indent_cn > {};
+  struct literal_string_cn : plus < not_one<'\'', '"'> > {};
   struct literal_quote : one<'\'', '"'> {};
   //template< char Q >
   //struct str_impl : if_must< one< Q >, until< one< Q >, literal_string > > {};
@@ -30,6 +30,7 @@ namespace caxios {
   struct literal_datetime_string : seq<literal_date, one<'T'>, literal_time, one<'Z'>> {};
 
   struct literal_color : seq<one<'#'>, rep<6, xdigit>> {};
+  //struct literal_series : plus<literal_indent, '/'> {};
   struct literal_string : sor< literal_string_cn, literal_keyword> {};
 
   struct literal_value_impl : sor<literal_color, literal_datetime_string, literal_datetime_double, literal_string> {};

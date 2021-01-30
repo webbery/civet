@@ -168,7 +168,7 @@ describe('civetkern read only test', function() {
   })
   it('get classes', function() {
     const rootClasses = instance.getClasses()
-    console.info(rootClasses)
+    // console.info(rootClasses)
     expect(rootClasses).to.lengthOf(4)
     expect(rootClasses[0]).to.have.property('children')
     expect(rootClasses[0].children[0]).to.have.property('name')
@@ -187,7 +187,7 @@ describe('civetkern read only test', function() {
   })
   it('search files by keyword', function() {
     let result = instance.query({keyword: ['标签']})
-    console.info(result)
+    // console.info(result)
     expect(result).to.lengthOf(2)
     //for (let info of result[0].meta) {
     //    console.info(info)

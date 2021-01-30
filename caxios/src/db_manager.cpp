@@ -586,16 +586,14 @@ namespace caxios {
     uint32_t len = 0;
     // remove old
     m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vOldWords[vOldWords.size() - 1]], pData, len);
-    if (len) {
-      std::vector<ClassID> vClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
-      eraseData(vClassesID, oldPath.first);
-      m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vOldWords[vOldWords.size() - 1]], vClassesID.data(), vClassesID.size()*sizeof(ClassID));
-    }
+    std::vector<ClassID> vClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
+    m_pDatabase->Del(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vOldWords[vOldWords.size() - 1]]);
     // add new
-    m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vWords[vWords.size() - 1]], pData, len);
-    std::vector<ClassID> vNewClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
-    addUniqueDataAndSort(vNewClassesID, newPath.first);
-    m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vWords[vWords.size() - 1]], vNewClassesID.data(), vNewClassesID.size() * sizeof(ClassID));
+    m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vWords[vWords.size() - 1]], vClassesID.data(), vClassesID.size() * sizeof(ClassID));
+    T_LOG("class", "update keyword name from %s(%d) to %s(%d), children: %s",
+      vOldWords[vOldWords.size() - 1].c_str(), mIndexes[vWords[vWords.size() - 1]],
+      vWords[vWords.size() - 1].c_str(), mIndexes[vWords[vWords.size() - 1]],
+      format_vector(vClassesID).c_str());
 
     m_pDatabase->Get(m_mDBs[TABLE_CLASS2HASH], oldPath.second, pData, len);
     if (len) {
@@ -704,7 +702,7 @@ namespace caxios {
         keys.push_back(key);
       }
     }
-    T_LOG("query", "query keys: %s", format_vector(keys).c_str());
+    T_LOG("query", "query word index: %s, keys: %s", format_vector(wIndexes).c_str(), format_vector(keys).c_str());
     for (auto k : keys) {
       m_pDatabase->Get(m_mDBs[tableName], k, pData, len);
       if (len) {

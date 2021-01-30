@@ -69,7 +69,7 @@ const maxCacheSize = 40 + 20 + 10
 
 const mutations = {
   init(state, data) {
-    console.info('cache init')
+    console.info('cache init', data)
     // let snaps = data.filesSnap
     // let imagesID = []
     // for (let snap of snaps) {
@@ -128,8 +128,10 @@ const mutations = {
       children.map(generateClassPath)
       // classesPath.unshift(cpath)
     }
-    let candidates = state.classes.children.map(generateClassPath)
-    console.info('candidates', candidates, state.classes.children)
+    if (state.classes.length) {
+      let candidates = state.classes.children.map(generateClassPath)
+      console.info('candidates', candidates, state.classes.children)
+    }
     // count
     state.unclasses = data['unclasses'].length
     state.untags = data['untags'].length
@@ -307,6 +309,7 @@ const actions = {
     }
     const allImages = await Service.getServiceInstance().get(Service.GET_IMAGES_INFO, imagesID)
     const allTags = await Service.getServiceInstance().get(Service.GET_ALL_TAGS)
+    console.info('recieveCounts:', unclasses)
     commit('init', {unclasses, untags, allClasses, filesSnap, allImages, allTags})
   },
   async query({commit}, query) {
@@ -372,9 +375,9 @@ const actions = {
   }
 }
 
-const utils = {
-  getFileFromCache: () => {}
-}
+// const utils = {
+//   getFileFromCache: () => {}
+// }
 export default {
   state,
   getters,

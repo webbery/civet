@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <map>
 
 #if defined(__linux__) || defined(__APPLE__)
 #define sprintf_s snprintf
@@ -57,6 +58,17 @@ namespace caxios {
     for (auto item : vi)
     {
       str += std::to_string(item);
+      str += ",";
+    }
+    return str;
+  }
+
+  template<typename T>
+  std::string format_vector(const std::map<std::string, T>& vi) {
+    std::string str;
+    for (auto item : vi)
+    {
+      str += "{" + item.first + ":" + std::to_string(item.second) + "}";
       str += ",";
     }
     return str;

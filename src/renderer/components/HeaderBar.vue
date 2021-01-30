@@ -19,12 +19,20 @@
       <component :is="comName"></component>
     </el-col>
     <el-col :span="1">
+<<<<<<< HEAD
       <el-dropdown size="mini" trigger="click">
+=======
+      <el-dropdown size="mini" trigger="click" @command="onQueryKindChange">
+>>>>>>> 修复数据库按分类检索失败的问题；修复数据库中英文混合检索失败的问题；debug cache；
         <span class="selected">
           {{queryKinds[queryIdx].name}}<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
+<<<<<<< HEAD
           <el-dropdown-item :key="queryKind" v-for="queryKind of queryKinds">
+=======
+          <el-dropdown-item :key="queryKind" v-for="queryKind of queryKinds" :command="queryKind.command">
+>>>>>>> 修复数据库按分类检索失败的问题；修复数据库中英文混合检索失败的问题；debug cache；
             {{queryKind.name}}
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -62,9 +70,9 @@ export default {
       },
       queryIdx: 0,
       queryKinds: [
-        {name: '所有'},
-        {name: '标签'},
-        {name: '分类'}
+        {name: '所有', command: 'all'},
+        {name: '标签', command: 'tag'},
+        {name: '分类', command: 'class'}
       ]
     }
   },
@@ -84,6 +92,21 @@ export default {
     onClickResource() {},
     onInitResourceDB(dbname) {
       this.resource = dbname
+    },
+    onQueryKindChange(cmd) {
+      switch (cmd) {
+        case 'all':
+          this.queryIdx = 0
+          break
+        case 'tag':
+          this.queryIdx = 1
+          break
+        case 'class':
+          this.queryIdx = 2
+          break
+        default:
+          break
+      }
     },
     onClickImport() {
       remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
