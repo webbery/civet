@@ -1,4 +1,6 @@
 import { traverseTree } from './tools'
+import { v4 as uuidv4 } from 'uuid'
+
 /**
  * Tree data struct
  * Created by ayou on 2017/7/20.
@@ -12,7 +14,7 @@ import { traverseTree } from './tools'
 export class TreeNode {
   constructor(data) {
     const { id, isLeaf } = data
-    this.id = typeof id === 'undefined' ? new Date().valueOf() : id
+    this.id = typeof id === 'undefined' ? uuidv4() : id
     this.parent = null
     this.children = null
     this.isLeaf = !!isLeaf

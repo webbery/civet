@@ -1,9 +1,6 @@
 <template>
   <div>
-      <span class="el-icon-zoom-out"></span>
-      <span class="el-icon-zoom-in"></span>
-      <span class="el-icon-refresh-right"></span>
-      <span class="el-icon-refresh-left"></span>
+    {{filename}}
   </div>
 </template>
 <script>
@@ -13,13 +10,15 @@ export default {
   name: 'image-operator',
   data() {
     return {
-      scaleValue: 50
+      filename: '_'
     }
   },
+  mounted() {
+    bus.on(bus.EVENT_DISPLAY_FILE_NAME, this.onUpdateDisplayName)
+  },
   methods: {
-    scaleChange() {
-      // 0.2~2
-      bus.emit(bus.EVENT_SCALE_IMAGE, this.scaleValue * 1.8 / 100 + 0.2)
+    onUpdateDisplayName(name) {
+      this.filename = name
     }
   }
 }

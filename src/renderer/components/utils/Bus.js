@@ -14,6 +14,7 @@ export default {
   EVENT_UPDATE_DISPLAY_IMAGE: 'updateDisplayImage',
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
   EVENT_SELECT_IMAGE: 'selectImage',
+  EVENT_DISPLAY_FILE_NAME: 'displayFileName',
   EVENT_REMOVE_FILES: 'removeFiles',
   EVENT_REMOVE_ITEM: 'removeTreeItem',
   EVENT_UPDATE_NAV_DESCRIBTION: 'updateNavDesc',

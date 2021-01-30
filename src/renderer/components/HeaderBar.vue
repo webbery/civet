@@ -164,7 +164,18 @@ export default {
     async onSearch() {
       const keywords = this.keyword.split(' ')
       console.info('keywords', keywords)
-      this.$store.dispatch('query', {keyword: keywords})
+      switch (this.queryIdx) {
+        case 0:
+          this.$store.dispatch('query', {keyword: keywords})
+          break
+        case 1:
+          this.$store.dispatch('query', {tag: keywords})
+          break
+        case 2:
+          this.$store.dispatch('query', {class: keywords})
+          break
+        default: break
+      }
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})
     }
   }

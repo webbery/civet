@@ -97,7 +97,7 @@ describe('civetkern add test', function() {
     expect(result).to.equal(true)
   })
   it('add files to class', function() {
-    let result = instance.addClasses({id: [fileids[0]], class: ['type1', 'type2']})
+    let result = instance.addClasses({id: [fileids[0]], class: ['type1', 'type2', '新分类']})
     expect(result).to.equal(true)
   })
   it('get unclassify files', function() {
@@ -115,18 +115,15 @@ describe('civetkern add test', function() {
         }
     }
   })
-  //it('update files tags', function() {
-  //  instance.updateFileTags({id: [fileids[0]], tag: ['newTag']})
-  //})
-  //it('update files class', function() {
-    //let result = instance.updateFileClass({id: [fileids[0]], class: ['/newClass', 'class1/class3']})
-    //expect(result).to.equal(true)
-  //})
   it('update class name', function() {
     // 如果新类名存在，则返回失败; 因为该函数只支持改名, 不支持将旧类别下的所有文件移动到新类别下
-    let result = instance.updateClassName('type1', '新分类1')
+    let result = instance.updateClassName('type1', '新分类2')
     expect(result).to.equal(true)
-    result = instance.addClasses(['新分类1/子类'])
+    result = instance.addClasses(['新分类2/子类'])
+    expect(result).to.equal(true)
+    result = instance.updateClassName('新分类2/子类', '新分类2/新子类')
+    expect(result).to.equal(true)
+    result = instance.updateClassName('新分类2', '新分类1')
     expect(result).to.equal(true)
   })
   after(function() {
@@ -179,6 +176,8 @@ describe('civetkern read only test', function() {
     expect(rootClasses[2].children).to.lengthOf(2)
     expect(rootClasses[3]).to.have.property('children')
     expect(rootClasses[3]['children']).to.lengthOf(1)
+    const childClasses = instance.getClasses('新分类')
+    expect(childClasses).to.lengthOf(2)
     // [{label: 'test.jpg', type: 'jpg', id: 1}], // [{label: name, type: clz/jpg, children: []}]
   })
   it('get file tags', function() {
@@ -192,8 +191,8 @@ describe('civetkern read only test', function() {
     //for (let info of result[0].meta) {
     //    console.info(info)
     //}
-    //result = instance.query({size: {$gt: 10240, $lt: 21000}})
-    //expect(result).to.lengthOf(1)
+    result = instance.query({keyword: '新分类1'})
+    expect(result).to.lengthOf(1)
   })
   it('search files by datetime', function() {
     let result = instance.query({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
@@ -220,6 +219,9 @@ describe('civetkern read only test', function() {
     expect(result).to.lengthOf(0)
     result = instance.query({class: '新分类1'})
     expect(result).to.lengthOf(1)
+    result = instance.query({class: ['新分类1']})
+    expect(result).to.lengthOf(1)
+    // result = instance.query({class: ['新分类']})
   })
   after(function() {
     instance.release()

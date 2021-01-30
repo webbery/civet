@@ -1,15 +1,23 @@
 <template>
-  <div class="image-panel">
-    <div class="prev" @click="onClickPrev"></div>
-    <div class="viewer">
-      <img :src="candidates[index].path" id="file-viewer">
-    </div>
-    <div class="next" @click="onClickNext"></div>
-  </div>
+    <el-container>
+      <el-main>
+        <div class="image-panel">
+          <div class="prev" @click="onClickPrev"></div>
+          <div class="viewer">
+            <img :src="candidates[index].path">
+          </div>
+          <div class="next" @click="onClickNext"></div>
+        </div>
+      </el-main>
+      <el-footer>
+        <span class="el-icon-zoom-out"></span>
+        <span class="el-icon-zoom-in"></span>
+      </el-footer>
+    </el-container>
+  
 </template>
 
 <script>
-import Viewer from 'viewerjs'
 import bus from './utils/Bus'
 import { mapState } from 'vuex'
 
@@ -22,47 +30,51 @@ export default {
       viewer: null
     }
   },
-  created() {
-    console.info('000', this.$route.params)
-    this.image = this.$route.params
-  },
   computed: mapState({
     candidates: state => state.Cache.viewItems
   }),
   mounted() {
+    console.info('candidates:', this.candidates)
     this.image = this.$route.params
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '图片显示', cmd: 'display'})
-    if (!this.viewer) {
-      this.viewer = new Viewer(document.getElementById('file-viewer'), {
-        toolbar: 1,
-        zoomable: true,
-        rotatable: true,
-        viewed() {
-          this.viewer.zoomTo(1)
-        }
-      })
-    }
     bus.on(bus.EVENT_SCALE_IMAGE, this.scaleImage)
     bus.on(bus.EVENT_ROTATE_IMAGE, this.rotateImage)
+    for (let idx = 0; idx < this.candidates.length; ++idx) {
+      if (this.candidates[idx].id === this.image.id) {
+        this.index = idx
+        this.$nextTick(() => {
+          bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[idx].filename)
+        })
+        break
+      }
+    }
   },
   methods: {
     scaleImage: (scale) => {
       console.info('scale image: ', scale)
-      this.viewer.zoomTo(scale)
     },
     rotateImage: (angle) => {
       console.info('rotate image: ', angle)
     },
     onClickNext() {
       console.info('next image')
+      if (this.index > this.candidates.length) {
+        this.index = this.candidates.length
+        return
+      }
       this.index += 1
-      this.viewer.view(this.index)
+      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[this.index].filename)
+      bus.emit(bus.EVENT_SELECT_IMAGE, this.candidates[this.index].id)
     },
     onClickPrev() {
       console.info('prev image')
+      if (this.index < 0) {
+        this.index = 0
+        return
+      }
       this.index -= 1
-      if (this.index < 0) return
-      this.viewer.view(this.index)
+      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[this.index].filename)
+      bus.emit(bus.EVENT_SELECT_IMAGE, this.candidates[this.index].id)
     }
   }
 }
@@ -71,7 +83,7 @@ export default {
 <style scoped>
 .image-panel{
   /* height: 100%; */
-  /* height: 90vh; */
+  height: 90vh;
   /* background-repeat: no-repeat;
   background-size: contain;
   background-position: center; */
@@ -97,7 +109,6 @@ export default {
   background: darkslateblue;
   line-height: 40px;
   font-family: 'element-icons' !important;
-  float: left;
   /* position: fixed; */
   /* top: 40%; */
 }

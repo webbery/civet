@@ -128,6 +128,7 @@ export default {
     },
     onClickNode(node) {
       console.info('onClickNode', node)
+      this.$store.dispatch('getClassesAndFiles', [node.name])
     },
     onChangeName(params) {
       if (params.eventType === 'blur') {

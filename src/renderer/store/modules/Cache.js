@@ -293,6 +293,9 @@ const mutations = {
     // count
     state.unclasses = counts.unclasses.length
     state.untags = counts.untags.length
+  },
+  getClassesAndFiles(state, classesFiles) {
+    console.info('getClassesAndFiles', classesFiles)
   }
 }
 
@@ -352,6 +355,10 @@ const actions = {
   },
   changeClassName({commit}, mutation) {
     commit('changeClassName', mutation)
+  },
+  async getClassesAndFiles({commit}, query) {
+    const allClasses = await Service.getServiceInstance().get(Service.GET_ALL_CATEGORY, query)
+    commit('getClassesAndFiles', allClasses)
   },
   update({commit}, sql) {
     /*

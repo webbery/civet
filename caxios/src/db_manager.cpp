@@ -482,23 +482,24 @@ namespace caxios {
     std::string parentKey(ROOT_CLASS_PATH);
     if (parent != ROOT_CLASS_PATH) {
       std::tie(parentID, parentKey) = EncodePath2Hash(parent);
+      T_LOG("class", "panrent: %s, ID: %d, key: %s", parent.c_str(), parentID, format_x16(parentKey).c_str());
     }
     void* pData = nullptr;
     uint32_t len = 0;
     auto children = GetClassChildren(parentKey);
-    std::string sParent = (parent == ROOT_CLASS_PATH ? "" : parent + ROOT_CLASS_PATH);
-      for (auto& clsID : children) {
+    //std::string sParent = (parent == ROOT_CLASS_PATH ? "" : ROOT_CLASS_PATH);
+    for (auto& clsID : children) {
       nlohmann::json jCls;
       std::string name = GetClassByHash(clsID);
       jCls["name"] = name;
       uint32_t childID;
       std::string sChild;
-      std::tie(childID, sChild) = EncodePath2Hash(sParent + name);
+      std::tie(childID, sChild) = EncodePath2Hash(name);
       if (childID == parentID) continue;
       auto clzChildren = GetClassChildren(sChild);
       auto files = GetFilesOfClass(childID);
-      T_LOG("class", "clsID:%u, parentID: %u,  %d children %s",
-        clsID, parentID, childID, format_vector(clzChildren).c_str());
+      T_LOG("class", "clsID:%u, parentID: %u,  %d children %s, files: %s",
+        clsID, parentID, childID, format_vector(clzChildren).c_str(), format_vector(files).c_str());
       if (clzChildren.size() || files.size()) {
         nlohmann::json children;
         for (auto& clzID : clzChildren) {
@@ -523,7 +524,7 @@ namespace caxios {
       jCls["type"] = "clz";
       classes.push_back(jCls);
     }
-      m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], parentID, pData, len);
+    m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], parentID, pData, len);
     for (size_t idx = 0; idx < len / sizeof(FileID); ++idx) {
       FileID fid = *((FileID*)pData + idx);
       nlohmann::json jFile;
@@ -590,6 +591,7 @@ namespace caxios {
     m_pDatabase->Del(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vOldWords[vOldWords.size() - 1]]);
     // add new
     m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], mIndexes[vWords[vWords.size() - 1]], vClassesID.data(), vClassesID.size() * sizeof(ClassID));
+    // TODO: update children class
     T_LOG("class", "update keyword name from %s(%d) to %s(%d), children: %s",
       vOldWords[vOldWords.size() - 1].c_str(), mIndexes[vWords[vWords.size() - 1]],
       vWords[vWords.size() - 1].c_str(), mIndexes[vWords[vWords.size() - 1]],
@@ -918,12 +920,14 @@ namespace caxios {
       std::string sParent(ROOT_CLASS_PATH);
       void* pData = nullptr;
       uint32_t len = 0;
-      // add word map to class hash
-      m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], vClassPath[vClassPath.size() - 1], pData, len);
-      std::vector<ClassID> vClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
-      addUniqueDataAndSort(vClassesID, child);
-      m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], vClassPath[vClassPath.size() - 1], vClassesID.data(), vClassesID.size() * sizeof(ClassID));
-      T_LOG("class", "add keyword %s(%d) map to %s ", clazz.c_str(), vClassPath[vClassPath.size() - 1], format_vector(vClassesID).c_str());
+      for (auto& clsPath : vClassPath) {
+        // add word map to class hash
+        m_pDatabase->Get(m_mDBs[TABLE_KEYWORD2CLASS], clsPath, pData, len);
+        std::vector<ClassID> vClassesID((ClassID*)pData, (ClassID*)pData + len / sizeof(ClassID));
+        addUniqueDataAndSort(vClassesID, child);
+        m_pDatabase->Put(m_mDBs[TABLE_KEYWORD2CLASS], clsPath, vClassesID.data(), vClassesID.size() * sizeof(ClassID));
+        T_LOG("class", "add keyword %s(%d) map to %s ", clazz.c_str(), clsPath, format_vector(vClassesID).c_str());
+      }
       if (vClassPath.size() > 0) {
         vClassPath.pop_back();
         if (vClassPath.size() != 0) {
@@ -1315,7 +1319,11 @@ namespace caxios {
     uint32_t len = 0;
     m_pDatabase->Get(m_mDBs[TABLE_FILESNAP], fileID, pData, len);
     if (len) {
-      snap = *(Snap*)pData;
+      std::string js((char*)pData, len);
+      nlohmann::json jSnap = nlohmann::json::parse(js);
+      std::get<2>(snap) = atoi(jSnap["step"].dump().c_str());
+      std::get<0>(snap) = fileID;
+      std::get<1>(snap) = jSnap["value"].dump();
     }
     return std::move(snap);
   }
