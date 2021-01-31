@@ -117,6 +117,7 @@ namespace caxios {
     bool AddFile(FileID, const MetaItems&, const Keywords&);
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
     bool AddFileID2Keyword(FileID, WordIndex);
+    void UpdateChildrenClassName(const std::string& clssKey, const std::string& oldarentName, const std::string& newParentName);
     bool AddKeyword2File(WordIndex, FileID);
     bool AddTagPY(const std::string& tag, WordIndex indx);
     bool AddClass2FileID(uint32_t, const std::vector<FileID>& vFilesID);
@@ -141,6 +142,8 @@ namespace caxios {
     std::pair<uint32_t, std::string> EncodePath2Hash(const std::string& classPath);
     std::vector<ClassID> GetClassChildren(const std::string& clazz);
     std::string GetClassByHash(ClassID);
+    std::string GetClassKey(ClassID);
+    std::string GetClassKey(const std::string& clsPath);
     std::vector<FileID> GetFilesOfClass(uint32_t clsID);
     std::vector<FileID> mapExistFiles(const std::vector<FileID>&);
     void ParseMeta(const std::string& meta);

@@ -1,11 +1,13 @@
-# civet
+﻿<div align='center' ><font size='10'>civet</font></div>
+
 
 > :kissing_heart: 本人摄影兼后期，为自己开发的一个支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
 目标是希望像VSCode那样，以扩展的形式让用户组装成各类数字资产(图片、文档、视频、文献、网页等)的管理软件。
 
-![界面预览](https://img2020.cnblogs.com/blog/554873/202101/554873-20210130003803596-2037279995.jpg)
+![界面预览](https://raw.githubusercontent.com/webbery/civet/master/show.JPG)
 
 ### 下载
+
 
 开发进度  
 ![75%](https://progress-bar.dev/75/?title=检索模块)

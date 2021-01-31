@@ -24,13 +24,14 @@
 #define T_LOG(module, fmt, ...)  {\
     char* clg = new char[1024];\
     memset(clg, 0, 1024);\
-    sprintf_s(clg, 1024, "[%s] [%s:%d] [%u] [%s] [%s] " fmt "\n", \
+    sprintf_s(clg, 1024, "[%s] [%u] [%s] [%s] [%s:%d] " fmt "\n", \
       caxios::current().c_str(),\
-      caxios::get_file_name(__FILE__).c_str(),\
-      __LINE__,\
       caxios::threadid(),\
       module,\
-      __FUNCTION__, ##__VA_ARGS__);\
+      __FUNCTION__,\
+      caxios::get_file_name(__FILE__).c_str(), \
+      __LINE__, \
+      ##__VA_ARGS__); \
     log2file(clg);\
     delete[] clg;\
   }

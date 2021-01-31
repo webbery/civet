@@ -516,6 +516,7 @@ namespace caxios {
       if (info[0].IsArray()) {
         Napi::Array arr = info[0].As<Napi::Array>();
         auto classes = ArrayAsStringVector(arr);
+        T_LOG("DEBUG", "class count: %d", classes.size());
         result = g_pCaxios->RemoveClasses(classes);
       }
       else if (info[0].IsObject()) {
@@ -560,6 +561,10 @@ namespace caxios {
     }
     return Napi::Value();
   }
+
+  Napi::Value debug(const Napi::CallbackInfo& info) {
+    return Napi::Value();
+  }
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
@@ -585,6 +590,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(removeTags);
   EXPORT_JS_FUNCTION_PARAM(removeClasses);
   EXPORT_JS_FUNCTION_PARAM(query);
+  EXPORT_JS_FUNCTION_PARAM(debug);
   EXPORT_JS_FUNCTION_PARAM(writeLog);
   return exports;
 }

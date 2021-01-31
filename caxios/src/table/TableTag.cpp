@@ -3,11 +3,30 @@
 #include "database.h"
 
 namespace caxios {
-
-  TableTag::TableTag(CDatabase* pDatabase, const std::string& name)
+  namespace {
+    const char* g_tag_table[] = {
+      TABLE_FILE2TAG,
+      TABLE_TAG2FILE,
+      TABLE_TAG_INDX
+    };
+  }
+  TableTag::TableTag(CDatabase* pDatabase)
     :ITable(pDatabase)
   {
-    _dbi = _pDatabase->OpenDatabase(name);
+    int cnt = sizeof(g_tag_table) / sizeof(char*);
+    for (int idx = 0; idx < cnt; ++idx) {
+      MDB_dbi dbi = _pDatabase->OpenDatabase(g_tag_table[idx]);
+      if (dbi >= 0) {
+        _dbi[g_tag_table[idx]] = dbi;
+      }
+    }
+  }
+
+  TableTag::~TableTag()
+  {
+    for (auto item : _dbi) {
+      _pDatabase->CloseDatabase(item.second);
+    }
   }
 
   bool TableTag::Add(const std::string& value, const std::vector<FileID>& fileid)
@@ -30,6 +49,16 @@ namespace caxios {
   {
 
     return true;
+  }
+
+  Iterator TableTag::begin()
+  {
+    return Iterator();
+  }
+
+  Iterator TableTag::end()
+  {
+    return Iterator();
   }
 
 }

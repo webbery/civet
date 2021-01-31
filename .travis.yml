@@ -9,10 +9,12 @@ node_js:
 matrix:
   include:
   - os: osx
+    osx_image: xcode11
   - os: windows
   - os: linux
-    env: CC=gcc-7.4 CXX=g++-7.4++ npm_config_clang=1
-    compiler: gcc
+    dist: bionic
+    # env: CC=gcc-7.5 CXX=g++-7.5
+    # compiler: gcc
 cache:
   directories:
     - node_modules

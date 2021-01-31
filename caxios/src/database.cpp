@@ -166,6 +166,7 @@ namespace caxios {
     this->Begin();
     if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
       T_LOG("database", "mdb_get fail: %s", err2str(rc).c_str());
+      len = 0;
       return false;
     }
     len = datum.mv_size;

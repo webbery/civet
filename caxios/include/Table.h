@@ -115,4 +115,12 @@ namespace caxios {
   protected:
     CDatabase* _pDatabase = nullptr;
   };
+
+  class ITriger {
+  public:
+    ITriger(CDatabase* pDB) : _pDatabase(pDB) {}
+    virtual void Trig() = 0;
+  private:
+    CDatabase* _pDatabase = nullptr;
+  };
 }

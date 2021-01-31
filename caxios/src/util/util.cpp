@@ -325,7 +325,7 @@ namespace caxios {
       }
     }
     vStr.emplace_back(str.substr(start, str.size() - start));
-    return vStr;
+    return std::move(vStr);
   }
 
   bool isNumber(const std::string& input)

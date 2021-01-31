@@ -1,8 +1,15 @@
 #include "TableClass.h"
 
 namespace caxios {
-
-  TableClass::TableClass(CDatabase* pDatabase, const std::string& name)
+  namespace {
+    const char* g_class_tables[] = {
+      TABLE_HASH2CLASS,
+      TABLE_CLASS2HASH,
+      TABLE_FILE2CLASS,
+      TABLE_CLASS2FILE,
+    };
+  }
+  TableClass::TableClass(CDatabase* pDatabase)
     :ITable(pDatabase)
   {
 
@@ -10,6 +17,10 @@ namespace caxios {
 
   bool TableClass::Add(const std::string& value, const std::vector<FileID>& fileid)
   {
+    if (fileid.size()) {
+    }
+    else {
+    }
     return true;
   }
 
@@ -17,6 +28,12 @@ namespace caxios {
   {
     return true;
   }
+
+  bool TableClass::Update(ClassID cid, const ClassProperty& prop)
+  {
+    return true;
+  }
+
   bool TableClass::Delete(const std::string& k, FileID fileID)
   {
     return true;
@@ -24,6 +41,16 @@ namespace caxios {
   bool TableClass::Query(const std::string& k, std::vector<FileID>& filesID)
   {
     return true;
+  }
+
+  bool TableClass::Query(ClassID cid, ClassProperty& prop)
+  {
+    return true;
+  }
+
+  void TableClass::GetClassName(ClassID cid)
+  {
+
   }
 
 }
