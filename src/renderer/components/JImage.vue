@@ -13,7 +13,7 @@ import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 import bus from './utils/Bus'
 // import Plugin from '@/../public/Plugin'
-import log from '@/../public/Logger'
+// import log from '@/../public/Logger'
 // import ImageProcess from '@/../public/ImageProcess'
 
 export default {
@@ -73,14 +73,14 @@ export default {
         this.canvas.width = this.box.offsetWidth
         this.canvas.height = this.box.offsetHeight
       }
-      log.info(this.box.offsetWidth, this.box.offsetHeight)
+      // log.info(this.box.offsetWidth, this.box.offsetHeight)
       this.context = this.canvas.getContext('2d')
       // console.info(src)
       if (typeof src === 'string') {
         let {data, info} = await sharp(src).jpeg({force: true}).ensureAlpha()
           .raw().toBuffer({ resolveWithObject: true })
         // this.$store.dispatch('updateThumbnail', {path: this.src, thumbnail: data})
-        log.info(info)
+        // log.info(info)
         this.originWidth = info.width
         this.originHeight = info.height
         this.imagewidth = info.width

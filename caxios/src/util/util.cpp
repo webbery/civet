@@ -19,7 +19,7 @@ namespace caxios {
   
   bool exist(const std::string& filepath) {
 #if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
-    if (access(filepath.c_str(), 0) == 0) return true;
+    if (access(filepath.c_str(), 0) != -1) return true;
 #elif defined(WIN32)
     if (_access(filepath.c_str(), 0) == 0) return true;
 #endif

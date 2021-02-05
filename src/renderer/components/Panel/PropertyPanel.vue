@@ -68,7 +68,7 @@ import IconTag from '@/components/IconTag'
 import JString from '@/../public/String'
 import JImage from '../JImage'
 import ImgTool from '../utils/ImgTool'
-import log from '@/../public/Logger'
+// import log from '@/../public/Logger'
 import { config } from '@/../public/CivetConfig'
 import { mapState } from 'vuex'
 
@@ -112,7 +112,7 @@ export default {
       console.info(this.$store)
       const files = this.$store.getters.getFiles([imageID])
       if (!files) return
-      log.info('PropertyPanel', files)
+      // log.info('PropertyPanel', files)
       const localize = new Intl.DateTimeFormat('zh-cn')
       if (files.length === 1) {
         let file = files[0]
@@ -148,7 +148,7 @@ export default {
                   console.info('date: ', dt, meta.value)
                   values.push(dt)
                 } else {
-                  values.push(meta.value)
+                  values.push(JString.formatOutput(meta.value))
                 }
               }
             }

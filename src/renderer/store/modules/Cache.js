@@ -7,6 +7,7 @@ const Cache = {
   query: {},
   files: {}
 }
+const maxCacheSize = 40 + 20 + 10
 
 const state = {
   classes: new Tree([]),
@@ -64,8 +65,6 @@ const remote = {
     return Service.getServiceInstance().get(Service.GET_ALL_TAGS)
   }
 }
-
-const maxCacheSize = 40 + 20 + 10
 
 const mutations = {
   init(state, data) {
@@ -143,7 +142,10 @@ const mutations = {
     let idx = 0
     console.info('addFiles:', files)
     for (let file of files) {
-      if (Cache.files.hasOwnProperty(file.id)) continue
+      if (Cache.files.hasOwnProperty(file.id)) {
+        // TODO: update file info
+        continue
+      }
       Cache.files[file.id] = new FileBase(file)
       // setting view panel item
       if (Cache.files.length > maxCacheSize) break

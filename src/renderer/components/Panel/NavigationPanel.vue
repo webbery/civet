@@ -11,6 +11,7 @@
           </table>
           <TreePanel :isActive="true" @addRootClass="addRootClass">
             <!-- <FolderTree :data="category"></FolderTree> -->
+            <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
             <VueTreeList
               @click="onClickNode"
               @change-name="onChangeName"
@@ -88,7 +89,13 @@ export default {
       ],
       // data: new Tree([]),
       newCategoryName: '',
-      index: 0
+      index: 0,
+      menus: [
+        {text: '导出到计算机', cb: this.onExportClasses},
+        {text: '重命名', cb: this.onChangeName},
+        {text: '添加', cb: this.onAddClass},
+        {text: '删除', cb: this.onDeleteClass}
+      ]
     }
   },
   computed: mapState({

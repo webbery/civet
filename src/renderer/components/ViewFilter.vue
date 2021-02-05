@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import log from '@/../public/Logger'
+// import log from '@/../public/Logger'
 import RangeInput from './Control/RangeInput'
 
 export default {
@@ -71,7 +71,7 @@ export default {
   methods: {
     onLoadTags() {
       this.tags = this.$store.getters.allTags
-      log.info(this.tags)
+      // log.info(this.tags)
     },
     onTagSelectChanged(item) {
       this.$store.dispatch('siftByTag', item)

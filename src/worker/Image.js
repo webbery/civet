@@ -113,7 +113,8 @@ class ImageMetaParser extends ImageParseBase {
     // let files = Storage.getFilesInfo([image.id])
     // console.info(files)
 
-    // image.stepCallback(undefined, image)
+    // reply as quick as we can
+    image.stepCallback(undefined, image)
 
     if (this.next !== undefined) {
       this.next.parse(image, buffer)

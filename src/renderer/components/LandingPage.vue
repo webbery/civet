@@ -8,7 +8,10 @@
         <NavigationPanel></NavigationPanel>
       </el-col>
       <el-col :span="16">
-        <div class="display"><router-view></router-view></div>
+        <div class="display">
+          <div id="loading-progress" v-if="loadProgress < 100"></div>
+          <router-view></router-view>
+        </div>
       </el-col>
       <el-col :span="4">
         <PropertyPanel></PropertyPanel>
@@ -25,6 +28,7 @@ import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/Panel/TagPanel'
 import ConfigPanel from '@/components/ConfigPanel'
 import Global from '@/components/utils/Global'
+import Service from './utils/Service'
 
 export default {
   name: 'landing-page',
@@ -36,10 +40,16 @@ export default {
     TagPanel,
     ConfigPanel
   },
+  data() {
+    return {
+      loadProgress: 50
+    }
+  },
   mounted() {
     // 挂载全局初始化事件
     const os = require('os')
     const platform = os.platform()
+    Service.getServiceInstance().on('replyFilesLoadCount', this.onFileLoadStatus)
     document.addEventListener('keydown', function(e) {
       if (platform === 'win32') {
         if (e.ctrlKey && !Global.ctrlPressed) {
@@ -62,6 +72,12 @@ export default {
         }
       }
     })
+  },
+  methods: {
+    onFileLoadStatus(status) {
+      const percent = parseInt(status.count * 100 / status.total)
+      this.loadProgress = percent
+    }
   }
 }
 </script>
@@ -79,5 +95,20 @@ export default {
   border-style: none dashed;
   border-radius: 5px;
   margin: 0 10px 0 10px;
+}
+#loading-progress {
+  position: relative;
+  height: 2px;
+  background: #dfdfdf;
+}
+#loading-progress::before {
+  position: absolute;
+  background: blueviolet;
+  height: 2px;
+  width: 50%;
+  content: '50%';
+  color: #fff;
+  font-size: 8px;
+  text-align: center;
 }
 </style>

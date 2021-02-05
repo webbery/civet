@@ -1,7 +1,7 @@
-import log from 'electron-log'
+// import log from 'electron-log'
 // import util from 'util'
 
-log.transports.console.format = '[{h}:{i}:{s}] [{level}] {text}'
+// log.transports.console.format = '[{h}:{i}:{s}] [{level}] {text}'
 let logLevel = ['verb', 'debug', 'info', 'warn', 'error']
 let JLog = {}
 for (let level of logLevel) {
@@ -18,7 +18,7 @@ for (let level of logLevel) {
     if (qIndx > 0) filename = filename.substr(0, qIndx)
     let args = [filename + ':']
     args.push.apply(args, arguments)
-    log[level].apply(this, args)
+    // log[level].apply(this, args)
   }
 }
 

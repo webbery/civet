@@ -19,20 +19,12 @@
       <component :is="comName"></component>
     </el-col>
     <el-col :span="1">
-<<<<<<< HEAD
-      <el-dropdown size="mini" trigger="click">
-=======
       <el-dropdown size="mini" trigger="click" @command="onQueryKindChange">
->>>>>>> 修复数据库按分类检索失败的问题；修复数据库中英文混合检索失败的问题；debug cache；
         <span class="selected">
           {{queryKinds[queryIdx].name}}<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-<<<<<<< HEAD
-          <el-dropdown-item :key="queryKind" v-for="queryKind of queryKinds">
-=======
           <el-dropdown-item :key="queryKind" v-for="queryKind of queryKinds" :command="queryKind.command">
->>>>>>> 修复数据库按分类检索失败的问题；修复数据库中英文混合检索失败的问题；debug cache；
             {{queryKind.name}}
           </el-dropdown-item>
         </el-dropdown-menu>

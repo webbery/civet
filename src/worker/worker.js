@@ -16,6 +16,7 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.prototype.$ipcRenderer = ipcRenderer
+window.eventBus = new Vue()
 
 /* splash */
 new Vue({
@@ -31,6 +32,12 @@ Array.prototype.remove = function (val) {
 }
 
 const threshodMode = true
+let isStart = false
+function updateProgress(percent) {
+  if (isStart === false) {
+    window.eventBus.$emit('progress', percent)
+  }
+}
 // your background code here
 const fs = require('fs')
 const timer = (function () {
@@ -60,6 +67,7 @@ let queue = {}
 
 const ReplyType = {
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
+  REPLY_FILES_LOAD_COUNT: 'replyFilesLoadCount',
   IS_DIRECTORY_EXIST: 'isDirectoryExist',
   REPLY_IMAGES_DIRECTORY: 'replyImagesWithDirectory',
   REPLY_IMAGES_INFO: 'replyImagesInfo',
@@ -113,18 +121,33 @@ function readImages(fullpath) {
     //   initHardLinkDir(config.app.default)
     // }
     const parser = new ImageParser(fullpath)
-    let img = parser.parse(info)
+    let img = parser.parse(info, (err, image) => {
+      if (err) {
+        console.info(err)
+        return
+      }
+      reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [image.toJson()])
+    })
     console.info('readImages', img)
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
   }
 }
 
+let totalFiles = 0
+let progressLoad = 0
 function readDir(path) {
   fs.readdir(path, function(err, menu) {
     if (err) return
     // console.info(menu)
+    totalFiles += menu.length
     for (let item of menu) {
       readImages(JString.joinPath(path, item))
+    }
+    reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, {count: menu.length, total: totalFiles})
+    progressLoad += menu.length
+    if (progressLoad === totalFiles) {
+      totalFiles = 0
+      progressLoad = 0
     }
   })
 }
@@ -185,6 +208,7 @@ const messageProcessor = {
     let imgs = storage.getFilesInfo(imagesIndex)
     console.info('getImagesInfo', imgs)
     let images = []
+    updateProgress(5)
     for (let img of imgs) {
       images.push(new JImage(img))
     }

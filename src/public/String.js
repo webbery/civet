@@ -39,6 +39,10 @@ export default {
     root += path
     return root
   },
+  formatOutput: (input, type) => {
+    let output = input.replace(/\\/g, '/')
+    return output
+  },
   isEmpty: (val) => {
     if (!val) return true
     const result = val.replace(/(^\s*)|(\s*$)/g, '')

@@ -222,7 +222,8 @@ export default {
         this.lastSelections[k].style.border = '0'
       }
       this.lastSelections = {}
-    }
+    },
+    onScrollNearBottom() {}
   }
 }
 </script>

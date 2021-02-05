@@ -23,7 +23,7 @@ namespace caxios {
 
   void createDirectories(const std::string& dir) {
 #if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
-    if (access(dir.c_str(), 0) == 0) return;
+    if (access(dir.c_str(), 0) != -1) return;
 #elif defined(WIN32)
     if (_access(dir.c_str(), 0) == 0) return;
 #endif

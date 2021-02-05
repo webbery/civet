@@ -1,8 +1,13 @@
 <template>
-  <div>civet启动!</div>
+  <div>civet启动! 进度: {{progress}}</div>
 </template>
 <script>
 export default {
-  name: 'Splash'
+  name: 'Splash',
+  data() {
+    return {
+      progress: 0
+    }
+  }
 }
 </script>
