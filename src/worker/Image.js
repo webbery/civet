@@ -1,5 +1,4 @@
 import FileBase from '../public/FileBase'
-import NLP from '../public/NLP'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
 // import CV from '../public/ImageProcess'
@@ -8,7 +7,17 @@ import fs from 'fs'
 import sharp from 'sharp'
 // import util from 'util'
 import storage from '../public/Kernel'
-import TaskManager from './WorkerPool/TaskManager'
+// import TaskManager from './WorkerPool/TaskManager'
+const workerpool = require('workerpool')
+let algorithmpath = ''
+// if (process.env.NODE_ENV === 'development') {
+algorithmpath = `./src/worker/algorithm/index.js`
+// } else {
+// algorithmpath = `${__dirname}/algorithm/NLP.js`
+// }
+console.info('ENV', process.env.NODE_ENV, 'algorithm_extend path:', algorithmpath)
+const cpus = require('os').cpus().length
+const pool = workerpool.pool(algorithmpath, {minWokers: cpus > 4 ? 4 : cpus, workerType: 'process'})
 // const jpegasm = require('jpeg-asm')
 
 // const jpegEncode = util.promisify(jpegasm.encode)
@@ -203,14 +212,19 @@ class ImageTextParser extends ImageParseBase {
     this.step = 1
   }
 
-  task(fullpath) {
-    console.info('NLP task')
-    NLP.getNouns(fullpath)
-  }
+  // task(fullpath) {
+  //   console.info('NLP task')
+  //   NLP.getNouns(fullpath)
+  // }
 
   async parse(image, buffer) {
-    const fullpath = image.path + '/' + image.filename
-    image.tag = await TaskManager.exec(NLP.getNouns, [fullpath])
+    const fullpath = image.path
+    console.info('parse tag:', fullpath)
+    // image.tag = await TaskManager.exec(NLP.getNouns, [fullpath])
+    // image.tag = NLP.getNouns(fullpath)
+    image.tag = await pool.exec('getNouns', [fullpath])
+    // pool.terminate()
+    console.info('image tag:', image.tag)
     if (image.tag !== 0) {
       image.keyword = image.tag
       console.info('ImageTextParser', image.tag)

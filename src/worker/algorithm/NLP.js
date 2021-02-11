@@ -1,5 +1,3 @@
-// import pinyin from 'pinyin'
-
 const NLP = (function () {
   let Segment = require('segment')
   let POSTAG = Segment.POSTAG
@@ -25,18 +23,7 @@ const NLP = (function () {
   }
 })()
 
-export default {
-  getNouns: (str) => {
-    return NLP.retrieveNoun(str)
-  },
-  // getFirstLetter: (cn) => {
-  //   return pinyin(cn, {
-  //     heteronym: true,
-  //     segment: true,
-  //     style: pinyin.STYLE_FIRST_LETTER
-  //   })
-  // },
-  simhash: (pixels, width, height) => {
-    // 使用dhash算法
-  }
-}
+module.exports = NLP
+// exports.getNouns = (str) => {
+//   return NLP.retrieveNoun(str)
+// }

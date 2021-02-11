@@ -11,8 +11,13 @@
 #include "log.h"
 
 #define MAX_NUM_DATABASE  64
-#define LIN_DELIMITER '/'
-#define WIN_DELIMITER '\\'
+#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+#define OS_DELIMITER '/'
+#else
+#define OS_DELIMITER '\\'
+#endif
+#define DBSCHEMA  "schema"
+#define DBTHUMBMAIL "t_"    //thumbnail
 
 namespace caxios {
   enum MetaType {
@@ -21,22 +26,23 @@ namespace caxios {
     BT_VALUE
   };
 
-  void createDirectories(const std::string& dir) {
+  bool isDirectoryExist(const std::string& dir) {
 #if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
-    if (access(dir.c_str(), 0) != -1) return;
+    if (access(dir.c_str(), 0) != -1) return true;
 #elif defined(WIN32)
-    if (_access(dir.c_str(), 0) == 0) return;
+    if (_access(dir.c_str(), 0) == 0) return true;
 #endif
-    size_t pos = dir.rfind(LIN_DELIMITER);
-    if (pos == std::string::npos) {
-      pos = dir.rfind(WIN_DELIMITER);
-      if (pos == std::string::npos) return;
-    }
+    return false;
+  }
+  void createDirectories(const std::string& dir) {
+    if (isDirectoryExist(dir)) return;
+    size_t pos = dir.rfind(OS_DELIMITER);
+    if (pos == std::string::npos) return;
     std::string parentDir = dir.substr(0, pos);
     //std::cout << "parentDir:"<<parentDir << std::endl;
     createDirectories(parentDir);
     //std::cout << "Create:" << parentDir << std::endl;
-    mkdir(parentDir.c_str()
+    mkdir(dir.c_str()
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
       ,0777
 #endif
@@ -54,7 +60,7 @@ namespace caxios {
 #ifdef _DEBUG
 #define MAX_EXPAND_DB_SIZE  5*1024*1024
 #else
-#define MAX_EXPAND_DB_SIZE  1*1024*1024*1024
+#define MAX_EXPAND_DB_SIZE  256*1024*1024
 #endif
     T_LOG("init", "max db size: %d", MAX_EXPAND_DB_SIZE);
     if (const int rc = mdb_env_set_mapsize(m_pDBEnv, MAX_EXPAND_DB_SIZE)) {
@@ -68,8 +74,9 @@ namespace caxios {
       return;
     }
     //open_flag |= MDB_NOTLS;
-    T_LOG("database", "Open DB %s, flag: %d, Mode: %s", dbpath.c_str(), m_flag, m_flag == MDB_RDONLY? "ReadOnly": "ReadWrite");
-    if (const int rc = mdb_env_open(m_pDBEnv, dbpath.c_str(), m_flag | MDB_NOTLS | MDB_NORDAHEAD | MDB_NOSUBDIR | MDB_NOLOCK, 0664)) {
+    const std::string schemaDB = dbpath + OS_DELIMITER + DBSCHEMA;
+    T_LOG("database", "Open DB %s, flag: %d, Mode: %s", schemaDB.c_str(), m_flag, m_flag == MDB_RDONLY? "ReadOnly": "ReadWrite");
+    if (const int rc = mdb_env_open(m_pDBEnv, schemaDB.c_str(), m_flag | MDB_NOTLS | MDB_NORDAHEAD | MDB_NOSUBDIR | MDB_NOLOCK, 0664)) {
       T_LOG("database", "mdb_env_open fail: %s", err2str(rc).c_str());
     }
     if (const int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &m_pTransaction)) {

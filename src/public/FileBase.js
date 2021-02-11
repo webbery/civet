@@ -16,6 +16,21 @@ export default class FileBase {
     }
   }
 
+  update(json) {
+    if (this.meta.length === 0) this.meta = json.meta
+    if (this.keyword.length === 0) this.keyword = json.keyword
+    if (this.category.length === 0) this.category = json.category || json.class
+    if (this.tag.length === 0) this.tag.length = json.tag
+    for (let item of json.meta) {
+      if (this.hasOwnProperty(item['name'])) continue
+      if (item['name'] === 'width' || item['name'] === 'height') {
+        this[item['name']] = parseInt(item['value'])
+      } else {
+        this[item['name']] = item['value']
+      }
+    }
+  }
+
   addMeta(typename, value, type) {
     if (!this[typename]) {
       const meta = { name: typename, value: value, type: this.metaType(value, type) }

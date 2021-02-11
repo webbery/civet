@@ -61,9 +61,10 @@ export default {
         {label: '最近365日', key: 'near365'},
         {label: '自定义', key: 'custom'}
       ],
-      fileType: '',
+      fileType: null,
       fileTypes: [
-        {label: 'jpg'}, {label: 'bmp'}
+        {label: 'jpg'},
+        {label: 'bmp'}
       ],
       clazz: []
     }
@@ -118,6 +119,7 @@ export default {
 
 <style scoped>
 .custom .el-select {
+  width: 120px;
   transform: translateY(-8px);
 }
 .custom input{
@@ -130,4 +132,7 @@ export default {
 .custom .el-dropdown{
   transform: translateY(-8px);
 }
+</style>
+<style lang="css" scoped>
+
 </style>

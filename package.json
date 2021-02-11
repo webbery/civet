@@ -114,6 +114,7 @@
     "vue": "^2.6.12",
     "vue-electron": "^1.0.6",
     "vue-lazyload": "^1.3.3",
+    "vue-multiselect": "^2.1.6",
     "vue-router": "^3.4.1",
     "vue-template-compiler": "^2.6.12",
     "vue-tree-list": "^1.5.0",

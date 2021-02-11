@@ -144,6 +144,7 @@ const mutations = {
     for (let file of files) {
       if (Cache.files.hasOwnProperty(file.id)) {
         // TODO: update file info
+        Cache.files[file.id].update(file)
         continue
       }
       Cache.files[file.id] = new FileBase(file)
@@ -155,6 +156,9 @@ const mutations = {
   },
   display(state, data) {
     let idx = 0
+    if (data) {
+      // for (let datum of data) {}
+    }
     for (let k in Cache.files) {
       Vue.set(state.viewItems, idx, Cache.files[k])
       idx += 1
