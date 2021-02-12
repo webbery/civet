@@ -1,4 +1,4 @@
-﻿<div align='center' ><font size='50'>civet</font></div>
+<div align='center' ><font size='50'>civet</font></div>
 
 
 > :kissing_heart: 支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
