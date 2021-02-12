@@ -4,7 +4,7 @@ import JString from '../public/String'
 // import CV from '../public/ImageProcess'
 import fs from 'fs'
 // import { imageHash } from 'image-hash'
-import sharp from 'sharp'
+// import sharp from 'sharp'
 // import util from 'util'
 import storage from '../public/Kernel'
 // import TaskManager from './WorkerPool/TaskManager'
@@ -18,7 +18,6 @@ algorithmpath = `./src/worker/algorithm/index.js`
 console.info('ENV', process.env.NODE_ENV, 'algorithm_extend path:', algorithmpath)
 const cpus = require('os').cpus().length
 const pool = workerpool.pool(algorithmpath, {minWokers: cpus > 4 ? 4 : cpus, workerType: 'process'})
-// const jpegasm = require('jpeg-asm')
 
 // const jpegEncode = util.promisify(jpegasm.encode)
 // const pHash = util.promisify(imageHash)
@@ -149,21 +148,21 @@ class ImageMetaParser extends ImageParseBase {
   }
 
   getImageThumbnail(width, height, buffer) {
-    const minVal = Math.min(width, height)
-    if (minVal < 200) {
-      return sharp(buffer).jpeg({quantisationTable: 8}).toBuffer()
-    }
-    if (width < height) {
-      const scale = width / 200.0
-      const newHeight = parseInt(height / scale)
-      const newWidth = 200
-      return sharp(buffer).resize(newWidth, newHeight).jpeg({quantisationTable: 8}).toBuffer()
-    } else {
-      const scale = height / 200.0
-      const newHeight = 200
-      const newWidth = parseInt(width / scale)
-      return sharp(buffer).resize(newWidth, newHeight).jpeg({quantisationTable: 8}).toBuffer()
-    }
+    // const minVal = Math.min(width, height)
+    // if (minVal < 200) {
+    //   return sharp(buffer).jpeg({quantisationTable: 8}).toBuffer()
+    // }
+    // if (width < height) {
+    //   const scale = width / 200.0
+    //   const newHeight = parseInt(height / scale)
+    //   const newWidth = 200
+    //   return sharp(buffer).resize(newWidth, newHeight).jpeg({quantisationTable: 8}).toBuffer()
+    // } else {
+    //   const scale = height / 200.0
+    //   const newHeight = 200
+    //   const newWidth = parseInt(width / scale)
+    //   return sharp(buffer).resize(newWidth, newHeight).jpeg({quantisationTable: 8}).toBuffer()
+    // }
   }
 
   getImageFormat(str) {

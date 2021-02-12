@@ -6,7 +6,8 @@ const path = require('path')
 const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 
-const MinifyPlugin = require("babel-minify-webpack-plugin")
+// const MinifyPlugin = require("babel-minify-webpack-plugin")
+const TerserPlugin = require("terser-webpack-plugin")
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -172,7 +173,7 @@ let workerConfig = {
 //   workerConfig.devtool = ''
 
 //   workerConfig.plugins.push(
-//     new MinifyPlugin(),
+//     new TerserPlugin(),
 //     new CopyWebpackPlugin([
 //       {
 //         from: path.join(__dirname, '../static'),

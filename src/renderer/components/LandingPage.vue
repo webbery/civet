@@ -103,10 +103,10 @@ export default {
 }
 #loading-progress::before {
   position: absolute;
-  background: blueviolet;
+  background: rgb(101, 160, 248);
   height: 2px;
   width: 50%;
-  content: '50%';
+  content: '';
   color: #fff;
   font-size: 8px;
   text-align: center;

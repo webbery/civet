@@ -126,6 +126,7 @@ function readImages(fullpath) {
         console.info(err)
         return
       }
+      console.info('reply image')
       reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [image.toJson()])
     })
     console.info('readImages', img)

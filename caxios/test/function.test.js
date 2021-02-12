@@ -81,7 +81,7 @@ describe('civetkern add test', function() {
   })
   it('set file tag', function() {
     expect(instance.setTags({id: [fileids[0]], tag: ['test','标签']})).to.equal(true)
-    expect(instance.setTags({id: [fileids[2]], tag: ['test','标签']})).to.equal(true)
+    expect(instance.setTags({id: [fileids[2]], tag: ['test','标签', 'A']})).to.equal(true)
     // expect(instance.setTags({id: [fileids[1]], tag: ['test','标签']})).to.equal(false)
   })
   it('get untag files again', function() {
@@ -129,6 +129,7 @@ describe('civetkern add test', function() {
     expect(childClasses).to.lengthOf(2)
     result = instance.updateClassName('新分类2/子类', '新分类2/新子类')
     expect(result).to.equal(true)
+    instance.addClasses({id: [fileids[0]], class: ['新分类2/新子类']})
     childClasses = instance.getClasses('新分类2')
     // console.info('3', childClasses)
     result = instance.updateClassName('新分类2', '新分类1')
@@ -177,7 +178,7 @@ describe('civetkern read only test', function() {
   })
   it('get classes', function() {
     const rootClasses = instance.getClasses()
-    // console.info(rootClasses)
+    console.info(rootClasses)
     expect(rootClasses).to.lengthOf(4)
     expect(rootClasses[0]).to.have.property('children')
     expect(rootClasses[0].children[0]).to.have.property('name')
@@ -208,6 +209,12 @@ describe('civetkern read only test', function() {
     //    console.info(info)
     //}
     result = instance.query({keyword: '新分类1'})
+    expect(result).to.lengthOf(2)
+    result = instance.query({keyword: '新分类'})
+    expect(result).to.lengthOf(1)
+    result = instance.query({keyword: 'jpg'})
+    expect(result).to.lengthOf(2)
+    result = instance.query({keyword: ['A', 'B']})
     expect(result).to.lengthOf(1)
   })
   it('search files by datetime', function() {
@@ -238,6 +245,10 @@ describe('civetkern read only test', function() {
     result = instance.query({class: ['新分类1']})
     expect(result).to.lengthOf(1)
     // result = instance.query({class: ['新分类']})
+  })
+  it('search ensamble', function() {
+    let result = instance.query({type: 'jpeg', keyword: 'A'})
+    expect(result).to.lengthOf(1)
   })
   after(function() {
     instance.release()

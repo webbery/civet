@@ -5,7 +5,7 @@
 # dist: trusty
 language: node_js
 node_js:
-  - 14
+  - 12
 matrix:
   include:
   - os: osx
@@ -14,7 +14,7 @@ matrix:
   - os: linux
     dist: bionic
     # env: CC=gcc-7.5 CXX=g++-7.5
-    # compiler: gcc
+    compiler: gcc
 cache:
   directories:
     - node_modules

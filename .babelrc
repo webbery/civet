@@ -204,7 +204,7 @@
         "corejs": 2
       }
     ],
-    "transform-vue-jsx",
+    "@vue/babel-plugin-transform-vue-jsx",
     ["@babel/plugin-transform-destructuring",
       {
         "allowArrayLike": true,

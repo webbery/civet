@@ -44,6 +44,7 @@
 <script>
 import bus from '../utils/Bus'
 // import FolderTree from '@/components/Control/FolderTree'
+import PopMenu from '@/components/Menu/PopMenu'
 import TreePanel from '@/components/Panel/TreePanel'
 import { mapState } from 'vuex'
 import VueTreeList from '@/components/Control/VueTreeList'
@@ -52,6 +53,7 @@ export default {
   name: 'navigation-panel',
   components: {
     // FolderTree,
+    PopMenu,
     VueTreeList,
     TreePanel
   },
@@ -135,7 +137,7 @@ export default {
     },
     onClickNode(node) {
       console.info('onClickNode', node)
-      this.$store.dispatch('getClassesAndFiles', [node.name])
+      this.$store.dispatch('getClassesAndFiles', node.name)
     },
     onChangeName(params) {
       if (params.eventType === 'blur') {

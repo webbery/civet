@@ -2,7 +2,7 @@
   <div>
     <el-color-picker v-model="color" size="mini"></el-color-picker>
     <span class="custom">
-      <el-select v-model="fileType" @change="onFileTypeChanged" clearable placeholder="类型" size="mini" multiple >
+      <el-select v-model="fileType" @change="onFileTypeChanged" clearable placeholder=" 类型" size="mini" multiple>
         <el-option
           v-for="(item, idx) in fileTypes"
           :key="idx"
@@ -11,7 +11,7 @@
         >
         </el-option>
       </el-select>
-      <el-select v-model="timeRange" @change="onTimeSelectChanged" clearable placeholder="时间" size="mini">
+      <el-select v-model="timeRange" @change="onTimeSelectChanged" clearable placeholder=" 时间" size="mini">
         <el-option
           v-for="(item, idx) in timeRanges"
           :key="idx"
@@ -38,13 +38,14 @@
 </template>
 
 <script>
-// import log from '@/../public/Logger'
 import RangeInput from './Control/RangeInput'
+import FittedSelect from './Control/FittedSelect'
 
 export default {
   name: 'view-filter',
   components: {
-    RangeInput
+    RangeInput,
+    FittedSelect
   },
   data() {
     // current datetime
@@ -64,6 +65,7 @@ export default {
       fileType: null,
       fileTypes: [
         {label: 'jpg'},
+        {label: 'png'},
         {label: 'bmp'}
       ],
       clazz: []
@@ -119,11 +121,7 @@ export default {
 
 <style scoped>
 .custom .el-select {
-  width: 120px;
   transform: translateY(-8px);
-}
-.custom input{
-  width: 100px;
 }
 .custom .el-select-dropdown {
   transform: translateY(-8px);

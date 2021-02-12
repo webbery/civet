@@ -57,7 +57,7 @@ export default {
       testData: [{src: '111', href: '2222'}]
     }
   },
-  async mounted() {
+  mounted() {
     console.info('mounted')
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
     this.width = document.getElementById('main-content').offsetWidth

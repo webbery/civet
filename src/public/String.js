@@ -40,6 +40,7 @@ export default {
     return root
   },
   formatOutput: (input, type) => {
+    if (typeof input !== 'string') return input
     let output = input.replace(/\\/g, '/')
     return output
   },

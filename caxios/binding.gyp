@@ -21,7 +21,7 @@
         "include",
         "src",
         # "<!(node -e \"require('nan')\")",
-		'<!@(node -p "require(\'node-addon-api\').include")',
+		    '<!@(node -p "require(\'node-addon-api\').include")',
       ],
       'cflags_c': [],
       'cflags_cc': [
@@ -33,6 +33,7 @@
       ],
       "cflags_cc!": [
         '-fno-exceptions',
+        '-fno-rtti'
         '-std=gnu++1y',
         '-std=gnu++0x'
       ],

@@ -120,14 +120,14 @@ const mutations = {
       } else {
         cpath = item.name
       }
-      // console.info('generateClassPath', cpath)
+      console.info('generateClassPath', cpath)
       state.classesName.push(cpath)
       let children = array[index].children
       if (!children) return
       children.map(generateClassPath)
       // classesPath.unshift(cpath)
     }
-    if (state.classes.length) {
+    if (state.classes && state.classes.children.length) {
       let candidates = state.classes.children.map(generateClassPath)
       console.info('candidates', candidates, state.classes.children)
     }
@@ -137,6 +137,7 @@ const mutations = {
     state.allCount = data.filesSnap.length
     // tags
     state.tags = data.allTags
+    console.info('init finish')
   },
   addFiles(state, files) {
     let idx = 0
@@ -295,7 +296,7 @@ const mutations = {
   updateHistoryLength(state, value) {
     state.histories = value
   },
-  updateCount(state, counts) {
+  updateCounts(state, counts) {
     // count
     state.unclasses = counts.unclasses.length
     state.untags = counts.untags.length
