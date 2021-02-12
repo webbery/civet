@@ -2,6 +2,7 @@ import FileBase from '@/../public/FileBase'
 import Service from '@/components/utils/Service'
 import { Tree, TreeNode } from '@/components/Control/Tree'
 import Vue from 'vue'
+import Utility from '@/../public/Utility'
 
 const Cache = {
   query: {},
@@ -14,6 +15,7 @@ const state = {
   // classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
   classesName: [],
   viewItems: [],
+  viewClass: [],
   tags: {},
   allCount: 0,
   untags: 0,
@@ -31,6 +33,9 @@ const getters = {
     if (start < state.viewItems.length) {
       return state.viewItems
     }
+  },
+  viewClass: state => {
+    return state.viewClass
   },
   classes: state => { return state.classes },
   getFiles: (state, getters) => {
@@ -91,7 +96,7 @@ const mutations = {
         if (children && children.length > 0) {
           for (let i = 0; i < children.length; ++i) {
             if (typeof children[i] === 'object') {
-              const child = new TreeNode({name: children[i].name, isLeaf: false})
+              const child = new TreeNode({name: children[i].name, isLeaf: false, count: children[i].count})
               parent.addChildren(child, true)
               addChildren(children[i].children, child)
             }
@@ -103,7 +108,7 @@ const mutations = {
         if (!clazz) continue
         console.info('clazz:', clazz)
         // Vue.set(state.classes, idx, clazz)
-        const root = new TreeNode({name: clazz.name, isLeaf: false})
+        const root = new TreeNode({name: clazz.name, isLeaf: false, count: clazz.count})
         if (clazz['children'] && clazz['children'].length > 0) {
           addChildren(clazz['children'], root)
         }
@@ -303,6 +308,19 @@ const mutations = {
   },
   getClassesAndFiles(state, classesFiles) {
     console.info('getClassesAndFiles', classesFiles)
+    // state.viewItems.splice(0, state.viewItems.length)
+    let clsIdx = 0
+    let fileIdx = 0
+    state.viewClass.splice(0, state.viewClass.length)
+    state.viewItems.splice(0, state.viewItems.length)
+    for (let idx = 0; idx < classesFiles.length; ++idx) {
+      if (Utility.isObject(classesFiles[idx])) {
+        Vue.set(state.viewClass, clsIdx++, classesFiles[idx])
+      } else {
+        Vue.set(state.viewItems, fileIdx++, Cache.files[classesFiles[idx].id])
+      }
+    }
+    // console.info('display classes', state.viewClass)
   }
 }
 
@@ -364,7 +382,7 @@ const actions = {
     commit('changeClassName', mutation)
   },
   async getClassesAndFiles({commit}, query) {
-    const allClasses = await Service.getServiceInstance().get(Service.GET_ALL_CATEGORY, query)
+    const allClasses = await Service.getServiceInstance().get(Service.GET_CATEGORY_DETAIL, query)
     commit('getClassesAndFiles', allClasses)
   },
   update({commit}, sql) {

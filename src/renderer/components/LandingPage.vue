@@ -77,6 +77,7 @@ export default {
     onFileLoadStatus(status) {
       const percent = parseInt(status.count * 100 / status.total)
       this.loadProgress = percent
+      console.info('progress:', percent)
     }
   }
 }
@@ -96,19 +97,25 @@ export default {
   border-radius: 5px;
   margin: 0 10px 0 10px;
 }
-#loading-progress {
+/* #loading-progress {
   position: relative;
   height: 2px;
   background: #dfdfdf;
 }
+@keyframes shimmer{
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 500px 0;
+  }
+}
 #loading-progress::before {
   position: absolute;
-  background: rgb(101, 160, 248);
+  animation: shimmer infinite 2s linear;
+  background: -webkit-repeating-linear-gradient(-0deg,#9dbafd 0, #6094f5 25%,#076ff7 50%, #6094f5 75%, #9dbafd 100%);
   height: 2px;
   width: 50%;
   content: '';
-  color: #fff;
-  font-size: 8px;
-  text-align: center;
-}
+} */
 </style>

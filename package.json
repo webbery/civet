@@ -97,11 +97,18 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "./extension/",
+        "to": "./extension",
+        "filter": [
+          "**/*"
+        ]
       }
     ]
   },
   "dependencies": {
-    "civetkern": "^0.1.4",
+    "civetkern": "^0.1.5",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
     "exifreader": "^3.9.0",

@@ -460,9 +460,6 @@ namespace caxios {
   Napi::Value getClasses(const Napi::CallbackInfo& info) {
     if (g_pCaxios) {
       std::string sParent("/");
-      if (info.Length() != 0) {
-        sParent = info[0].As<Napi::String>();
-      }
       T_LOG("class", "get classes");
       nlohmann::json classes = nlohmann::json::array();
       g_pCaxios->GetClasses(sParent, classes);
@@ -473,7 +470,21 @@ namespace caxios {
     }
     return Napi::Value();
   }
-  Napi::Value getTagsOfFiles(const Napi::CallbackInfo& info) {
+  Napi::Value getClassesInfo(const Napi::CallbackInfo& info) {
+    if (g_pCaxios) {
+      std::string sParent("/");
+      if (info.Length() != 0) {
+        sParent = info[0].As<Napi::String>();
+      }
+      T_LOG("class", "get classes info");
+      nlohmann::json classes = nlohmann::json::array();
+      g_pCaxios->getClassesInfo(sParent, classes);
+      Napi::Env env = info.Env();
+      return Parse(env, classes.dump());
+    }
+    return Napi::Value();
+  }
+  Napi::Value getTagsOfFiles(const Napi::CallbackInfo & info) {
     if (g_pCaxios) {
       Napi::Object obj = info[0].As<Napi::Object>();
       auto aFilesID = AttrAsArray(obj, "id");
@@ -585,6 +596,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(getUnTagFiles);
   EXPORT_JS_FUNCTION_PARAM(getUnClassifyFiles);
   EXPORT_JS_FUNCTION_PARAM(getClasses);
+  EXPORT_JS_FUNCTION_PARAM(getClassesInfo);
   EXPORT_JS_FUNCTION_PARAM(getTagsOfFiles);
   EXPORT_JS_FUNCTION_PARAM(removeFiles);
   EXPORT_JS_FUNCTION_PARAM(removeTags);

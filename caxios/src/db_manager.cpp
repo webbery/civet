@@ -394,6 +394,30 @@ namespace caxios {
     return true;
   }
 
+  size_t DBManager::GetFileCountOfClass(ClassID cid)
+  {
+    void* pData = nullptr;
+    uint32_t len = 0;
+    m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], cid, pData, len);
+    return len / sizeof(FileID);
+  }
+
+  size_t DBManager::GetAllFileCountOfClass(ClassID cid)
+  {
+    size_t count = GetFileCountOfClass(cid);
+    auto key = GetClassKey(cid);
+    auto children = GetClassChildren(key);
+    for (int idx = 0; idx < children.size();) {
+      ClassID child = children[idx];
+      count += GetFileCountOfClass(child);
+      children.erase(children.begin());
+      auto ck = GetClassKey(child);
+      auto cc = GetClassChildren(ck);
+      if (cc.size()) children.insert(children.end(), cc.begin(),cc.end());
+    }
+    return count;
+  }
+
   bool DBManager::GetUntagFiles(std::vector<FileID>& filesID)
   {
     std::vector<Snap> vSnaps;
@@ -457,6 +481,59 @@ namespace caxios {
       std::tie(childID, sChild) = EncodePath2Hash(name);
       if (childID == parentID) continue;
       auto clzChildren = GetClassChildren(sChild);
+      if (clzChildren.size()) {
+        nlohmann::json children;
+        for (auto& clzID : clzChildren) {
+          nlohmann::json clz;
+          clz["id"] = clzID;
+          std::string classPath = GetClassByHash(clzID);
+          size_t pos = classPath.rfind('/');
+          if (pos != std::string::npos) {
+            clz["name"] = classPath.substr(pos + 1);
+          }
+          else {
+            clz["name"] = classPath;
+          }
+          clz["count"] = GetAllFileCountOfClass(clzID);
+          clz["type"] = "clz";
+          children.push_back(clz);
+        }
+        jCls["children"] = children;
+      }
+      jCls["count"] = GetAllFileCountOfClass(childID);
+      jCls["type"] = "clz";
+      classes.push_back(jCls);
+    }
+    if (!classes.empty()) {
+      T_LOG("class", "parent: %s(%s), get class: %d", parent.c_str(), parentKey.c_str(), classes.dump().c_str());
+    }
+    return true;
+  }
+
+  bool DBManager::getClassesInfo(const std::string& parent, nlohmann::json& info)
+  {
+    READ_BEGIN(TABLE_CLASS2FILE);
+    READ_BEGIN(TABLE_CLASS2HASH);
+    std::map<uint32_t, std::vector<FileID>> vFiles;
+    uint32_t parentID = 0;
+    std::string parentKey(ROOT_CLASS_PATH);
+    if (parent != ROOT_CLASS_PATH) {
+      std::tie(parentID, parentKey) = EncodePath2Hash(parent);
+      T_LOG("class", "panrent: %s, ID: %d, key: %s", parent.c_str(), parentID, format_x16(parentKey).c_str());
+    }
+    void* pData = nullptr;
+    uint32_t len = 0;
+    auto children = GetClassChildren(parentKey);
+    //std::string sParent = (parent == ROOT_CLASS_PATH ? "" : ROOT_CLASS_PATH);
+    for (auto& clsID : children) {
+      nlohmann::json jCls;
+      std::string name = GetClassByHash(clsID);
+      jCls["name"] = name;
+      uint32_t childID;
+      std::string sChild;
+      std::tie(childID, sChild) = EncodePath2Hash(name);
+      if (childID == parentID) continue;
+      auto clzChildren = GetClassChildren(sChild);
       auto files = GetFilesOfClass(childID);
       T_LOG("class", "clsID:%u, parentID: %u,  %d children %s, files: %s",
         clsID, parentID, childID, format_vector(clzChildren).c_str(), format_vector(files).c_str());
@@ -473,6 +550,7 @@ namespace caxios {
           else {
             clz["name"] = classPath;
           }
+          clz["count"] = GetAllFileCountOfClass(clzID);
           clz["type"] = "clz";
           children.push_back(clz);
         }
@@ -481,8 +559,9 @@ namespace caxios {
         }
         jCls["children"] = children;
       }
+      jCls["count"] = GetAllFileCountOfClass(childID);
       jCls["type"] = "clz";
-      classes.push_back(jCls);
+      info.push_back(jCls);
     }
     m_pDatabase->Get(m_mDBs[TABLE_CLASS2FILE], parentID, pData, len);
     for (size_t idx = 0; idx < len / sizeof(FileID); ++idx) {
@@ -491,10 +570,10 @@ namespace caxios {
       jFile["id"] = fid;
       Snap snap = GetFileSnap(fid);
       jFile["name"] = std::get<1>(snap);
-      classes.push_back(jFile);
+      info.push_back(jFile);
     }
-    if (!classes.empty()) {
-      T_LOG("class", "parent: %s(%s), get class: %d", parent.c_str(), parentKey.c_str(), classes.dump().c_str());
+    if (!info.empty()) {
+      T_LOG("class", "parent: %s(%s), get class: %d", parent.c_str(), parentKey.c_str(), info.dump().c_str());
     }
     return true;
   }

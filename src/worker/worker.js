@@ -77,6 +77,7 @@ const ReplyType = {
   REPLY_ALL_TAGS_WITH_IMAGES: 'replyAllTagsWithImages',
   REPLY_QUERY_FILES: 'replyQueryFilesResult',
   REPLAY_ALL_CATEGORY: 'replyAllCategory',
+  REPLY_CLASSES_INFO: 'replyClassesInfo',
   REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
   REPLY_UNTAG_IMAGES: 'replyUntagImages',
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
@@ -182,7 +183,7 @@ function reply2Renderer(type, value) {
       }
       console.info('clear queue')
       queue = {}
-    }, 1000)
+    }, 200)
   } else {
     ipcRenderer.send('message-from-worker', {type: type, data: value})
   }
@@ -251,7 +252,6 @@ const messageProcessor = {
     console.info('allTags', allTags)
     reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
-  'getCategoryDetail': (category) => {},
   'queryFiles': (nsql) => {
     let allFiles = storage.query(nsql)
     console.info(nsql, 'reply: ', allFiles)
@@ -262,10 +262,16 @@ const messageProcessor = {
     return storage.addClasses(mutation)
   },
   'getAllCategory': (parent) => {
-    const category = storage.getClasses(parent)
+    const category = storage.getClasses()
     // let category = await CategoryArray.loadFromDB()
     console.info('getAllCategory', category)
     reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
+  },
+  'getCategoryDetail': (parent) => {
+    const category = storage.getClassDetail(parent)
+    // let category = await CategoryArray.loadFromDB()
+    console.info('getCategoryDetail', category)
+    reply2Renderer(ReplyType.REPLY_CLASSES_INFO, category)
   },
   'getUncategoryImages': async () => {
     let uncateimgs = storage.getUnClassifyFiles()

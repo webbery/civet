@@ -95,6 +95,7 @@ namespace caxios {
   bool isDate(const std::string& input);
   time_t str2time(const std::string& input);
 
+  std::wstring string2wstring(const std::string& str);
 
 }
 

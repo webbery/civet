@@ -13,6 +13,8 @@
 #include <regex>
 #include <iomanip>
 #include <sstream>
+#include <codecvt>
+#include <locale>
 #define CHAR_BIT_S  255
 
 namespace caxios {
@@ -344,5 +346,12 @@ namespace caxios {
       vArgs.emplace_back(v);
     }
     auto result = function.As<Napi::Function>().Call(vArgs);
+  }
+
+  std::wstring string2wstring(const std::string& str)
+  {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    return conv.from_bytes(str);
+    //std::locale::global(std::locale("Chinese-simplified"));
   }
 }

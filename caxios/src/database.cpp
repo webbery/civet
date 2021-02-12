@@ -8,9 +8,11 @@
 #include <direct.h>
 #include <io.h>
 #endif
+#include "util/util.h"
 #include "log.h"
 
 #define MAX_NUM_DATABASE  64
+#define UNIVERSAL_DELIMITER '/'
 #if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
 #define OS_DELIMITER '/'
 #else
@@ -26,31 +28,42 @@ namespace caxios {
     BT_VALUE
   };
 
-  bool isDirectoryExist(const std::string& dir) {
-#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
-    if (access(dir.c_str(), 0) != -1) return true;
-#elif defined(WIN32)
-    if (_access(dir.c_str(), 0) == 0) return true;
-#endif
-    return false;
-  }
-  void createDirectories(const std::string& dir) {
-    if (isDirectoryExist(dir)) return;
-    size_t pos = dir.rfind(OS_DELIMITER);
-    if (pos == std::string::npos) return;
-    std::string parentDir = dir.substr(0, pos);
-    //std::cout << "parentDir:"<<parentDir << std::endl;
-    createDirectories(parentDir);
-    //std::cout << "Create:" << parentDir << std::endl;
-    mkdir(dir.c_str()
+  void MkDir(const std::wstring& dir) {
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
-      ,0777
+    mkdir(dir.c_str()
+      , 0777
+#else
+    _wmkdir(dir.c_str()
 #endif
     );
   }
+  bool isDirectoryExist(const std::wstring& dir) {
+#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+    if (access(dir.c_str(), 0) != -1) return true;
+#elif defined(WIN32)
+    if (_waccess(dir.c_str(), 0) == 0) return true;
+#endif
+    return false;
+  }
+  void createDirectories(const std::wstring& dir) {
+    if (isDirectoryExist(dir)) return;
+    size_t pos = dir.rfind(UNIVERSAL_DELIMITER);
+    if (pos == std::string::npos) {
+      pos = dir.rfind(OS_DELIMITER);
+      if (pos == std::string::npos) {
+        MkDir(dir);
+        return;
+      }
+    }
+    std::wstring parentDir = dir.substr(0, pos);
+    T_LOG("database", "parentDir: %s",parentDir.c_str());
+    createDirectories(parentDir);
+    MkDir(dir);
+  }
 
   CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
-    createDirectories(dbpath);
+    auto wpath = string2wstring(dbpath);
+    createDirectories(wpath);
     T_LOG("init", "createDirectories: %s", dbpath.c_str());
     if (flag == DBFlag::ReadOnly) m_flag = MDB_RDONLY;
     else m_flag = MDB_WRITEMAP;

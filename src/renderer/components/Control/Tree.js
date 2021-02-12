@@ -17,6 +17,7 @@ export class TreeNode {
     this.id = typeof id === 'undefined' ? uuidv4() : id
     this.parent = null
     this.children = null
+    this.count = 0
     this.isLeaf = !!isLeaf
 
     // other params

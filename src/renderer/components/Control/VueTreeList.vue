@@ -86,6 +86,7 @@
             </slot>
           </span>
         </div>
+        <div class="vtl-count"><span>{{ model.count }}</span></div>
       </div>
 
       <div
@@ -504,6 +505,11 @@ export default {
   }
   .vtl-operation {
     margin-left: 2rem;
+    letter-spacing: 1px;
+  }
+  .vtl-count {
+    margin-left: auto;
+    order: 2;
     letter-spacing: 1px;
   }
 }

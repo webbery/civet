@@ -15,6 +15,7 @@ const replyMessageMap = {
   'getAllTagsWithImages': 'replyAllTagsWithImages',
   'queryFiles': 'replyQueryFilesResult',
   'getAllCategory': 'replyAllCategory',
+  'getCategoryDetail': 'replyClassesInfo',
   'getUncategoryImages': 'replyUncategoryImages',
   'getUntagImages': 'replyUntagImages',
   'reInitDB': 'replyReloadDBStatus',

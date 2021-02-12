@@ -894,14 +894,6 @@ std::vector<std::string> getLocaleAlphabet(wchar_t chr)
 }
 
 
-std::wstring string2wstring(const std::string& str)
-{
-  std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-  return conv.from_bytes(str);
-  //std::locale::global(std::locale("Chinese-simplified"));
-}
-
-
 std::string wstring2string(const std::wstring& str)
 {
   std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;

@@ -49,7 +49,30 @@ function load() {
   }
   return thirdModules
 }
+
+function unzip(filepath) {}
+
+function installPath() {
+  const os = require('os')
+  const platform = os.platform()
+  switch (platform) {
+    case 'win32':
+      break
+    case 'mac':
+      break
+    default:
+      break
+  }
+}
+function install(extension) {
+  //
+  const instPath = installPath()
+  console.info(instPath)
+}
 export default {
+  unzip: unzip,
+  install: install,
+  uninstall: null,
   load: load,
   getModuleByExt: (ext) => {
     load()
