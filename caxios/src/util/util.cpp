@@ -81,6 +81,23 @@ namespace caxios {
     return (hs + di) % std::numeric_limits<uint32_t>::max();
   }
 
+  bool eraseData(std::vector<WordRef>& vDest, WordIndex tgt)
+  {
+    for (auto itr = vDest.begin(); itr != vDest.end();) {
+      if (itr->_wid == tgt) {
+        itr->_ref -= 1;
+      }
+      if (itr->_ref == 0) {
+        itr = vDest.erase(itr);
+        return true;
+      }
+      else {
+        ++itr;
+      }
+    }
+    return false;
+  }
+
   bool isDate(const std::string& input)
   {
     std::regex reg("\\\^[0-9]+.[0-9]*|[0-9]+-[0-9]+-[0-9]+T[0-9]+:[0-9]+:[0-9]+.[0-9]+Z");

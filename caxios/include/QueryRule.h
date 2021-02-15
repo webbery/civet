@@ -10,6 +10,7 @@ namespace caxios {
   struct literal_indent_cn : utf8::ranges< U'\u2E80', U'\u9FFF'> {};
   struct literal_string_cn : plus < not_one<'\'', '"'> > {};
   struct literal_quote : one<'\'', '"'> {};
+  struct literal_spaces : star<space> {};
   //template< char Q >
   //struct str_impl : if_must< one< Q >, until< one< Q >, literal_string > > {};
   struct literal_int_part : plus<digit> {};
@@ -57,7 +58,10 @@ namespace caxios {
   struct literal_start : one<'{', '['> {};
   struct literal_close : one<'}', ']'> {};
 
-  struct literal_query_equal : seq<literal_start, literal_string_key, literal_eq, literal_value, literal_close > {};
+  struct literal_condition : seq< literal_string_key, literal_eq, literal_spaces, literal_value > {};
+  struct literal_conditions : if_must< literal_and, literal_condition> {};
+
+  struct literal_query_equal : seq<literal_start, literal_condition, literal_spaces, star<literal_conditions>, literal_close > {};
   struct literal_query_compare : seq<literal_start, literal_op_key, literal_eq, literal_value, literal_close> {};
 
   struct literal_query : sor<literal_query_compare, literal_query_equal > {};

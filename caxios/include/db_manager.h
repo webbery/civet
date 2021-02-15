@@ -5,6 +5,7 @@
 #include <map>
 #include <Table.h>
 #include "log.h"
+#include "datum_type.h"
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
@@ -18,6 +19,7 @@ namespace caxios {
     enum CompareType {
     CT_EQUAL = 0,
     CT_IN,
+    CT_OR,
     CT_GREAT_EQUAL,
     CT_GREAT_THAN,
     CT_LESS_THAN
@@ -120,8 +122,12 @@ namespace caxios {
     bool AddFile(FileID, const MetaItems&, const Keywords&);
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
     bool AddFileID2Keyword(FileID, WordIndex);
-    void UpdateChildrenClassName(const std::string& clssKey, const std::string& oldarentName, const std::string& newParentName);
+    void UpdateChildrenClassName(
+      const std::string& clssKey, const std::string& oldarentName, const std::string& newParentName,
+      const std::vector<std::string>& oldStrings, const std::vector<WordIndex>& vWordsIndex);
     bool AddKeyword2File(WordIndex, FileID);
+    void BindKeywordAndFile(WordIndex, FileID);
+    void BindKeywordAndFile(const std::vector<WordIndex>&, const std::vector<FileID>&);
     bool AddTagPY(const std::string& tag, WordIndex indx);
     bool AddClass2FileID(uint32_t, const std::vector<FileID>& vFilesID);
     bool AddFileID2Class(const std::vector<FileID>&, uint32_t);
@@ -155,7 +161,24 @@ namespace caxios {
     Snap GetFileSnap(FileID);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
     WordIndex GetWordIndex(const std::string& word);
-    std::vector<std::string> GetWordByIndex(const WordIndex* const wordsIndx, size_t cnt);
+    template<typename T>
+    std::vector<std::string> GetWordByIndex(const T* const wordsIndx, size_t cnt) {
+      std::vector<std::string> vWords(cnt);
+      for (size_t idx = 0; idx < cnt; ++idx)
+      {
+        const T& index = wordsIndx[idx];
+        if (word_policy<T>::id(index) == 0) {
+          T_LOG("dict", "word index: 0");
+          continue;
+        }
+        void* pData = nullptr;
+        uint32_t len = 0;
+        if (!m_pDatabase->Get(m_mDBs[TABLE_INDX_KEYWORD], word_policy<T>::id(index), pData, len)) continue;
+        std::string word((char*)pData, len);
+        vWords[idx] = word;
+      }
+      return std::move(vWords);
+    }
     template<typename Itr>
     std::map<WordIndex, std::string> GetWordByIndex(const Itr start, const Itr end) {
       std::map<WordIndex, std::string> mWords;
@@ -181,12 +204,11 @@ namespace caxios {
     std::vector<FileID> _Query(const std::string& tableName, const CQuery<QT_String, CT_EQUAL>& values);
     template<typename FAIL>
     std::vector<FileID> _Query(const std::string& tableName, FAIL& values) {
+#ifdef WIN32
       T_LOG("query", "fail, table: %s, query: %s", tableName.c_str()
-#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
-#elif defined(WIN32)
         , typeid(values).name()
-#endif
       );
+#endif
       std::vector<FileID> v;
       return std::move(v);
     }

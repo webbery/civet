@@ -2,7 +2,6 @@ import FileBase from '@/../public/FileBase'
 import Service from '@/components/utils/Service'
 import { Tree, TreeNode } from '@/components/Control/Tree'
 import Vue from 'vue'
-import Utility from '@/../public/Utility'
 
 const Cache = {
   query: {},
@@ -314,8 +313,12 @@ const mutations = {
     state.viewClass.splice(0, state.viewClass.length)
     state.viewItems.splice(0, state.viewItems.length)
     for (let idx = 0; idx < classesFiles.length; ++idx) {
-      if (Utility.isObject(classesFiles[idx])) {
-        Vue.set(state.viewClass, clsIdx++, classesFiles[idx])
+      if (classesFiles[idx].type === 'clz') {
+        let item = {}
+        item.path = classesFiles[idx].name
+        let pos = classesFiles[idx].name.lastIndexOf('/') + 1
+        item.name = classesFiles[idx].name.substring(pos)
+        Vue.set(state.viewClass, clsIdx++, item)
       } else {
         Vue.set(state.viewItems, fileIdx++, Cache.files[classesFiles[idx].id])
       }

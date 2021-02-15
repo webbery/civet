@@ -137,7 +137,15 @@ export default {
     },
     onClickNode(node) {
       console.info('onClickNode', node)
-      this.$store.dispatch('getClassesAndFiles', node.name)
+      let parentPath = ''
+      let parent = node.parent
+      while (parent) {
+        if (parent.name === 'root') break
+        parentPath += parent.name + '/'
+        parent = parent.parent
+      }
+      const clsPath = parentPath + node.name
+      this.$store.dispatch('getClassesAndFiles', clsPath)
     },
     onChangeName(params) {
       if (params.eventType === 'blur') {

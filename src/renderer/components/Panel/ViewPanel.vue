@@ -4,7 +4,11 @@
     <el-scrollbar style="height:96vh;" @click.native="onPanelClick($event)">
       <div v-if="classList.length > 0">
         <div class="hr-divider" data-content="分类"></div>
-        <div class="folder" v-for="(item, idx) in classList" :key="idx" @click="onClassClick(item)">
+        <div v-bind:class="{'folder-selected': folderSelected[idx], 'folder': !folderSelected[idx]}"
+          v-for="(item, idx) in classList" :key="idx"
+          @click="onClassClick($event, idx, item)"
+          @dblclick="onClassDbClick($event, idx, item)"
+        >
           <div class="b-icon b-icon_type_folder"></div>
           <div>{{ item.name }}</div>
         </div>
@@ -62,7 +66,9 @@ export default {
       ],
       width: 400,
       height: 800,
-      testData: [{src: '111', href: '2222'}]
+      testData: [{src: '111', href: '2222'}],
+      lastSelectFolder: -1,
+      folderSelected: []
     }
   },
   mounted() {
@@ -74,7 +80,15 @@ export default {
   },
   computed: mapState({
     imageList: (state) => state.Cache.viewItems,
-    classList: (state) => state.Cache.viewClass
+    classList(state) {
+      if (this.lastSelectFolder === -1) {
+        this.folderSelected.splice(0, this.folderSelected.length)
+        for (let idx = 0; idx < state.Cache.viewClass.length; ++idx) {
+          this.$set(this.folderSelected, idx, false)
+        }
+      }
+      return state.Cache.viewClass
+    }
   }),
   watch: {
     $route: function(to, from) {
@@ -122,6 +136,8 @@ export default {
       else {
         this.clearSelections()
       }
+      this.$set(this.folderSelected, this.lastSelectFolder, false)
+      this.lastSelectFolder = -1
     },
     onImageClick(e, root, image) {
       console.info('onImageClick', image)
@@ -160,8 +176,18 @@ export default {
       console.info(index)
       this.enableInput = true
     },
-    onClassClick: function (item) {
-      console.info('folder click', item)
+    onClassClick: function (event, idx, item) {
+      console.info('folder click', idx, item, this.lastSelectFolder)
+      event.stopPropagation()
+      if (this.lastSelectFolder !== -1) {
+        this.$set(this.folderSelected, this.lastSelectFolder, false)
+      }
+      this.$set(this.folderSelected, idx, true)
+      this.lastSelectFolder = idx
+    },
+    onClassDbClick: function (event, idx, item) {
+      this.$store.dispatch('getClassesAndFiles', item.path)
+      this.lastSelectFolder = -1
     },
     onSelectMenu: function (indexList) {
       console.info(indexList)
@@ -331,6 +357,14 @@ export default {
 }
 .folder {
   display: inline-block;
+  text-align: center;
+  font-size: 14px;
+}
+.folder-selected {
+  display: inline-block;
+  background-color: rgb(27, 128, 230);
+  /* margin: 0em 1em 0 1em; */
+  border-radius: 4px;
   text-align: center;
   font-size: 14px;
 }

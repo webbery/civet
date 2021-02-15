@@ -3,6 +3,7 @@
 #include "db_manager.h"
 #include "util/util.h"
 #include "log.h"
+#include <algorithm>
 
 namespace caxios {
   namespace {
@@ -93,7 +94,8 @@ namespace caxios {
     m_bClose = false;
     // create action now
     IAction* pAction = Factory::create(m_sKey, m_vCond, m_ctype);
-    m_vActions.emplace_back(pAction);
+    if (pAction) m_vActions.emplace_back(pAction);
+    m_vCond.clear();
   }
 
   void QueryActions::push(const std::string& key)
@@ -111,17 +113,25 @@ namespace caxios {
 
   std::vector<caxios::FileID> QueryActions::invoke()
   {
-    std::vector<caxios::FileID> result;
+    std::vector<caxios::FileID> temp, result;
     int idx = m_vActions.size() - 1;
+    // currently use 'and' in multiple query conditions.
+    // TODO: construct an executable queue from parser tree 
     while (idx>=0)
     {
       auto back = m_vActions[idx];
       m_vActions.pop_back();
       idx -= 1;
-      result = back->query(m_pDBManager);
+      std::vector<caxios::FileID> qr = back->query(m_pDBManager);
+      if (temp.size() == 0) temp = qr;
+      else {
+        std::set_intersection(std::begin(temp), std::end(temp), std::begin(qr), std::end(qr),
+          std::inserter(result, std::begin(result)));
+      }
       if(m_vActions.size() == 0) break;
       //m_vActions.back().constraint(result);
     }
+    if (result.size() == 0 && temp.size() != 0) result = temp;
     return std::move(result);
   }
 

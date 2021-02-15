@@ -16,4 +16,27 @@ namespace caxios {
   typedef std::tuple<FileID, std::string, char> Snap; // fileid, display_name, initialize_state
   typedef std::vector<std::string> Classes;
   typedef std::tuple<FileID, MetaItems, Tags, Classes, Annotations, Keywords> FileInfo;
+
+  struct WordRef{
+    WordIndex _wid;
+    uint8_t _ref;
+  };
+
+  template<typename T> struct word_policy;
+  template<> struct word_policy< WordIndex > {
+    static WordIndex id(const WordIndex& ref) { return ref; }
+  };
+  template<> struct word_policy< WordRef > {
+    static WordIndex id(const WordRef& ref) { return ref._wid; }
+  };
+  inline bool operator == (const WordRef& left, const WordRef& right) {
+    return left._wid == right._wid;
+  }
+  inline bool operator != (const WordRef& left, const WordRef& right) {
+    return left._wid != right._wid;
+  }
+
+  inline bool operator < (const WordRef& left, const WordRef& right) {
+    return left._wid < right._wid;
+  }
 }

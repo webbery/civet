@@ -85,11 +85,17 @@ namespace caxios {
     return false;
   }
 
-  template<typename T>
-  void eraseData(std::vector<T>& vDest, const std::vector <T>& tgt) {
+  bool eraseData(std::vector<WordRef>& vDest, WordIndex tgt);
+
+  template<typename T1, typename T2>
+  std::vector<T2> eraseData(std::vector<T1>& vDest, const std::vector <T2>& tgt) {
+    std::vector<T2> vRemoved;
     for (auto& item : tgt) {
-      eraseData(vDest, item);
+      if (eraseData(vDest, item)) {
+        vRemoved.push_back(item);
+      }
     }
+    return std::move(vRemoved);
   }
 
   bool isDate(const std::string& input);

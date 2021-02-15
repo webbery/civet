@@ -217,6 +217,15 @@ namespace caxios {
       }
     }
   };
+  template<> struct action< literal_and > {
+    template< typename ActionInput >
+    static void apply(const ActionInput& in, QueryActions& actions) {
+      if (!in.empty()) {
+        actions.close();
+        actions.open();
+      }
+    }
+  };
   template<> struct action< literal_array> {
     template< typename ActionInput >
     static void apply(const ActionInput& in, QueryActions& actions) {
