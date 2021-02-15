@@ -181,7 +181,12 @@ namespace caxios {
     std::vector<FileID> _Query(const std::string& tableName, const CQuery<QT_String, CT_EQUAL>& values);
     template<typename FAIL>
     std::vector<FileID> _Query(const std::string& tableName, FAIL& values) {
-      T_LOG("query", "fail, table: %s, query: %s", tableName.c_str(), typeid(values).name());
+      T_LOG("query", "fail, table: %s, query: %s", tableName.c_str()
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+#elif defined(WIN32)
+        , typeid(values).name()
+#endif
+      );
       std::vector<FileID> v;
       return std::move(v);
     }

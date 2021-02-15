@@ -13,7 +13,7 @@
 
 #define MAX_NUM_DATABASE  64
 #define UNIVERSAL_DELIMITER '/'
-#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux)
 #define OS_DELIMITER '/'
 #else
 #define OS_DELIMITER '\\'
@@ -28,7 +28,13 @@ namespace caxios {
     BT_VALUE
   };
 
-  void MkDir(const std::wstring& dir) {
+  void MkDir(
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+    const std::string& dir
+#else
+    const std::wstring& dir
+#endif
+  ) {
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
     mkdir(dir.c_str()
       , 0777
@@ -37,15 +43,27 @@ namespace caxios {
 #endif
     );
   }
-  bool isDirectoryExist(const std::wstring& dir) {
-#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+  bool isDirectoryExist(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  ) {
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
     if (access(dir.c_str(), 0) != -1) return true;
 #elif defined(WIN32)
     if (_waccess(dir.c_str(), 0) == 0) return true;
 #endif
     return false;
   }
-  void createDirectories(const std::wstring& dir) {
+  void createDirectories(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  ) {
     if (isDirectoryExist(dir)) return;
     size_t pos = dir.rfind(UNIVERSAL_DELIMITER);
     if (pos == std::string::npos) {
@@ -55,15 +73,24 @@ namespace caxios {
         return;
       }
     }
-    std::wstring parentDir = dir.substr(0, pos);
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    std::string parentDir;
+#elif defined(WIN32)
+    std::wstring parentDir;
+#endif
+    parentDir = dir.substr(0, pos);
     T_LOG("database", "parentDir: %s",parentDir.c_str());
     createDirectories(parentDir);
     MkDir(dir);
   }
 
   CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    createDirectories(dbpath);
+#elif defined(WIN32)
     auto wpath = string2wstring(dbpath);
     createDirectories(wpath);
+#endif
     T_LOG("init", "createDirectories: %s", dbpath.c_str());
     if (flag == DBFlag::ReadOnly) m_flag = MDB_RDONLY;
     else m_flag = MDB_WRITEMAP;
