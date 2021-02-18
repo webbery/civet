@@ -1,6 +1,7 @@
 import FileBase from '../public/FileBase'
 import ExifReader from 'exifreader'
 import JString from '../public/String'
+import Utility from '../public/Utility'
 // import CV from '../public/ImageProcess'
 import fs from 'fs'
 // import { imageHash } from 'image-hash'
@@ -108,7 +109,7 @@ class ImageMetaParser extends ImageParseBase {
 
     if (meta['DateTime'] !== undefined && meta['DateTime'].value) {
       // image.datetime = meta['DateTime'].value[0]
-      image.addMeta('datetime', meta['DateTime'].value[0], 'date')
+      image.addMeta('datetime', Utility.convert2ValidDate(meta['DateTime'].value[0]), 'date')
     }
     image.addMeta('type', this.getImageFormat(type))
     image.addMeta('width', this.getImageWidth(meta))
@@ -224,7 +225,7 @@ class ImageTextParser extends ImageParseBase {
     image.tag = await pool.exec('getNouns', [fullpath])
     // pool.terminate()
     console.info('image tag:', image.tag)
-    if (image.tag !== 0) {
+    if (image.tag.length > 0) {
       image.keyword = image.tag
       console.info('ImageTextParser', image.tag)
       try {

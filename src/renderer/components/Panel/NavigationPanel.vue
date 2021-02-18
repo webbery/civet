@@ -11,7 +11,7 @@
           </table>
           <TreePanel :isActive="true" @addRootClass="addRootClass">
             <!-- <FolderTree :data="category"></FolderTree> -->
-            <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
+            <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="classTree"></PopMenu>
             <VueTreeList
               @click="onClickNode"
               @change-name="onChangeName"
@@ -163,6 +163,9 @@ export default {
     },
     onDropNode(params) {
       console.info('onDropNode', params)
+    },
+    onSelectMenu(indexList) {
+      console.info('navi menu')
     },
     renderContent(h, {node, data, store}) {
       // console.info('renderContent', data)

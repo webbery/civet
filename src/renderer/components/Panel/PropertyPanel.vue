@@ -144,7 +144,10 @@ export default {
                 values.push(getSize(parseInt(file.size)))
               } else {
                 if (item.type === 'date') {
-                  const dt = localize.format(new Date(meta.value))
+                  // console.info('time', Utility.convert2ValidDate(meta.value))
+                  const t = new Date(meta.value)
+                  // console.info('time 2', t)
+                  const dt = localize.format(t)
                   console.info('date: ', dt, meta.value)
                   values.push(dt)
                 } else {

@@ -254,7 +254,7 @@ const messageProcessor = {
   },
   'queryFiles': (nsql) => {
     let allFiles = storage.query(nsql)
-    console.info(nsql, 'reply: ', allFiles)
+    console.info('type', typeof nsql['datetime']['$gt'], nsql, 'reply: ', allFiles)
     reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
   },
   'addCategory': (mutation) => {

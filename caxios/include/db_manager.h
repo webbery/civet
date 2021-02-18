@@ -107,6 +107,7 @@ namespace caxios {
         if (keyword == TB_Keyword || keyword == TB_Class || keyword == TB_Tag) {
           return this->_Query(m_mKeywordMap[keyword], compare);
         }
+        T_LOG("query", "keyword %s", keyword.c_str());
         //if (subset.empty()) {
         //  
         //}

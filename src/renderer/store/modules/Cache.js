@@ -131,7 +131,7 @@ const mutations = {
       children.map(generateClassPath)
       // classesPath.unshift(cpath)
     }
-    if (state.classes && state.classes.children.length) {
+    if (state.classes && state.classes.children && state.classes.children.length) {
       let candidates = state.classes.children.map(generateClassPath)
       console.info('candidates', candidates, state.classes.children)
     }
@@ -287,6 +287,17 @@ const mutations = {
     for (let idx = 0; idx < filesid.length; ++idx) {
       // remove from cache
       Vue.delete(Cache.files, filesid[idx])
+    }
+    let removeCnt = 0
+    for (let idx = 0; idx < state.viewItems.length; ++idx) {
+      if (removeCnt === filesid.length) break
+      for (let idx = 0; idx < filesid.length; ++idx) {
+        if (state.viewItems[idx].id === filesid[idx]) {
+          Vue.delete(state.viewItems, idx)
+          removeCnt += 1
+          break
+        }
+      }
     }
     // remove from db
     Service.getServiceInstance().send(Service.REMOVE_FILES, filesid)
