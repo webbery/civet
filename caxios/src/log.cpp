@@ -71,14 +71,16 @@ namespace caxios {
       fclose(_file);
     }
 
-    bool Open(bool flag) {
-      std::string logname("civetkern_");
-      std::string mode("read");
+    bool Open(const char* fname, bool flag) {
+      std::string logname(fname);
+      std::string mode("");
       if (flag == 0) mode = "write";
       int idx = 1;
       std::string filename;
       while (true) {
-        filename = logname + std::to_string(idx) + "_" + mode + ".log";
+        if (mode.size() != 0) {
+          filename = logname + std::to_string(idx) + "_" + mode + ".log";
+        }
         if (!caxios::exist(filename)) {
           logname = filename;
           break;
@@ -139,9 +141,17 @@ namespace caxios {
   bool init_log(bool flag, bool enable) {
     if (enable) {
       pLog = new FLog();
-      bool success = pLog->Open(flag);
+      bool success = pLog->Open("civitkern_", flag);
       if (success) return pLog;
     }
     return false;
+  }
+
+  bool log_trace(char** str, int num) {
+    FLog log;
+    log.Open("dump.txt", true);
+    for (int i=0;i<num; ++i) {
+      log.Write(str[i]);
+    }
   }
 }

@@ -5,7 +5,7 @@
   "description": "图像素材管理软件",
   "license": "MIT",
   "main": "./dist/electron/main.js",
-  "appId": "org.picstation.electron-vue",
+  "appId": "com.civet.app",
   "keywords": [
     "image",
     "manager",
@@ -108,7 +108,7 @@
     ]
   },
   "dependencies": {
-    "civetkern": "^0.1.5",
+    "civetkern": "^0.1.6",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
     "exifreader": "^3.9.0",

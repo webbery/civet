@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
+#include <execinfo.h>
 #elif defined(WIN32)
 #include <direct.h>
 #include <io.h>
@@ -24,6 +26,13 @@ namespace caxios {
   CAxios* g_pCaxios = nullptr;
   
   namespace {
+    void logStacktrace(int n, struct __siginfo* info, void* act) {
+#define MAX_TRACE_SIZE  1024
+      void* buf[MAX_TRACE_SIZE];
+      int cnt = backtrace(buf, MAX_TRACE_SIZE);
+      char** calls = backtrace_symbols(buf, cnt);
+      log_trace(calls, cnt);
+    }
     Napi::Object FileInfo2Object(napi_env env, const FileInfo& info) {
       Napi::Object obj = Napi::Object::New(env);
       obj.Set("id", std::get<0>(info));
@@ -152,6 +161,14 @@ namespace caxios {
       enableLog = info[2].As<Napi::Boolean>();
     }
     init_log(readOnly, enableLog);
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    struct sigaction act;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags=SA_SIGINFO;
+    act.sa_sigaction = logStacktrace;
+    sigaction(SIGSEGV,&act,NULL);
+#elif defined(WIN32)
+#endif
     std::string defaultName = AttrAsStr(options, "/app/default");
     Napi::Object resource = FindObjectFromArray(options.Get("resources").As<Napi::Object>(), [&defaultName](Napi::Object obj)->bool {
       if (AttrAsStr(obj, "name") == defaultName) return true;
