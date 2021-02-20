@@ -80,7 +80,7 @@ namespace caxios {
 
   bool init_log(bool flag, bool enable = true);
   void log2file(const std::string& log);
-  bool log_trace( char** str, int num);
+  bool log_trace(const char* msg, char** str, int num);
 }
 
 #endif

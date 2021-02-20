@@ -26,13 +26,46 @@ namespace caxios {
   CAxios* g_pCaxios = nullptr;
   
   namespace {
-    void logStacktrace(int n, struct __siginfo* info, void* act) {
-#define MAX_TRACE_SIZE  1024
+    void logStacktrace(int sn) {
+      const char* typeMsg = "Unknow Crash:\n";
+      usleep(1000*1000);
+      switch (sn)
+      {
+      case SIGABRT:
+        typeMsg = "SIGABRT:\n";
+        break;
+      case SIGSEGV:
+        typeMsg = "SIGSEGV:\n";
+        break;
+      case SIGBUS:
+        typeMsg = "SIGBUS:\n";
+        break;
+      case SIGFPE:
+        typeMsg = "SIGFPE:\n";
+        break;
+      case SIGILL:
+        typeMsg = "SIGILL:\n";
+        break;
+      case SIGTRAP:
+        typeMsg = "SIGTRAP:\n";
+        break;
+      default:
+        break;
+      }
+#define MAX_TRACE_SIZE  512
       void* buf[MAX_TRACE_SIZE];
       int cnt = backtrace(buf, MAX_TRACE_SIZE);
-      char** calls = backtrace_symbols(buf, cnt);
-      log_trace(calls, cnt);
+      char** symbols = backtrace_symbols(buf, cnt);
+      log_trace(typeMsg, symbols, cnt);
+      free(symbols);
+      signal(SIGABRT, SIG_DFL);
+      signal(SIGSEGV, SIG_DFL);
+      signal(SIGBUS, SIG_DFL);
+      signal(SIGFPE, SIG_DFL);
+      signal(SIGILL, SIG_DFL);
+      signal(SIGTRAP, SIG_DFL);
     }
+
     Napi::Object FileInfo2Object(napi_env env, const FileInfo& info) {
       Napi::Object obj = Napi::Object::New(env);
       obj.Set("id", std::get<0>(info));
@@ -141,6 +174,21 @@ namespace caxios {
     }
   }
 
+  void init_trace() {
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    struct sigaction act;
+    sigemptyset(&act.sa_mask);
+    act.sa_handler = logStacktrace;
+    sigemptyset(&act.sa_mask);
+    sigaction(SIGABRT, &act, NULL);
+    sigaction(SIGSEGV, &act, NULL);
+    sigaction(SIGBUS, &act, NULL);
+    sigaction(SIGFPE, &act, NULL);
+    sigaction(SIGILL, &act, NULL);
+    sigaction(SIGTRAP, &act, NULL);
+#elif defined(WIN32)
+#endif
+  }
   Napi::Value release(const Napi::CallbackInfo& info){
     if (g_pCaxios) {
       delete g_pCaxios;
@@ -161,14 +209,7 @@ namespace caxios {
       enableLog = info[2].As<Napi::Boolean>();
     }
     init_log(readOnly, enableLog);
-#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
-    struct sigaction act;
-    sigemptyset(&act.sa_mask);
-    act.sa_flags=SA_SIGINFO;
-    act.sa_sigaction = logStacktrace;
-    sigaction(SIGSEGV,&act,NULL);
-#elif defined(WIN32)
-#endif
+    init_trace();
     std::string defaultName = AttrAsStr(options, "/app/default");
     Napi::Object resource = FindObjectFromArray(options.Get("resources").As<Napi::Object>(), [&defaultName](Napi::Object obj)->bool {
       if (AttrAsStr(obj, "name") == defaultName) return true;

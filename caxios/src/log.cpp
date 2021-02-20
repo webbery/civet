@@ -7,9 +7,11 @@
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #elif defined(WIN32)
 #include <direct.h>
 #include <io.h>
+#include <process.h>
 #endif
 #ifndef _WIN32
 #include <errno.h>
@@ -147,11 +149,17 @@ namespace caxios {
     return false;
   }
 
-  bool log_trace(char** str, int num) {
+  bool log_trace(const char* msg, char** str, int num) {
     FLog log;
     log.Open("dump.txt", true);
+    char stack_holder[256] = {0};
+    sprintf(stack_holder, "process id(%d), thread id(%u)", getpid(), caxios::threadid());
+    log.Write(stack_holder);
+    log.Write("\n");
+    log.Write(msg);
     for (int i=0;i<num; ++i) {
       log.Write(str[i]);
     }
+    log.Write("\n");
   }
 }
