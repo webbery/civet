@@ -2,6 +2,7 @@
 #include <map>
 #include <vector>
 
+#define CVDB_VERSION  1
 namespace caxios {
   typedef unsigned int FileID;
   //struct 

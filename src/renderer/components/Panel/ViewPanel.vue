@@ -18,15 +18,16 @@
         <WaterfallSlot v-for="(item, index) in imageList" :width="item.width" :height="item.height" :order="index" :key="item.id">
           <div class="image" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true">
             <el-card :body-style="{ padding: '1px'}" shadow="never" style="border: 0px;">
-              <Preview :src="getImage(item)" class="f" 
+              <Preview :src="getImage(item)"
                 @dblclick.native="onImageDbClick(item)"
                 @keydown.ctrl.67.native="onFileCopyOut(props)"
-                @contextmenu.native="onImageClick($event, $root, item)" @mousedown.native="onImageClick($event, $root, item)" 
+                @contextmenu.native="onImageClick($event, $root, item)"
+                @mousedown.native="onImageClick($event, $root, item)"
               >
               </Preview>
-              <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;text-align: center;" @dblclick.native="onClickName(index)">
-                <span class="name" >{{item.filename}}</span>
-                <input v-if="enableInput"/>
+              <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;text-align: center; font-size: 12px;">
+                <InputLabel @changed="onFilenameChanged" :fileid="item.id" 
+                >{{item.filename}}</InputLabel>
               </div>
             </el-card>
           </div>
@@ -47,17 +48,17 @@ import { mapState } from 'vuex'
 import ExtensionManager from '@/../public/ExtensionManager'
 import Waterfall from '../Layout/waterfall'
 import WaterfallSlot from '../Layout/waterfall-slot'
+import InputLabel from '../Control/InputLabel'
 
 export default {
   name: 'view-panel',
   components: {
-    Preview, PopMenu, Waterfall, WaterfallSlot
+    Preview, PopMenu, Waterfall, WaterfallSlot, InputLabel
   },
   data() {
     return {
       firstLoad: true,
       lastSelections: {},
-      enableInput: false,
       imageSelected: false,
       menus: [
         {text: '导出到计算机', cb: this.onChangeName},
@@ -140,11 +141,11 @@ export default {
       this.lastSelectFolder = -1
     },
     onImageClick(e, root, image) {
-      console.info('onImageClick', image)
+      console.info('onImageClick', e, image)
       this.imageSelected = true
       if (!Global.ctrlPressed) {
         bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
-        if (e.button === 2) { // 选择多个后右键
+        if (event.button === 2) { // 选择多个后右键
           // right click
           this.imageSelected = false
           root.$emit('easyAxis', {
@@ -172,9 +173,14 @@ export default {
         this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.filename, cmd: 'display'}})
       }
     },
-    onClickName: function (index) {
-      console.info(index)
-      this.enableInput = true
+    onFilenameChanged: function (fileid, newname) {
+      console.info(fileid, newname)
+      this.$store.dispatch('changeFileName', {id: fileid, filename: newname})
+      if (this.imageSelected) {
+        this.$nextTick(() => {
+          bus.emit(bus.EVENT_SELECT_IMAGE, fileid)
+        })
+      }
     },
     onClassClick: function (event, idx, item) {
       console.info('folder click', idx, item, this.lastSelectFolder)

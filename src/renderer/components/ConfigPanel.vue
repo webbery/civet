@@ -1,12 +1,16 @@
 <template>
   <div class="config">
-    <div style="margin-top: 15px;">
-      <el-input placeholder="请输入内容" v-model="config" class="input-with-select" :disabled="true">
-        <template slot="prepend">数据库路径：</template>
-        <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()"></el-button>
-      </el-input>
-      <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
-    </div>
+    <el-collapse v-model="activeResource" accordion>
+      <el-collapse-item title="资源库" name="1">
+        <div>
+          <el-input placeholder="请输入内容" v-model="config" class="input-with-select" :disabled="true">
+            <template slot="prepend">数据库路径：</template>
+            <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()"></el-button>
+          </el-input>
+          <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
+        </div>
+      </el-collapse-item>
+    </el-collapse>
   <!-- <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button> -->
     <div class="modules">
       <el-collapse accordion>
@@ -79,6 +83,7 @@ export default {
   name: 'config-page',
   data() {
     return {
+      activeResource: ['1'],
       configPath: '',
       enableTransfer: false,
       tansferMessage: '开始迁移',

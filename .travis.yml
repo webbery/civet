@@ -1,0 +1,29 @@
+# Commented sections below can be used to run tests on the CI server
+# https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
+# osx_image: xcode8.3
+# sudo: required
+# dist: trusty
+language: node_js
+node_js:
+  - 12
+matrix:
+  include:
+  - os: osx
+    osx_image: xcode11
+  - os: windows
+  - os: linux
+    dist: bionic
+    # env: CC=gcc-7.5 CXX=g++-7.5
+    compiler: gcc
+cache:
+  directories:
+    - node_modules
+    - "$HOME/.electron"
+    - "$HOME/.cache"
+before_install:
+  - npm install
+script:
+  - npm run build
+branches:
+  only:
+    - master

@@ -7,9 +7,11 @@
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #elif defined(WIN32)
 #include <direct.h>
 #include <io.h>
+#include <process.h>
 #endif
 #ifndef _WIN32
 #include <errno.h>
@@ -71,14 +73,16 @@ namespace caxios {
       fclose(_file);
     }
 
-    bool Open(bool flag) {
-      std::string logname("civetkern_");
-      std::string mode("read");
+    bool Open(const char* fname, bool flag) {
+      std::string logname(fname);
+      std::string mode("");
       if (flag == 0) mode = "write";
       int idx = 1;
       std::string filename;
       while (true) {
-        filename = logname + std::to_string(idx) + "_" + mode + ".log";
+        if (mode.size() != 0) {
+          filename = logname + std::to_string(idx) + "_" + mode + ".log";
+        }
         if (!caxios::exist(filename)) {
           logname = filename;
           break;
@@ -139,9 +143,33 @@ namespace caxios {
   bool init_log(bool flag, bool enable) {
     if (enable) {
       pLog = new FLog();
-      bool success = pLog->Open(flag);
+      bool success = pLog->Open("civitkern_", flag);
       if (success) return pLog;
     }
     return false;
   }
+
+  bool log_trace(const char* msg, char** str, int num) {
+    FLog log;
+    log.Open("dump.txt", true);
+    char stack_holder[256] = {0};
+    sprintf(stack_holder, "version(%d.%d), process id(%d), thread id(%u)",
+      CAXIOS_MAJOR_VERSION, CAXIOS_MINOR_VERSION, getpid(), caxios::threadid());
+    log.Write(stack_holder);
+    log.Write("\n");
+    log.Write(msg);
+    for (int i=0;i<num; ++i) {
+      log.Write(str[i]);
+    }
+    log.Write("\n");
+  }
+
+  bool log_trace(const char* msg)
+  {
+    FLog log;
+    log.Open("dump.txt", true);
+    log.Write(msg);
+    log.Write("\n");
+  }
+
 }

@@ -2,7 +2,7 @@
   <div class="property">
       <el-card :body-style="{ padding: '0px' }">
         <div style="padding: 4px;" class="image-name">
-          <span >{{filename}}</span>
+          <InputLabel>{{filename}}</InputLabel>
         </div>
         <JImage :src="imagepath" :interact="false"></JImage>
         <div class="color-container">
@@ -68,7 +68,7 @@ import IconTag from '@/components/IconTag'
 import JString from '@/../public/String'
 import JImage from '../JImage'
 import ImgTool from '../utils/ImgTool'
-// import log from '@/../public/Logger'
+import InputLabel from '../Control/InputLabel'
 import { config } from '@/../public/CivetConfig'
 import { mapState } from 'vuex'
 
@@ -89,7 +89,7 @@ export default {
     }
   },
   components: {
-    IconTag, JImage
+    IconTag, JImage, InputLabel
   },
   computed: mapState({
     candidateClasses: state => state.Cache.classesName
@@ -109,10 +109,10 @@ export default {
         return v.toFixed(1) + unit
       }
       // const images = this.$kernel.getFilesInfo([imageID])
-      console.info(this.$store)
+      // console.info(this.$store)
       const files = this.$store.getters.getFiles([imageID])
       if (!files) return
-      // log.info('PropertyPanel', files)
+      console.info('PropertyPanel', files)
       const localize = new Intl.DateTimeFormat('zh-cn')
       if (files.length === 1) {
         let file = files[0]
@@ -126,10 +126,11 @@ export default {
           }
           return null
         }
+        this.filename = file.filename
         for (let item of schema) {
           if (item.name === 'filename') {
-            const meta = getItem(item.name, file.meta)
-            this.filename = meta.value
+            // const meta = getItem(item.name, file.meta)
+            // this.filename = meta.value
             continue
           }
           if (item.name === 'color') continue

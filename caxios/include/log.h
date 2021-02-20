@@ -5,6 +5,9 @@
 #include <deque>
 #include <map>
 
+#define CAXIOS_MAJOR_VERSION  1
+#define CAXIOS_MINOR_VERSION  0
+
 #if defined(__linux__) || defined(__APPLE__)
 #define sprintf_s snprintf
 #endif
@@ -80,6 +83,8 @@ namespace caxios {
 
   bool init_log(bool flag, bool enable = true);
   void log2file(const std::string& log);
+  bool log_trace(const char* msg, char** str, int num);
+  bool log_trace(const char* msg);
 }
 
 #endif

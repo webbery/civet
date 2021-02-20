@@ -291,9 +291,9 @@ const messageProcessor = {
     storage.updateClassName(data.oldName, data.newName)
   },
   'updateFileName': (data) => {
-    console.info('updateFileName id:', data.id, ', old:', data.oldName, 'new:', data.newName)
+    console.info('updateFileName id:', data.id, 'new:', data.filename)
     // {id: [fileids[0]], filename: '测试'}
-    storage.updateFile({id: [data.id], filename: data.newName})
+    storage.updateFile({id: [data.id], filename: data.filename})
   },
   'reInitDB': async (data) => {
     console.info('init db')

@@ -1,9 +1,47 @@
 'use strict'
 
 import { app, BrowserWindow, Menu, ipcMain } from 'electron'
-// import { config } from '../public/CivetConfig'
 import { autoUpdater } from 'electron-updater'
 
+function initUpdater() {
+  const updaterCacheDirName = 'civet'
+  const path = require('path')
+  const updatePendingPath = path.join(autoUpdater.app.baseCachePath, updaterCacheDirName, 'pending')
+  console.info('update dir:', updatePendingPath)
+  const fs = require('fs')
+  if (fs.existsSync(updatePendingPath)) fs.rmdir(updatePendingPath)
+  const updateURL = 'https://download.fastgit.org/webbery/civet/releases/download'
+  autoUpdater.autoDownload = false
+  if (process.env.NODE_ENV === 'development') {
+    autoUpdater.updateConfigPath = path.join(__dirname, 'default-app-update.yml')
+  } else {
+    autoUpdater.updateConfigPath = path.join(__dirname, '../../../app-update.yml')
+  }
+  autoUpdater.setFeedURL(updateURL)
+
+  autoUpdater.on('checking-for-update', () => {
+    sendWindowMessage(workerWindow, 'checking-for-update', 'Checking for update...')
+  })
+  autoUpdater.on('update-available', (info) => {
+    sendWindowMessage(workerWindow, 'update-available', 'Update available.')
+  })
+  autoUpdater.on('update-not-available', (info) => {
+    sendWindowMessage(workerWindow, 'update-not-available', 'Update not available.')
+  })
+  autoUpdater.on('error', (err) => {
+    sendWindowMessage(workerWindow, 'error', 'Error in auto-updater. ' + err)
+  })
+  autoUpdater.on('download-progress', (progressObj) => {
+    let logMessage = 'Download speed: ' + progressObj.bytesPerSecond
+    logMessage = logMessage + ' - Downloaded ' + progressObj.percent + '%'
+    logMessage = logMessage + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
+    sendWindowMessage(workerWindow, 'download-progress', logMessage)
+  })
+  autoUpdater.on('update-downloaded', (info) => {
+    sendWindowMessage(workerWindow, 'update-downloaded', 'Update downloaded')
+  })
+}
+initUpdater()
 // import '../renderer/store'
 // const cpus = require('os').cpus().length
 /**
@@ -156,27 +194,6 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
  */
-autoUpdater.on('checking-for-update', () => {
-  sendWindowMessage(workerWindow, 'checking-for-update', 'Checking for update...')
-})
-autoUpdater.on('update-available', (info) => {
-  sendWindowMessage(workerWindow, 'update-available', 'Update available.')
-})
-autoUpdater.on('update-not-available', (info) => {
-  sendWindowMessage(workerWindow, 'update-not-available', 'Update not available.')
-})
-autoUpdater.on('error', (err) => {
-  sendWindowMessage(workerWindow, 'error', 'Error in auto-updater. ' + err)
-})
-autoUpdater.on('download-progress', (progressObj) => {
-  let logMessage = 'Download speed: ' + progressObj.bytesPerSecond
-  logMessage = logMessage + ' - Downloaded ' + progressObj.percent + '%'
-  logMessage = logMessage + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
-  sendWindowMessage(workerWindow, 'download-progress', logMessage)
-})
-autoUpdater.on('update-downloaded', (info) => {
-  sendWindowMessage(workerWindow, 'update-downloaded', 'Update downloaded')
-})
 
 function sendWindowMessage(targetWindow, message, payload) {
   if (typeof targetWindow === 'undefined') {

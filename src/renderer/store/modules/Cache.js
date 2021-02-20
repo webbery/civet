@@ -164,6 +164,7 @@ const mutations = {
     if (data) {
       // for (let datum of data) {}
     }
+    state.viewClass.splice(0, state.viewClass.length)
     for (let k in Cache.files) {
       Vue.set(state.viewItems, idx, Cache.files[k])
       idx += 1
@@ -282,6 +283,9 @@ const mutations = {
   },
   changeFileName(state, mutation) {
     console.info('changeFileName', mutation)
+    let fileid = mutation.id
+    Cache.files[fileid].filename = mutation.filename
+    Service.getServiceInstance().send(Service.UPDATE_FILE_NAME, mutation)
   },
   removeFiles(state, filesid) {
     for (let idx = 0; idx < filesid.length; ++idx) {
