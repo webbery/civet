@@ -239,7 +239,7 @@ namespace caxios {
     sigaction(SIGILL, &act, NULL);
     sigaction(SIGTRAP, &act, NULL);
 #elif defined(WIN32)
-    SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)CaxiosCrashHandler);
+    // SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)CaxiosCrashHandler);
 #endif
   }
   Napi::Value release(const Napi::CallbackInfo& info){
@@ -251,6 +251,7 @@ namespace caxios {
   }
   Napi::Value init(const Napi::CallbackInfo& info) {
     if (g_pCaxios) return Napi::Value::From(info.Env(), true);
+    init_trace();
     //setlocale(LC_ALL, "");
     Napi::Object options = info[0].As<Napi::Object>();
     int32_t readOnly = 0;
@@ -262,10 +263,11 @@ namespace caxios {
       enableLog = info[2].As<Napi::Boolean>();
     }
     init_log(readOnly, enableLog);
-    init_trace();
     std::string defaultName = AttrAsStr(options, "/app/default");
+    // T_LOG("init", "default: %s, config: %s", defaultName.c_str(), Stringify(info.Env(), options).c_str());
     Napi::Object resource = FindObjectFromArray(options.Get("resources").As<Napi::Object>(), [&defaultName](Napi::Object obj)->bool {
       if (AttrAsStr(obj, "name") == defaultName) return true;
+      return false;
     });
     if (!resource.IsUndefined()) {
       std::string path = AttrAsStr(resource, "/db/path");

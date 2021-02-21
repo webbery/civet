@@ -114,7 +114,10 @@ export default {
       }
       this.$store.dispatch('query', query)
     },
-    onFileTypeChanged(keys) {}
+    onFileTypeChanged(keys) {
+      console.info('onFileTypeChanged', keys)
+      this.$store.dispatch('query', {type: keys})
+    }
   }
 }
 </script>

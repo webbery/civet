@@ -1424,7 +1424,8 @@ namespace caxios {
     nlohmann::json jsn = nlohmann::json::parse(meta);
     for (auto item : jsn)
     {
-      if (item["db"] == true) {
+      //T_LOG("query", "schema item: %s", item.dump().c_str());
+      if (item["query"] == true) {
         std::string name = trunc(item["name"].dump());
         m_mTables[name] = new TableMeta(m_pDatabase, name, trunc(item["type"].dump()));
         T_LOG("query", "schema[%s]: %s", name.c_str(), item["name"].dump().c_str());

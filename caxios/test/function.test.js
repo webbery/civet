@@ -9,18 +9,31 @@ let cfg = {
   },
   resources:[
       {
-      name: '图像库',
+      name: '2233',
       db: {
-          path: '数据库'
+          path: '数据库A'
       },
       meta: [
-          {name: 'color', value: '主色', type: 'color', db: true},
-          {name: 'datetime', value: '创建日期', type: 'date', db: true},
-          {name: 'size', value: '大小', type: 'int', db: true},
-          {name: 'type', value: '类型', type: 'str', db: true},
-          {name: 'filename', value: '文件名', type: 'str', db: false}
+          {name: 'color', value: '主色', type: 'color', query: true},
+          {name: 'datetime', value: '创建日期', type: 'date', query: true},
+          {name: 'size', value: '大小', type: 'int', query: true},
+          {name: 'type', value: '类型', type: 'str', query: true},
+          {name: 'filename', value: '文件名', type: 'str', query: false}
       ]
-      }
+      },
+      {
+        name: '图像库',
+        db: {
+            path: '数据库'
+        },
+        meta: [
+            {name: 'color', value: '主色', type: 'color', query: true},
+            {name: 'datetime', value: '创建日期', type: 'date', query: true},
+            {name: 'size', value: '大小', type: 'int', query: true},
+            {name: 'type', value: '类型', type: 'str', query: true},
+            {name: 'filename', value: '文件名', type: 'str', query: false}
+        ]
+        }
   ]
 }
 

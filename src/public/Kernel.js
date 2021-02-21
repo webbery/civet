@@ -5,15 +5,19 @@ const kernel = (function () {
     flag = 1
   }
   let _isInit = false
-  function _init() {
-    const cfg = require('../public/CivetConfig').config
+  function _init(name) {
+    const cfg = require('./CivetConfig').config
     const config = cfg.getConfig(true)
     if (config.resources.length === 0) return false
     try {
-      if (!instance.civetkern.init(config, flag, true)) {
+      if (!instance.civetkern.init(config, flag, false)) {
         console.info('init fail')
         return false
       }
+      // if (!cfg.isDBExist(name)) {
+      //   console.info('db not exist')
+      //   return false
+      // }
       _isInit = true
       console.info(config, flag, instance.civetkern)
       return true
@@ -21,9 +25,9 @@ const kernel = (function () {
       console.info('init civetkern exception:', exception)
     }
   }
-  return function() {
+  return function(name) {
     if (!_isInit) {
-      if (!_init()) return null
+      if (!_init(name)) return null
     }
     return instance.civetkern
   }
@@ -45,8 +49,8 @@ function zipFile(input) {
 global.zipFile = zipFile
 
 export default {
-  init: () => {
-    kernel()
+  init: (name) => {
+    kernel(name)
   },
   getFilesSnap: (flag) => {
     return kernel().getFilesSnap(flag)

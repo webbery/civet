@@ -23,7 +23,7 @@ export default {
     // rgb2hsv(test, 2)
     // let data = {data: test, info: {width: 2, height: 1}}
     // CV.sumaryColors(data)
-    if (config.isFirstTime() || !config.isDBExist()) {
+    if (config.isFirstTime()) {
       const guider = this.$refs.guider
       console.info('show model')
       guider.showModal()

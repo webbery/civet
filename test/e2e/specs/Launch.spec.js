@@ -9,6 +9,8 @@ function test(title, cb) {
 }
 
 describe('Launch', function () {
+  this.beforeAll(utils.beforeAll)
+  this.afterAll(utils.afterAll)
   beforeEach(utils.beforeEach)
   afterEach(utils.afterEach)
 
@@ -21,13 +23,18 @@ describe('Launch', function () {
   //     expect(title).to.equal('civet')
   //   })
   // })
-  it('validate application title', function() {
-    this.app.client.windowByIndex(1).then(() => {
-      let title = this.app.client.getTitle()
-      expect(title).to.equal('civet')
-    })
+  // it('validate application title', function() {
+  //   this.app.client.windowByIndex(1).then(() => {
+  //     let title = this.app.client.getTitle()
+  //     expect(title).to.equal('civet')
+  //   })
+  // })
+  test('validate init database', () => {
+    // let title = this.app.client.getTitle()
+    // expect(title).to.equal('civet')
+    expect(this.app.client.$('#guider-config').isVisible()).to.equal(true)
   })
-  test('validate adding files', () => {
+  test('validate remove database', () => {
     
   })
 })

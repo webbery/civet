@@ -173,9 +173,8 @@ const mutations = {
   },
   async query(state, result) {
     //   console.info('++++++')QUERY_FILES
-    state.query = result
     state.viewItems.splice(0, state.viewItems.length)
-    for (let idx = 0; idx < state.query.length; ++idx) {
+    for (let idx = 0; idx < result.length; ++idx) {
       Vue.set(state.viewItems, idx, Cache.files[result[idx].id])
     }
     console.info(state.viewItems, result)
@@ -359,8 +358,12 @@ const actions = {
     commit('init', {unclasses, untags, allClasses, filesSnap, allImages, allTags})
   },
   async query({commit}, query) {
-    const result = await Service.getServiceInstance().get(Service.QUERY_FILES, query)
-    console.info('query: ', query, 'result: ', result)
+    for (let k in query) {
+      console.info('query add key', k, Cache.query)
+      Cache.query[k] = query[k]
+    }
+    const result = await Service.getServiceInstance().get(Service.QUERY_FILES, Cache.query)
+    console.info('query: ', Cache.query, 'result: ', result)
     commit('query', result)
   },
   display({commit}, data) {

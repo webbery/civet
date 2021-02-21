@@ -35,6 +35,10 @@ class CivetConfig {
     return this.config
   }
 
+  getCurrentDB() {
+    return this.config.app.default
+  }
+
   getDBPath(name) {
     for (let resource of this.config.resources) {
       if (this.config.app.default === resource.name) {
@@ -54,6 +58,11 @@ class CivetConfig {
   }
 
   isFirstTime() {
+    // const defaultName = this.config.app.default
+    // const dbpath = this.getDBPath(defaultName)
+    // if (!fs.existsSync(dbpath)) {
+    //   this.config.app.first = true
+    // }
     return this.config.app.first
   }
 

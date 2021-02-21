@@ -33,7 +33,7 @@ namespace caxios {
       vFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
     }
     addUniqueDataAndSort(vFilesID, fileid);
-    T_LOG("meta", "add meta, cur data: %s", format_vector(vFilesID).c_str());
+    T_LOG("meta", "add meta, key: %s, cur data: %s", sKey.c_str(), format_vector(vFilesID).c_str());
     return _pDatabase->Put(_dbi, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
   }
 

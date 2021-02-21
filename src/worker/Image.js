@@ -171,10 +171,10 @@ class ImageMetaParser extends ImageParseBase {
     switch (str.toLowerCase()) {
       case 'jpg':
       case 'jpeg':
-        return 'jpeg'
+        return 'jpg'
       case 'tif':
       case 'tiff':
-        return 'tiff'
+        return 'tif'
       case 'bmp':
         return 'bmp'
       case 'gif':

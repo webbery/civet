@@ -33,9 +33,9 @@ Array.prototype.remove = function (val) {
 
 const threshodMode = true
 let isStart = false
-function updateProgress(percent) {
+function updateStatus(status) {
   if (isStart === false) {
-    window.eventBus.$emit('progress', percent)
+    window.eventBus.$emit('status', status)
   }
 }
 // your background code here
@@ -197,6 +197,7 @@ const messageProcessor = {
     }
   },
   'getImagesInfo': (data) => {
+    updateStatus('reading files')
     let imagesIndex = []
     if (data === undefined) {
       // 全部图片信息
@@ -210,7 +211,6 @@ const messageProcessor = {
     let imgs = storage.getFilesInfo(imagesIndex)
     console.info('getImagesInfo', imgs)
     let images = []
-    updateProgress(5)
     for (let img of imgs) {
       images.push(new JImage(img))
     }
@@ -254,7 +254,7 @@ const messageProcessor = {
   },
   'queryFiles': (nsql) => {
     let allFiles = storage.query(nsql)
-    console.info('type', typeof nsql['datetime']['$gt'], nsql, 'reply: ', allFiles)
+    console.info(nsql, 'reply: ', allFiles)
     reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
   },
   'addCategory': (mutation) => {
@@ -274,11 +274,13 @@ const messageProcessor = {
     reply2Renderer(ReplyType.REPLY_CLASSES_INFO, category)
   },
   'getUncategoryImages': async () => {
+    updateStatus('reading unclassify info')
     let uncateimgs = storage.getUnClassifyFiles()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
     console.info('unclasses', uncateimgs)
   },
   'getUntagImages': () => {
+    updateStatus('reading untag info')
     let untagimgs = storage.getUnTagFiles()
     reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
     console.info('untag', untagimgs)

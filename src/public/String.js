@@ -1,3 +1,20 @@
+const i18n = {
+  'path': '路径',
+  'filename': '文件名',
+  'size': '路径',
+  'datetime': '创建时间',
+  'addtime': '添加时间',
+  'specs': '尺寸',
+  'author': '作者',
+  'tag': '标签',
+  'anno': '批注',
+  'keyword': '关键字',
+  'width': '宽',
+  'height': '高',
+  'type': '类型',
+  'reading files': '读取图片中'
+}
+
 export default {
   findString: (strs, target) => {
     for (let idx of strs) {
@@ -56,21 +73,7 @@ export default {
     return s
   },
   i18n: (en) => {
-    switch (en) {
-      case 'path': return '路径'
-      case 'filename': return '文件名'
-      case 'size': return '大小'
-      case 'datetime': return '创建时间'
-      case 'addtime': return '添加时间'
-      case 'specs': return '尺寸'
-      case 'author': return '作者'
-      case 'tag': return '标签'
-      case 'anno': return '批注'
-      case 'keyword': return '关键字'
-      case 'width': return '宽'
-      case 'height': return '高'
-      case 'type': return '类型'
-      default: return en
-    }
+    if (i18n.hasOwnProperty(en)) return i18n[en]
+    return 'unknow'
   }
 }
