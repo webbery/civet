@@ -11,11 +11,12 @@ import storage from '../public/Kernel'
 // import TaskManager from './WorkerPool/TaskManager'
 const workerpool = require('workerpool')
 let algorithmpath = ''
-// if (process.env.NODE_ENV === 'development') {
-algorithmpath = `./src/worker/algorithm/index.js`
-// } else {
-// algorithmpath = `${__dirname}/algorithm/NLP.js`
-// }
+if (process.env.NODE_ENV === 'development') {
+  algorithmpath = `./src/worker/algorithm/index.js`
+} else {
+  console.info('extension path:', __dirname)
+  algorithmpath = `${__dirname}/resources/extension/strextract/index.js`
+}
 console.info('ENV', process.env.NODE_ENV, 'algorithm_extend path:', algorithmpath)
 const cpus = require('os').cpus().length
 const pool = workerpool.pool(algorithmpath, {minWokers: cpus > 4 ? 4 : cpus, workerType: 'process'})
@@ -112,8 +113,16 @@ class ImageMetaParser extends ImageParseBase {
       image.addMeta('datetime', Utility.convert2ValidDate(meta['DateTime'].value[0]), 'date')
     }
     image.addMeta('type', this.getImageFormat(type))
-    image.addMeta('width', this.getImageWidth(meta))
-    image.addMeta('height', this.getImageHeight(meta))
+    if (!meta['Orientation']) {
+      image.addMeta('orient', meta['Orientation'])
+    }
+    if (!meta['Orientation'] || meta['Orientation'] === 0) {
+      image.addMeta('width', this.getImageWidth(meta))
+      image.addMeta('height', this.getImageHeight(meta))
+    } else { // rotation 90
+      image.addMeta('height', this.getImageWidth(meta))
+      image.addMeta('width', this.getImageHeight(meta))
+    }
     try {
       storage.addFiles([image])
     } catch (err) {

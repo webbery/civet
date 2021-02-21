@@ -68,7 +68,11 @@ namespace caxios {
     :_strs(strs){}
 
     bool operator()(const std::string& val) const {
-      return true;
+      for (const std::string& s: _strs)
+      {
+        if (val == s) return true;
+      }
+      return false;
     }
 
     std::vector<std::string> condition() { return _strs; }

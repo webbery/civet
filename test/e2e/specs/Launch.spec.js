@@ -35,6 +35,6 @@ describe('Launch', function () {
     expect(this.app.client.$('#guider-config').isVisible()).to.equal(true)
   })
   test('validate remove database', () => {
-    
+
   })
 })

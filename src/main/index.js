@@ -93,14 +93,14 @@ function createRendererWindow() {
     workerWindow.close()
     // mainWindow.close()
   })
+  mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
-    mainWindow.webContents.openDevTools()
     // enableDevTools(mainWindow)
   }
   mainWindow.show()
-  if (process.env.NODE_ENV !== 'development') {
-    workerWindow.hide()
-  }
+  // if (process.env.NODE_ENV !== 'development') {
+  //   workerWindow.hide()
+  // }
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
@@ -129,8 +129,8 @@ function createWorkerWindow (bFirst) {
   // }
   if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
   else workerWindow.loadURL(workerURL)
+  workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
-    workerWindow.webContents.openDevTools()
     // enableDevTools(workerWindow)
   }
 }

@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: build
         run: |
-          npm ci
+          npm install
           npm run build
         env:
           CI: true

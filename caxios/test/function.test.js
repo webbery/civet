@@ -67,12 +67,26 @@ describe('civetkern add test', function() {
     willBeAdd.push({
       'id': fileids[2],
       'meta': [
-        {"name":"path","type":"str","value":"C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg"},
-        {"name":"filename","type":"str","value":"06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.jpg"},
+        {"name":"path","type":"str","value":"C:\\Users\\webberg\\Pictures\\06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.png"},
+        {"name":"filename","type":"str","value":"06cc22608a1111eab5a4993e17631b31.jpg~tplv-banciyuan-w650.png"},
         {"name":"size","type":"int","value":267028},
         //{"name":"datetime","type":"date","value":t.getTime()},
         {"name":"hash","type":"str","value":"unknow"},
-        {"name":"type","type":"str","value":"unknow"},
+        {"name":"type","type":"str","value":"png"},
+        {"name":"width","type":"int","value":650},
+        {"name":"height","type":"int","value":1091}
+      ],
+      keyword: 'test'
+    }),
+    willBeAdd.push({
+      'id': fileids[3],
+      'meta': [
+        {"name":"path","type":"str","value":"C:\\Users\\webberg\\Pictures\\bbb.png"},
+        {"name":"filename","type":"str","value":"bbb.png"},
+        {"name":"size","type":"int","value":267028},
+        //{"name":"datetime","type":"date","value":t.getTime()},
+        {"name":"hash","type":"str","value":"unknow"},
+        {"name":"type","type":"str","value":"png"},
         {"name":"width","type":"int","value":650},
         {"name":"height","type":"int","value":1091}
       ],
@@ -99,7 +113,7 @@ describe('civetkern add test', function() {
   })
   it('get untag files again', function() {
     let untags = instance.getUnTagFiles()
-    expect(untags).to.have.lengthOf(0)
+    expect(untags).to.have.lengthOf(1)
   })
   it('get unclassify files', function() {
     const unclasses = instance.getUnClassifyFiles()
@@ -253,6 +267,8 @@ describe('civetkern read only test', function() {
   it('search files by file type', function() {
     let result = instance.query({type: 'jpeg'})
     expect(result).to.lengthOf(1)
+    result = instance.query({type: 'png'})
+    expect(result).to.lengthOf(2)
   })
   it('search by tag', function() {
     let result = instance.query({tag: '标签'})
@@ -318,7 +334,7 @@ describe('civetkern clean test', function() {
     instance.removeTags({id: [snaps[0].id], tag: ['test']})
   })
   it('remove files success', function() {
-    const result = instance.removeFiles([snaps[0].id, snaps[1].id])
+    const result = instance.removeFiles([snaps[0].id, snaps[1].id, snaps[2].id])
     assert(result === true)
   })
   after(function() {

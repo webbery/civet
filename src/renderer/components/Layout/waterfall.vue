@@ -172,10 +172,13 @@ var verticalLineProcessor = (() => {
       rect.top = tops[offset]
       rect.left = strategy.left + (offset ? sum(strategy.width.slice(0, offset)) : 0)
       rect.width = width
+      if (!meta.height) return
+      // console.info('waterfall', index, meta.height, meta.width)
       rect.height = meta.height * (options.fixedHeight ? 1 : width / meta.width) + 32
       tops[offset] = tops[offset] + rect.height
     })
     vm.style.height = Math.max.apply(Math, tops) + 'px'
+    // console.info('waterfall', vm.style.height)
   }
 
   function getRowStrategy (width, options) {

@@ -99,7 +99,7 @@
         ]
       },
       {
-        "from": "./extension/",
+        "from": "./src/worker/algorithm/",
         "to": "./extension",
         "filter": [
           "**/*"
@@ -108,13 +108,11 @@
     ]
   },
   "dependencies": {
-    "civetkern": "^0.1.10",
+    "civetkern": "^0.1.11",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
-    "exifreader": "^3.9.0",
+    "exifreader": "^3.14.0",
     "image-hash": "^4.0.1",
-    "nodejieba": "^2.5.1",
-    "pinyin": "^2.9.1",
     "segment": "^0.1.3",
     "sharp": "^0.26.2",
     "uuid": "^8.3.1",

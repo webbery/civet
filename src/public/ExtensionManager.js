@@ -34,8 +34,8 @@ function unzip(filepath) {}
 function installPath() {
   const os = require('os')
   const platform = os.platform()
-  const app = require('./System').default.app()
-  const userDir = app.getPath('userData')
+  // const app = require('./System').default.app()
+  // const userDir = app.getPath('userData')
   switch (platform) {
     case 'win32':
       break
@@ -44,8 +44,15 @@ function installPath() {
     default:
       break
   }
-  const extensionPath = userDir + '/.civet/extension'
-  if (!fs.accessSync(extensionPath, fs.constants.F_OK)) {
+  console.info(__dirname)
+  let extensionPath
+  if (process.env.NODE_ENV === 'development') {
+    extensionPath = path.join(__dirname, '../worker/service')
+  } else {
+    extensionPath = path.join(__dirname, '/resources/extension')
+  }
+  // TODO: recursive create path
+  if (!fs.existsSync(extensionPath)) {
     fs.mkdirSync(extensionPath)
   }
   console.info('extension path:', extensionPath)
@@ -71,7 +78,8 @@ export default {
     // }
     const lext = ext.toLowerCase()
     console.info(lext)
-    if (lext === 'jpg' || lext === 'jpeg' || lext === 'bmp' || lext === 'tiff' || lext === 'png') return true
+    if (lext === 'jpg' || lext === 'jpeg' || lext === 'bmp' || lext === 'tiff' || lext === 'png'
+      || lext === 'webp' || lext === 'tif' || lext === 'heic') return true
     return null
   }
 }
