@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs'
 
 const model = (async function initModels () {
-  const {app} = require('electron')
+  const { app } = require('electron')
   const dir = app.getAppPath()
   const model = await tf.loadLayersModel(dir + '/search/default/model.json')
   return model

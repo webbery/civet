@@ -1,0 +1,3 @@
+class IFile {
+  constructor() {}
+}

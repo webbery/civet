@@ -1,4 +1,4 @@
-export default{
+export default {
   app() {
     let application = null
     if (process.type === 'browser') {

@@ -1,23 +1,23 @@
 const i18n = {
-  'path': '路径',
-  'filename': '文件名',
-  'size': '路径',
-  'datetime': '创建时间',
-  'addtime': '添加时间',
-  'specs': '尺寸',
-  'author': '作者',
-  'tag': '标签',
-  'anno': '批注',
-  'keyword': '关键字',
-  'width': '宽',
-  'height': '高',
-  'type': '类型',
+  path: '路径',
+  filename: '文件名',
+  size: '路径',
+  datetime: '创建时间',
+  addtime: '添加时间',
+  specs: '尺寸',
+  author: '作者',
+  tag: '标签',
+  anno: '批注',
+  keyword: '关键字',
+  width: '宽',
+  height: '高',
+  type: '类型',
   'reading files': '读取图片中'
 }
 
 export default {
   findString: (strs, target) => {
-    for (let idx of strs) {
+    for (const idx of strs) {
       if (strs[idx].indexOf(target) >= 0) return idx
     }
     return -1
@@ -47,8 +47,8 @@ export default {
     return str.replace(new RegExp(s1, 'gm'), s2)
   },
   joinPath: (root, path) => {
-    let newPath = root.replace(/\\/g, '/')
-    let last = newPath[newPath.length - 1]
+    const newPath = root.replace(/\\/g, '/')
+    const last = newPath[newPath.length - 1]
     console.info(newPath)
     if (last !== '/') {
       root += '/'
@@ -58,7 +58,7 @@ export default {
   },
   formatOutput: (input, type) => {
     if (typeof input !== 'string') return input
-    let output = input.replace(/\\/g, '/')
+    const output = input.replace(/\\/g, '/')
     return output
   },
   isEmpty: (val) => {
@@ -73,7 +73,7 @@ export default {
     return s
   },
   i18n: (en) => {
-    if (i18n.hasOwnProperty(en)) return i18n[en]
+    if (Object.prototype.hasOwnProperty.call(i18n, en)) return i18n[en]
     return 'unknow'
   }
 }

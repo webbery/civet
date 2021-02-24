@@ -23,33 +23,33 @@ type
 help
 
 */
-const path = require('path')
-const fs = require('fs')
+// const path = require('path')
+// const fs = require('fs')
 
 let thirdModules = null
 function init(plgDir) {
-  let modules = {}
+  // const modules = {}
 
-  function loadModule(moduleName, fullpath) {
-    try {
-      modules[moduleName] = require(fullpath)
-      console.info('load plugin: ', moduleName)
-    } catch (err) {
-      console.error(err)
-    }
-  }
+  // function loadModule(moduleName, fullpath) {
+  //   try {
+  //     modules[moduleName] = require(fullpath)
+  //     console.info('load plugin: ', moduleName)
+  //   } catch (err) {
+  //     console.error(err)
+  //   }
+  // }
 
-  const plguins = fs.readdirSync(plgDir)
-  for (let filename of plguins) {
-    const fullpath = path.join(plgDir, filename)
-    const stat = fs.statSync(fullpath)
-    if (!stat.isDirectory()) {
-      if (path.exist(fullpath + '/index.js')) {
-        loadModule(filename, fullpath + '/index.js')
-      }
-    }
-    return modules
-  }
+  // const plguins = fs.readdirSync(plgDir)
+  // for (const filename of plguins) {
+  //   const fullpath = path.join(plgDir, filename)
+  //   const stat = fs.statSync(fullpath)
+  //   if (!stat.isDirectory()) {
+  //     if (path.exist(fullpath + '/index.js')) {
+  //       loadModule(filename, fullpath + '/index.js')
+  //     }
+  //   }
+  //   return modules
+  // }
 }
 
 function load() {
@@ -65,8 +65,8 @@ export default {
   load: load,
   getModuleByExt: (ext) => {
     load()
-    for (let module of thirdModules) {
-      if (module['type'] === 'file' && module['ext'].indexOf(ext) > -1) {
+    for (const module of thirdModules) {
+      if (module.type === 'file' && module.ext.indexOf(ext) > -1) {
         return module
       }
     }

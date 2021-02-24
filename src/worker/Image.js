@@ -4,22 +4,19 @@ import JString from '../public/String'
 import Utility from '../public/Utility'
 // import CV from '../public/ImageProcess'
 import fs from 'fs'
-// import { imageHash } from 'image-hash'
-// import sharp from 'sharp'
-// import util from 'util'
 import storage from '../public/Kernel'
 // import TaskManager from './WorkerPool/TaskManager'
 const workerpool = require('workerpool')
 let algorithmpath = ''
 if (process.env.NODE_ENV === 'development') {
-  algorithmpath = `./src/worker/algorithm/index.js`
+  algorithmpath = './src/worker/algorithm/index.js'
 } else {
   console.info('extension path:', __dirname)
   algorithmpath = `${__dirname}/resources/extension/strextract/index.js`
 }
 console.info('ENV', process.env.NODE_ENV, 'algorithm_extend path:', algorithmpath)
 const cpus = require('os').cpus().length
-const pool = workerpool.pool(algorithmpath, {minWokers: cpus > 4 ? 4 : cpus, workerType: 'process'})
+const pool = workerpool.pool(algorithmpath, { minWokers: cpus > 4 ? 4 : cpus, workerType: 'process' })
 
 // const jpegEncode = util.promisify(jpegasm.encode)
 // const pHash = util.promisify(imageHash)
@@ -35,7 +32,7 @@ export class ImageParser {
     // const bakFilepath = this.hardLinkDir + '/' + f.base
     // fs.linkSync(fullpath, bakFilepath)
     const fid = storage.generateFilesID(1)
-    let fileInfo = {
+    const fileInfo = {
       fileid: fid[0],
       meta: [
         { name: 'path', value: this.fullpath, type: 'str' },
@@ -50,7 +47,7 @@ export class ImageParser {
 }
 
 const parseChain = (fileInfo, stepFinishCB) => {
-  let image = new JImage(fileInfo)
+  const image = new JImage(fileInfo)
   image.stepCallback = stepFinishCB
   const meta = new ImageMetaParser()
   const text = new ImageTextParser()
@@ -95,12 +92,12 @@ class ImageMetaParser extends ImageParseBase {
     //   console.info('comparing ...')
     // }
     const meta = ExifReader.load(buffer)
-    delete meta['MakerNote']
-    let type = meta['format']
+    delete meta.MakerNote
+    let type = meta.format
     if (type === undefined) {
       type = JString.getFormatType(image.filename)
     } else {
-      type = JString.getFormatType(meta['format'].description)
+      type = JString.getFormatType(meta.format.description)
     }
     // const thumbnail = this.getImageThumbnail(buffer)
     // image.addMeta('thumbnail', thumbnail)
@@ -108,15 +105,15 @@ class ImageMetaParser extends ImageParseBase {
     // console.info('hash: ', hashValue)
     // image.addMeta('hash', hashValue)
 
-    if (meta['DateTime'] !== undefined && meta['DateTime'].value) {
+    if (meta.DateTime !== undefined && meta.DateTime.value) {
       // image.datetime = meta['DateTime'].value[0]
-      image.addMeta('datetime', Utility.convert2ValidDate(meta['DateTime'].value[0]), 'date')
+      image.addMeta('datetime', Utility.convert2ValidDate(meta.DateTime.value[0]), 'date')
     }
     image.addMeta('type', this.getImageFormat(type))
-    if (!meta['Orientation']) {
-      image.addMeta('orient', meta['Orientation'])
+    if (!meta.Orientation) {
+      image.addMeta('orient', meta.Orientation)
     }
-    if (!meta['Orientation'] || meta['Orientation'] === 0) {
+    if (!meta.Orientation || meta.Orientation === 0) {
       image.addMeta('width', this.getImageWidth(meta))
       image.addMeta('height', this.getImageHeight(meta))
     } else { // rotation 90
@@ -141,18 +138,18 @@ class ImageMetaParser extends ImageParseBase {
 
   getImageWidth(meta) {
     if (meta['Image Width']) return meta['Image Width'].value
-    if (meta['ImageWidth']) return meta['ImageWidth'].value
+    if (meta.ImageWidth) return meta.ImageWidth.value
     console.info('width error', meta)
   }
 
   getImageHeight(meta) {
     if (meta['Image Height']) return meta['Image Height'].value
-    if (meta['ImageLength']) return meta['ImageLength'].value
+    if (meta.ImageLength) return meta.ImageLength.value
   }
 
   getImageTime(meta) {
-    if (meta['DateTime'] !== undefined) {
-      return meta['DateTime'].value[0]
+    if (meta.DateTime !== undefined) {
+      return meta.DateTime.value[0]
     }
     console.info('image time error', meta)
   }

@@ -36,6 +36,12 @@ let mainConfig = {
       {
         test: /\.node$/,
         use: 'node-loader'
+      },
+      {
+        test: /\.(tsx?|ts)(\?.*)?$/,
+        use: {
+          loader: 'ts-loader'
+        }
       }
     ]
   },

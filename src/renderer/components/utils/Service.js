@@ -7,40 +7,45 @@ const { ipcRenderer } = require('electron')
 const replyMessageMap = {
   // 'addImagesByDirectory': 'updateImageList',
   // 'addImagesByPaths': 'updateImageList',
-  'hasDirectory': 'isDirectoryExist',
-  'getImagesWithDirectoryFormat': 'replyImagesWithDirectory',
-  'getImagesInfo': 'replyImagesInfo',
-  'getImageInfo': 'replyImageInfo',
-  'getAllTags': 'replyAllTags',
-  'getAllTagsWithImages': 'replyAllTagsWithImages',
-  'queryFiles': 'replyQueryFilesResult',
-  'getAllCategory': 'replyAllCategory',
-  'getCategoryDetail': 'replyClassesInfo',
-  'getUncategoryImages': 'replyUncategoryImages',
-  'getUntagImages': 'replyUntagImages',
-  'reInitDB': 'replyReloadDBStatus',
-  'getFilesSnap': 'replyFilesSnap'
+  hasDirectory: 'isDirectoryExist',
+  getImagesWithDirectoryFormat: 'replyImagesWithDirectory',
+  getImagesInfo: 'replyImagesInfo',
+  getImageInfo: 'replyImageInfo',
+  getAllTags: 'replyAllTags',
+  getAllTagsWithImages: 'replyAllTagsWithImages',
+  queryFiles: 'replyQueryFilesResult',
+  getAllCategory: 'replyAllCategory',
+  getCategoryDetail: 'replyClassesInfo',
+  getUncategoryImages: 'replyUncategoryImages',
+  getUntagImages: 'replyUntagImages',
+  reInitDB: 'replyReloadDBStatus',
+  getFilesSnap: 'replyFilesSnap'
 }
 
-let getServiceInstance = (function() {
+const getServiceInstance = (function() {
   let hasInited
-  let callbackCache = {}
+  const callbackCache = {}
   let service
   let promiseOn
+  let requestID = 0
   return function () {
     if (hasInited === undefined) {
       hasInited = true
       service = {
         send: (msgType, msgData) => {
+          requestID += 1
           console.info('message-from-renderer: type=' + msgType + ', data', msgData)
           ipcRenderer.send('message-from-renderer', {
+            request: requestID,
             type: msgType,
             data: msgData
           })
+          return requestID
         },
         on: (type, callback) => {
           console.info('regist message-from-main: type=' + type)
           if (callbackCache[type] === undefined) {
+            // callbackCache[type] = [{request, callback}]
             callbackCache[type] = [callback]
           } else {
             callbackCache[type].push(callback)
@@ -53,7 +58,7 @@ let getServiceInstance = (function() {
         if (replyMessageMap[msgType] === undefined) {
           console.log(msgType, ' reply is not defined')
         }
-        let result = await promiseOn(replyMessageMap[msgType])
+        const result = await promiseOn(replyMessageMap[msgType])
         return result
       }
       ipcRenderer.on('message-to-renderer', (sender, msg) => {
@@ -71,7 +76,7 @@ let getServiceInstance = (function() {
   }
 })()
 
-export default{
+export default {
   getServiceInstance: getServiceInstance,
   IS_DIRECTORY_EXIST: 'hasDirectory',
   GET_IMAGE_INFO: 'getImageInfo',

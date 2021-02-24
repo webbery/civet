@@ -2,6 +2,7 @@
 
 import { app, BrowserWindow, Menu, ipcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
+const path = require('path')
 
 function initUpdater() {
   const updaterCacheDirName = 'civet'
@@ -62,8 +63,8 @@ if (process.env.NODE_ENV !== 'development') {
 // }
 let mainWindow, workerWindow
 const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
+  ? 'http://localhost:9080'
+  : path.join(__dirname, '/index.html')
 function createRendererWindow() {
   mainWindow = new BrowserWindow({
     webPreferences: {
@@ -124,8 +125,8 @@ function createWorkerWindow (bFirst) {
   // } else {
   workerURL = process.env.NODE_ENV === 'development'
     // ? `http://localhost:9081`
-    ? `worker.html`
-    : `file://${__dirname}/worker.html`
+    ? 'worker.html'
+    : path.join(__dirname, '/worker.html')
   // }
   if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
   else workerWindow.loadURL(workerURL)

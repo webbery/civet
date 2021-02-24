@@ -5,7 +5,7 @@ const init = (function() {
   function _init() {
     if (!_pool) {
       const cpus = require('os').cpus().length
-      _pool = workerpool.pool({minWokers: cpus > 4 ? 4 : cpus, workerType: 'process'})
+      _pool = workerpool.pool({ minWokers: cpus > 4 ? 4 : cpus, workerType: 'process' })
     }
   }
 

@@ -18,7 +18,7 @@ class CivetConfig {
     if (!fs.existsSync(this.configPath)) {
       fs.writeFileSync(this.configPath, JSON.stringify(cfg))
     } else {
-      let config = JSON.parse(fs.readFileSync(this.configPath))
+      const config = JSON.parse(fs.readFileSync(this.configPath))
       // cfg.app.first = false
       if (!config.app.version || config.app.version !== version) {
         // upgrade config here
@@ -40,7 +40,7 @@ class CivetConfig {
   }
 
   getDBPath(name) {
-    for (let resource of this.config.resources) {
+    for (const resource of this.config.resources) {
       if (this.config.app.default === resource.name) {
         return resource.db.path
       }
@@ -49,7 +49,7 @@ class CivetConfig {
   }
 
   meta() {
-    for (let resource of this.config.resources) {
+    for (const resource of this.config.resources) {
       if (this.config.app.default === resource.name) {
         return resource.meta
       }
@@ -75,22 +75,22 @@ class CivetConfig {
   switchResource(name) {}
 
   getResourcesName() {
-    let resources = []
-    for (let resource of this.config.resources) {
+    const resources = []
+    for (const resource of this.config.resources) {
       resources.push(resource.name)
     }
     return resources
   }
 
   getCurrentResource() {
-    for (let resource of this.config.resources) {
+    for (const resource of this.config.resources) {
       if (resource.name === this.config.app.default) return resource
     }
     return null
   }
 
   addResource(name, path) {
-    for (let resource of this.config.resources) {
+    for (const resource of this.config.resources) {
       if (resource.name === name) {
         resource.db.path = path
         return
@@ -99,14 +99,14 @@ class CivetConfig {
     this.config.app.default = name
     this.config.resources.push({
       name: name,
-      db: {path: path + '/' + name},
+      db: { path: path + '/' + name },
       meta: this.schema()
     })
   }
 
   isMetaDisplay(name, meta) {
     console.info('meta name:', name)
-    for (let item of meta) {
+    for (const item of meta) {
       if (item.name === name && item.display === true) return true
     }
     return false
@@ -120,15 +120,15 @@ class CivetConfig {
 
   schema(filetype = 'img') {
     return [
-      {name: 'color', value: '主色', type: 'val/array', query: true, size: 3, display: true},
-      {name: 'size', value: '大小', type: 'str', query: true, display: true},
-      {name: 'path', value: '路径', type: 'str', display: true},
-      {name: 'filename', value: '文件名', type: 'str', display: true},
-      {name: 'type', value: '类型', type: 'str', query: true, display: true},
-      {name: 'datetime', value: '创建时间', type: 'date', query: true, display: true},
-      {name: 'addtime', value: '添加时间', type: 'date', query: true, display: true},
-      {name: 'width', value: '宽', type: 'str', display: true},
-      {name: 'height', value: '高', type: 'str', display: true}
+      { name: 'color', value: '主色', type: 'val/array', query: true, size: 3, display: true },
+      { name: 'size', value: '大小', type: 'str', query: true, display: true },
+      { name: 'path', value: '路径', type: 'str', display: true },
+      { name: 'filename', value: '文件名', type: 'str', display: true },
+      { name: 'type', value: '类型', type: 'str', query: true, display: true },
+      { name: 'datetime', value: '创建时间', type: 'date', query: true, display: true },
+      { name: 'addtime', value: '添加时间', type: 'date', query: true, display: true },
+      { name: 'width', value: '宽', type: 'str', display: true },
+      { name: 'height', value: '高', type: 'str', display: true }
     ]
   }
 }

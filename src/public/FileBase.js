@@ -6,12 +6,12 @@ export default class FileBase {
     this.keyword = json.keyword || []
     this.category = json.category || json.class || []
     this.tag = json.tag || []
-    for (let item of json.meta) {
+    for (const item of json.meta) {
       // console.info(item)
-      if (item['name'] === 'width' || item['name'] === 'height') {
-        this[item['name']] = parseInt(item['value'])
+      if (item.name === 'width' || item.name === 'height') {
+        this[item.name] = parseInt(item.value)
       } else {
-        this[item['name']] = item['value']
+        this[item.name] = item.value
       }
     }
   }
@@ -21,12 +21,12 @@ export default class FileBase {
     if (this.keyword.length === 0) this.keyword = json.keyword
     if (this.category.length === 0) this.category = json.category || json.class
     if (this.tag.length === 0) this.tag.length = json.tag
-    for (let item of json.meta) {
-      if (this.hasOwnProperty(item['name'])) continue
-      if (item['name'] === 'width' || item['name'] === 'height') {
-        this[item['name']] = parseInt(item['value'])
+    for (const item of json.meta) {
+      if (Object.prototype.hasOwnProperty.call(this, item.name)) continue
+      if (item.name === 'width' || item.name === 'height') {
+        this[item.name] = parseInt(item.value)
       } else {
-        this[item['name']] = item['value']
+        this[item.name] = item.value
       }
     }
   }
@@ -36,9 +36,9 @@ export default class FileBase {
       const meta = { name: typename, value: value, type: this.metaType(value, type) }
       this.meta.push(meta)
     } else {
-      for (let item of this.meta) {
-        if (item['name'] === typename) {
-          item['value'] = value
+      for (const item of this.meta) {
+        if (item.name === typename) {
+          item.value = value
           break
         }
       }

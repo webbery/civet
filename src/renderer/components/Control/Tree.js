@@ -21,7 +21,7 @@ export class TreeNode {
     this.isLeaf = !!isLeaf
 
     // other params
-    for (var k in data) {
+    for (const k in data) {
       if (k !== 'id' && k !== 'children' && k !== 'isLeaf') {
         this[k] = data[k]
       }
@@ -61,7 +61,7 @@ export class TreeNode {
 
   // remove child
   _removeChild(child) {
-    for (var i = 0, len = this.children.length; i < len; i++) {
+    for (let i = 0, len = this.children.length; i < len; i++) {
       if (this.children[i] === child) {
         this.children.splice(i, 1)
         break
@@ -105,7 +105,7 @@ export class TreeNode {
   }
 
   findChildIndex(child) {
-    var index
+    let index
     for (let i = 0, len = this.children.length; i < len; i++) {
       if (this.children[i] === child) {
         index = i
@@ -159,9 +159,9 @@ export class Tree {
 
   initNode(node, data) {
     for (let i = 0, len = data.length; i < len; i++) {
-      var _data = data[i]
+      const _data = data[i]
 
-      var child = new TreeNode(_data)
+      const child = new TreeNode(_data)
       if (_data.children && _data.children.length > 0) {
         this.initNode(child, _data.children)
       }

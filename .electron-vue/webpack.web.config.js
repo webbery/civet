@@ -90,6 +90,12 @@ let webConfig = {
             name: 'fonts/[name].[ext]'
           }
         }
+      },
+      {
+        test: /\.(tsx?|ts)(\?.*)?$/,
+        use: {
+          loader: 'ts-loader'
+        }
       }
     ]
   },

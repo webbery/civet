@@ -3,14 +3,14 @@ const path = require('path')
 const fs = require('fs')
 
 function init(plgDir) {
-  let modules = {}
+  const modules = {}
 
   function loadModule() {
     try {
       const extensionPath = installPath()
       const extensions = fs.readdirSync(extensionPath)
-      for (let extensionID of extensions) {
-        if (modules.hasOwnProperty(extensionID)) continue
+      for (const extensionID of extensions) {
+        if (Object.prototype.hasOwnProperty.call(modules, extensionID)) continue
         const fullpath = path.join(extensionPath, extensionID)
         const pkg = fullpath + '/package.json'
         const config = require(pkg)
@@ -78,8 +78,8 @@ export default {
     // }
     const lext = ext.toLowerCase()
     console.info(lext)
-    if (lext === 'jpg' || lext === 'jpeg' || lext === 'bmp' || lext === 'tiff' || lext === 'png'
-      || lext === 'webp' || lext === 'tif' || lext === 'heic') return true
+    if (lext === 'jpg' || lext === 'jpeg' || lext === 'bmp' || lext === 'tiff' || lext === 'png' ||
+      lext === 'webp' || lext === 'tif' || lext === 'heic') return true
     return null
   }
 }

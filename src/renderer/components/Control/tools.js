@@ -2,7 +2,7 @@
  * Created by ayou on 18/2/6.
  */
 
-var handlerCache
+let handlerCache
 
 export const addHandler = function(element, type, handler) {
   handlerCache = handler
@@ -27,9 +27,9 @@ export const removeHandler = function(element, type) {
 
 // depth first search
 export const traverseTree = root => {
-  var newRoot = {}
+  const newRoot = {}
 
-  for (var k in root) {
+  for (const k in root) {
     if (k !== 'children' && k !== 'parent') {
       newRoot[k] = root[k]
     }
@@ -37,7 +37,7 @@ export const traverseTree = root => {
 
   if (root.children && root.children.length > 0) {
     newRoot.children = []
-    for (var i = 0, len = root.children.length; i < len; i++) {
+    for (let i = 0, len = root.children.length; i < len; i++) {
       newRoot.children.push(traverseTree(root.children[i]))
     }
   }

@@ -7,7 +7,10 @@ import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
 import storage from '../public/Kernel'
+import ImageTest from './service/ImageTest'
 
+const t = ImageTest()
+console.info(t.property)
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
 
@@ -25,14 +28,14 @@ new Vue({
 }).$mount('#app')
 
 Array.prototype.remove = function (val) {
-  let index = this.indexOf(val)
+  const index = this.indexOf(val)
   if (index > -1) {
     this.splice(index, 1)
   }
 }
 
 const threshodMode = true
-let isStart = false
+const isStart = false
 function updateStatus(status) {
   if (isStart === false) {
     window.eventBus.$emit('status', status)
@@ -122,7 +125,7 @@ function readImages(fullpath) {
     //   initHardLinkDir(config.app.default)
     // }
     const parser = new ImageParser(fullpath)
-    let img = parser.parse(info, (err, image) => {
+    const img = parser.parse(info, (err, image) => {
       if (err) {
         console.info(err)
         return
@@ -142,10 +145,10 @@ function readDir(path) {
     if (err) return
     // console.info(menu)
     totalFiles += menu.length
-    for (let item of menu) {
+    for (const item of menu) {
       readImages(JString.joinPath(path, item))
     }
-    reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, {count: menu.length, total: totalFiles})
+    reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
     progressLoad += menu.length
     if (progressLoad === totalFiles) {
       totalFiles = 0
@@ -173,131 +176,131 @@ function reply2Renderer(type, value) {
         return
       }
       console.info(queue.length)
-      for (let tp in queue) {
+      for (const tp in queue) {
         if (queue[tp].length === 1) {
-          ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
+          ipcRenderer.send('message-from-worker', { type: tp, data: queue[tp] })
         } else {
           console.info('send ', queue[tp].length, 'to renderer')
-          ipcRenderer.send('message-from-worker', {type: tp, data: queue[tp]})
+          ipcRenderer.send('message-from-worker', { type: tp, data: queue[tp] })
         }
       }
       console.info('clear queue')
       queue = {}
     }, 200)
   } else {
-    ipcRenderer.send('message-from-worker', {type: type, data: value})
+    ipcRenderer.send('message-from-worker', { type: type, data: value })
   }
 }
 
 const messageProcessor = {
-  'addImagesByDirectory': readDir,
-  'addImagesByPaths': (data) => {
-    for (let fullpath of data) {
+  addImagesByDirectory: readDir,
+  addImagesByPaths: (data) => {
+    for (const fullpath of data) {
       readImages(fullpath)
     }
   },
-  'getImagesInfo': (data) => {
+  getImagesInfo: (data) => {
     updateStatus('reading files')
     let imagesIndex = []
     if (data === undefined) {
       // 全部图片信息
-      let imagesSnap = storage.getFilesSnap()
-      for (let imgID in imagesSnap) {
+      const imagesSnap = storage.getFilesSnap()
+      for (const imgID in imagesSnap) {
         imagesIndex.push(imgID)
       }
     } else {
       imagesIndex = data
     }
-    let imgs = storage.getFilesInfo(imagesIndex)
+    const imgs = storage.getFilesInfo(imagesIndex)
     console.info('getImagesInfo', imgs)
-    let images = []
-    for (let img of imgs) {
+    const images = []
+    for (const img of imgs) {
       images.push(new JImage(img))
     }
     reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
-  'getFilesSnap': (data) => {
+  getFilesSnap: (data) => {
     // 全部图片信息
     const imagesSnap = storage.getFilesSnap()
     reply2Renderer(ReplyType.REPLY_FILES_SNAP, imagesSnap)
   },
-  'getImageInfo': (imageID) => {
+  getImageInfo: (imageID) => {
     const img = storage.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
-    let image = new JImage(img[0])
+    const image = new JImage(img[0])
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
-  'setTag': (data) => {
+  setTag: (data) => {
     console.info(data)
     storage.setTags(data.id, data.tag)
   },
-  'removeFiles': (filesID) => {
+  removeFiles: (filesID) => {
     console.info('removeFiles:', filesID)
     storage.removeFiles(filesID)
   },
-  'removeTag': (data) => {
+  removeTag: (data) => {
     console.info(data)
     storage.removeTags(data.filesID, data.tag)
   },
-  'removeClasses': (mutation) => {
+  removeClasses: (mutation) => {
     console.info('removeClasses', mutation)
     storage.removeClasses(mutation)
   },
-  'getAllTags': (data) => {
-    let allTags = storage.getAllTags()
+  getAllTags: (data) => {
+    const allTags = storage.getAllTags()
     reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
   },
-  'getAllTagsWithImages': (data) => {
-    let allTags = storage.getTagsOfFiles()
+  getAllTagsWithImages: (data) => {
+    const allTags = storage.getTagsOfFiles()
     console.info('allTags', allTags)
     reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
-  'queryFiles': (nsql) => {
-    let allFiles = storage.query(nsql)
+  queryFiles: (nsql) => {
+    const allFiles = storage.query(nsql)
     console.info(nsql, 'reply: ', allFiles)
     reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
   },
-  'addCategory': (mutation) => {
+  addCategory: (mutation) => {
     console.info('add class', mutation)
     return storage.addClasses(mutation)
   },
-  'getAllCategory': (parent) => {
+  getAllCategory: (parent) => {
     const category = storage.getClasses()
     // let category = await CategoryArray.loadFromDB()
     console.info('getAllCategory', category)
     reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
   },
-  'getCategoryDetail': (parent) => {
+  getCategoryDetail: (parent) => {
     const category = storage.getClassDetail(parent)
     // let category = await CategoryArray.loadFromDB()
     console.info('getCategoryDetail', category)
     reply2Renderer(ReplyType.REPLY_CLASSES_INFO, category)
   },
-  'getUncategoryImages': async () => {
+  getUncategoryImages: async () => {
     updateStatus('reading unclassify info')
-    let uncateimgs = storage.getUnClassifyFiles()
+    const uncateimgs = storage.getUnClassifyFiles()
     reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
     console.info('unclasses', uncateimgs)
   },
-  'getUntagImages': () => {
+  getUntagImages: () => {
     updateStatus('reading untag info')
-    let untagimgs = storage.getUnTagFiles()
+    const untagimgs = storage.getUnTagFiles()
     reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
     console.info('untag', untagimgs)
   },
-  'updateImageCategory': (data) => {
+  updateImageCategory: (data) => {
     storage.updateFileClass(data.imageID, data.category)
   },
-  'updateCategoryName': (data) => {
+  updateCategoryName: (data) => {
     console.info('old:', data.oldName, 'new:', data.newName)
     storage.updateClassName(data.oldName, data.newName)
   },
-  'updateFileName': (data) => {
+  updateFileName: (data) => {
     console.info('updateFileName id:', data.id, 'new:', data.filename)
     // {id: [fileids[0]], filename: '测试'}
-    storage.updateFile({id: [data.id], filename: data.filename})
+    storage.updateFile({ id: [data.id], filename: data.filename })
   },
-  'reInitDB': async (data) => {
+  reInitDB: async (data) => {
     console.info('init db')
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)

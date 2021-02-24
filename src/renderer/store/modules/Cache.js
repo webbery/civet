@@ -40,8 +40,8 @@ const getters = {
   getFiles: (state, getters) => {
     return (filesID) => {
       console.info('get files: ', filesID)
-      let files = []
-      for (let fileID of filesID) {
+      const files = []
+      for (const fileID of filesID) {
         const file = Cache.files[fileID]
         if (file !== null) {
           files.push(file)
@@ -63,7 +63,7 @@ const remote = {
     const uncalsses = await Service.getServiceInstance().get(Service.GET_UNCATEGORY_IMAGES)
     const untags = await Service.getServiceInstance().get(Service.GET_UNTAG_IMAGES)
     console.info('untag is', untags, 'unclasses:', uncalsses)
-    return {unclasses: uncalsses, untags: untags}
+    return { unclasses: uncalsses, untags: untags }
   },
   async recieveTags() {
     return Service.getServiceInstance().get(Service.GET_ALL_TAGS)
@@ -80,7 +80,7 @@ const mutations = {
     //   // if (imagesID.length > 40) break
     // }
     const images = data.allImages
-    for (let image of images) {
+    for (const image of images) {
       Cache.files[image.id] = new FileBase(image)
       if (Cache.files.length > maxCacheSize) break
     }
@@ -88,14 +88,14 @@ const mutations = {
     // setting view panel item
     mutations.display(state, data)
     // get classes
-    let cls = data['allClasses']
+    const cls = data.allClasses
     console.info('allClasses', cls)
     if (cls) {
       const addChildren = function (children, parent) {
         if (children && children.length > 0) {
           for (let i = 0; i < children.length; ++i) {
             if (typeof children[i] === 'object') {
-              const child = new TreeNode({name: children[i].name, isLeaf: false, count: children[i].count})
+              const child = new TreeNode({ name: children[i].name, isLeaf: false, count: children[i].count })
               parent.addChildren(child, true)
               addChildren(children[i].children, child)
             }
@@ -103,13 +103,13 @@ const mutations = {
         }
       }
       for (let idx = 0; idx < cls.length; ++idx) {
-        let clazz = cls[idx]
+        const clazz = cls[idx]
         if (!clazz) continue
         console.info('clazz:', clazz)
         // Vue.set(state.classes, idx, clazz)
-        const root = new TreeNode({name: clazz.name, isLeaf: false, count: clazz.count})
-        if (clazz['children'] && clazz['children'].length > 0) {
-          addChildren(clazz['children'], root)
+        const root = new TreeNode({ name: clazz.name, isLeaf: false, count: clazz.count })
+        if (clazz.children && clazz.children.length > 0) {
+          addChildren(clazz.children, root)
         }
         state.classes.addChildren(root)
       }
@@ -126,27 +126,27 @@ const mutations = {
       }
       console.info('generateClassPath', cpath)
       state.classesName.push(cpath)
-      let children = array[index].children
+      const children = array[index].children
       if (!children) return
       children.map(generateClassPath)
       // classesPath.unshift(cpath)
     }
     if (state.classes && state.classes.children && state.classes.children.length) {
-      let candidates = state.classes.children.map(generateClassPath)
+      const candidates = state.classes.children.map(generateClassPath)
       console.info('candidates', candidates, state.classes.children)
     }
     // count
-    state.unclasses = data['unclasses'].length
-    state.untags = data['untags'].length
+    state.unclasses = data.unclasses.length
+    state.untags = data.untags.length
     state.allCount = data.filesSnap.length
     // tags
     state.tags = data.allTags
     console.info('init finish')
   },
   addFiles(state, files) {
-    let idx = 0
+    const idx = 0
     console.info('addFiles:', files)
-    for (let file of files) {
+    for (const file of files) {
       if (Cache.files.hasOwnProperty(file.id)) {
         // TODO: update file info
         Cache.files[file.id].update(file)
@@ -165,7 +165,7 @@ const mutations = {
       // for (let datum of data) {}
     }
     state.viewClass.splice(0, state.viewClass.length)
-    for (let k in Cache.files) {
+    for (const k in Cache.files) {
       Vue.set(state.viewItems, idx, Cache.files[k])
       idx += 1
       if (idx > maxCacheSize) break
@@ -180,14 +180,14 @@ const mutations = {
     console.info(state.viewItems, result)
   },
   async addTag(state, mutation) {
-    const {fileID, tag} = mutation
+    const { fileID, tag } = mutation
     console.info('cache add tag:', fileID, tag)
     const file = Cache.files[fileID]
     if (!file) {
       return
     }
     file.tag.push(tag)
-    Service.getServiceInstance().send(Service.SET_TAG, {id: [fileID], tag: file.tag})
+    Service.getServiceInstance().send(Service.SET_TAG, { id: [fileID], tag: file.tag })
     // const {unclasses, untags} = await remote.recieveCounts()
     if (file.tag.length === 1) {
       state.untags += 1
@@ -198,11 +198,11 @@ const mutations = {
   addClass(state, mutation) {
     if (Array.isArray(mutation)) {
       if (!state.classes.children) state.classes.children = []
-      state.classes.addChildren(new TreeNode({name: mutation[0], isLeaf: false}))
+      state.classes.addChildren(new TreeNode({ name: mutation[0], isLeaf: false }))
       state.classesName.push(mutation[0])
       Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
     } else if (typeof mutation === 'object') {
-      let children = mutation.node
+      const children = mutation.node
       let parent = mutation.parent
       parent.addChildren(children, true)
       // make path
@@ -220,16 +220,16 @@ const mutations = {
     const fileid = mutation.id
     const classpath = mutation.path
     console.info('addClassOfFile', fileid, classpath)
-    let file = Cache.files[fileid]
+    const file = Cache.files[fileid]
     console.info(file)
     if (!file.category) file.category = []
     file.category.push(classpath)
-    Service.getServiceInstance().send(Service.ADD_CATEGORY, {id: [fileid], class: [classpath]})
+    Service.getServiceInstance().send(Service.ADD_CATEGORY, { id: [fileid], class: [classpath] })
   },
   removeClass(state, mutation) {
     console.info('remove class', mutation, state.classesName)
     if (Array.isArray(mutation)) {
-      for (let clsName of mutation) {
+      for (const clsName of mutation) {
         // remove from className
         state.classesName.splice(state.classesName.indexOf(clsName), 1)
         // remove from classes
@@ -240,10 +240,10 @@ const mutations = {
           }
         }
         // remove from relavent files
-        for (let fileid in Cache.files) {
-          let file = Cache.files[fileid]
+        for (const fileid in Cache.files) {
+          const file = Cache.files[fileid]
           // console.info(file)
-          let pos = file.category.indexOf(clsName)
+          const pos = file.category.indexOf(clsName)
           if (pos >= 0) file.category.splice(pos, 1)
         }
       }
@@ -262,14 +262,14 @@ const mutations = {
     }
   },
   removeClassOfFile(state, mutation) {
-    let fileid = mutation.id
-    let classpath = mutation.path
+    const fileid = mutation.id
+    const classpath = mutation.path
     console.info('remove class of file', fileid, classpath)
-    let file = Cache.files[fileid]
+    const file = Cache.files[fileid]
     for (let idx = 0; idx < file.category.length; ++idx) {
       if (file.category[idx] === classpath) {
         file.category.splice(idx, 1)
-        Service.getServiceInstance().send(Service.REMOVE_CLASSES, {id: [fileid], class: [classpath]})
+        Service.getServiceInstance().send(Service.REMOVE_CLASSES, { id: [fileid], class: [classpath] })
         break
       }
     }
@@ -278,11 +278,11 @@ const mutations = {
     console.info('changeClassName', mutation, state.classesName)
     const indx = state.classesName.indexOf(mutation.old)
     state.classesName[indx] = mutation.new
-    Service.getServiceInstance().send(Service.UPDATE_CATEGORY_NAME, {oldName: mutation.old, newName: mutation.new})
+    Service.getServiceInstance().send(Service.UPDATE_CATEGORY_NAME, { oldName: mutation.old, newName: mutation.new })
   },
   changeFileName(state, mutation) {
     console.info('changeFileName', mutation)
-    let fileid = mutation.id
+    const fileid = mutation.id
     Cache.files[fileid].filename = mutation.filename
     Service.getServiceInstance().send(Service.UPDATE_FILE_NAME, mutation)
   },
@@ -306,8 +306,8 @@ const mutations = {
     Service.getServiceInstance().send(Service.REMOVE_FILES, filesid)
   },
   removeTags(state, mutation) {
-    Service.getServiceInstance().send(Service.REMOVE_TAG, {tag: [mutation.tag], filesID: [mutation.id]})
-    let file = Cache.files[mutation.id]
+    Service.getServiceInstance().send(Service.REMOVE_TAG, { tag: [mutation.tag], filesID: [mutation.id] })
+    const file = Cache.files[mutation.id]
     file.tag.splice(file.tag.indexOf(mutation.tag), 1)
   },
   update(state, sql) {},
@@ -328,9 +328,9 @@ const mutations = {
     state.viewItems.splice(0, state.viewItems.length)
     for (let idx = 0; idx < classesFiles.length; ++idx) {
       if (classesFiles[idx].type === 'clz') {
-        let item = {}
+        const item = {}
         item.path = classesFiles[idx].name
-        let pos = classesFiles[idx].name.lastIndexOf('/') + 1
+        const pos = classesFiles[idx].name.lastIndexOf('/') + 1
         item.name = classesFiles[idx].name.substring(pos)
         Vue.set(state.viewClass, clsIdx++, item)
       } else {
@@ -343,22 +343,22 @@ const mutations = {
 
 const actions = {
   async init({ commit }, flag) {
-    const {unclasses, untags} = await remote.recieveCounts()
+    const { unclasses, untags } = await remote.recieveCounts()
     const allClasses = await Service.getServiceInstance().get(Service.GET_ALL_CATEGORY, '/')
     console.info('all classes:', allClasses)
     const filesSnap = await Service.getServiceInstance().get(Service.GET_FILES_SNAP)
-    let imagesID = []
-    for (let snap of filesSnap) {
+    const imagesID = []
+    for (const snap of filesSnap) {
       imagesID.push(snap.id)
       if (imagesID.length > maxCacheSize) break
     }
     const allImages = await Service.getServiceInstance().get(Service.GET_IMAGES_INFO, imagesID)
     const allTags = await Service.getServiceInstance().get(Service.GET_ALL_TAGS)
     console.info('recieveCounts:', unclasses)
-    commit('init', {unclasses, untags, allClasses, filesSnap, allImages, allTags})
+    commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
   },
-  async query({commit}, query) {
-    for (let k in query) {
+  async query({ commit }, query) {
+    for (const k in query) {
       console.info('query add key', k, Cache.query)
       Cache.query[k] = query[k]
     }
@@ -366,64 +366,64 @@ const actions = {
     console.info('query: ', Cache.query, 'result: ', result)
     commit('query', result)
   },
-  display({commit}, data) {
+  display({ commit }, data) {
     commit('display', data)
   },
-  removeFiles({commit}, files) {
+  removeFiles({ commit }, files) {
     commit('removeFiles', files)
   },
-  async addFiles({commit}, files) {
+  async addFiles({ commit }, files) {
     commit('addFiles', files)
     // count
     const counts = await remote.recieveCounts()
     commit('updateCounts', counts)
   },
-  addTag({commit}, mutation) {
+  addTag({ commit }, mutation) {
     commit('addTag', mutation)
   },
-  addClass({commit}, mutation) {
+  addClass({ commit }, mutation) {
     commit('addClass', mutation)
   },
-  async addClassOfFile({commit}, mutation) {
+  async addClassOfFile({ commit }, mutation) {
     await commit('addClassOfFile', mutation)
   },
-  removeClass({commit}, node) {
+  removeClass({ commit }, node) {
     commit('removeClass', node)
   },
-  async removeClassOfFile({commit}, mutation) {
+  async removeClassOfFile({ commit }, mutation) {
     await commit('removeClassOfFile', mutation)
   },
-  removeTags({commit}, mutation) {
+  removeTags({ commit }, mutation) {
     commit('removeTags', mutation)
   },
-  changeFileName({commit}, mutation) {
+  changeFileName({ commit }, mutation) {
     commit('changeFileName', mutation)
   },
-  changeClassName({commit}, mutation) {
+  changeClassName({ commit }, mutation) {
     commit('changeClassName', mutation)
   },
-  async getClassesAndFiles({commit}, query) {
+  async getClassesAndFiles({ commit }, query) {
     const allClasses = await Service.getServiceInstance().get(Service.GET_CATEGORY_DETAIL, query)
     commit('getClassesAndFiles', allClasses)
   },
-  update({commit}, sql) {
+  update({ commit }, sql) {
     /*
      *  sql like: {query:'', $set:{}}, {query:'', $unset:{}}
      */
     commit('update', sql)
   },
-  remove({commit}, sql) {
+  remove({ commit }, sql) {
     /*
      *  sql like: {query:''}
      */
     commit('update', sql)
   },
-  insert({commit}, sql) {
+  insert({ commit }, sql) {
     /*
      *  sql like: {query:'', value: {}}
      */
   },
-  updateHistoryLength({commit}, value) {
+  updateHistoryLength({ commit }, value) {
     commit('updateHistoryLength', value)
   }
 }
