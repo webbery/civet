@@ -89,6 +89,8 @@ class CivetConfig {
     return null
   }
 
+  getRecentResources() {}
+
   addResource(name, path) {
     for (const resource of this.config.resources) {
       if (resource.name === name) {

@@ -187,6 +187,7 @@
     "node-sass": "^4.9.2",
     "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
+    "source-map-loader": "^2.0.1",
     "spectron": "^10.0.1",
     "style-loader": "^0.21.0",
     "terser-webpack-plugin": "^4.2.3",

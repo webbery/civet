@@ -116,6 +116,7 @@ let workerConfig = {
       },
       {
         test: /\.(tsx?|ts)(\?.*)?$/,
+        enforce: 'pre',
         use: {
           loader: 'ts-loader'
         },

@@ -6,7 +6,7 @@
           <el-button @click="onClickResource" size="mini" round>{{resource}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>{{resource}}</el-dropdown-item>
-            <el-dropdown-item divided>最近使用</el-dropdown-item>
+            <el-dropdown-item v-for="(res, idx) of recentResources" :key="idx" @click="onSelectResource(res)">{{res}}</el-dropdown-item>
             <el-dropdown-item divided>新建资源库</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -54,6 +54,7 @@ export default {
       scaleValue: 20,
       keyword: '',
       resource: '资源库',
+      recentResources: ['最近使用'],
       viewDesc: '全部',
       disabled: true,
       style: {
@@ -79,11 +80,15 @@ export default {
     const resource = config.getCurrentResource()
     console.info('header', resource)
     this.resource = resource.name
+    this.recentResources.push(resource.name)
   },
   methods: {
     onClickResource() {},
     onInitResourceDB(dbname) {
       this.resource = dbname
+    },
+    onSelectResource(resname) {
+      console.info(resname)
     },
     onQueryKindChange(cmd) {
       switch (cmd) {

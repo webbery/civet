@@ -82,7 +82,7 @@ const mutations = {
     const images = data.allImages
     for (const image of images) {
       Cache.files[image.id] = new FileBase(image)
-      if (Cache.files.length > maxCacheSize) break
+      // if (Cache.files.length > maxCacheSize) break
     }
     // const len = state.cache.length
     // setting view panel item
@@ -146,6 +146,7 @@ const mutations = {
   addFiles(state, files) {
     const idx = 0
     console.info('addFiles:', files)
+    let cnt = 0
     for (const file of files) {
       if (Cache.files.hasOwnProperty(file.id)) {
         // TODO: update file info
@@ -153,11 +154,13 @@ const mutations = {
         continue
       }
       Cache.files[file.id] = new FileBase(file)
+      cnt += 1
       // setting view panel item
-      if (Cache.files.length > maxCacheSize) break
+      // if (Cache.files.length > maxCacheSize) break
       const pos = state.viewItems.length + idx
       Vue.set(state.viewItems, pos, Cache.files[file.id])
     }
+    state.allCount += cnt
   },
   display(state, data) {
     let idx = 0
@@ -168,7 +171,7 @@ const mutations = {
     for (const k in Cache.files) {
       Vue.set(state.viewItems, idx, Cache.files[k])
       idx += 1
-      if (idx > maxCacheSize) break
+      // if (idx > maxCacheSize) break
     }
   },
   async query(state, result) {
@@ -350,7 +353,7 @@ const actions = {
     const imagesID = []
     for (const snap of filesSnap) {
       imagesID.push(snap.id)
-      if (imagesID.length > maxCacheSize) break
+      // if (imagesID.length > maxCacheSize) break
     }
     const allImages = await Service.getServiceInstance().get(Service.GET_IMAGES_INFO, imagesID)
     const allTags = await Service.getServiceInstance().get(Service.GET_ALL_TAGS)

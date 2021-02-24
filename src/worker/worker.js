@@ -7,10 +7,7 @@ import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
 import storage from '../public/Kernel'
-import ImageTest from './service/ImageTest'
 
-const t = ImageTest()
-console.info(t.property)
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
 

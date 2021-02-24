@@ -10,8 +10,8 @@
         </div>
       </el-main>
       <el-footer>
-        <span class="el-icon-zoom-out"></span>
-        <span class="el-icon-zoom-in"></span>
+        <!-- <span class="el-icon-zoom-out"></span>
+        <span class="el-icon-zoom-in"></span> -->
       </el-footer>
     </el-container>
   
