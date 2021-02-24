@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 declare module 'civet' {
 
   export const version: string;
@@ -47,4 +48,19 @@ declare module 'civet' {
     then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => TResult | Thenable<TResult>): Thenable<TResult>;
     then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => void): Thenable<TResult>;
   }
+=======
+interface IFile {
+  id: number;
+  type: string;
+  meta: JSON;
+  tag: string[];
+  category: string[];
+  anno?: string[];
+  keyword: string[];
+}
+
+interface IFileEvent {
+  onReadEvent: (stream: JSON) => boolean;
+  onWriteEvent: () => boolean;
+>>>>>>> 1dc7daa... update ci; add part of ts files for extension
 }

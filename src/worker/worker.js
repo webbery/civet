@@ -7,6 +7,7 @@ import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
 import storage from '../public/Kernel'
+import ImageService from './service/ImageService'
 
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
@@ -121,6 +122,8 @@ function readImages(fullpath) {
     //   console.info('--------2----------', config)
     //   initHardLinkDir(config.app.default)
     // }
+    const image = new ImageService()
+    image.read(fullpath)
     const parser = new ImageParser(fullpath)
     const img = parser.parse(info, (err, image) => {
       if (err) {
