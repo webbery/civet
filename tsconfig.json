@@ -9,11 +9,16 @@
     "moduleResolution": "node",
     // 启用装饰器模式
     "experimentalDecorators": true,
+    "sourceMap": true,
+    "allowJs": true,
     // 
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/public/*", "src/worker/service/*"]
     }
   },
-  "include": ["src/public/*.ts", "src/worker/service/*.ts"]
+  "include": ["src/public/*.ts", "src/worker/service/*.ts"],
+  "exclude": [
+    "node_modules"
+  ]
 }

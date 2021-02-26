@@ -42,3 +42,21 @@ export class IFileImpl{
 //     }
 //   }
 }
+
+export enum MessageState{
+  UNINIT = 0,
+  PENDING = 1,
+  FINISH = 2
+}
+
+export class Message {
+  id: number = 0;
+  state: number = MessageState.UNINIT;
+  type: string = '';
+  tick: number = 0;   // waitting time, unit second
+  msg: any;
+}
+
+export class Parser {
+  callback: Function = ():void =>{ console.error('use empty callback')};
+}

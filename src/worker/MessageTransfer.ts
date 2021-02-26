@@ -1,3 +1,4 @@
+import { Message, MessageState } from '../public/civet'
 const { ipcRenderer } = require('electron')
 const timer = (function () {
     let t = null
@@ -23,19 +24,27 @@ const timer = (function () {
     }
   })()
 
-  export class Message {
-    id: number = 0;
-    tick: number = 0;   // waitting time, unit second
-    msg: any;
-  }
-
   export class MessageTransfer {
-    threshodMode: number = 200;
-    messageQueue: Message[];
-    constructor(threshodMode) {
-      this.threshodMode = threshodMode
+    threshod: number = 200;
+    messageQueue: Map<number, Message>;
+    constructor(threshod) {
+      this.threshod = threshod
     }
-    post(msgs: Message[]) {
-      ipcRenderer.send('message-from-worker', msgs)
+    post(msg: Message) {
+      if (this.messageQueue.has(msg.id)) {
+        let msgs = this.messageQueue.get(msg.id)
+        if (Array.isArray(msgs.msg)) {
+          msgs.msg.push.apply(msgs.msg, msg.msg)
+        } else {
+          msgs.msg.push(msg.msg)
+          msgs.state = MessageState.FINISH
+        }
+        this.messageQueue.set(msg.id, msgs);
+      } else {
+        this.messageQueue.set(msg.id, msg);
+      }
+      timer.start(() => {
+      }, 200);
+      // ipcRenderer.send('message-from-worker', msgs)
     }
   }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-color-picker v-model="color" size="mini"></el-color-picker>
+    <!-- <el-color-picker v-model="color" size="mini"></el-color-picker> -->
     <span class="custom">
       <el-select v-model="fileType" @change="onFileTypeChanged" clearable placeholder=" 类型" size="mini" multiple>
         <el-option
@@ -20,7 +20,7 @@
         >
         </el-option>
       </el-select>
-      <el-dropdown trigger="click">
+      <!-- <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
           <RangeInput label="宽" firstPlaceholder="最小" lastPlaceholder="最大"></RangeInput>
@@ -32,7 +32,7 @@
         <el-dropdown-menu slot="dropdown">
           <RangeInput firstPlaceholder="最小" lastPlaceholder="最大" unit="Kb"></RangeInput>
         </el-dropdown-menu>
-      </el-dropdown>
+      </el-dropdown> -->
     </span>
   </div>
 </template>

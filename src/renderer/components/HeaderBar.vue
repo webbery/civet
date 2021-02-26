@@ -54,7 +54,7 @@ export default {
       scaleValue: 20,
       keyword: '',
       resource: '资源库',
-      recentResources: ['最近使用'],
+      recentResources: [],
       viewDesc: '全部',
       disabled: true,
       style: {

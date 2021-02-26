@@ -33,6 +33,13 @@
   "build": {
     "productName": "civet",
     "appId": "com.civet.app",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "webbery",
+        "repo": "civet"
+      }
+    ],
     "directories": {
       "output": "build"
     },
@@ -106,6 +113,7 @@
     "element-ui": "^2.14.1",
     "exifreader": "^3.9.0",
     "image-hash": "^4.0.1",
+    "import-html-entry": "^1.11.1",
     "segment": "^0.1.3",
     "sharp": "^0.26.2",
     "uuid": "^8.3.1",

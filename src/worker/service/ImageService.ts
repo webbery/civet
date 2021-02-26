@@ -1,4 +1,4 @@
-import { IFileImpl } from '../../public/civet'
+import { IFileImpl, Parser } from '../../public/civet'
 
 export class ImageService {
   private _parsers: ImageParser[] = [];
@@ -30,11 +30,27 @@ class MessageTransfer {
   msg: any;
 }
 
-class ImageParser {
+class ImageParser extends Parser {
   parse(file: IFileImpl): boolean {
     return true
   }
 }
 
-class ImageMetaParser extends ImageParser {}
-class ImagePathParser extends ImageParser {}
+@injectReply
+class ImageMetaParser extends ImageParser {
+  parse(file: IFileImpl): boolean {
+    console.info('ImageMetaParser,', file)
+    return true;
+  }
+}
+class ImagePathParser extends ImageParser {
+  parse(file: IFileImpl): boolean {
+    console.info('ImagePathParser')
+    return true;
+  }
+}
+
+function injectReply(reply: any) {
+  const reply2Renderer = require('../transfer')
+  reply.callback = reply2Renderer
+}

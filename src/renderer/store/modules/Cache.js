@@ -7,7 +7,7 @@ const Cache = {
   query: {},
   files: {}
 }
-const maxCacheSize = 40 + 20 + 10
+// const maxCacheSize = 40 + 20 + 10
 
 const state = {
   classes: new Tree([]),
