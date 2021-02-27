@@ -34,6 +34,14 @@ describe('Launch', function () {
     // expect(title).to.equal('civet')
     expect(this.app.client.$('#guider-config').isVisible()).to.equal(true)
   })
+  test('validate add files', () => {})
+  test('validate property', () => {})
+  test('validate web view', () => {})
+  test('validate detail view', () => {})
+  test('validate class ability', () => {})
+  test('validate tag ability', () => {})
+  test('validate tag mananger', () => {})
+  test('validate search', () => {})
   test('validate remove database', () => {
 
   })

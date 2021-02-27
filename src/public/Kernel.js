@@ -67,7 +67,6 @@ export default {
   generateFilesID: (num) => { return kernel().generateFilesID(num) },
   addFiles: (src) => { return kernel().addFiles(src) },
   removeFiles: (filesID) => { kernel().removeFiles(filesID) },
-  updateFilesKeywords: (filesID, keywords) => {},
   setTags: (filesID, tags) => { return kernel().setTags({ id: filesID, tag: tags }) },
   removeTags: (filesID, tags) => { return kernel().removeTags({ id: filesID, tag: tags }) },
   addClasses: (sql) => { return kernel().addClasses(sql) },

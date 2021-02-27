@@ -182,21 +182,11 @@ const mutations = {
     }
     console.info(state.viewItems, result)
   },
-  async addTag(state, mutation) {
-    const { fileID, tag } = mutation
-    console.info('cache add tag:', fileID, tag)
-    const file = Cache.files[fileID]
-    if (!file) {
-      return
-    }
-    file.tag.push(tag)
-    Service.getServiceInstance().send(Service.SET_TAG, { id: [fileID], tag: file.tag })
+  updateTag(state, info) {
     // const {unclasses, untags} = await remote.recieveCounts()
-    if (file.tag.length === 1) {
-      state.untags += 1
-    }
+    state.untags = info.untags
     // update tags
-    // state.tags = await remote.recieveTags()
+    state.tags = info.tags
   },
   addClass(state, mutation) {
     if (Array.isArray(mutation)) {
@@ -357,7 +347,7 @@ const actions = {
     }
     const allImages = await Service.getServiceInstance().get(Service.GET_IMAGES_INFO, imagesID)
     const allTags = await Service.getServiceInstance().get(Service.GET_ALL_TAGS)
-    console.info('recieveCounts:', unclasses)
+    console.info('recieveCounts:', unclasses, 'tags:', allTags)
     commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
   },
   async query({ commit }, query) {
@@ -376,13 +366,23 @@ const actions = {
     commit('removeFiles', files)
   },
   async addFiles({ commit }, files) {
-    commit('addFiles', files)
+    await commit('addFiles', files)
     // count
     const counts = await remote.recieveCounts()
-    commit('updateCounts', counts)
+    await commit('updateCounts', counts)
   },
-  addTag({ commit }, mutation) {
-    commit('addTag', mutation)
+  async addTag({ commit }, mutation) {
+    const { fileID, tag } = mutation
+    console.info('cache add tag:', fileID, tag)
+    const file = Cache.files[fileID]
+    if (!file) {
+      return
+    }
+    file.tag.push(tag)
+    Service.getServiceInstance().send(Service.SET_TAG, { id: [fileID], tag: file.tag })
+    const tags = await remote.recieveTags()
+    const { ...untags } = await remote.recieveCounts()
+    commit('updateTag', {tags, untags})
   },
   addClass({ commit }, mutation) {
     commit('addClass', mutation)

@@ -16,9 +16,9 @@
 </template>
 <script>
 import { remote } from 'electron'
-import { config } from '../../public/CivetConfig'
-import Service from './utils/Service'
-import bus from './utils/Bus'
+import { config } from '../../../public/CivetConfig'
+import Service from '../utils/Service'
+import bus from '../utils/Bus'
 
 export default {
   name: 'Guider',

@@ -3,13 +3,13 @@
 import { app, BrowserWindow, Menu, ipcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
 const path = require('path')
+const fs = require('fs')
 
 function initUpdater() {
   const updaterCacheDirName = 'civet'
   const path = require('path')
   const updatePendingPath = path.join(autoUpdater.app.baseCachePath, updaterCacheDirName, 'pending')
   console.info('update dir:', updatePendingPath)
-  const fs = require('fs')
   if (fs.existsSync(updatePendingPath)) fs.rmdir(updatePendingPath)
   const updateURL = 'https://download.fastgit.org/webbery/civet/releases/download'
   autoUpdater.autoDownload = false
@@ -221,5 +221,28 @@ app.on('ready', async () => {
   ipcMain.on('ready', (event, arg) => {
     console.info('child process ready')
     createRendererWindow()
+  })
+  ipcMain.on('export2Diectory', (event, arg) => {
+    const { dialog } = require('electron')
+    console.info(arg)
+    const dir = dialog.showOpenDialogSync(mainWindow, {
+      title: '导出文件',
+      buttonLabel: '导出',
+      properties: ['openDirectory']
+    })
+    if (!dir) return
+    console.info('export:', dir)
+    if (!fs.statSync(dir[0]).isDirectory()) return
+    // copy files to dir
+    const path = require('path')
+    for (let filepath of arg) {
+      if (fs.existsSync(filepath)) {
+        console.info(filepath)
+        const f = path.parse(filepath)
+        const dest = dir + '/' + f.base
+        console.info(dest)
+        fs.copyFileSync(filepath, dest)
+      }
+    }
   })
 })

@@ -1,7 +1,7 @@
 const i18n = {
   path: '路径',
   filename: '文件名',
-  size: '路径',
+  size: '大小',
   datetime: '创建时间',
   addtime: '添加时间',
   specs: '尺寸',

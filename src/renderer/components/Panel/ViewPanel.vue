@@ -1,7 +1,15 @@
 <template>
+  <div v-if="imageList.length === 0" @drop="dropFiles($event)" @dragover.prevent>
+    <div @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true" style="height:96vh;widht: 100%">
+      <div class="initial" >
+        请拖拽文件或文件夹到此处
+      </div>
+    </div>
+  </div>
+  <div v-else> 
     <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
     <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
-    <el-scrollbar style="height:96vh;" @click.native="onPanelClick($event)">
+    <el-scrollbar style="height:96vh;" @click.native="onPanelClick($event)" wrap-style="overflow-x:hidden;">
       <div v-if="classList.length > 0">
         <div class="hr-divider" data-content="分类"></div>
         <div v-bind:class="{'folder-selected': folderSelected[idx], 'folder': !folderSelected[idx]}"
@@ -35,6 +43,7 @@
       </Waterfall>
       </el-scrollbar>
     </div>
+  </div>
 </template>
 
 <script>
@@ -45,7 +54,7 @@ import ImgTool from '../utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
 import Global from '../utils/Global'
 import { mapState } from 'vuex'
-import ExtensionManager from '@/../public/ExtensionManager'
+// import ExtensionManager from '@/../public/ExtensionManager'
 import Waterfall from '../Layout/waterfall'
 import WaterfallSlot from '../Layout/waterfall-slot'
 import InputLabel from '../Control/InputLabel'
@@ -61,8 +70,8 @@ export default {
       lastSelections: {},
       imageSelected: false,
       menus: [
-        {text: '导出到计算机', cb: this.onChangeName},
-        {text: '重命名', cb: this.onChangeName},
+        {text: '导出到计算机', cb: this.onExportFiles},
+        // {text: '重命名', cb: this.onChangeName},
         {text: '删除', cb: this.onDeleteItem}
       ],
       width: 400,
@@ -202,30 +211,11 @@ export default {
       console.info('COPY')
       // console.info(__filename, __line, image)
     },
-    onImageNameChange(image) {},
     dropFiles(event) {
       let files = event.dataTransfer.files
       let paths = []
-      const String = require('../../../public/String').default
-      const h = this.$createElement
+      // const String = require('../../../public/String').default
       for (let item of files) {
-        const fs = require('fs')
-        const stat = fs.statSync(item.path)
-        if (stat.isFile()) {
-          const ext = String.getFormatType(item.path)
-          if (ExtensionManager.getModuleByExt(ext) === null) {
-            this.$notify.error({
-              title: '不支持的格式',
-              dangerouslyUseHTMLString: true,
-              message: h('div', {style: 'color: white; font-size: 12px;'}, item.path),
-              // duration: 0,
-              position: 'bottom_right'
-            })
-            continue
-          }
-        } else if (!stat.isDirectory()) {
-          continue
-        }
         paths.push(item.path)
       }
       if (paths.length > 0) {
@@ -267,6 +257,17 @@ export default {
       }
       this.lastSelections = {}
     },
+    onExportFiles(name, parent, fileid) {
+      console.info(fileid, 'selections:', this.lastSelections)
+      const filesID = Object.keys(this.lastSelections)
+      const files = this.$store.getters.getFiles(filesID)
+      let filespath = []
+      for (let file of files) {
+        filespath.push(file.path)
+      }
+      const ipcRenderer = require('electron').ipcRenderer
+      ipcRenderer.send('export2Diectory', filespath)
+    },
     onScrollNearBottom() {}
   }
 }
@@ -282,7 +283,6 @@ export default {
   /* float: left; */
   position: absolute;
   bottom: 22px;
-  right: 0px;
   z-index: 9;
 }
 .image {
@@ -401,5 +401,14 @@ export default {
     line-height: 1.5em;
     color: white;
     background-color: #222933;
+}
+.initial {
+  width:350px;
+	height:150px;
+	position:fixed;
+	top:50%;
+  font-size: 25px;
+	margin-top:-25px;
+  left: 40%;
 }
 </style>

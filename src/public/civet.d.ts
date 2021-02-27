@@ -2,50 +2,50 @@ declare module 'civet' {
 
   export const version: string;
   
-  export interface IFile {
-    readonly id: number;
-    readonly type: string;
-    readonly name: string;
+  // export interface IFile {
+  //   readonly id: number;
+  //   readonly type: string;
+  //   readonly name: string;
 
-    path: string[];
-    meta: JSON;
-    tag: string[];
-    category: string[];
-    anno?: string[];
-    keyword: string[];
-    [propName: string]: any;
+  //   path: string[];
+  //   meta: JSON;
+  //   tag: string[];
+  //   category: string[];
+  //   anno?: string[];
+  //   keyword: string[];
+  //   [propName: string]: any;
 
-    read(path: string): Thenable<boolean>;
-    write(path: string): Thenable<boolean>;
-  }
+  //   read(path: string): Thenable<boolean>;
+  //   write(path: string): Thenable<boolean>;
+  // }
 
-  export interface FileReadEvent{
-    onRead(path: string): void;
-  }
+  // export interface FileReadEvent{
+  //   onRead(path: string): void;
+  // }
 
-  export interface IDatabase {
-    addFiles(path: string[]): Thenable<boolean>;
-    removeFiles(ids: number[]): Thenable<boolean>;
-    updateFilesKeywords(ids: number[], keywords: string[]): Thenable<boolean>;
-    setTags(ids: number[], tags: string[]): Thenable<boolean>;
-    removeTags(ids: number[], tags: string[]): Thenable<boolean>;
-    addClasses(path: string[]): Thenable<boolean>;
-    addClasses(ids: number[], path: string[]): Thenable<boolean>;
-    removeClasses(path: string[]): Thenable<boolean>;
-    updateFile(meta: object): Thenable<boolean>;
-    updateClassName(oldPath: string, newPath: string): Thenable<boolean>;
-  }
+  // export interface IDatabase {
+  //   addFiles(path: string[]): Thenable<boolean>;
+  //   removeFiles(ids: number[]): Thenable<boolean>;
+  //   updateFilesKeywords(ids: number[], keywords: string[]): Thenable<boolean>;
+  //   setTags(ids: number[], tags: string[]): Thenable<boolean>;
+  //   removeTags(ids: number[], tags: string[]): Thenable<boolean>;
+  //   addClasses(path: string[]): Thenable<boolean>;
+  //   addClasses(ids: number[], path: string[]): Thenable<boolean>;
+  //   removeClasses(path: string[]): Thenable<boolean>;
+  //   updateFile(meta: object): Thenable<boolean>;
+  //   updateClassName(oldPath: string, newPath: string): Thenable<boolean>;
+  // }
 
-  export interface IRegistEvent {
-  }
+  // export interface IRegistEvent {
+  // }
 
-  export interface IFilePaser {
-    // onParse(stream: Stream): Thenable<boolean>;
-  }
+  // export interface IFilePaser {
+  //   // onParse(stream: Stream): Thenable<boolean>;
+  // }
 
-	export interface IWebview {
-		html: string;
-  }
+	// export interface IWebview {
+	// 	html: string;
+  // }
 
   interface Thenable<T> {
     then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => TResult | Thenable<TResult>): Thenable<TResult>;

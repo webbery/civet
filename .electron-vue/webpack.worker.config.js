@@ -176,31 +176,31 @@ let workerConfig = {
 /**
  * 发版打开此处
  */
-// if (process.env.NODE_ENV === 'production') {
-//   workerConfig.devtool = ''
+if (process.env.NODE_ENV === 'production') {
+  workerConfig.devtool = ''
 
-//   workerConfig.plugins.push(
-//     new TerserPlugin(),
-//     new CopyWebpackPlugin([
-//       {
-//         from: path.join(__dirname, '../static'),
-//         to: path.join(__dirname, '../dist/electron/static'),
-//         ignore: ['.*']
-//       }
-//     ]),
-//     new webpack.DefinePlugin({
-//       'process.env.NODE_ENV': '"production"'
-//     }),
-//     new webpack.LoaderOptionsPlugin({
-//       minimize: true
-//     })
-//   )
-// } else {
-workerConfig.plugins.push(
-  new webpack.DefinePlugin({
-    '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
-  })
-)
-// }
+  workerConfig.plugins.push(
+    new TerserPlugin(),
+    new CopyWebpackPlugin([
+      {
+        from: path.join(__dirname, '../static'),
+        to: path.join(__dirname, '../dist/electron/static'),
+        ignore: ['.*']
+      }
+    ]),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': '"production"'
+    }),
+    new webpack.LoaderOptionsPlugin({
+      minimize: true
+    })
+  )
+} else {
+  workerConfig.plugins.push(
+    new webpack.DefinePlugin({
+      '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
+    })
+  )
+}
 
 module.exports = workerConfig

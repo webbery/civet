@@ -1,6 +1,6 @@
 import JString from '../public/String'
 // import CV from '../public/CV'
-import { ImageParser, JImage } from './Image'
+// import { JImage } from './Image'
 // import { CategoryArray } from './Category'
 import ElementUI from 'element-ui'
 import 'element-theme-dark'
@@ -8,7 +8,8 @@ import Vue from 'vue'
 import App from './App'
 import storage from '../public/Kernel'
 import { ImageService } from './service/ImageService'
-import { reply2Renderer } from './transfer'
+import { reply2Renderer, ReplyType } from './transfer'
+import { IFileImpl } from '../public/civet'
 
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
@@ -41,24 +42,6 @@ function updateStatus(status) {
 }
 // your background code here
 const fs = require('fs')
-
-const ReplyType = {
-  WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
-  REPLY_FILES_LOAD_COUNT: 'replyFilesLoadCount',
-  IS_DIRECTORY_EXIST: 'isDirectoryExist',
-  REPLY_IMAGES_DIRECTORY: 'replyImagesWithDirectory',
-  REPLY_IMAGES_INFO: 'replyImagesInfo',
-  REPLY_IMAGE_INFO: 'replyImageInfo',
-  REPLY_FILES_SNAP: 'replyFilesSnap',
-  REPLY_ALL_TAGS: 'replyAllTags',
-  REPLY_ALL_TAGS_WITH_IMAGES: 'replyAllTagsWithImages',
-  REPLY_QUERY_FILES: 'replyQueryFilesResult',
-  REPLAY_ALL_CATEGORY: 'replyAllCategory',
-  REPLY_CLASSES_INFO: 'replyClassesInfo',
-  REPLY_UNCATEGORY_IMAGES: 'replyUncategoryImages',
-  REPLY_UNTAG_IMAGES: 'replyUntagImages',
-  REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
-}
 
 // let bakDir
 // // console.info(configPath, '............', userDir)
@@ -99,19 +82,10 @@ function readImages(fullpath) {
     //   console.info('--------2----------', config)
     //   initHardLinkDir(config.app.default)
     // }
-    const image = new ImageService()
-    image.read(fullpath)
-    const parser = new ImageParser(fullpath)
-    const img = parser.parse(info, (err, image) => {
-      if (err) {
-        console.info(err)
-        return
-      }
-      console.info('reply image')
-      reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [image.toJson()])
-    })
-    console.info('readImages', img)
-    reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [img.toJson()])
+    const service = new ImageService()
+    const file = service.read(fullpath)
+    console.info('readImages', file)
+    reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file.toJson()])
   }
 }
 
@@ -157,7 +131,7 @@ const messageProcessor = {
     console.info('getImagesInfo', imgs)
     const images = []
     for (const img of imgs) {
-      images.push(new JImage(img))
+      images.push(new IFileImpl(img))
     }
     reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
@@ -169,7 +143,7 @@ const messageProcessor = {
   getImageInfo: (imageID) => {
     const img = storage.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
-    const image = new JImage(img[0])
+    const image = new IFileImpl(img[0])
     reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
   },
   setTag: (data) => {

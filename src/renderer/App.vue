@@ -7,7 +7,7 @@
 
 <script>
 import LandingPage from '@/components/LandingPage'
-import Guider from '@/components/Guider'
+import Guider from '@/components/Dialog/Guider'
 // import CV from '@/../public/ImageProcess'
 import { config } from '@/../public/CivetConfig'
 import Service from '@/components/utils/Service'
@@ -30,6 +30,7 @@ export default {
     }
     // regist ipc message process function
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
+    this.$ipcRenderer.on(Service.ON_FILE_RESOLVE_FAIL, this.onFileResolveFail)
     this.$nextTick(() => {
       this.$store.dispatch('init')
     })
@@ -38,6 +39,17 @@ export default {
     onUpdateImages(error, updateImages) {
       if (error) console.log(error)
       this.$store.dispatch('addFiles', updateImages)
+    },
+    onFileResolveFail(info) {
+      console.info(info)
+      const h = this.$createElement
+      this.$notify.error({
+        title: info.msg,
+        dangerouslyUseHTMLString: true,
+        message: h('div', {style: 'color: white; font-size: 12px;'}, info.path),
+        // duration: 0,
+        position: 'bottom_right'
+      })
     }
   },
   destroyed: function() {

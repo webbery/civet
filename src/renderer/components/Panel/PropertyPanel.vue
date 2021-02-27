@@ -139,7 +139,11 @@ export default {
             names.push(JString.i18n(item.name))
             const meta = getItem(item.name, file.meta)
             if (!meta) {
-              values.push('unknow')
+              if (!file[item.name]) {
+                values.push('-')
+              } else {
+                values.push(file[item.name])
+              }
             } else {
               if (item.name === 'size') {
                 values.push(getSize(parseInt(file.size)))

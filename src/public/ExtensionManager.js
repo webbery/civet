@@ -11,10 +11,10 @@ function init(plgDir) {
       const extensions = fs.readdirSync(extensionPath)
       for (const extensionID of extensions) {
         if (Object.prototype.hasOwnProperty.call(modules, extensionID)) continue
-        const fullpath = path.join(extensionPath, extensionID)
-        const pkg = fullpath + '/package.json'
-        const config = require(pkg)
-        modules[extensionID] = config
+        // const fullpath = path.join(extensionPath, extensionID)
+        // const pkg = fullpath + '/package.json'
+        // const config = require(pkg)
+        // modules[extensionID] = config
       }
     } catch (err) {
       console.error(err)

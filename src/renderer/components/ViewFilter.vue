@@ -59,13 +59,13 @@ export default {
         {label: '最近7日', key: 'near7'},
         {label: '最近30日', key: 'near30'},
         {label: '最近90日', key: 'near90'},
-        {label: '最近365日', key: 'near365'},
-        {label: '自定义', key: 'custom'}
+        {label: '最近365日', key: 'near365'}
       ],
       fileType: null,
       fileTypes: [
         {label: 'jpg'},
         {label: 'png'},
+        {label: 'tif'},
         {label: 'bmp'}
       ],
       clazz: []
