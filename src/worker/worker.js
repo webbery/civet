@@ -72,7 +72,7 @@ const fs = require('fs')
 //   }
 // }
 
-function readImages(fullpath) {
+async function readImages(fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
     readDir(fullpath)
@@ -83,7 +83,7 @@ function readImages(fullpath) {
     //   initHardLinkDir(config.app.default)
     // }
     const service = new ImageService()
-    const file = service.read(fullpath)
+    const file = await service.read(fullpath)
     console.info('readImages', file)
     reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file.toJson()])
   }
@@ -92,12 +92,12 @@ function readImages(fullpath) {
 let totalFiles = 0
 let progressLoad = 0
 function readDir(path) {
-  fs.readdir(path, function(err, menu) {
+  fs.readdir(path, async function(err, menu) {
     if (err) return
     // console.info(menu)
     totalFiles += menu.length
     for (const item of menu) {
-      readImages(JString.joinPath(path, item))
+      await readImages(JString.joinPath(path, item))
     }
     reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
     progressLoad += menu.length

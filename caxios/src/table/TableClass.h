@@ -15,7 +15,7 @@ namespace caxios {
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid);
     virtual bool Update(const std::string& current, const UpdateValue& value);
     virtual bool Delete(const std::string& k, FileID fileID);
-    bool Query(const std::string& k, std::vector<FileID>& filesID);
+    virtual std::vector<FileID> Find(const std::string& k);
     bool Query(ClassID cid, ClassProperty& prop);
     bool Update(ClassID cid, const ClassProperty& prop);
 

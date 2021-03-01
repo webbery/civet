@@ -278,6 +278,12 @@ export default {
       }
     },
 
+    expand() {
+      if (this.isFolder) {
+        this.expanded = true
+      }
+    },
+
     mouseOver() {
       if (this.model.disabled) return
       this.isHover = true
@@ -299,7 +305,8 @@ export default {
       this.rootNode.$emit('right-click', {
         event,
         root,
-        model: this.model
+        model: this.model,
+        expand: this.expand
       })
     },
 

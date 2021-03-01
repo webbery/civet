@@ -110,6 +110,8 @@ namespace caxios {
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid) = 0;
     virtual bool Update(const std::string& current, const UpdateValue& value) = 0;
     virtual bool Delete(const std::string& k, FileID fileID) = 0;
+    // TODO: add custom distance function from developer
+    virtual std::vector<FileID> Find(const std::string& k) = 0;
     virtual Iterator begin() = 0;
     virtual Iterator end() = 0;
   protected:

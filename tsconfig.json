@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     // 启用装饰器模式
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "allowJs": true,
     // 

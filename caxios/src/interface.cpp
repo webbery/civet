@@ -12,112 +12,18 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <signal.h>
-#include <execinfo.h>
 #elif defined(WIN32)
 #include <direct.h>
 #include <io.h>
-#include <windows.h>
-#include <dbghelp.h>
-#pragma comment(lib, "dbghelp.lib")
 #endif
 
 // https://stackoverflow.com/questions/36659166/nodejs-addon-calling-javascript-callback-from-inside-nan-asyncworkerexecute
 #define EXPORT_JS_FUNCTION_PARAM(name) exports.Set(#name, Napi::Function::New(env, caxios::name));
-#define MAX_TRACE_SIZE  128
 
 namespace caxios {
   CAxios* g_pCaxios = nullptr;
   
   namespace {
-#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
-    void logStacktrace(int sn) {
-      const char* typeMsg = "Unknow Crash:\n";
-      usleep(1000*1000);
-      switch (sn)
-      {
-      case SIGABRT:
-        typeMsg = "SIGABRT:\n";
-        break;
-      case SIGSEGV:
-        typeMsg = "SIGSEGV:\n";
-        break;
-      case SIGBUS:
-        typeMsg = "SIGBUS:\n";
-        break;
-      case SIGFPE:
-        typeMsg = "SIGFPE:\n";
-        break;
-      case SIGILL:
-        typeMsg = "SIGILL:\n";
-        break;
-      case SIGTRAP:
-        typeMsg = "SIGTRAP:\n";
-        break;
-      default:
-        break;
-      }
-      void* buf[MAX_TRACE_SIZE];
-      int cnt = backtrace(buf, MAX_TRACE_SIZE);
-      char** symbols = backtrace_symbols(buf, cnt);
-      log_trace(typeMsg, symbols, cnt);
-      free(symbols);
-      signal(SIGABRT, SIG_DFL);
-      signal(SIGSEGV, SIG_DFL);
-      signal(SIGBUS, SIG_DFL);
-      signal(SIGFPE, SIG_DFL);
-      signal(SIGILL, SIG_DFL);
-      signal(SIGTRAP, SIG_DFL);
-    }
-#elif defined(WIN32)
-  LONG CaxiosCrashHandler(EXCEPTION_POINTERS *pException) {
-    HANDLE process = GetCurrentProcess();
-    SymInitialize(process, NULL, TRUE);
-    void *pStack[MAX_TRACE_SIZE];
-    WORD cnt = CaptureStackBackTrace(0, MAX_TRACE_SIZE, pStack, NULL);
-#define MAX_STACK_INFO  10*1024
-    char* stackInfo = new char[MAX_STACK_INFO];
-    memset(stackInfo, 0, MAX_STACK_INFO);
-    for (WORD i = 0; i < cnt; ++i) {
-      DWORD64 address = (DWORD64)(pStack[i]);
-      DWORD64 displacementSym = 0;
-      char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-      PSYMBOL_INFO pSymbol = (PSYMBOL_INFO)buffer;
-      pSymbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-      pSymbol->MaxNameLen = MAX_SYM_NAME;
-
-      DWORD displacementLine = 0;
-      IMAGEHLP_LINE64 line;
-      line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-
-      if (SymFromAddr(process, address, &displacementSym, pSymbol)
-        && SymGetLineFromAddr64(process, address, &displacementLine, &line)) {
-        sprintf(stackInfo, "[stack] [%s:%d] %s\n", line.FileName, line.LineNumber, pSymbol->Name);
-      }
-      else {
-        LPVOID lpMsgBuf = nullptr;
-        FormatMessage(
-          FORMAT_MESSAGE_ALLOCATE_BUFFER |
-          FORMAT_MESSAGE_FROM_SYSTEM |
-          FORMAT_MESSAGE_IGNORE_INSERTS,
-          NULL,
-          GetLastError(),
-          0,
-          (LPTSTR)&lpMsgBuf,
-          0,
-          NULL
-        );
-        strcpy(stackInfo, (char*)lpMsgBuf);
-        LocalFree(lpMsgBuf);
-        break;
-      }
-    }
-    log_trace(stackInfo);
-    delete[] stackInfo;
-    return EXCEPTION_EXECUTE_HANDLER;
-  }
-#endif
-
     Napi::Object FileInfo2Object(napi_env env, const FileInfo& info) {
       Napi::Object obj = Napi::Object::New(env);
       obj.Set("id", std::get<0>(info));
@@ -138,6 +44,11 @@ namespace caxios {
 #endif
               T_LOG("file", "date %f", dTime);
             }
+          }
+          else if (itr->second[0] == '[' && itr->second[itr->second.size() - 1] == ']') { // array
+            //T_LOG("file", "meta value: %s", itr->second.c_str());
+            auto array = Parse(env, itr->second);
+            prop.Set(itr->first, array);
           }
           else {
             prop.Set(itr->first, itr->second);
@@ -226,22 +137,6 @@ namespace caxios {
     }
   }
 
-  void init_trace() {
-#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
-    struct sigaction act;
-    sigemptyset(&act.sa_mask);
-    act.sa_handler = logStacktrace;
-    sigemptyset(&act.sa_mask);
-    sigaction(SIGABRT, &act, NULL);
-    sigaction(SIGSEGV, &act, NULL);
-    sigaction(SIGBUS, &act, NULL);
-    sigaction(SIGFPE, &act, NULL);
-    sigaction(SIGILL, &act, NULL);
-    sigaction(SIGTRAP, &act, NULL);
-#elif defined(WIN32)
-    // SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)CaxiosCrashHandler);
-#endif
-  }
   Napi::Value release(const Napi::CallbackInfo& info){
     if (g_pCaxios) {
       delete g_pCaxios;
@@ -420,6 +315,44 @@ namespace caxios {
   }
   // void addAnotation(const v8::FunctionCallbackInfo<v8::Value>& info) {}
   // void addKeyword(const v8::FunctionCallbackInfo<v8::Value>& info) {}
+  
+  Napi::Value addMeta(const Napi::CallbackInfo& info) {
+    if (g_pCaxios == nullptr) return Napi::Boolean::From(info.Env(), false);
+    /// <summary>
+    /// add/update meta info to database, if cache is enable, shared memory is used to save it.
+    /// </summary>
+    /// <param name="info">{id: [fileid], meta: {name: 'name', value: 'value', type: 'type', query: boolean}}</param>
+    /// <returns></returns>
+    auto obj = info[0].As<Napi::Object>();
+    auto ids = AttrAsUint32Vector(obj, "id");
+    auto meta = AttrAsObject(obj, "meta");
+    if (meta.IsEmpty()) return Napi::Boolean::From(info.Env(), false);
+    std::string name = AttrAsStr(meta, "name");
+    std::string type = AttrAsStr(meta, "type");
+    nlohmann::json jmt;
+    if (type == "color") {
+      auto colors = AttrAsStringVector(meta, "value");
+      jmt["value"] = colors;
+    }
+    else {
+      std::string value = AttrAsStr(meta, "value");
+      jmt["value"] = value;
+    }
+    if (meta.Has("query")) {
+      bool bQuery = AttrAsBool(meta, "query");
+      jmt["query"] = bQuery;
+    }
+    else {
+      jmt["query"] = false;
+    }
+    jmt["name"] = name;
+    jmt["type"] = type;
+    T_LOG("meta", "add meta to file %s", format_vector(ids).c_str());
+    if (g_pCaxios->AddMeta(ids, jmt)) {
+      return Napi::Boolean::From(info.Env(), true);
+    }
+    return Napi::Boolean::From(info.Env(), false);
+  }
 
   Napi::Value updateFile(const Napi::CallbackInfo& info) {
     // 0: query, 1: new value
@@ -698,6 +631,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   EXPORT_JS_FUNCTION_PARAM(addFiles);
   EXPORT_JS_FUNCTION_PARAM(setTags);            // depreciate
   EXPORT_JS_FUNCTION_PARAM(addClasses);
+  EXPORT_JS_FUNCTION_PARAM(addMeta);
   EXPORT_JS_FUNCTION_PARAM(updateFile);
   EXPORT_JS_FUNCTION_PARAM(updateFileKeywords); // depreciate
   EXPORT_JS_FUNCTION_PARAM(updateFileTags);     // depreciate

@@ -46,6 +46,11 @@ export class IFileImpl{
   public set filename(name: string) { this._filename = name;}
   public get path() { return this._path; }
   public set path(val: string) {this._path = val;}
+  
+  public addMeta(key: string, value: any, type: string | undefined): void {
+    this[key] = value
+    this.meta.push({name: key, value: value, type: type})
+  }
 
   public toJson() {
     return {

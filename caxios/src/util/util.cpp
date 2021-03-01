@@ -104,6 +104,12 @@ namespace caxios {
     return std::regex_match(input, reg);
   }
 
+  bool isColor(const std::string& input)
+  {
+    std::regex reg("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
+    return std::regex_match(input, reg);
+  }
+
   time_t str2time(const std::string& input)
   {
     size_t pos = input.find_last_of('.');
@@ -208,6 +214,11 @@ namespace caxios {
   Napi::Array AttrAsArray(Napi::Object obj, std::string attr)
   {
     return obj.Get(attr).As<Napi::Array>();
+  }
+
+  Napi::Object AttrAsObject(Napi::Object obj, std::string attr)
+  {
+    return obj.Get(attr).As<Napi::Object>();
   }
 
   std::vector<int32_t> AttrAsInt32Vector(Napi::Object obj, std::string attr)

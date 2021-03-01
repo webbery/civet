@@ -38,9 +38,11 @@ namespace caxios {
   {
     return true;
   }
-  bool TableClass::Query(const std::string& k, std::vector<FileID>& filesID)
+
+  std::vector<caxios::FileID> TableClass::Find(const std::string& k)
   {
-    return true;
+    std::vector<caxios::FileID> vFiles;
+    return std::move(vFiles);
   }
 
   bool TableClass::Query(ClassID cid, ClassProperty& prop)

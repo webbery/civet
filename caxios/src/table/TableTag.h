@@ -12,6 +12,7 @@ namespace caxios {
     virtual bool Update(const std::string& current, const UpdateValue& value);
     virtual bool Delete(const std::string& k, FileID fileID);
     virtual bool Query(const std::string& k, std::vector<FileID>& filesID, std::vector<std::string>& vChildren);
+    virtual std::vector<FileID> Find(const std::string& k);
     virtual Iterator begin();
     virtual Iterator end();
   private:

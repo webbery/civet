@@ -23,7 +23,10 @@ const NLP = (function () {
   }
 })()
 
-module.exports = NLP
+export default {
+  getNouns: NLP.retrieveNoun
+}
+// module.exports = NLP
 // exports.getNouns = (str) => {
 //   return NLP.retrieveNoun(str)
 // }

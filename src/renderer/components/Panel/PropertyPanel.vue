@@ -5,10 +5,10 @@
           <InputLabel>{{filename}}</InputLabel>
         </div>
         <JImage :src="imagepath" :interact="false"></JImage>
-        <!-- <div class="color-container">
+        <div class="color-container">
           <span v-if="picture.colors.length!==0" ><span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span></span>
           <span v-else icon="el-icon-loading"></span>
-        </div> -->
+        </div>
       </el-card>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
     <fieldset>
@@ -76,7 +76,7 @@ export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, width: 0, height: 0, size: 0, colors: ['#FF2277', '#179577', '#179677', '#279577', '#179517', '#174527'] },
+      picture: { id: null, width: 0, height: 0, size: 0, colors: [] },
       imagepath: '',
       dynamicTags: [],
       dynamicClass: [],
@@ -133,8 +133,10 @@ export default {
             // this.filename = meta.value
             continue
           }
-          if (item.name === 'color') continue
-          if (item.display) {
+          if (item.name === 'color') {
+            continue
+          }
+          if (item.display !== false) {
             console.info('propterty name:', item.name, 'type:', item.type)
             names.push(JString.i18n(item.name))
             const meta = getItem(item.name, file.meta)
@@ -165,6 +167,13 @@ export default {
         this.metaNames = names
         this.metaValues = values
         this.picture.id = file.id
+        if (file.color) {
+          for (let idx = 0; idx < 6; ++idx) {
+            let color = file.color[idx]
+            if (!color) break
+            this.$set(this.picture.colors, idx, color)
+          }
+        }
         this.imagepath = file.path
         this.dynamicTags = file.tag ? file.tag.slice(0) : []
         this.dynamicClass = file.category

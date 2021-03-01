@@ -21,6 +21,7 @@ namespace caxios {
   double AttrAsDouble(Napi::Object obj, unsigned int const attr);
   bool AttrAsBool(Napi::Object obj, std::string attr);
   Napi::Array AttrAsArray(Napi::Object obj, std::string attr);
+  Napi::Object AttrAsObject(Napi::Object obj, std::string attr);
   std::vector<int32_t> AttrAsInt32Vector(Napi::Object obj, std::string attr);
   std::vector<uint32_t> AttrAsUint32Vector(Napi::Object obj, std::string attr);
   std::vector<std::string> AttrAsStringVector(Napi::Object obj, std::string attr);
@@ -99,6 +100,7 @@ namespace caxios {
   }
 
   bool isDate(const std::string& input);
+  bool isColor(const std::string& input);
   time_t str2time(const std::string& input);
 
   std::wstring string2wstring(const std::string& str);

@@ -85,6 +85,7 @@ namespace caxios {
   void log2file(const std::string& log);
   bool log_trace(const char* msg, char** str, int num);
   bool log_trace(const char* msg);
+  void init_trace();
 }
 
 #endif

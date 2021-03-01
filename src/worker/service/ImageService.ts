@@ -2,14 +2,21 @@ import { IFileImpl, Parser } from '../../public/civet'
 import storage from '../../public/Kernel'
 import { getSuffixFromString, convert2ValidDate } from '../../public/Utility'
 import { reply2Renderer, ReplyType } from '../transfer'
+import NLP from '../algorithm/strextract/NLP'
+import util from 'util'
+const Kmeans = require('node-kmeans')
+const kmeans = util.promisify(Kmeans.clusterize)
+const tinyColor = require('tinycolor2')
 
 export class ImageService {
   private _parsers: ImageParser[] = [];
   constructor() {
     this._parsers.push(new ImageMetaParser)
+    this._parsers.push(new ThumbnailParser)
     this._parsers.push(new ImagePathParser)
+    this._parsers.push(new ColorParser)
   }
-  read(filepath: string): IFileImpl | null {
+  async read(filepath: string): Promise<IFileImpl> {
     const path = require('path')
     const f = path.parse(filepath)
     let file = new IFileImpl(undefined)
@@ -18,7 +25,10 @@ export class ImageService {
     file.meta.push({name: 'filename', value: f.base, type: 'str'})
     file.meta.push({name: 'path', value: filepath, type: 'str'})
     for (let parser of this._parsers) {
-      if (!parser.parse(file)) return null
+      if (!await parser.parse(file)) {
+        console.error('parse error')
+        break
+      }
     }
     return file
   }
@@ -45,7 +55,9 @@ class ImageMetaParser extends ImageParser {
     this._typeParser.set('png', exifParser);
     this._typeParser.set('tif', exifParser);
     this._typeParser.set('gif', exifParser);
-    this._typeParser.set('bmp', new BmpMetaParser);
+    const sharpParser = new SharpMetaParser;
+    this._typeParser.set('bmp', sharpParser);
+    this._typeParser.set('fit', sharpParser);
   }
   parse(file: IFileImpl): boolean {
     console.info('ImageMetaParser,', file)
@@ -81,20 +93,22 @@ class ImagePathParser extends ImageParser {
   constructor() {
     super()
     this.callback = reply2Renderer;
-    const workerpool = require('workerpool')
-    let algorithmpath = ''
-    if (process.env.NODE_ENV === 'development') {
-      algorithmpath = './src/worker/algorithm/index.js'
-    } else {
-      console.info('extension path:', __dirname)
-      algorithmpath = `${__dirname}/resources/extension/strextract/index.js`
-    }
-    console.info('ENV', process.env.NODE_ENV, 'algorithm_extend path:', algorithmpath)
-    const cpus = require('os').cpus().length
-    this.pool = workerpool.pool(algorithmpath, { minWokers: cpus > 4 ? 4 : cpus, workerType: 'process' })
+    // const workerpool = require('workerpool')
+    // let algorithmpath = ''
+    // if (process.env.NODE_ENV === 'development') {
+    //   algorithmpath = './src/worker/algorithm/strextract/index.js'
+    // } else {
+    //   console.info('extension path:', __dirname)
+    //   algorithmpath = `${__dirname}/../../../extension/strextract/index.js`
+    //   // algorithmpath = `${__dirname}/resources/extension/strextract/index.js`
+    // }
+    // console.info('ENV', process.env.NODE_ENV, 'algorithm_extend path:', algorithmpath)
+    // const cpus = require('os').cpus().length
+    // this.pool = workerpool.pool(algorithmpath, { minWokers: cpus > 4 ? 4 : cpus, workerType: 'process' })
   }
-  async parse(file: IFileImpl): Promise<boolean> {
-    file.tag = await this.pool.exec('getNouns', [file.path]);
+  parse(file: IFileImpl): boolean {
+    // file.tag = await this.pool.exec('getNouns', [file.path]);
+    file.tag = NLP.getNouns(file.path)
     if (file.tag.length > 0) {
       file.keyword = file.tag
       console.info('ImageTextParser', file.tag)
@@ -112,12 +126,25 @@ class ImagePathParser extends ImageParser {
 }
 
 class FileTypeMetaParser {
-  parse(file: IFileImpl): boolean {
+  parse(file: IFileImpl): Promise<boolean> | boolean {
     return false;
   }
 }
 
-class BmpMetaParser extends FileTypeMetaParser{}
+class SharpMetaParser extends FileTypeMetaParser{
+  async parse(file: IFileImpl): Promise<boolean> {
+    const sharp = require('sharp')
+    try{
+      const image = sharp(file.path)
+      const info = await image.on('info')
+      console.info('SharpMetaParser', info)
+    } catch (err) {
+      console.error('SharpMetaParser(' + file.path + ')', err,)
+      return false
+    }
+    return true;
+  }
+}
 
 class ExifMetaParser extends FileTypeMetaParser{
   parse(file: IFileImpl): boolean {
@@ -125,26 +152,27 @@ class ExifMetaParser extends FileTypeMetaParser{
     const buffer = fs.readFileSync(file.path)
     const ExifReader = require('exifreader')
     const meta = ExifReader.load(buffer)
+    console.info(meta)
     delete meta.MakerNote
     // datetime
     if (meta.DateTime !== undefined && meta.DateTime.value) {
-      file.meta.push({name: 'datetime', value: convert2ValidDate(meta.DateTime.value[0]), type: 'date', desc: ''})
+      file.addMeta('datetime', convert2ValidDate(meta.DateTime.value[0]), 'date')
     }
     // orient
     if (meta.Orientation !== undefined) {
-      file.meta.push({name: 'orient', value: meta.Orientation.value, desc: ''})
+      file.addMeta('orient', meta.Orientation.value, undefined)
     }
     // width, height
     if (!meta.Orientation || meta.Orientation.value === 1 || meta.Orientation.value === 3) {
-      file.meta.push({name: 'width',value: this.getImageWidth(meta), type: 'val'})
-      file.meta.push({name: 'height', value: this.getImageHeight(meta), type: 'val'})
+      file.addMeta('width', this.getImageWidth(meta), 'val')
+      file.addMeta('height', this.getImageHeight(meta), 'val')
     } else { // rotation 90
-      file.meta.push({name: 'height', vlaue: this.getImageWidth(meta), type: 'val'})
-      file.meta.push({name: 'width', value: this.getImageHeight(meta), type: 'val'})
+      file.addMeta('height', this.getImageWidth(meta), 'val')
+      file.addMeta('width', this.getImageHeight(meta), 'val')
     }
     // size
     const stat = fs.statSync(file.path)
-    file.meta.push({name: 'size', value: stat.size, type:'val'})
+    file.addMeta('size', stat.size, 'val')
     return true;
   }
 
@@ -161,6 +189,124 @@ class ExifMetaParser extends FileTypeMetaParser{
   }
 }
 
-// function injectReply(reply: any) {
-//   reply.prototype.callback = reply2Renderer
-// }
+class ThumbnailParser extends ImageParser{
+  constructor() {
+    super()
+  }
+
+  async parse(file: IFileImpl): Promise<boolean> {
+    const sharp = require('sharp')
+    try {
+      const image = sharp(file.path)
+      let scale = 1
+      if (file.width > 200) {
+        scale = 200.0 / file.width
+      }
+      const width = Math.round(file.width * scale)
+      const height = Math.round(file.height * scale)
+      const data = await image.resize(width, height)
+        .jpeg().toBuffer()
+      // console.info('ThumbnailParser:', data)
+      file.thumbnail = data
+      console.info('thumbnail:', typeof data)
+      // storage.addMeta([file.id], {name: 'thumbnail', value: file.thumbnail, type: 'bin'})
+      file.raw = await image.resize(width, height)
+        .raw().toBuffer()
+      return true;
+    } catch(err) {
+      console.error(err)
+    }
+    return false
+  }
+}
+
+class ColorParser extends ImageParser {
+  private _plate: number[];
+
+  constructor() {
+    super()
+    this._plate = []
+  }
+  async parse(file: IFileImpl): Promise<boolean> {
+    if (!!file.raw) {
+      const count = file.raw.length / 3;
+      let counter = new Map<number, number>()
+      for (let start = 0; start < count; start += 3) {
+        // const idx = this.rgb2index([0, 255, 0])
+        const idx = this.rgb2index([file.raw[start], file.raw[start + 1], file.raw[start + 2]])
+        const val = counter.get(idx)
+        if (val === undefined) {
+          counter.set(idx, 1)
+        } else {
+          counter.set(idx, val + 1)
+        }
+      }
+      // console.info('counter', counter)
+      const topk = Array.from(counter).sort(([, a], [, b]) => {
+        return b - a
+      }).splice(0, 50)
+      // console.info('topk', topk)
+      const colors = topk.map((item, idx, arr) => {
+        return this.index2rgb(item[0])
+      })
+      // console.info('color indx:', colors)
+      const centers = await kmeans(colors, {k: 6})
+      const centroid = centers.map((item: any, idx: any, arr:any) => {
+        return tinyColor({r: item.centroid[0], g: item.centroid[1], b: item.centroid[2]}).toHexString()
+      })
+      file.addMeta('color', centroid, 'color')
+      storage.addMeta([file.id], {name: 'color', value: centroid, type: 'color', query: true})
+    }
+    return true;
+  }
+
+  rgb2hsv(colors: number[]): number[] {
+    const count = colors.length / 3;
+    let hsv: number[] = [];
+    for (let start = 0; start < count; start += 3) {
+      const val = tinyColor({r: colors[start], g: colors[start + 1], b: colors[start + 2]}).toHsv()
+      hsv.push.apply(hsv, val)
+    }
+    return hsv
+  }
+
+  hsv2rgb(colors: number[]): number[] {
+    let tinyColor = require('tinycolor2')
+    const count = colors.length / 3;
+    let rgb: number[] = [];
+    for (let start = 0; start < count; start += 3) {
+      const val = tinyColor({r: colors[start], g: colors[start + 1], b: colors[start + 2]}).toRgb()
+      rgb.push.apply(rgb, val)
+    }
+    return rgb
+  }
+
+  rgb2index(color: number[]): number {
+    const ir = Math.floor(color[0] / 16)
+    const ig = Math.floor(color[1] / 16)
+    const ib = Math.floor(color[2] / 16)
+    return Math.floor(ir * 4096 * 256 + ig * 256 + ib)
+  }
+
+  index2hsv(index: number): number[] {
+    const vv = index / (4096 * 256)
+    const h = vv * 16
+    index -= vv * (4096 * 256)
+    const vw = index / 256
+    const s = vw * 16
+    index -= vw * 256
+    const v = index * 16
+    return [h/180.0, s/255.0, v/255.0]
+  }
+
+  index2rgb(index: number): number[] {
+    const vv = Math.floor(index / (4096 * 256))
+    const r = vv * 16
+    index -= vv * (4096 * 256)
+    const vw = Math.floor(index / 256)
+    const g = vw * 16
+    index -= vw * 256
+    const b = index * 16
+    return [Math.floor(r), Math.floor(g), Math.floor(b)]
+  }
+}

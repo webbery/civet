@@ -105,6 +105,7 @@ function createRendererWindow() {
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
+    // show: true,
     show: process.env.NODE_ENV === 'development',
     frame: false,
     webPreferences: {
@@ -130,9 +131,9 @@ function createWorkerWindow (bFirst) {
   // }
   if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
   else workerWindow.loadURL(workerURL)
-  workerWindow.webContents.openDevTools()
+  // workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
-    // enableDevTools(workerWindow)
+    workerWindow.webContents.openDevTools()
   }
 }
 

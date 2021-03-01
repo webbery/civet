@@ -43,7 +43,7 @@
 
 <script>
 import bus from '../utils/Bus'
-// import FolderTree from '@/components/Control/FolderTree'
+import { TreeNode } from '../Control/Tree'
 import PopMenu from '@/components/Menu/PopMenu'
 import TreePanel from '@/components/Panel/TreePanel'
 import { mapState } from 'vuex'
@@ -167,20 +167,23 @@ export default {
       const root = params.root
       root.$emit('easyAxis', {
         tag: 'classTree',
-        index: params.model,
+        index: {model: params.model, operator: {expand: params.expand}},
         x: event.clientX,
         y: event.clientY
       })
     },
-    onDeleteClass(name, parent, model) {
-      console.info(name, parent, model)
-      this.$store.dispatch('removeClass', model)
+    onDeleteClass(name, parent, data) {
+      console.info(name, parent, data.model)
+      this.$store.dispatch('removeClass', data.model)
     },
     onExportClasses(params) {},
-    onAddClass(params) {
-      const model = parems.model
-      var node = new TreeNode({ name: '', isLeaf: false })
-      this.$store.dispatch('addClass', {model, node})
+    onAddClass(name, parent, data) {
+      console.info('add node:', data)
+      var node = new TreeNode({ name: '11', isLeaf: false })
+      this.$store.dispatch('addClass', {parent: data.model, node})
+      this.$nextTick(() => {
+        data.operator.expand()
+      })
     },
     onDropNode(params) {
       console.info('onDropNode', params)

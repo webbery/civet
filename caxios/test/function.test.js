@@ -119,6 +119,13 @@ describe('civetkern add test', function() {
     const unclasses = instance.getUnClassifyFiles()
     expect(unclasses).to.have.lengthOf(willBeAdd.length)
   })
+  it('add file meta', function() {
+    let result = instance.addMeta({id: [fileids[0]], meta:{name: 'color', value: ['#fab13c', '#f7a13c'], type: 'color', query: true}})
+    expect(result).to.equal(true)
+    let jpegBin = new Array(3000).join('f')
+    // console.info(jpegBin)
+    result = instance.addMeta({id: [fileids[2]], meta:{name: 'thumbnail', value: jpegBin, type: 'bin'}})
+  })
   it('add class', function() {
     let result = instance.addClasses(['新分类', 'class2', '新分类/新分类'])
     expect(result).to.equal(true)
@@ -187,12 +194,12 @@ describe('civetkern read only test', function() {
     let filesInfo = instance.getFilesInfo([snaps[0].id])
     // console.info(filesInfo)
     expect(filesInfo).to.lengthOf(1)
-    // for (let item of filesInfo[0]['meta']) {
-    //   console.info(item)
-    //   if (item.type === 'date') {
-    //     console.info(item.value.toString())
-    //   }
-    // }
+    for (let item of filesInfo[0]['meta']) {
+      console.info(item)
+      // if (item.type === 'date') {
+      //   console.info(item.value.toString())
+      // }
+    }
     expect(filesInfo[0]['tag']).to.exist
     expect(filesInfo[0]['tag']).to.include('test')
     expect(filesInfo[0]['tag']).to.include('标签')

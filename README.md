@@ -11,11 +11,7 @@
 
 ### 下载
 
-
-开发进度  
-![78%](https://progress-bar.dev/75/?title=检索模块)
-![80%](https://progress-bar.dev/80/?title=界面逻辑)
-![90%](https://progress-bar.dev/90/?title=存储模块)
+[测试版本 0.1.0](https://github.com/webbery/civet/releases)
 
 项目讨论区(https://www.yuque.com/g/webberg/dacstu/docs)  
 

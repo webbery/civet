@@ -28,6 +28,7 @@ namespace caxios {
   enum QueryType {
     QT_String,
     QT_DateTime,
+    QT_Color,
   };
   template<QueryType Q, CompareType C> struct CQuery;
   template<> struct CQuery<QT_String, CT_IN>;
@@ -63,6 +64,7 @@ namespace caxios {
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>&);
     bool AddClasses(const std::vector<std::string>& classes);
     bool AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
+    bool AddMeta(const std::vector<FileID>& files, const nlohmann::json& meta);
     bool RemoveFiles(const std::vector<FileID>& filesID);
     bool RemoveTags(const std::vector<FileID>& files, const Tags& tags);
     bool RemoveClasses(const std::vector<std::string>& classes);
@@ -88,11 +90,11 @@ namespace caxios {
     std::vector<FileID> QueryImpl(const std::string& keyword, const F& compare)
     {
       std::vector<FileID> vOut;
-      auto itr = m_mTables.find(keyword);
-      if (itr != m_mTables.end()) {
+      auto pMetaTable = GetMetaTable(keyword);
+      if (pMetaTable) {
         T_LOG("query", "meta(%s)", keyword.c_str());
         // meta
-        auto cursor = std::begin(*(itr->second));
+        auto cursor = std::begin(*pMetaTable);
         auto end = Iterator();
         for (; cursor != end; ++cursor) {
           auto item = *cursor;
@@ -162,6 +164,9 @@ namespace caxios {
     Snap GetFileSnap(FileID);
     std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
     WordIndex GetWordIndex(const std::string& word);
+    ITable* GetMetaTable(const std::string& name);
+    ITable* GetOrCreateMetaTable(const std::string& name, const std::string& type);
+
     template<typename T>
     std::vector<std::string> GetWordByIndex(const T* const wordsIndx, size_t cnt) {
       std::vector<std::string> vWords(cnt);

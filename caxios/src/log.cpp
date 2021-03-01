@@ -8,16 +8,23 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
+#include <execinfo.h>
 #elif defined(WIN32)
 #include <direct.h>
 #include <io.h>
 #include <process.h>
+#include <windows.h>
+#include <dbghelp.h>
+#include <csignal>
+#pragma comment(lib, "dbghelp.lib")
 #endif
 #ifndef _WIN32
 #include <errno.h>
 #include <string.h> 
 #endif
 #include "util/util.h"
+#define MAX_TRACE_SIZE  64
 
 namespace caxios {
   std::string err2str(int err) {
@@ -166,10 +173,194 @@ namespace caxios {
   bool log_trace(const char* msg)
   {
     FLog log;
-    log.Open("dump.txt", true);
+    log.Open("dump.txt", true);\
+    log.Write(current().c_str());
     log.Write(msg);
     log.Write("\n");
     return true;
   }
 
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+  void logStacktrace(int sn) {
+    const char* typeMsg = "Unknow Crash:\n";
+    usleep(1000 * 1000);
+    switch (sn)
+    {
+    case SIGABRT:
+      typeMsg = "SIGABRT:\n";
+      break;
+    case SIGSEGV:
+      typeMsg = "SIGSEGV:\n";
+      break;
+    case SIGBUS:
+      typeMsg = "SIGBUS:\n";
+      break;
+    case SIGFPE:
+      typeMsg = "SIGFPE:\n";
+      break;
+    case SIGILL:
+      typeMsg = "SIGILL:\n";
+      break;
+    case SIGTRAP:
+      typeMsg = "SIGTRAP:\n";
+      break;
+    default:
+      break;
+    }
+    void* buf[MAX_TRACE_SIZE];
+    int cnt = backtrace(buf, MAX_TRACE_SIZE);
+    char** symbols = backtrace_symbols(buf, cnt);
+    log_trace(typeMsg, symbols, cnt);
+    free(symbols);
+    signal(SIGABRT, SIG_DFL);
+    signal(SIGSEGV, SIG_DFL);
+    signal(SIGBUS, SIG_DFL);
+    signal(SIGFPE, SIG_DFL);
+    signal(SIGILL, SIG_DFL);
+    signal(SIGTRAP, SIG_DFL);
+  }
+#elif defined(WIN32)
+  void captureStackTrace(CONTEXT* context, std::vector<uint64_t>& frame_pointers) {
+    DWORD machine_type = 0;
+    STACKFRAME64 frame = {}; // force zeroing
+    frame.AddrPC.Mode = AddrModeFlat;
+    frame.AddrFrame.Mode = AddrModeFlat;
+    frame.AddrStack.Mode = AddrModeFlat;
+#ifdef _M_X64
+    frame.AddrPC.Offset = context->Rip;
+    frame.AddrFrame.Offset = context->Rbp;
+    frame.AddrStack.Offset = context->Rsp;
+    machine_type = IMAGE_FILE_MACHINE_AMD64;
+#else
+    frame.AddrPC.Offset = context->Eip;
+    frame.AddrPC.Offset = context->Ebp;
+    frame.AddrPC.Offset = context->Esp;
+    machine_type = IMAGE_FILE_MACHINE_I386;
+#endif
+    for (size_t index = 0; index < frame_pointers.size(); ++index)
+    {
+      if (StackWalk64(machine_type,
+        GetCurrentProcess(),
+        GetCurrentThread(),
+        &frame,
+        context,
+        NULL,
+        SymFunctionTableAccess64,
+        SymGetModuleBase64,
+        NULL)) {
+        frame_pointers[index] = frame.AddrPC.Offset;
+      }
+      else {
+        break;
+      }
+    }
+  }
+
+  std::string getSymbolInformation(const size_t index, const std::vector<uint64_t>& frame_pointers) {
+    auto addr = frame_pointers[index];
+    std::string frame_dump = "stack dump [" + std::to_string(index) + "]\t";
+
+    DWORD64 displacement64;
+    DWORD displacement;
+    char symbol_buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME];
+    SYMBOL_INFO* symbol = reinterpret_cast<SYMBOL_INFO*>(symbol_buffer);
+    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+    symbol->MaxNameLen = MAX_SYM_NAME;
+
+    IMAGEHLP_LINE64 line;
+    line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+    std::string lineInformation;
+    std::string callInformation;
+    if (SymFromAddr(GetCurrentProcess(), addr, &displacement64, symbol)) {
+      callInformation.append(" ").append(std::string(symbol->Name, symbol->NameLen));
+      if (SymGetLineFromAddr64(GetCurrentProcess(), addr, &displacement, &line)) {
+        lineInformation.append("\t").append(line.FileName).append(" L: ");
+        lineInformation.append(std::to_string(line.LineNumber));
+      }
+    }
+    frame_dump.append(lineInformation).append(callInformation);
+    return frame_dump;
+  }
+
+  std::string convertFramesToText(std::vector<uint64_t>& frame_pointers) {
+    std::string dump; // slightly more efficient than ostringstream
+    const size_t kSize = frame_pointers.size();
+    for (size_t index = 0; index < kSize && frame_pointers[index]; ++index) {
+      dump += getSymbolInformation(index, frame_pointers);
+      dump += "\n";
+    }
+    return dump;
+  }
+
+  std::string stackdump(CONTEXT* context) {
+    const BOOL kLoadSymModules = TRUE;
+    const auto initialized = SymInitialize(GetCurrentProcess(), nullptr, kLoadSymModules);
+    if (TRUE != initialized) {
+      return { "Error: Cannot call SymInitialize(...) for retrieving symbols in stack" };
+    }
+    std::shared_ptr<void> RaiiSymCleaner(nullptr, [&](void*) {
+      SymCleanup(GetCurrentProcess());
+      }); // Raii sym cleanup
+    const size_t kmax_frame_dump_size = MAX_TRACE_SIZE;
+    std::vector<uint64_t>  frame_pointers(kmax_frame_dump_size);
+    // C++11: size set and values are zeroed
+    assert(frame_pointers.size() == kmax_frame_dump_size);
+    captureStackTrace(context, frame_pointers);
+    return convertFramesToText(frame_pointers);
+  }
+  LONG CaxiosCrashHandler(EXCEPTION_POINTERS* pException) {
+    std::string dump = "\n***** Received fatal signal *****\n";
+    dump += stackdump(pException->ContextRecord);
+    log_trace(dump.c_str());
+    return EXCEPTION_CONTINUE_SEARCH;
+  }
+
+  std::string stackdump() {
+    CONTEXT current_context;
+    memset(&current_context, 0, sizeof(CONTEXT));
+    RtlCaptureContext(&current_context);
+    return stackdump(&current_context);
+  }
+
+  void signalHandler(int signal_number) {
+    std::string dump = "\n***** Received fatal signal *****\n";
+    dump += stackdump();
+    log_trace(dump.c_str());
+    __debugbreak();
+  }
+  bool g_installed_thread_signal_handler = false;
+  void installSignalHandlerForThread() {
+    if (!g_installed_thread_signal_handler) {
+      g_installed_thread_signal_handler = true;
+      if (SIG_ERR == signal(SIGTERM, signalHandler))
+        perror("signal - SIGTERM");
+      if (SIG_ERR == signal(SIGABRT, signalHandler))
+        perror("signal - SIGABRT");
+      if (SIG_ERR == signal(SIGFPE, signalHandler))
+        perror("signal - SIGFPE");
+      if (SIG_ERR == signal(SIGSEGV, signalHandler))
+        perror("signal - SIGSEGV");
+      if (SIG_ERR == signal(SIGILL, signalHandler))
+        perror("signal - SIGILL");
+    }
+  }
+
+#endif
+
+  void init_trace() {
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    struct sigaction act;
+    sigemptyset(&act.sa_mask);
+    act.sa_handler = logStacktrace;
+    sigemptyset(&act.sa_mask);
+    sigaction(SIGABRT, &act, NULL);
+    sigaction(SIGSEGV, &act, NULL);
+    sigaction(SIGBUS, &act, NULL);
+    sigaction(SIGFPE, &act, NULL);
+    sigaction(SIGILL, &act, NULL);
+    sigaction(SIGTRAP, &act, NULL);
+#elif defined(WIN32)
+     SetUnhandledExceptionFilter((LPTOP_LEVEL_EXCEPTION_FILTER)CaxiosCrashHandler);
+#endif
+  }
 }

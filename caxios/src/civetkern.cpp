@@ -37,6 +37,11 @@ namespace caxios {
     return m_pDBManager->AddClasses(classes);
   }
 
+  bool CAxios::AddMeta(const std::vector<FileID>& files, const nlohmann::json& meta)
+  {
+    return m_pDBManager->AddMeta(files, meta);
+  }
+
   bool CAxios::SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags)
   {
     return m_pDBManager->SetTags(filesID, tags);

@@ -12,6 +12,20 @@ const i18n = {
   width: '宽',
   height: '高',
   type: '类型',
+  Make: '照相机制造商',
+  Model: '照相机型号',
+  XResolution: '水平分辨率',
+  YResolution: '垂直分辨率',
+  ExposureTime: '曝光时间',
+  FNumber: '光圈',
+  ExposureProgram: '拍摄模式',
+  ISOSpeedRatings: 'ISO速度',
+  FocalLength: '焦距',
+  'Flash did not fire': '无闪光',
+  'compulsory flash mode': '',
+  MeteringMode: '测光模式',
+  Spot: '点',
+  ColorSpace: '颜色空间',
   'reading files': '读取图片中'
 }
 

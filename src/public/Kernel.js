@@ -66,6 +66,7 @@ export default {
   // 以下接口为可写接口
   generateFilesID: (num) => { return kernel().generateFilesID(num) },
   addFiles: (src) => { return kernel().addFiles(src) },
+  addMeta: (filesID, meta) => { return kernel().addMeta({id: filesID, meta: meta}) },
   removeFiles: (filesID) => { kernel().removeFiles(filesID) },
   setTags: (filesID, tags) => { return kernel().setTags({ id: filesID, tag: tags }) },
   removeTags: (filesID, tags) => { return kernel().removeTags({ id: filesID, tag: tags }) },

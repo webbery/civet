@@ -287,14 +287,15 @@ const mutations = {
     let removeCnt = 0
     for (let idx = 0; idx < state.viewItems.length; ++idx) {
       if (removeCnt === filesid.length) break
-      for (let idx = 0; idx < filesid.length; ++idx) {
-        if (state.viewItems[idx].id === filesid[idx]) {
+      for (let fidx = 0; fidx < filesid.length; ++fidx) {
+        if (state.viewItems[idx].id === filesid[fidx]) {
           Vue.delete(state.viewItems, idx)
           removeCnt += 1
           break
         }
       }
     }
+    state.allCount -= removeCnt
     // remove from db
     Service.getServiceInstance().send(Service.REMOVE_FILES, filesid)
   },

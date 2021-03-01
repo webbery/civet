@@ -60,6 +60,12 @@ namespace caxios {
     return _pDatabase->Put(_dbi, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
   }
 
+  std::vector<caxios::FileID> TableMeta::Find(const std::string& k)
+  {
+    std::vector<caxios::FileID> vFiles;
+    return std::move(vFiles);
+  }
+
   Iterator TableMeta::begin()
   {
     Iterator itr(_pDatabase, _dbi);
@@ -78,7 +84,10 @@ namespace caxios {
       double dKey = atof(k.substr(1).c_str());
       time_t t = dKey;
       sKey = std::string((char*)&t, sizeof(time_t));
-      T_LOG("meta", "meta key: %s", sKey.c_str());
+      T_LOG("meta", "Date meta key: %s", sKey.c_str());
+    }
+    else if (isColor(k)) {
+      T_LOG("meta", "Color meta key: %s", sKey.c_str());
     }
     return sKey;
   }

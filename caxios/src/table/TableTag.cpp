@@ -51,6 +51,12 @@ namespace caxios {
     return true;
   }
 
+  std::vector<caxios::FileID> TableTag::Find(const std::string& k)
+  {
+    std::vector<caxios::FileID> vFiles;
+    return std::move(vFiles);
+  }
+
   Iterator TableTag::begin()
   {
     return Iterator();

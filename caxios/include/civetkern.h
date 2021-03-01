@@ -17,6 +17,7 @@ namespace caxios{
     bool AddFiles(const std::vector <std::tuple< FileID, MetaItems, Keywords >>& files);
     bool AddClasses(const std::vector<std::string>& classes, const std::vector<FileID>& filesID);
     bool AddClasses(const std::vector<std::string>& classes);
+    bool AddMeta(const std::vector<FileID>& files, const nlohmann::json& meta);
     bool SetTags(const std::vector<FileID>& filesID, const std::vector<std::string>& tags);
     bool GetFilesSnap(std::vector<Snap>& snaps);
     bool GetFilesInfo(const std::vector<FileID>& filesID, std::vector< FileInfo>& filesInfo);
