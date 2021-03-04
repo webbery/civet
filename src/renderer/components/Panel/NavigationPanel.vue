@@ -10,10 +10,10 @@
             <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
           </table>
           <TreePanel :isActive="true" @addRootClass="addRootClass">
-            <!-- <FolderTree :data="category"></FolderTree> -->
             <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="classTree"></PopMenu>
             <VueTreeList
               @click="onClickNode"
+              @right-click="onRightClick"
               @change-name="onChangeName"
               @delete-node="onDelNode"
               @add-node="onAddNode"
@@ -160,6 +160,27 @@ export default {
         }
         this.$store.dispatch('changeClassName', {old: sParent + oldName, new: sParent + newName})
       }
+    },
+    onRightClick(params) {
+      // console.info('right-click', params)
+      const event = params.event
+      const root = params.root
+      root.$emit('easyAxis', {
+        tag: 'classTree',
+        index: params.model,
+        x: event.clientX,
+        y: event.clientY
+      })
+    },
+    onDeleteClass(name, parent, model) {
+      console.info(name, parent, model)
+      this.$store.dispatch('removeClass', model)
+    },
+    onExportClasses(params) {},
+    onAddClass(params) {
+      const model = parems.model
+      var node = new TreeNode({ name: '', isLeaf: false })
+      this.$store.dispatch('addClass', {model, node})
     },
     onDropNode(params) {
       console.info('onDropNode', params)

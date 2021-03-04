@@ -26,6 +26,7 @@
         @mouseover="mouseOver"
         @mouseout="mouseOut"
         @click.stop="click"
+        @contextmenu="rightClick($event, $root)"
       >
         <span class="vtl-caret vtl-is-small" v-if="model.children && model.children.length > 0">
           <i class="vtl-icon" :class="caretClass" @click.prevent.stop="toggle"></i>
@@ -57,7 +58,7 @@
           @blur="setUnEditable"
         />
         <div class="vtl-operation" v-show="isHover && !editable">
-          <span
+          <!-- <span
             :title="defaultAddTreeNodeTitle"
             @click.stop.prevent="addChild(false)"
             v-if="!model.isLeaf && !model.addTreeNodeDisabled"
@@ -65,7 +66,7 @@
             <slot name="addTreeNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
               <i class="vtl-icon vtl-icon-folder-plus-e"></i>
             </slot>
-          </span>
+          </span> -->
           <!-- <span
             :title="defaultAddLeafNodeTitle"
             @click.stop.prevent="addChild(true)"
@@ -80,13 +81,13 @@
               <i class="vtl-icon vtl-icon-edit"></i>
             </slot>
           </span>
-          <span title="delete" @click.stop.prevent="delNode" v-if="!model.delNodeDisabled">
+          <!-- <span title="delete" @click.stop.prevent="delNode" v-if="!model.delNodeDisabled">
             <slot name="delNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
               <i class="vtl-icon vtl-icon-trash"></i>
             </slot>
-          </span>
+          </span> -->
         </div>
-        <div class="vtl-count"><span>{{ model.count }}</span></div>
+        <div class="vtl-count" v-if="model.count>0"><span>{{ model.count }}</span></div>
       </div>
 
       <div
@@ -290,6 +291,15 @@ export default {
       this.rootNode.$emit('click', {
         toggle: this.toggle,
         ...this.model
+      })
+    },
+
+    rightClick(event, root) {
+      // console.info('tree right click', event, root)
+      this.rootNode.$emit('right-click', {
+        event,
+        root,
+        model: this.model
       })
     },
 
