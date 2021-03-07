@@ -10,6 +10,7 @@
 #include <vector>
 #include "db_manager.h"
 #include <iostream>
+#include "intrinsic.h"
 
 namespace caxios {
   class DBManager;
@@ -95,12 +96,46 @@ namespace caxios {
     std::string _str;
   };
 
+  class Near {
+  public:
+    Near(const std::string& str, float distance)
+      :_d(distance) {
+      _color = color(str);
+    }
+
+    bool operator()(const std::string& val) const {
+      uint32_t col = color(val);
+      if (lab_distance(col, _color)<_d) {
+        return true;
+      }
+      return false;
+    }
+
+  private:
+    uint32_t color(const std::string& col)const{
+      // #FF
+      char* p;
+      return strtoul(col.substr(1).c_str(), &p, 16);
+    }
+  private:
+    uint32_t _color;
+    float _d;
+  };
+
   enum class Priority : int {};
   template<QueryType QT, CompareType CT> struct CQuery;
   template<> struct CQuery<QT_String, CT_IN> : public In {
     typedef std::string type;
     CQuery(const std::vector<QueryCondition>& conditions)
     :In(Cast<std::string>(conditions)){}
+  private:
+    Priority _p;
+  };
+
+  template<> struct CQuery<QT_Color, CT_EQUAL> : public Near {
+    typedef std::string type;
+    CQuery(const std::vector<QueryCondition>& conditions)
+      :Near(conditions[0].As<std::string>(), 40) {}
   private:
     Priority _p;
   };
@@ -202,8 +237,11 @@ namespace caxios {
 
   template<> struct action< literal_color> {
     template<typename ActionInput>
-    static void apply(const ActionInput& in, QueryActions& val) {
-      //val += in.string();
+    static void apply(const ActionInput& in, QueryActions& actions) {
+      if (!in.empty()) {
+        QueryCondition cond(in.string());
+        actions.push(cond);
+      }
     }
   };
   template<> struct action< literal_op > {

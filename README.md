@@ -15,18 +15,20 @@
 
 项目讨论区(https://www.yuque.com/g/webberg/dacstu/docs)  
 
-**道阻且长，行则将至。**
 
-### 类似软件对比
-|  软件   | 开发平台  | 本地存储  | 协议 |
-| :----: | :----:   |  :----: | :----: |
-| Civet  | Electron/C++ | lmdb | 开源MIT
-| Eagle  | Electron | Json/图片拷贝 | 私有
-| Billfish  | Qt | Sqlite + 图片拷贝/索引 | 私有
+**道阻且长，行则将至。**
 
 #### 问题反馈
 
-如有任何使用上的问题或建议请反馈到 https://github.com/webbery/civet/issues
+如有任何使用上的问题或建议请反馈到[**Issue**](https://github.com/webbery/civet/issues)  
+或者反馈到[**Trello**](https://trello.com/b/M4hmAF2h/civet)
+
+### 类似软件对比
+|  软件   | 界面 | 开发语言  | 本地存储  | 协议 | 其他
+| :----: | :----: | :----:  |  :----: | :----: | :----: |
+| Civet  | Electron | Typescript/C++ | lmdb | 开源MIT | 地上走的
+| Eagle  | Electron | Js | Json/图片拷贝 | 私有 | 天上飞的
+| Billfish  | Qt | C++ | Sqlite + 图片拷贝/索引 | 私有 | 水里游的
 
 #### RoadMap
 + [ ] 增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取和展示

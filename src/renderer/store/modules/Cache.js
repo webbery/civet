@@ -1,6 +1,7 @@
 import FileBase from '@/../public/FileBase'
 import Service from '@/components/utils/Service'
 import { Tree, TreeNode } from '@/components/Control/Tree'
+import { isEmpty } from '@/../public/Utility'
 import Vue from 'vue'
 
 const Cache = {
@@ -191,22 +192,31 @@ const mutations = {
   addClass(state, mutation) {
     if (Array.isArray(mutation)) {
       if (!state.classes.children) state.classes.children = []
-      state.classes.addChildren(new TreeNode({ name: mutation[0], isLeaf: false }))
-      state.classesName.push(mutation[0])
-      Service.getServiceInstance().send(Service.ADD_CATEGORY, mutation)
+      state.classes.addChildren(new TreeNode({ name: mutation[0], isLeaf: false, editable: true }))
+      if (isEmpty(mutation[0])) return
+      this.addClassName(mutation[0])
     } else if (typeof mutation === 'object') {
       const children = mutation.node
       let parent = mutation.parent
       parent.addChildren(children, true)
       // make path
+      if (isEmpty(children.name)) return
       let classPath = children.name
       while (parent.parent !== null) {
         classPath = parent.name + '/' + classPath
         parent = parent.parent
       }
-      state.classesName.push(classPath)
-      console.info('classPath:', classPath)
-      Service.getServiceInstance().send(Service.ADD_CATEGORY, [classPath])
+      this.addClassName([classPath])
+    }
+  },
+  addClassName(state, names) {
+    if (!names.length) {
+      state.classesName.push(names)
+      Service.getServiceInstance().send(Service.ADD_CATEGORY, names)
+    } else {
+      state.classesName.push(names)
+      console.info('classPath:', names)
+      Service.getServiceInstance().send(Service.ADD_CATEGORY, names)
     }
   },
   addClassOfFile(state, mutation) {
@@ -404,6 +414,10 @@ const actions = {
     commit('changeFileName', mutation)
   },
   changeClassName({ commit }, mutation) {
+    if (isEmpty(mutation.old)) {
+      commit('addClassName', mutation.new)
+      return
+    }
     commit('changeClassName', mutation)
   },
   async getClassesAndFiles({ commit }, query) {

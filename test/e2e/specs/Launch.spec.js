@@ -1,18 +1,19 @@
 import utils from '../utils'
 
 function test(title, cb) {
-  it(title, function() {
-    this.app.client.windowByIndex(1).then(() => {
-      cb()
-    })
+  it(title, async function() {
+    console.info('-----------')
+    await this.app.client.windowByIndex(1).then(async () => {
+      await cb(this.app.client)
+    });
+    console.info('finish')
   })
 }
 
 describe('Launch', function () {
   this.beforeAll(utils.beforeAll)
-  this.afterAll(utils.afterAll)
-  beforeEach(utils.beforeEach)
-  afterEach(utils.afterEach)
+  // beforeEach(utils.beforeEach)
+  // afterEach(utils.afterEach)
 
   // it('validate window count', async function () {
   //   let count = await this.app.client.getWindowCount();
@@ -29,10 +30,17 @@ describe('Launch', function () {
   //     expect(title).to.equal('civet')
   //   })
   // })
-  test('validate init database', () => {
-    // let title = this.app.client.getTitle()
+  test('update database', () => {})
+  test('validate init database', async (client) => {
+    const visible = await client.$('#guider-config').isVisible()
     // expect(title).to.equal('civet')
-    expect(this.app.client.$('#guider-config').isVisible()).to.equal(true)
+    expect(visible).to.equal(true)
+    const dbInput = client.$('input[placeholder="资源库名称"]')
+    expect(dbInput).not.to.equal(undefined)
+    await dbInput.setValue('1111111')
+    const dbPath = client.$('input[placeholder="资源库路径"]')
+    await dbPath.setValue(__dirname)
+    console.info('44444444444')
   })
   test('validate add files', () => {})
   test('validate property', () => {})
@@ -45,4 +53,5 @@ describe('Launch', function () {
   test('validate remove database', () => {
 
   })
+  this.afterAll(utils.afterAll)
 })

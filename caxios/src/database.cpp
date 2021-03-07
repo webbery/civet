@@ -18,7 +18,6 @@
 #else
 #define OS_DELIMITER '\\'
 #endif
-#define DBSCHEMA  "schema"
 #define DBTHUMBMAIL "t_"    //thumbnail
 
 namespace caxios {
@@ -84,7 +83,7 @@ namespace caxios {
     MkDir(dir);
   }
 
-  CDatabase::CDatabase(const std::string& dbpath, DBFlag flag) {
+  CDatabase::CDatabase(const std::string& dbpath, const std::string& name, DBFlag flag, size_t size) {
 #if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
     createDirectories(dbpath);
 #elif defined(WIN32)
@@ -97,13 +96,8 @@ namespace caxios {
 
     mdb_env_create(&m_pDBEnv);
     mdb_env_set_maxreaders(m_pDBEnv, 4);
-#ifdef _DEBUG
-#define MAX_EXPAND_DB_SIZE  5*1024*1024
-#else
-#define MAX_EXPAND_DB_SIZE  256*1024*1024
-#endif
-    T_LOG("init", "max db size: %d", MAX_EXPAND_DB_SIZE);
-    if (const int rc = mdb_env_set_mapsize(m_pDBEnv, MAX_EXPAND_DB_SIZE)) {
+
+    if (const int rc = mdb_env_set_mapsize(m_pDBEnv, size)) {
       T_LOG("init", "mdb_env_set_mapsize fail: %s", err2str(rc).c_str());
       mdb_env_close(m_pDBEnv);
       return;
@@ -114,7 +108,7 @@ namespace caxios {
       return;
     }
     //open_flag |= MDB_NOTLS;
-    const std::string schemaDB = dbpath + OS_DELIMITER + DBSCHEMA;
+    const std::string schemaDB = dbpath + OS_DELIMITER + name;
     T_LOG("database", "Open DB %s, flag: %d, Mode: %s", schemaDB.c_str(), m_flag, m_flag == MDB_RDONLY? "ReadOnly": "ReadWrite");
     if (const int rc = mdb_env_open(m_pDBEnv, schemaDB.c_str(), m_flag | MDB_NOTLS | MDB_NORDAHEAD | MDB_NOSUBDIR | MDB_NOLOCK, 0664)) {
       T_LOG("database", "mdb_env_open fail: %s", err2str(rc).c_str());

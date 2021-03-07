@@ -20,7 +20,7 @@ namespace caxios{
 
   class CDatabase {
   public:
-    CDatabase(const std::string& dbpath, DBFlag flag);
+    CDatabase(const std::string& dbpath, const std::string& name, DBFlag flag, size_t size);
     ~CDatabase();
 
     MDB_dbi OpenDatabase(const std::string& dbname);

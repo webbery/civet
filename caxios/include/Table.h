@@ -4,6 +4,7 @@
 #include "datum_type.h"
 #include "database.h"
 #include <string.h>
+#include <limits>
 
 #define TABLE_SCHEMA        "dbinfo"
 #define TABLE_FILESNAP      "file_snap"
@@ -27,6 +28,10 @@
 #define TABLE_RECYCLE_ID    "recycle"
 
 #define SCHEMA_VERSION    1
+
+enum class SCHEMA_INFO {
+  Version = 1
+};
 
 namespace caxios {
   class CDatabase;
@@ -80,6 +85,7 @@ namespace caxios {
     bool operator == (const Iterator& other) {
       if (!_end) {
         if (_key.mv_size != other._key.mv_size) return false;
+        if (std::numeric_limits<size_t>::max() == _key.mv_size) return false;
         if (memcmp(_key.mv_data, other._key.mv_data, _key.mv_size) == 0) return true;
         return false;
       }

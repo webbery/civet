@@ -29,6 +29,9 @@
 #define BIT_CLASS   (1<<BIT_CLASS_OFFSET)
 //#define BIT_ANNO  (1<<3)
 
+#define DBSCHEMA  "schema"
+#define DBBIN  "bin"
+
 namespace caxios {
   const char* g_tables[] = {
     TABLE_SCHEMA,
@@ -65,13 +68,16 @@ namespace caxios {
   DBManager::DBManager(const std::string& dbdir, int flag, const std::string& meta/* = ""*/)
   {
     _flag = (flag == 0 ? ReadWrite : ReadOnly);
-    if (m_pDatabase == nullptr) {
-      m_pDatabase = new CDatabase(dbdir, _flag);
-    }
-    if (m_pDatabase == nullptr) {
-      std::cerr << "new CDatabase fail.\n";
-      return;
-    }
+#ifdef _DEBUG
+#define MAX_SCHEMA_DB_SIZE  5*1024*1024
+#define MAX_BIN_DB_SIZE     5*1024*1024
+#else
+#define MAX_SCHEMA_DB_SIZE  256*1024*1024
+#define MAX_BIN_DB_SIZE     512*1024*1024
+#endif
+    InitDB(m_pDatabase, dbdir.c_str(), DBSCHEMA, MAX_SCHEMA_DB_SIZE);
+    InitDB(m_pBinaryDB, dbdir.c_str(), DBBIN, MAX_BIN_DB_SIZE);
+    
     // init map
     InitMap();
     // open all database
@@ -93,12 +99,18 @@ namespace caxios {
       }
     }
     // 检查数据库版本是否匹配, 如果不匹配, 则开启线程，将当前数据库copy一份，进行升级, 并同步后续的所有写操作
+    if (!ValidVersion()) {
 
+    }
     // 如果期间程序退出中断, 记录中断点, 下次启动时继续 
   }
 
   DBManager::~DBManager()
   {
+    if (m_pBinaryDB) {
+      delete m_pBinaryDB;
+      m_pBinaryDB = nullptr;
+    }
     if (m_pDatabase != nullptr) {
       for (auto item : m_mDBs) {
         m_pDatabase->CloseDatabase(item.second);
@@ -192,6 +204,9 @@ namespace caxios {
     WRITE_BEGIN();
     std::string name = meta["name"];
     std::string type = meta["type"];
+    if (type == "bin") {
+
+    }
     // add meta to file
     void* pData = nullptr;
     uint32_t len = 0;
@@ -205,7 +220,7 @@ namespace caxios {
       m_pDatabase->Put(m_mDBs[TABLE_FILE_META], fid, (void*)vData.data(), vData.size());
     }
     // add to meta table
-    if (meta["query"] == true) {
+    if (meta["query"] == true && type != "bin") {
       auto pTable = GetOrCreateMetaTable(name, meta["type"]);
       std::vector<std::string> vStr = meta["value"];
       for (auto& val : vStr) {
@@ -223,7 +238,7 @@ namespace caxios {
     T_LOG("file", "exist files: %s", format_vector(filesID).c_str());
     for (auto fileID : filesID)
     {
-      T_LOG("file", "remove file id: %d", fileID)
+      T_LOG("file", "remove file id: %d", fileID);
       RemoveFile(fileID);
     }
     WRITE_END();
@@ -795,11 +810,30 @@ namespace caxios {
     return std::move(outFilesID);
   }
 
-  void DBManager::ValidVersion()
+  bool DBManager::ValidVersion()
   {
     void* pData = nullptr;
     uint32_t len = 0;
-    if (m_pDatabase->Get(m_mDBs[TABLE_SCHEMA], SCHEMA_VERSION, pData, len)) {
+    m_pDatabase->Get(m_mDBs[TABLE_SCHEMA], (uint32_t)SCHEMA_INFO::Version, pData, len);
+    if (len == 0) {
+      char dbvs = SCHEMA_VERSION;
+      m_pDatabase->Put(m_mDBs[TABLE_SCHEMA], (uint32_t)SCHEMA_INFO::Version, &dbvs, sizeof(char));
+      return true;
+    }
+    char* pV = (char*)pData;
+    if (*pV == SCHEMA_VERSION) return true;
+    return false;
+  }
+
+  void DBManager::InitDB(CDatabase*& pDB, const char* dir, const char* name, size_t size)
+  {
+    T_LOG("init", "max db size: %d", size);
+    if (pDB == nullptr) {
+      pDB = new CDatabase(dir, name, _flag, size);
+    }
+    if (pDB == nullptr) {
+      std::cerr << "new CDatabase fail.\n";
+      return;
     }
   }
 

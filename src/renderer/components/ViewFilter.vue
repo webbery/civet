@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <el-color-picker v-model="color" size="mini"></el-color-picker> -->
+    <el-color-picker v-model="color" size="mini" style="" @active-change="onColorChanged"></el-color-picker>
     <span class="custom">
       <el-select v-model="fileType" @change="onFileTypeChanged" clearable placeholder=" 类型" size="mini" multiple>
         <el-option
@@ -117,22 +117,24 @@ export default {
     onFileTypeChanged(keys) {
       console.info('onFileTypeChanged', keys)
       this.$store.dispatch('query', {type: keys})
+    },
+    onColorChanged(color) {
+      // console.info('onColorChanged:', color)
+      this.color = color
+      const tinyColor = require('tinycolor2')
+      const hex = tinyColor(color).toHexString()
+      this.$store.dispatch('query', {color: hex})
     }
   }
 }
 </script>
 
 <style scoped>
-.custom .el-select {
-  transform: translateY(-8px);
-}
 .custom .el-select-dropdown {
-  transform: translateY(-8px);
+  /* transform: translateY(-8px); */
   font-size: 12px;
 }
-.custom .el-dropdown{
-  transform: translateY(-8px);
-}
+
 </style>
 <style lang="css" scoped>
 

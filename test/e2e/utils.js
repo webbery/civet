@@ -21,14 +21,13 @@ export default {
     // return this.app.start()
   },
   beforeAll() {
-    // console.info('beforeAll', __dirname)
+    console.info('beforeAll', __dirname)
     // backup develop database
-    if (fs.existsSync('./cfg.json')) {
-      const cfg = JSON.parse(fs.readFileSync('./cfg.json'))
-      if (cfg.app.default !== 'test') {
-        fs.renameSync('cfg.json', 'cfg.json.bak')
-      }
+    if (fs.existsSync('cfg.json')) {
+      console.info('eeeexxxxiissstt')
+      fs.renameSync('cfg.json', 'cfg.json.bak')
     }
+    console.info('path:', electron)
     this.timeout(10000)
     this.app = new Application({
       path: electron,
@@ -39,15 +38,17 @@ export default {
     return this.app.start()
   },
   afterAll() {
-    this.timeout(10000)
+    console.info('aaaaaaaaaaaa')
+    this.timeout(60000)
+    console.info('bbbbbbbbbbbb')
 
     if (this.app && this.app.isRunning()) {
-      this.app.stop()
+      // this.app.stop()
     }
 
     console.info('afterAll')
-    if (fs.existsSync('./cfg.json.bak')) {
-      fs.renameSync('cfg.json.bak', 'cfg.json')
-    }
+    // if (fs.existsSync('./cfg.json.bak')) {
+    //   fs.renameSync('cfg.json.bak', 'cfg.json')
+    // }
   }
 }

@@ -41,7 +41,12 @@ namespace caxios {
 
   QueryCondition::QueryCondition(const std::string& s)
   {
-    m_qType = QT_String;
+    if (isColor(s)) {
+      m_qType = QT_Color;
+    }
+    else {
+      m_qType = QT_String;
+    }
     m_sCondition = s;
   }
 
@@ -63,6 +68,9 @@ namespace caxios {
     }
     else if (type == QT_String && ct == CT_EQUAL) {
       return new QueryAction<QT_String, CT_EQUAL>(k, conds);
+    }
+    else if (type == QT_Color && ct == CT_EQUAL) {
+      return new QueryAction<QT_Color, CT_EQUAL>(k, conds);
     }
     T_LOG("query", "create action fail, type: %d, compare: %d", type, ct);
     //g_mActionFactory[QT_DateTime][CT_GREAT_THAN](k, conds);

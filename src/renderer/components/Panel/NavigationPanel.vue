@@ -94,7 +94,7 @@ export default {
       index: 0,
       menus: [
         {text: '导出到计算机', cb: this.onExportClasses},
-        {text: '重命名', cb: this.onChangeName},
+        {text: '重命名', cb: this.onMenuChangeName},
         {text: '添加', cb: this.onAddClass},
         {text: '删除', cb: this.onDeleteClass}
       ]
@@ -167,7 +167,7 @@ export default {
       const root = params.root
       root.$emit('easyAxis', {
         tag: 'classTree',
-        index: {model: params.model, operator: {expand: params.expand}},
+        index: {model: params.model, operator: {expand: params.expand, setEditable: params.setEditable}},
         x: event.clientX,
         y: event.clientY
       })
@@ -179,11 +179,15 @@ export default {
     onExportClasses(params) {},
     onAddClass(name, parent, data) {
       console.info('add node:', data)
-      var node = new TreeNode({ name: '11', isLeaf: false })
+      var node = new TreeNode({ name: '', isLeaf: false, editable: true })
       this.$store.dispatch('addClass', {parent: data.model, node})
       this.$nextTick(() => {
         data.operator.expand()
       })
+    },
+    onMenuChangeName(name, parent, data) {
+      console.info(data)
+      data.operator.setEditable()
     },
     onDropNode(params) {
       console.info('onDropNode', params)

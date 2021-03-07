@@ -32,6 +32,7 @@ namespace caxios {
   };
   template<QueryType Q, CompareType C> struct CQuery;
   template<> struct CQuery<QT_String, CT_IN>;
+  template<> struct CQuery<QT_Color, CT_EQUAL>;
   template<typename Q> struct CQueryType {
     static Q policy(MDB_val& val) {
       return *(Q*)val.mv_data;
@@ -120,9 +121,11 @@ namespace caxios {
     }
 
   private:
-    void ValidVersion();
+    bool ValidVersion();
+    void InitDB(CDatabase*& pDB, const char* dir, const char* name, size_t size);
     void InitMap();
     bool AddFile(FileID, const MetaItems&, const Keywords&);
+    //bool AddBinMeta(FileID, )
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
     bool AddFileID2Keyword(FileID, WordIndex);
     void UpdateChildrenClassName(
@@ -223,6 +226,7 @@ namespace caxios {
   private:
     DBFlag _flag = ReadWrite;
     CDatabase* m_pDatabase = nullptr;
+    CDatabase* m_pBinaryDB = nullptr; // store binary data such as thumbnail etc.
     std::map<std::string, MDB_dbi > m_mDBs;
     std::map<std::string, std::string> m_mKeywordMap;
     std::map<std::string, ITable*> m_mTables;

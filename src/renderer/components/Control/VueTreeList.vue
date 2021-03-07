@@ -57,36 +57,6 @@
           @input="updateName"
           @blur="setUnEditable"
         />
-        <div class="vtl-operation" v-show="isHover && !editable">
-          <!-- <span
-            :title="defaultAddTreeNodeTitle"
-            @click.stop.prevent="addChild(false)"
-            v-if="!model.isLeaf && !model.addTreeNodeDisabled"
-          >
-            <slot name="addTreeNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
-              <i class="vtl-icon vtl-icon-folder-plus-e"></i>
-            </slot>
-          </span> -->
-          <!-- <span
-            :title="defaultAddLeafNodeTitle"
-            @click.stop.prevent="addChild(true)"
-            v-if="!model.isLeaf && !model.addLeafNodeDisabled"
-          >
-            <slot name="addLeafNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
-              <i class="vtl-icon vtl-icon-plus"></i>
-            </slot>
-          </span> -->
-          <span title="edit" @click.stop.prevent="setEditable" v-if="!model.editNodeDisabled">
-            <slot name="editNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
-              <i class="vtl-icon vtl-icon-edit"></i>
-            </slot>
-          </span>
-          <!-- <span title="delete" @click.stop.prevent="delNode" v-if="!model.delNodeDisabled">
-            <slot name="delNodeIcon" :expanded="expanded" :model="model" :root="rootNode">
-              <i class="vtl-icon vtl-icon-trash"></i>
-            </slot>
-          </span> -->
-        </div>
         <div class="vtl-count" v-if="model.count>0"><span>{{ model.count }}</span></div>
       </div>
 
@@ -143,6 +113,7 @@
 <script>
 import { TreeNode } from './Tree.js'
 import { addHandler, removeHandler } from './tools.js'
+import { isEmpty } from '@/../public/Utility'
 
 let compInOperation = null
 
@@ -151,7 +122,6 @@ export default {
   data: function() {
     return {
       isHover: false,
-      editable: false,
       isDragEnterUp: false,
       isDragEnterBottom: false,
       isDragEnterNode: false,
@@ -198,6 +168,7 @@ export default {
     },
 
     isFolder() {
+      console.info('update children')
       return this.model.children && this.model.children.length
     },
 
@@ -213,6 +184,10 @@ export default {
         'vtl-drag-disabled': dragDisabled,
         'vtl-disabled': disabled
       }
+    },
+
+    editable() {
+      return this.model.editable
     }
   },
   beforeCreate() {
@@ -226,6 +201,13 @@ export default {
         vm.editable = false
       }
     })
+    if (this.model.editable) {
+      this.$nextTick(() => {
+        const $input = this.$refs.nodeInput
+        $input.focus()
+        $input.setSelectionRange(0, $input.value.length)
+      })
+    }
   },
   beforeDestroy() {
     removeHandler(window, 'keyup')
@@ -249,7 +231,7 @@ export default {
     },
 
     setEditable() {
-      this.editable = true
+      this.model.editable = true
       this.oldName = this.model.name
       this.$nextTick(() => {
         const $input = this.$refs.nodeInput
@@ -259,7 +241,11 @@ export default {
     },
 
     setUnEditable(e) {
-      this.editable = false
+      this.model.editable = false
+      if (isEmpty(this.model.name)) {
+        this.delNode()
+        return
+      }
       // var oldName = this.model.name
       // console.info('new name: ', e.target.value)
       this.model.changeName(e.target.value)
@@ -306,15 +292,16 @@ export default {
         event,
         root,
         model: this.model,
-        expand: this.expand
+        expand: this.expand,
+        setEditable: this.setEditable
       })
     },
 
     addChild(isLeaf) {
-      let name = isLeaf ? this.defaultLeafNodeName : this.defaultTreeNodeName
-      name += this.model.children ? this.model.children.length : ''
+      // let name = isLeaf ? this.defaultLeafNodeName : this.defaultTreeNodeName
+      // name += this.model.children ? this.model.children.length : ''
       this.expanded = true
-      var node = new TreeNode({ name, isLeaf })
+      var node = new TreeNode({ name: '', isLeaf, editable: true })
       // console.info('model:', this.model, 'node:', node)
       // this.model.addChildren(node, true)
       this.rootNode.$emit('add-node', node, this.model)

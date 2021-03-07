@@ -18,3 +18,8 @@ export function getSuffixFromString(str: string): string {
   else if (name === 'tiff') name = 'tif'
   return name
 }
+
+export function isEmpty(str: string): boolean {
+  if (!str || str.trim().length === 0) return true
+  return false
+}

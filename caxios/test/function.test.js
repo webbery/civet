@@ -120,7 +120,7 @@ describe('civetkern add test', function() {
     expect(unclasses).to.have.lengthOf(willBeAdd.length)
   })
   it('add file meta', function() {
-    let result = instance.addMeta({id: [fileids[0]], meta:{name: 'color', value: ['#fab13c', '#f7a13c'], type: 'color', query: true}})
+    let result = instance.addMeta({id: [fileids[0]], meta:{name: 'color', value: ['#2a344f', '#3f4865'], type: 'color', query: true}})
     expect(result).to.equal(true)
     let jpegBin = new Array(3000).join('f')
     // console.info(jpegBin)
@@ -289,6 +289,10 @@ describe('civetkern read only test', function() {
     result = instance.query({class: ['新分类1']})
     expect(result).to.lengthOf(1)
     // result = instance.query({class: ['新分类']})
+  })
+  it('search by color', function() {
+    let result = instance.query({color: '#343e58'})
+    expect(result).to.lengthOf(1)
   })
   it('search ensamble', function() {
     let result = instance.query({type: 'jpeg', keyword: 'A'})

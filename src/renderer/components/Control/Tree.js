@@ -13,16 +13,17 @@ import { v4 as uuidv4 } from 'uuid'
  */
 export class TreeNode {
   constructor(data) {
-    const { id, isLeaf } = data
+    const { id, isLeaf, editable } = data
     this.id = typeof id === 'undefined' ? uuidv4() : id
     this.parent = null
     this.children = null
     this.count = 0
     this.isLeaf = !!isLeaf
+    this.editable = editable || false
 
     // other params
     for (const k in data) {
-      if (k !== 'id' && k !== 'children' && k !== 'isLeaf') {
+      if (k !== 'id' && k !== 'children' && k !== 'isLeaf' && k !== 'editable') {
         this[k] = data[k]
       }
     }
