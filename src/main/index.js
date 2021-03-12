@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, Menu, ipcMain } from 'electron'
+import { app, BrowserWindow, Menu, ipcMain, protocol } from 'electron'
 import { autoUpdater } from 'electron-updater'
 const path = require('path')
 const fs = require('fs')
@@ -191,10 +191,6 @@ import { autoUpdater } from 'electron-updater'
 autoUpdater.on('update-downloaded', () => {
   autoUpdater.quitAndInstall()
 })
-
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
-})
  */
 
 function sendWindowMessage(targetWindow, message, payload) {
@@ -208,6 +204,16 @@ function sendWindowMessage(targetWindow, message, payload) {
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)
   createWorkerWindow()
+  protocol.registerFileProtocol('civet', (request, callback) => {
+    // 截取file:///之后的内容，也就是我们需要的
+    const url = request.url.substr(8)
+    console.info('url:', url)
+    // 使用callback获取真正指向内容
+    const params = { path: path.normalize(`${__dirname}/${url}`) }
+    callback(params)
+  }, (error) => {
+    if (error) console.error('Failed to register protocol')
+  })
   ipcMain.on('message-from-worker', (event, arg) => {
     // console.info('########################')
     // console.info(arg.type, arg.data)

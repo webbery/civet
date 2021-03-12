@@ -36,7 +36,7 @@ const getServiceInstance = (function() {
           requestID += 1
           console.info('message-from-renderer: type=' + msgType + ', data', msgData)
           ipcRenderer.send('message-from-renderer', {
-            request: requestID,
+            id: requestID,
             type: msgType,
             data: msgData
           })
@@ -67,8 +67,9 @@ const getServiceInstance = (function() {
           console.info(msg.type, 'no callback')
           return
         }
+        console.info('message-to-renderer', msg.type)
         callbacks.forEach(callback => {
-          callback(null, msg.data)
+          callback(null, msg.data.msg)
         })
       }) // 监听主进程的消息
     }

@@ -1,6 +1,6 @@
 <template>
   <div class="property">
-      <el-card :body-style="{ padding: '0px' }">
+      <div :body-style="{ padding: '0px' }">
         <div style="padding: 4px;" class="image-name">
           <InputLabel>{{filename}}</InputLabel>
         </div>
@@ -9,7 +9,7 @@
           <span v-if="picture.colors.length!==0" ><span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span></span>
           <span v-else icon="el-icon-loading"></span>
         </div>
-      </el-card>
+      </div>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
     <fieldset>
       <legend class="title">标签</legend>
@@ -120,6 +120,10 @@ export default {
         let names = []
         let values = []
         console.info(schema)
+        let displayTable = {}
+        for (let item of schema) {
+          displayTable[item.name] = item.display
+        }
         const getItem = function (k, meta) {
           for (let item of meta) {
             if (item.name === k) return item
@@ -127,7 +131,7 @@ export default {
           return null
         }
         this.filename = file.filename
-        for (let item of schema) {
+        for (let item of file.meta) {
           if (item.name === 'filename') {
             // const meta = getItem(item.name, file.meta)
             // this.filename = meta.value
@@ -136,7 +140,7 @@ export default {
           if (item.name === 'color') {
             continue
           }
-          if (item.display !== false) {
+          if (displayTable[item.name] !== false) {
             console.info('propterty name:', item.name, 'type:', item.type)
             names.push(JString.i18n(item.name))
             const meta = getItem(item.name, file.meta)

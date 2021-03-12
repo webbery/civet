@@ -1,9 +1,9 @@
 <template>
-  <lazy-component @show="handler">
+  <!-- <lazy-component @show="handler"> -->
     <div class="frame">
     <img class="mini-cover" :src="src" width="100%">
     </div>
-  </lazy-component>
+  <!-- </lazy-component> -->
 </template>
 <script>
 export default {

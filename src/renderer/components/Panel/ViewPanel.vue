@@ -74,8 +74,8 @@ export default {
         // {text: '重命名', cb: this.onChangeName},
         {text: '删除', cb: this.onDeleteItem}
       ],
-      width: 400,
-      height: 800,
+      // width: 400,
+      // height: 800,
       testData: [{src: '111', href: '2222'}],
       lastSelectFolder: -1,
       folderSelected: []
@@ -84,9 +84,9 @@ export default {
   mounted() {
     console.info('mounted')
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
-    this.width = document.getElementById('main-content').offsetWidth
-    this.height = document.getElementById('main-content').offsetHeight
-    console.info('width: ', this.width, 'height:', this.height)
+    // this.width = document.getElementById('main-content').offsetWidth
+    // this.height = document.getElementById('main-content').offsetHeight
+    // console.info('width: ', this.width, 'height:', this.height)
   },
   computed: mapState({
     imageList: (state) => state.Cache.viewItems,

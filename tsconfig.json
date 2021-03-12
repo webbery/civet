@@ -10,6 +10,7 @@
     // 启用装饰器模式
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
     "sourceMap": true,
     "allowJs": true,
     // 

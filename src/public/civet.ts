@@ -48,6 +48,10 @@ export class IFileImpl{
   public set path(val: string) {this._path = val;}
   
   public addMeta(key: string, value: any, type: string | undefined): void {
+    if (this[key]) {
+      console.info('key ' + key + ' is exist' )
+      return
+    }
     this[key] = value
     this.meta.push({name: key, value: value, type: type})
   }
@@ -74,8 +78,8 @@ export enum MessageState{
 
 export class Message {
   id: number = 0;
-  state: number = MessageState.UNINIT;
   type: string = '';
+  state: number = MessageState.UNINIT;
   tick: number = 0;   // waitting time, unit second
   msg: any;
 }

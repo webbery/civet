@@ -1,50 +1,112 @@
 import { Message, MessageState } from '../public/civet'
 const { ipcRenderer } = require('electron')
-const timer = (function () {
-    let t = null
-    return {
-      start: (func, tick) => {
-        const task = () => {
-          // 执行一次func, 然后定时执行func
-          func()
-          if (t === null) {
-            t = setInterval(func, tick)
-            console.info('start timer')
-          }
-        }
-        if (t === null) setImmediate(task)
-      },
-      stop: () => {
-        if (t !== null) {
-          clearTimeout(t)
-          t = null
-          console.info('stop timer')
-        }
+
+class Timer {
+  handle: any = null;
+  start(func: any, tick: any) {
+    const task = () => {
+      // 执行一次func, 然后定时执行func
+      func()
+      if (this.handle === null) {
+        this.handle = setInterval(func, tick)
+        console.info('start timer')
       }
     }
-  })()
+    if (this.handle === null) setImmediate(task)
+  }
+  stop() {
+    if (this.handle !== null) {
+      clearTimeout(this.handle)
+      this.handle = null
+      console.info('stop timer')
+    }
+  }
+}
 
-  export class MessageTransfer {
+  const timer = new Timer();
+
+  interface IMessageCallback {
+    (id: number, data: any): void;
+  }
+
+  export class MessagePipeline {
     threshod: number = 200;
-    messageQueue: Map<number, Message>;
-    constructor(threshod) {
+    messageQueue: Map<string, Message> = new Map<string, Message>();
+    processor: Map<string, any> = new Map<string, any>();
+    constructor(threshod: number, processor: Map<string, any>) {
       this.threshod = threshod
+      this.processor = processor
+
+      ipcRenderer.on('message-from-main', async (event, arg) => {
+        console.info('==================')
+        console.info('arg', arg)
+        console.info('==================')
+        const func = this.processor.get(arg.type)
+        const reply = await func(arg.data)
+        console.info('replay', reply)
+        if (reply === undefined) return
+        let msg = new Message()
+        msg.id = arg.id
+        msg.type = reply.type
+        msg.msg = reply.data
+        msg.tick = 0
+        this.post(msg)
+      })
     }
     post(msg: Message) {
-      if (this.messageQueue.has(msg.id)) {
-        let msgs = this.messageQueue.get(msg.id)
+      // if same type exist but id is different, remove smaller id message.
+      for (let k of this.messageQueue.keys()) {
+        const [mid, type] = this.unzip(k)
+        if (type === msg.type) {
+          if (mid < msg.id) {
+            // remove
+            this.messageQueue.delete(k)
+          }
+        }
+      }
+      const id = this.indentify(msg.id, msg.type)
+      if (this.messageQueue.has(id)) {
+        let msgs = this.messageQueue.get(id)
+        if (!msgs) return
         if (Array.isArray(msgs.msg)) {
           msgs.msg.push.apply(msgs.msg, msg.msg)
         } else {
           msgs.msg.push(msg.msg)
           msgs.state = MessageState.FINISH
         }
-        this.messageQueue.set(msg.id, msgs);
+        this.messageQueue.set(id, msgs);
       } else {
-        this.messageQueue.set(msg.id, msg);
+        this.messageQueue.set(id, msg);
       }
       timer.start(() => {
+        if (this.messageQueue.size === 0) {
+          timer.stop();
+          return;
+        }
+        for (const id of this.messageQueue.keys()) {
+          let message = this.messageQueue.get(id)
+          if (!message) continue
+          const [_, type] = this.unzip(id)
+          if (message.msg.length === 1) {
+            console.info('send ', message.msg, 'to renderer')
+            ipcRenderer.send('message-from-worker', { type: type, data: message })
+          } else {
+            console.info('send ', message.msg.length, 'to renderer')
+            ipcRenderer.send('message-from-worker', { type: type, data: message })
+          }
+        }
+        this.messageQueue.clear()
       }, 200);
       // ipcRenderer.send('message-from-worker', msgs)
+    }
+    regist(msgType: string, msgFunc: IMessageCallback) {
+      this.processor.set(msgType, msgFunc);
+    }
+    private indentify(id: number, type: string): string {
+      return type + ',' + id;
+    }
+    private unzip(key: string): [number, string] {
+      const [type, id] = key.split(',')
+      return [parseInt(id), type]
     }
   }

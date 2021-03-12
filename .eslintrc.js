@@ -38,6 +38,7 @@ module.exports = {
         "object": false
       }
     }],
+    "no-callback-literal": 0,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
   }
 }

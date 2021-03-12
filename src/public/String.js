@@ -12,20 +12,20 @@ const i18n = {
   width: '宽',
   height: '高',
   type: '类型',
-  Make: '照相机制造商',
-  Model: '照相机型号',
-  XResolution: '水平分辨率',
-  YResolution: '垂直分辨率',
-  ExposureTime: '曝光时间',
-  FNumber: '光圈',
-  ExposureProgram: '拍摄模式',
-  ISOSpeedRatings: 'ISO速度',
-  FocalLength: '焦距',
-  'Flash did not fire': '无闪光',
+  make: '照相机制造商',
+  model: '照相机型号',
+  xresolution: '水平分辨率',
+  yresolution: '垂直分辨率',
+  exposuretime: '曝光时间',
+  fnumber: '光圈',
+  exposureprogram: '拍摄模式',
+  isospeedratings: 'ISO速度',
+  focallength: '焦距',
+  'flash did not fire': '无闪光',
   'compulsory flash mode': '',
-  MeteringMode: '测光模式',
-  Spot: '点',
-  ColorSpace: '颜色空间',
+  meteringmode: '测光模式',
+  spot: '点',
+  colorspace: '颜色空间',
   'reading files': '读取图片中'
 }
 
@@ -86,8 +86,13 @@ export default {
     if (s.length === 1) s = '0' + s
     return s
   },
+  locale: () => {
+    return (navigator.languages && navigator.languages.length) ? navigator.languages[0] : navigator.language
+  },
   i18n: (en) => {
+    // const locale = this.locale()
+    en = en.toLowerCase()
     if (Object.prototype.hasOwnProperty.call(i18n, en)) return i18n[en]
-    return 'unknow'
+    return en
   }
 }
