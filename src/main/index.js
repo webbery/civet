@@ -85,14 +85,21 @@ function createRendererWindow() {
   mainWindow.maximize()
   mainWindow.loadURL(winURL)
 
-  mainWindow.onbeforeunload = (e) => {
-    console.info('onbeforeunload')
-    return true
-  }
+  // mainWindow.onbeforeunload = (e) => {
+  //   console.info('onbeforeunload')
+  //   return true
+  // }
   mainWindow.on('close', () => {
     // config.save()
+    console.info('main window close')
+    // mainWindow.removeAllListeners('close');
+    mainWindow.webContents.closeDevTools()
     workerWindow.close()
     // mainWindow.close()
+  })
+
+  mainWindow.on('closed', () => {
+    console.info('main window closed')
   })
   mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
@@ -150,33 +157,6 @@ app.on('activate', () => {
   }
 })
 
-// let childDirectoryWindow
-// ipcMain.on('import-directory', () => {
-//   console.info('-------------')
-//   childDirectoryWindow = new BrowserWindow({
-//     parent: mainWindow,
-//     modal: true,
-//     show: false,
-//     width: 300,
-//     height: 300,
-//     resizable: false,
-//     backgroundColor: '#fff',
-//     frame: false,
-//     hasShadow: true,
-//     closable: true,
-//     webPreferences: {
-//       devTools: false
-//     }
-//   })
-//   childDirectoryWindow.once('ready-to-show', () => {
-//     childDirectoryWindow.show()
-//   })
-//   childDirectoryWindow.loadURL(winURL + '#/downloadModal')
-// })
-// // 关闭模态窗口
-// ipcMain.on('close-down-modal', () => {
-//   childDirectoryWindow.hide()
-// })
 /**
  * Auto Updater
  *
@@ -201,19 +181,16 @@ function sendWindowMessage(targetWindow, message, payload) {
   targetWindow.webContents.send(message, payload)
 }
 
+app.whenReady().then(() => {
+  protocol.registerFileProtocol('file', (request, callback) => {
+    const pathname = decodeURI(request.url.replace('file:///', ''))
+    console.info('file url:', pathname)
+    callback(pathname)
+  })
+})
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)
   createWorkerWindow()
-  protocol.registerFileProtocol('civet', (request, callback) => {
-    // 截取file:///之后的内容，也就是我们需要的
-    const url = request.url.substr(8)
-    console.info('url:', url)
-    // 使用callback获取真正指向内容
-    const params = { path: path.normalize(`${__dirname}/${url}`) }
-    callback(params)
-  }, (error) => {
-    if (error) console.error('Failed to register protocol')
-  })
   ipcMain.on('message-from-worker', (event, arg) => {
     // console.info('########################')
     // console.info(arg.type, arg.data)

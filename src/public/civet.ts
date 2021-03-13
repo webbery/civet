@@ -84,6 +84,10 @@ export class Message {
   msg: any;
 }
 
+export interface IMessagePipeline {
+  post: any;
+}
+
 export class Parser {
-  callback: Function = ():void =>{ console.error('use empty callback')};
+  pipeline?: IMessagePipeline;
 }

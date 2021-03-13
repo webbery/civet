@@ -1,4 +1,4 @@
-import { Message, MessageState } from '../public/civet'
+import { Message, MessageState, IMessagePipeline } from '../public/civet'
 const { ipcRenderer } = require('electron')
 
 class Timer {
@@ -29,7 +29,7 @@ class Timer {
     (id: number, data: any): void;
   }
 
-  export class MessagePipeline {
+  export class MessagePipeline implements IMessagePipeline {
     threshod: number = 200;
     messageQueue: Map<string, Message> = new Map<string, Message>();
     processor: Map<string, any> = new Map<string, any>();
@@ -42,7 +42,7 @@ class Timer {
         console.info('arg', arg)
         console.info('==================')
         const func = this.processor.get(arg.type)
-        const reply = await func(arg.data)
+        const reply = await func.call(this, arg.id, arg.data)
         console.info('replay', reply)
         if (reply === undefined) return
         let msg = new Message()
@@ -87,11 +87,11 @@ class Timer {
           let message = this.messageQueue.get(id)
           if (!message) continue
           const [_, type] = this.unzip(id)
-          if (message.msg.length === 1) {
+          if (message.msg !== undefined && message.msg.length === 1) {
             console.info('send ', message.msg, 'to renderer')
             ipcRenderer.send('message-from-worker', { type: type, data: message })
           } else {
-            console.info('send ', message.msg.length, 'to renderer')
+            console.info('send ', message, 'to renderer')
             ipcRenderer.send('message-from-worker', { type: type, data: message })
           }
         }

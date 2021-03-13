@@ -8,7 +8,7 @@ import Vue from 'vue'
 import App from './App'
 import storage from '../public/Kernel'
 import { ImageService } from './service/ImageService'
-import { reply2Renderer, ReplyType } from './transfer'
+import { ReplyType } from './transfer'
 import { IFileImpl, Message } from '../public/civet'
 import { MessagePipeline } from './MessageTransfer'
 
@@ -78,34 +78,41 @@ const fs = require('fs')
 //   }
 // }
 
-async function readImages(fullpath) {
+async function readImages(msgid, fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
-    readDir(fullpath)
+    readDir.call(this, msgid, fullpath)
   } else {
     // if (bakDir === undefined) {
     //   const config = cvtConfig.getConfig()
     //   console.info('--------2----------', config)
     //   initHardLinkDir(config.app.default)
     // }
-    const service = new ImageService()
+    const service = new ImageService(pipeline)
     const file = await service.read(fullpath)
-    console.info('readImages', file)
-    reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file.toJson()])
+    console.info('readImages', file, this)
+    let msg = new Message()
+    msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
+    msg.msg = [file.toJson()]
+    msg.tick = 0
+    msg.id = msgid
+    pipeline.post(msg)
+    // reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file.toJson()])
   }
 }
 
 let totalFiles = 0
 let progressLoad = 0
-function readDir(path) {
+function readDir(msgid, path) {
   fs.readdir(path, async function(err, menu) {
     if (err) return
     // console.info(menu)
     totalFiles += menu.length
     for (const item of menu) {
-      await readImages(JString.joinPath(path, item))
+      await readImages(msgid, JString.joinPath(path, item))
     }
-    reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
+    console.info('read dir :', this)
+    // reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
     progressLoad += menu.length
     if (progressLoad === totalFiles) {
       totalFiles = 0
@@ -116,12 +123,12 @@ function readDir(path) {
 
 const messageProcessor = {
   addImagesByDirectory: readDir,
-  addImagesByPaths: (data) => {
+  addImagesByPaths: (msgid, data) => {
     for (const fullpath of data) {
-      readImages(fullpath)
+      readImages.call(this, msgid, fullpath)
     }
   },
-  getImagesInfo: (data) => {
+  getImagesInfo: (msgid, data) => {
     updateStatus('reading files')
     let imagesIndex = []
     if (data === undefined) {
@@ -134,81 +141,78 @@ const messageProcessor = {
       imagesIndex = data
     }
     const imgs = storage.getFilesInfo(imagesIndex)
-    console.info('getImagesInfo', imgs)
+    console.info('getImagesInfo', imgs, this)
     const images = []
     for (const img of imgs) {
       images.push(new IFileImpl(img))
     }
-    const msg = new Message()
-    console.info('---++++0---', data)
-    console.info('008899:', msg)
     return {type: ReplyType.REPLY_IMAGES_INFO, data: images}
     // reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
   },
-  getFilesSnap: (data) => {
+  getFilesSnap: (msgid, data) => {
     // 全部图片信息
     const imagesSnap = storage.getFilesSnap()
     return {type: ReplyType.REPLY_FILES_SNAP, data: imagesSnap}
     // reply2Renderer(ReplyType.REPLY_FILES_SNAP, imagesSnap)
   },
-  getImageInfo: (imageID) => {
+  getImageInfo: (msgid, imageID) => {
     const img = storage.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
     const image = new IFileImpl(img[0])
     // reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
     return {type: ReplyType.REPLY_IMAGE_INFO, data: image}
   },
-  setTag: (data) => {
+  setTag: (msgid, data) => {
     console.info(data)
     storage.setTags(data.id, data.tag)
   },
-  removeFiles: (filesID) => {
+  removeFiles: (msgid, filesID) => {
     console.info('removeFiles:', filesID)
     storage.removeFiles(filesID)
   },
-  removeTag: (data) => {
+  removeTag: (msgid, data) => {
     console.info(data)
     storage.removeTags(data.filesID, data.tag)
   },
-  removeClasses: (mutation) => {
+  removeClasses: (msgid, mutation) => {
     console.info('removeClasses', mutation)
     storage.removeClasses(mutation)
   },
-  getAllTags: (data) => {
+  getAllTags: (msgid, data) => {
     const allTags = storage.getAllTags()
     // reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
     return {type: ReplyType.REPLY_ALL_TAGS, data: allTags}
   },
-  getAllTagsWithImages: (data) => {
+  getAllTagsWithImages: (msgid, data) => {
     const allTags = storage.getTagsOfFiles()
     console.info('allTags', allTags)
     // reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   },
-  queryFiles: (nsql) => {
+  queryFiles: (msgid, nsql) => {
     const allFiles = storage.query(nsql)
     console.info(nsql, 'reply: ', allFiles)
     // reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
     return {type: ReplyType.REPLY_QUERY_FILES, data: allFiles}
   },
-  addCategory: (mutation) => {
+  addCategory: (msgid, mutation) => {
     console.info('add class', mutation)
     storage.addClasses(mutation)
   },
-  getAllCategory: (parent) => {
+  getAllCategory: (msgid, parent) => {
     const category = storage.getClasses()
     // let category = await CategoryArray.loadFromDB()
     console.info('getAllCategory', category)
     // reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
     return {type: ReplyType.REPLAY_ALL_CATEGORY, data: category}
   },
-  getCategoryDetail: (parent) => {
+  getCategoryDetail: (msgid, parent) => {
     const category = storage.getClassDetail(parent)
     // let category = await CategoryArray.loadFromDB()
     console.info('getCategoryDetail', category)
     // reply2Renderer(ReplyType.REPLY_CLASSES_INFO, category)
     return {type: ReplyType.REPLY_CLASSES_INFO, data: category}
   },
-  getUncategoryImages: async (data) => {
+  getUncategoryImages: async (msgid, data) => {
     updateStatus('reading unclassify info')
     const uncateimgs = storage.getUnClassifyFiles()
     console.info('ppopopo', data)
@@ -223,19 +227,19 @@ const messageProcessor = {
     console.info('untag', untagimgs)
     return {type: ReplyType.REPLY_UNTAG_IMAGES, data: untagimgs}
   },
-  updateImageCategory: (data) => {
+  updateImageCategory: (msgid, data) => {
     storage.updateFileClass(data.imageID, data.category)
   },
-  updateCategoryName: (data) => {
+  updateCategoryName: (msgid, data) => {
     console.info('old:', data.oldName, 'new:', data.newName)
     storage.updateClassName(data.oldName, data.newName)
   },
-  updateFileName: (data) => {
+  updateFileName: (msgid, data) => {
     console.info('updateFileName id:', data.id, 'new:', data.filename)
     // {id: [fileids[0]], filename: '测试'}
     storage.updateFile({ id: [data.id], filename: data.filename })
   },
-  reInitDB: async (data) => {
+  reInitDB: async (msgid, data) => {
     console.info('init db')
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)

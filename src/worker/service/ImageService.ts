@@ -1,7 +1,8 @@
 import { IFileImpl, Parser } from '../../public/civet'
 import storage from '../../public/Kernel'
 import { getSuffixFromString, convert2ValidDate } from '../../public/Utility'
-import { reply2Renderer, ReplyType } from '../transfer'
+import { ReplyType } from '../transfer'
+import { MessagePipeline } from '../MessageTransfer'
 import NLP from '../algorithm/strextract/NLP'
 import util from 'util'
 const Kmeans = require('node-kmeans')
@@ -10,11 +11,11 @@ const tinyColor = require('tinycolor2')
 
 export class ImageService {
   private _parsers: ImageParser[] = [];
-  constructor() {
-    this._parsers.push(new ImageMetaParser)
-    this._parsers.push(new ThumbnailParser)
-    this._parsers.push(new ImagePathParser)
-    this._parsers.push(new ColorParser)
+  constructor(pipeline: MessagePipeline) {
+    this._parsers.push(new ImageMetaParser(pipeline))
+    this._parsers.push(new ThumbnailParser(pipeline))
+    this._parsers.push(new ImagePathParser(pipeline))
+    this._parsers.push(new ColorParser(pipeline))
   }
   async read(filepath: string): Promise<IFileImpl> {
     const path = require('path')
@@ -47,9 +48,9 @@ class ImageParser extends Parser {
 
 class ImageMetaParser extends ImageParser {
   _typeParser: Map<string, FileTypeMetaParser> = new Map();
-  constructor() {
+  constructor(pipeline: MessagePipeline) {
     super();
-    this.callback = reply2Renderer;
+    this.pipeline = pipeline;
     const exifParser = new ExifMetaParser;
     this._typeParser.set('jpg', exifParser);
     this._typeParser.set('png', exifParser);
@@ -66,7 +67,7 @@ class ImageMetaParser extends ImageParser {
     try {
       // TODO: call interface of type implements, but now we simply read the file
       if (!this._typeParser.has(type)) {
-        this.callback('onFileResolveFail', [{filname: file.filename, path: file.path, msg: 'can\'t resolve this kind of file'}])
+        this.pipeline!.post('onFileResolveFail', [{filname: file.filename, path: file.path, msg: 'can\'t resolve this kind of file'}])
         return false
       }
       const parser = this._typeParser.get(type);
@@ -78,7 +79,7 @@ class ImageMetaParser extends ImageParser {
       file.meta.push({name: 'type', value: type, type: 'str'})
     } catch (err) {
       console.error('ImageMetaParser:', err)
-      this.callback('onFileResolveFail', [{filname: file.filename, path: file.path, msg: 'resolve file error'}])
+      this.pipeline!.post('onFileResolveFail', [{filname: file.filename, path: file.path, msg: 'resolve file error'}])
       return false
     }
     file.id = storage.generateFilesID(1)[0]
@@ -90,9 +91,9 @@ class ImageMetaParser extends ImageParser {
 }
 class ImagePathParser extends ImageParser {
   private pool: any;
-  constructor() {
+  constructor(pipeline: MessagePipeline) {
     super()
-    this.callback = reply2Renderer;
+    this.pipeline = pipeline;
     // const workerpool = require('workerpool')
     // let algorithmpath = ''
     // if (process.env.NODE_ENV === 'development') {
@@ -119,7 +120,7 @@ class ImagePathParser extends ImageParser {
         console.info('parse text error', err)
         return false
       }
-      this.callback(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file])
+      this.pipeline!.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file])
     }
     return true
   }
@@ -190,7 +191,7 @@ class ExifMetaParser extends FileTypeMetaParser{
 }
 
 class ThumbnailParser extends ImageParser{
-  constructor() {
+  constructor(pipeline: MessagePipeline) {
     super()
   }
 
@@ -223,7 +224,7 @@ class ThumbnailParser extends ImageParser{
 class ColorParser extends ImageParser {
   private _plate: number[];
 
-  constructor() {
+  constructor(pipeline: MessagePipeline) {
     super()
     this._plate = []
   }

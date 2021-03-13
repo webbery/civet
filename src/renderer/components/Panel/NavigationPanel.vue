@@ -19,8 +19,8 @@
               @add-node="onAddNode"
               @drop="onDropNode"
               :model="category"
-              default-tree-node-name="新分类"
-              default-leaf-node-name="新分类"
+              default-tree-node-name=""
+              default-leaf-node-name=""
               v-bind:default-expanded="false"
             >
               <template v-slot:leafNameDisplay="slotProps">
@@ -48,6 +48,7 @@ import PopMenu from '@/components/Menu/PopMenu'
 import TreePanel from '@/components/Panel/TreePanel'
 import { mapState } from 'vuex'
 import VueTreeList from '@/components/Control/VueTreeList'
+import { isEmpty } from '../../../public/Utility'
 
 export default {
   name: 'navigation-panel',
@@ -119,7 +120,7 @@ export default {
       this.headOptions[1].value += updateValue
     },
     addRootClass() {
-      let name = '新分类'
+      let name = ''
       if (this.index !== 0) name = name + this.index
       // let root = new TreeNode({name: name, isLeaf: false})
       // if (!this.data.children) this.data.children = []
@@ -137,6 +138,7 @@ export default {
     },
     onClickNode(node) {
       console.info('onClickNode', node)
+      if (isEmpty(node.name)) return
       let parentPath = ''
       let parent = node.parent
       while (parent) {

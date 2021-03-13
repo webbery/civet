@@ -1,7 +1,7 @@
 <template>
   <div v-if="imageList.length === 0" @drop="dropFiles($event)" @dragover.prevent>
     <div @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true" style="height:96vh;widht: 100%">
-      <div class="initial" >
+      <div class="initial" @click="onLoadFilesTest">
         请拖拽文件或文件夹到此处
       </div>
     </div>
@@ -268,7 +268,9 @@ export default {
       const ipcRenderer = require('electron').ipcRenderer
       ipcRenderer.send('export2Diectory', filespath)
     },
-    onScrollNearBottom() {}
+    onScrollNearBottom() {},
+    onLoadFilesTest() {
+    }
   }
 }
 </script>

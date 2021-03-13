@@ -415,7 +415,7 @@ const actions = {
     commit('changeFileName', mutation)
   },
   changeClassName({ commit }, mutation) {
-    if (isEmpty(mutation.old)) {
+    if (mutation.old[mutation.old.length - 1] === '/' || isEmpty(mutation.old)) {
       commit('addClassName', mutation.new)
       return
     }

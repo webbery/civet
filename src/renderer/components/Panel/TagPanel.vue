@@ -23,7 +23,7 @@ export default {
   },
   methods: {
     updateTags() {
-      this.tags = this.$store.getters.tags[0]
+      this.tags = this.$store.getters.tags
       console.info(this.tags)
     }
   }
