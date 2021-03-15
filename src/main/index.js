@@ -88,9 +88,12 @@ function createRendererWindow() {
   })
 
   mainWindow.maximize()
-  const mainpath = url.format({pathname: winURL, protocol: 'file:', slashes: true})
-  mainWindow.loadURL(mainpath)
-
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL(winURL)
+  } else {
+    const mainpath = url.format({pathname: winURL, protocol: 'file:', slashes: true})
+    mainWindow.loadURL(mainpath)
+  }
   // mainWindow.onbeforeunload = (e) => {
   //   console.info('onbeforeunload')
   //   return true
@@ -109,7 +112,6 @@ function createRendererWindow() {
   mainWindow.on('closed', () => {
     console.info('main window closed')
   })
-  mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
@@ -121,9 +123,9 @@ function createRendererWindow() {
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
-    show: true,
-    // show: process.env.NODE_ENV === 'development',
-    frame: true,
+    // show: true,
+    show: process.env.NODE_ENV === 'development',
+    frame: false,
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
@@ -146,14 +148,15 @@ function createWorkerWindow (bFirst) {
     : path.join(__dirname, '/worker.html')
   // }
   // logFile.write(util.format(workerURL) + '\n')
-  const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
   // logFile.write(util.format() + '\n')
   if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
-  else workerWindow.loadURL(urlpath)
-  workerWindow.webContents.openDevTools()
-  // if (process.env.NODE_ENV === 'development') {
-  //   workerWindow.webContents.openDevTools()
-  // }
+  else {
+    const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
+    workerWindow.loadURL(urlpath)
+  }
+  if (process.env.NODE_ENV === 'development') {
+    workerWindow.webContents.openDevTools()
+  }
 }
 
 app.on('window-all-closed', async () => {

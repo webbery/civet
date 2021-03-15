@@ -12,10 +12,13 @@
         "src/db_manager.cpp",
         "src/log.cpp",
         "src/DBThread.cpp",
-        "src/QueryAction.cpp",
         "src/table/TableTag.cpp",
         "src/table/TableMeta.cpp",
         "src/table/TableClass.cpp",
+        "src/RPN.cpp",
+        "src/Condition.cpp",
+        "src/Table.cpp",
+        "src/Expression.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",
@@ -49,12 +52,30 @@
           '-O3'
         ]
       },
-	  'msvs_settings': {
-        'VCCLCompilerTool': {
-		  "ExceptionHandling": 1,
-		  'AdditionalOptions': [ '-std:c++17' ]
-		}
-      }
+      'conditions':[
+        ['OS=="win"', {
+          'configurations':{
+            'Release': {
+	            'msvs_settings': {
+                'VCCLCompilerTool': {
+                  "ExceptionHandling": 1,
+                  'AdditionalOptions': [ '-std:c++17' ],
+                  'RuntimeTypeInfo': 'true'
+                }
+              }
+            },
+            'Debug': {
+	            'msvs_settings': {
+                'VCCLCompilerTool': {
+                  "ExceptionHandling": 1,
+                  'AdditionalOptions': [ '-std:c++17' ],
+                  'RuntimeTypeInfo': 'true'
+                }
+              }
+            }
+          }
+        }]
+      ]
     }
   ]
 }

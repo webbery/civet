@@ -6,7 +6,7 @@
 
 namespace caxios {
 
-  TableMeta::TableMeta(CDatabase* pDatabase, const std::string& name, const std::string& tp)
+  TableMeta::TableMeta(CDatabase* pDatabase, const std::string& name/*, const std::string& tp*/)
     :ITable(pDatabase)
     ,_table(name)
   {
@@ -16,7 +16,7 @@ namespace caxios {
   TableMeta::~TableMeta()
   {
     if (_dbi) {
-      _pDatabase->CloseDatabase(_dbi);
+      _pDatabase->CloseDatabase(_table);
       _dbi = 0;
     }
   }
@@ -27,14 +27,14 @@ namespace caxios {
     // value as key, fileid as value
     void* pData = nullptr;
     uint32_t len = 0;
-    _pDatabase->Get(_dbi, sKey, pData, len);
+    _pDatabase->Get(_table, sKey, pData, len);
     std::vector<FileID> vFilesID;
     if (len) {
       vFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
     }
     addUniqueDataAndSort(vFilesID, fileid);
     T_LOG("meta", "add meta, key: %s, cur data: %s", sKey.c_str(), format_vector(vFilesID).c_str());
-    return _pDatabase->Put(_dbi, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
+    return _pDatabase->Put(_table, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
   }
 
   bool TableMeta::Update(const std::string& current, const UpdateValue& value)
@@ -48,16 +48,16 @@ namespace caxios {
     void* pData = nullptr;
     uint32_t len = 0;
     T_LOG("meta", "remove key: %s", sKey.c_str());
-    _pDatabase->Get(_dbi, sKey, pData, len);
+    _pDatabase->Get(_table, sKey, pData, len);
     std::vector<FileID> vFilesID;
     if (len) {
       vFilesID.assign((FileID*)pData, (FileID*)pData + len / sizeof(FileID));
     }
     eraseData(vFilesID, fileID);
     if (vFilesID.size() == 0) {
-      return _pDatabase->Del(_dbi, sKey);
+      return _pDatabase->Del(_table, sKey);
     }
-    return _pDatabase->Put(_dbi, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
+    return _pDatabase->Put(_table, sKey, (void*)vFilesID.data(), vFilesID.size() * sizeof(FileID));
   }
 
   std::vector<caxios::FileID> TableMeta::Find(const std::string& k)
@@ -68,7 +68,7 @@ namespace caxios {
 
   Iterator TableMeta::begin()
   {
-    Iterator itr(_pDatabase, _dbi);
+    Iterator itr(_pDatabase, _table);
     return std::move(itr);
   }
 

@@ -124,6 +124,13 @@ namespace caxios {
     return std::mktime(&stm)*1000 + milliSec;
   }
 
+  uint32_t str2color(const std::string& input)
+  {
+    // #FF
+    char* p;
+    return strtoul(input.substr(1).c_str(), &p, 16);
+  }
+
   std::string serialize(const std::vector<WordIndex>& classes)
   {
     std::string s;

@@ -5,6 +5,9 @@
 #include "database.h"
 #include <string.h>
 #include <limits>
+#include "ISymbol.h"
+#include "Expression.h"
+#include "Condition.h"
 
 #define TABLE_SCHEMA        "dbinfo"
 #define TABLE_FILESNAP      "file_snap"
@@ -14,12 +17,12 @@
 #define TABLE_KEYWORD2FILE  "keyword2file"
 #define TABLE_FILE2KEYWORD  "file2keyword"
 #define TABLE_KEYWORD2CLASS "keyword2class" // word index -> classes
-#define TABLE_FILE2TAG      "tag"           // fileID -> tag
+#define TABLE_FILE2TAG      "file2tag"      // fileID -> tag
 #define TABLE_TAG2FILE      "tags"          // tag -> fileID
 #define TABLE_TAG_INDX      "tag_indx"      // alphabet -> tag indx
 #define TABLE_CLASS2HASH    "class2hash"    // class -> hash, so that when class name change, hash can not be change
 #define TABLE_HASH2CLASS    "hash2class"    // hash -> class
-#define TABLE_FILE2CLASS    "class"         // fileID -> class hash
+#define TABLE_FILE2CLASS    "file2class"    // fileID -> class hash
 #define TABLE_CLASS2FILE    "classes"       // class hash -> fileID
 #define TABLE_COUNT         "count"         // about count of some statistic
 #define TABLE_ANNOTATION    "annotation"
@@ -55,12 +58,12 @@ namespace caxios {
     {
       *_refs += 1;
     }
-    Iterator(CDatabase* pDatabase, MDB_dbi dbi)
+    Iterator(CDatabase* pDatabase, const std::string& table)
       :_end(false)
       , _pDatabase(pDatabase)
     {
       _refs = new int(1);
-      _cursor = pDatabase->OpenCursor(dbi);
+      _cursor = pDatabase->OpenCursor(table);
       pDatabase->MoveNext(_cursor, _key, _datum);
     }
     ~Iterator(){
@@ -103,6 +106,17 @@ namespace caxios {
     MDB_cursor* _cursor = nullptr;
   };
 
+  std::unique_ptr<ValueArray> Query(
+    CDatabase* pDB,
+    std::unique_ptr < IExpression > pExpr,
+    std::unique_ptr < ITableProxy > leftValue,
+    std::unique_ptr<ValueInstance> rightValue);
+  std::unique_ptr<ValueArray> Query(
+    CDatabase* pDB,
+    std::unique_ptr < IExpression > pExpr,
+    std::unique_ptr<ValueInstance> leftValue,
+    std::unique_ptr<ValueInstance> rightValue);
+
   typedef std::string ClassName;
   typedef std::vector<FileID> ChildrenFile;
   typedef std::vector<ClassName> ChildrenClass;
@@ -117,7 +131,7 @@ namespace caxios {
     virtual bool Update(const std::string& current, const UpdateValue& value) = 0;
     virtual bool Delete(const std::string& k, FileID fileID) = 0;
     // TODO: add custom distance function from developer
-    virtual std::vector<FileID> Find(const std::string& k) = 0;
+    //virtual std::vector<FileID> Query(const IExpression* expr, ) = 0;
     virtual Iterator begin() = 0;
     virtual Iterator end() = 0;
   protected:

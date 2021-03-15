@@ -2,7 +2,7 @@
   "name": "civet",
   "version": "0.1.1",
   "author": "webberg <webbery@foxmail.com>",
-  "description": "图像素材管理软件",
+  "description": "素材管理软件",
   "license": "MIT",
   "main": "./dist/electron/main.js",
   "appId": "com.civet.app",
@@ -32,7 +32,7 @@
     "publish": "node_modules/.bin/publish"
   },
   "build": {
-    "productName": "civet",
+    "productName": "Civet",
     "appId": "com.civet.app",
     "publish": [
       {
@@ -65,7 +65,7 @@
     "mac": {
       "identity": "v_yuanwenbin",
       "category": "public.app-category.graphics-design",
-      "icon": "build/icons/icon.icns",
+      "icon": "build/icons/icon512.icns",
       "type": "distribution",
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
@@ -77,7 +77,7 @@
       "target": "nsis"
     },
     "linux": {
-      "icon": "build/icons",
+      "icon": "build/icons/icon.png",
       "target": "deb"
     },
     "nsis": {

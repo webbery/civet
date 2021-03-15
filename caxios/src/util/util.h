@@ -102,6 +102,7 @@ namespace caxios {
   bool isDate(const std::string& input);
   bool isColor(const std::string& input);
   time_t str2time(const std::string& input);
+  uint32_t str2color(const std::string& input);
 
   std::wstring string2wstring(const std::string& str);
 

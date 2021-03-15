@@ -3,58 +3,19 @@
 #include "database.h"
 #include "json.hpp"
 #include <map>
-#include <Table.h>
 #include "log.h"
 #include "datum_type.h"
+#include "CompareType.h"
+#include "Keyword.h"
+#include "Condition.h"
+#include "Table.h"
 
 #define TABLE_FILEID        32    // "file_cur_id"
 
-#define TB_Keyword    "keyword"
-#define TB_Tag        "tag"
-#define TB_Class      "class"
-#define TB_Annotation "annotation"
-#define TB_FileID     "fileid"
-
 namespace caxios {
-    enum CompareType {
-    CT_EQUAL = 0,
-    CT_IN,
-    CT_OR,
-    CT_GREAT_EQUAL,
-    CT_GREAT_THAN,
-    CT_LESS_THAN
-  };
-
-  enum QueryType {
-    QT_String,
-    QT_DateTime,
-    QT_Color,
-  };
-  template<QueryType Q, CompareType C> struct CQuery;
+  template<DataType Q, CompareType C> struct CQuery;
   template<> struct CQuery<QT_String, CT_IN>;
   template<> struct CQuery<QT_Color, CT_EQUAL>;
-  template<typename Q> struct CQueryType {
-    static Q policy(MDB_val& val) {
-      return *(Q*)val.mv_data;
-    }
-  };
-
-  class QueryCondition {
-  public:
-    QueryCondition();
-    QueryCondition(const std::string& s);
-    QueryCondition(time_t s);
-
-    template <typename T>
-    T As() const {
-      return std::get<T>(m_sCondition);
-    }
-
-    QueryType type() const {return m_qType;}
-  private:
-    QueryType m_qType;
-    std::variant< std::string, time_t, double> m_sCondition;
-  };
 
   class DBManager {
   public:
@@ -85,40 +46,6 @@ namespace caxios {
     bool UpdateClassName(const std::string& oldName, const std::string& newName);
     bool UpdateFileMeta(const std::vector<FileID>& filesID, const nlohmann::json& mutation);
     bool Query(const std::string& query, std::vector< FileInfo>& filesInfo);
-
-  public: // will be implimented in ITable
-    template<typename F>
-    std::vector<FileID> QueryImpl(const std::string& keyword, const F& compare)
-    {
-      std::vector<FileID> vOut;
-      auto pMetaTable = GetMetaTable(keyword);
-      if (pMetaTable) {
-        T_LOG("query", "meta(%s)", keyword.c_str());
-        // meta
-        auto cursor = std::begin(*pMetaTable);
-        auto end = Iterator();
-        for (; cursor != end; ++cursor) {
-          auto item = *cursor;
-          typename F::type val = CQueryType<typename F::type>::policy(item.first);
-          if (compare(val)) {
-            FileID* start = (FileID*)(item.second.mv_data);
-            vOut.insert(vOut.end(), start, start + item.second.mv_size / sizeof(FileID));
-          }
-        }
-      }
-      else {
-        if (keyword == TB_Keyword || keyword == TB_Class || keyword == TB_Tag) {
-          return this->_Query(m_mKeywordMap[keyword], compare);
-        }
-        T_LOG("query", "keyword %s", keyword.c_str());
-        //if (subset.empty()) {
-        //  
-        //}
-        //else {
-        //}
-      }
-      return vOut;
-    }
 
   private:
     bool ValidVersion();
@@ -165,10 +92,7 @@ namespace caxios {
     void SetSnapStep(FileID fileID, int bit, bool set=true);
     char GetSnapStep(FileID fileID, nlohmann::json&);
     Snap GetFileSnap(FileID);
-    std::map<std::string, WordIndex> GetWordsIndex(const std::vector<std::string>& words);
     WordIndex GetWordIndex(const std::string& word);
-    ITable* GetMetaTable(const std::string& name);
-    ITable* GetOrCreateMetaTable(const std::string& name, const std::string& type);
 
     template<typename T>
     std::vector<std::string> GetWordByIndex(const T* const wordsIndx, size_t cnt) {
@@ -182,7 +106,7 @@ namespace caxios {
         }
         void* pData = nullptr;
         uint32_t len = 0;
-        if (!m_pDatabase->Get(m_mDBs[TABLE_INDX_KEYWORD], word_policy<T>::id(index), pData, len)) continue;
+        if (!m_pDatabase->Get(TABLE_INDX_KEYWORD, word_policy<T>::id(index), pData, len)) continue;
         std::string word((char*)pData, len);
         vWords[idx] = word;
       }
@@ -200,7 +124,7 @@ namespace caxios {
         }
         void* pData = nullptr;
         uint32_t len = 0;
-        if (!m_pDatabase->Get(m_mDBs[TABLE_INDX_KEYWORD], index, pData, len)) continue;
+        if (!m_pDatabase->Get(TABLE_INDX_KEYWORD, index, pData, len)) continue;
         std::string word((char*)pData, len);
         mWords[index] = word;
       }
@@ -209,55 +133,9 @@ namespace caxios {
     std::vector<std::vector<FileID>> GetFilesIDByTagIndex(const WordIndex* const wordsIndx, size_t cnt);
 
   private:
-    std::vector<FileID> _Query(const std::string& tableName, const CQuery<QT_String, CT_IN>& values);
-    std::vector<FileID> _Query(const std::string& tableName, const CQuery<QT_String, CT_EQUAL>& values);
-    template<typename FAIL>
-    std::vector<FileID> _Query(const std::string& tableName, FAIL& values) {
-#ifdef WIN32
-      T_LOG("query", "fail, table: %s, query: %s", tableName.c_str()
-        , typeid(values).name()
-      );
-#endif
-      std::vector<FileID> v;
-      return std::move(v);
-    }
-    std::vector<FileID> _QueryImpl(const std::string& tableName, const std::map<std::string, caxios::WordIndex>& wIndexes);
-
-  private:
     DBFlag _flag = ReadWrite;
     CDatabase* m_pDatabase = nullptr;
     CDatabase* m_pBinaryDB = nullptr; // store binary data such as thumbnail etc.
-    std::map<std::string, MDB_dbi > m_mDBs;
-    std::map<std::string, std::string> m_mKeywordMap;
-    std::map<std::string, ITable*> m_mTables;
-  };
-
-  class IAction {
-  public:
-    virtual ~IAction() {}
-    //virtual void push(const std::string& kw) = 0;
-    //virtual void push(const QueryCondition& cond) = 0;
-    virtual std::vector<FileID> query(DBManager*) = 0;
-  };
-
-  template<QueryType QT, CompareType CT>
-  class QueryAction : public IAction {
-  public:
-    QueryAction(const std::string& k, const std::vector<QueryCondition>& vCond)
-    :m_sKeyword(k)
-    , m_query(vCond)
-    { }
-
-    std::vector<FileID> query(DBManager* pDB) {
-      return pDB->QueryImpl(m_sKeyword, m_query/*, m_vQuerySet*/);
-    }
-
-    void constraint(const std::vector<FileID>&);
-
-  private:
-    std::string m_sKeyword;
-    CQuery< QT, CT > m_query;
-    std::vector<FileID> m_vQuerySet;
   };
   
 }

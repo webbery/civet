@@ -194,12 +194,12 @@ describe('civetkern read only test', function() {
     let filesInfo = instance.getFilesInfo([snaps[0].id])
     // console.info(filesInfo)
     expect(filesInfo).to.lengthOf(1)
-    for (let item of filesInfo[0]['meta']) {
-      console.info(item)
-      // if (item.type === 'date') {
-      //   console.info(item.value.toString())
-      // }
-    }
+    // for (let item of filesInfo[0]['meta']) {
+    //   console.info(item)
+    //   // if (item.type === 'date') {
+    //   //   console.info(item.value.toString())
+    //   // }
+    // }
     expect(filesInfo[0]['tag']).to.exist
     expect(filesInfo[0]['tag']).to.include('test')
     expect(filesInfo[0]['tag']).to.include('标签')
@@ -273,6 +273,7 @@ describe('civetkern read only test', function() {
   })
   it('search files by file type', function() {
     let result = instance.query({type: 'jpeg'})
+    // console.info('jjjjj', result)
     expect(result).to.lengthOf(1)
     result = instance.query({type: 'png'})
     expect(result).to.lengthOf(2)
@@ -291,11 +292,11 @@ describe('civetkern read only test', function() {
     // result = instance.query({class: ['新分类']})
   })
   it('search by color', function() {
-    let result = instance.query({color: '#343e58'})
+    let result = instance.query({color: {$near: '#343e58'}})
     expect(result).to.lengthOf(1)
   })
   it('search ensamble', function() {
-    let result = instance.query({type: 'jpeg', keyword: 'A'})
+    let result = instance.query({type: 'jpeg', tag: 'test'})
     expect(result).to.lengthOf(1)
   })
   after(function() {

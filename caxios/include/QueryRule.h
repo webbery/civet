@@ -42,10 +42,11 @@ namespace caxios {
   struct literal_lt : string<'$', 'l', 't'> {};
   struct literal_lte : string<'$', 'l', 't', 'e'> {};
   struct literal_ne : string<'$', 'n', 'e'> {};
+  struct literal_near : string<'$', 'n', 'e', 'a', 'r'> {};
   struct literal_eq : one<':'> {};
   struct literal_and : one<','> {};
   struct literal_or : string<'$', 'o', 'r'> {};
-  struct literal_op : sor< literal_lte, literal_gte, literal_gt, literal_lt, literal_ne> {};
+  struct literal_op : sor< literal_lte, literal_gte, literal_gt, literal_lt, literal_near, literal_ne> {};
 
   struct literal_op_key : seq< literal_quote, literal_op, literal_quote> {};
   struct literal_string_key : seq< literal_quote, literal_keyword, literal_quote> {};
@@ -61,10 +62,10 @@ namespace caxios {
   struct literal_condition : seq< literal_string_key, literal_eq, literal_spaces, literal_value > {};
   struct literal_conditions : if_must< literal_and, literal_condition> {};
 
-  struct literal_query_equal : seq<literal_start, literal_condition, literal_spaces, star<literal_conditions>, literal_close > {};
+  struct literal_query_and : seq<literal_start, literal_condition, literal_spaces, star<literal_conditions>, literal_close > {};
   struct literal_query_compare : seq<literal_start, literal_op_key, literal_eq, literal_value, literal_close> {};
 
-  struct literal_query : sor<literal_query_compare, literal_query_equal > {};
+  struct literal_query : sor<literal_query_compare, literal_query_and > {};
 
   struct QueryGrammar :
     if_must<

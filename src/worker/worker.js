@@ -196,6 +196,9 @@ const messageProcessor = {
   },
   addCategory: (msgid, mutation) => {
     console.info('add class', mutation)
+    if (!Array.isArray(mutation)) {
+      mutation = [mutation]
+    }
     storage.addClasses(mutation)
   },
   getAllCategory: (msgid, parent) => {

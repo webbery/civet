@@ -24,9 +24,9 @@ namespace caxios {
 
   TableTag::~TableTag()
   {
-    for (auto item : _dbi) {
-      _pDatabase->CloseDatabase(item.second);
-    }
+    //for (auto item : _dbi) {
+    //  _pDatabase->CloseDatabase(item.second);
+    //}
   }
 
   bool TableTag::Add(const std::string& value, const std::vector<FileID>& fileid)

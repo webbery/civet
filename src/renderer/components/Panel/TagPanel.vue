@@ -50,6 +50,8 @@ button {
   min-width: 60px;
   height: 30px;
   background: #d0d8ea;
+  background: #343e58;
+  background: #3f4865;
   border: none;
   border-radius: 20px;
   text-transform: uppercase;
