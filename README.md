@@ -11,10 +11,12 @@
 
 ### 下载
 
-[测试版本 0.1.0](https://github.com/webbery/civet/releases)
+[测试版本](https://github.com/webbery/civet/releases)
 
-项目讨论区(https://www.yuque.com/g/webberg/dacstu/docs)  
+### 相关资源
 
+![开发文档](https://webbery.gitbook.io/civet/)
+![项目讨论区](https://www.yuque.com/g/webberg/dacstu/docs)  
 
 **道阻且长，行则将至。**
 
@@ -35,6 +37,9 @@
 + [ ] 增加存储插件功能，以支持多种数据存储方式(如本地复制、云存储等)
 + [ ] 增加信息提取插件功能，以增强不同文件类型的信息存储与检索
 + [ ] 引入HTML5批注规范，为各种类型的文件增加批注功能
+
+#### Requirements
+C++编译器要求支持C++17, Node版本建议>12  
 
 #### 感谢  
 lmdb提供了一个基于共享内存的数据库，使civet在存储大量的缩略图上有巨大的性能改善  

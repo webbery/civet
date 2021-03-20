@@ -1,24 +1,24 @@
-import puppeteer from "puppeteer-core"
-const electron = require("electron");
-const { spawn } = require("child_process");
+import puppeteer from 'puppeteer-core'
+const electron = require('electron')
+const { spawn } = require('child_process')
 
-let spawnedProcess;
+let spawnedProcess
 
 const run = async () => {
-  const port = 9200; // Debugging port
-  const startTime = Date.now();
-  const timeout = 20000; // Timeout in miliseconds
-  let app;
+  const port = 9200 // Debugging port
+  const startTime = Date.now()
+  const timeout = 20000 // Timeout in miliseconds
+  let app
 
   // Start Electron with custom debugging port
-  spawnedProcess = spawn(electron, [".", `--remote-debugging-port=${port}`], {
+  spawnedProcess = spawn(electron, ['.', `--remote-debugging-port=${port}`], {
     shell: true
-  });
+  })
 
   // Log errors of spawned process to console
-  spawnedProcess.stderr.on("data", data => {
-    console.error(`stderr: ${data}`);
-  });
+  spawnedProcess.stderr.on('data', data => {
+    console.error(`stderr: ${data}`)
+  })
 
   // Wait for Puppeteer to connect
   while (!app) {
@@ -26,10 +26,10 @@ const run = async () => {
       app = await puppeteer.connect({
         browserURL: `http://localhost:${port}`,
         defaultViewport: { width: 1000, height: 600 }
-      });
+      })
     } catch (error) {
       if (Date.now() > startTime + timeout) {
-        throw error;
+        throw error
       }
     }
   }
@@ -39,18 +39,18 @@ const run = async () => {
   // const text = await page.$eval("#demo", element => element.innerText);
   // assert(text === "Demo of Electron + Puppeteer + Jest.");
   // await page.close();
-};
+}
 
 run()
   .then(() => {
-    console.log("Test passed");
+    console.log('Test passed')
   })
   .catch(error => {
-    console.error(`Test failed. Error: ${error.message}`);
-    kill(spawnedProcess.pid, () => {
-      process.exit(1);
-    });
-  });
+    console.error(`Test failed. Error: ${error.message}`)
+    // kill(spawnedProcess.pid, () => {
+    //   process.exit(1);
+    // });
+  })
 
 // const main = async () => {
 //   console.info('+++++++++++++++')
@@ -67,7 +67,6 @@ run()
 //   console.log(page.url());
 //   // window.destroy();
 // };
-
 
 // describe('Launch', async function () {
 //   await main();

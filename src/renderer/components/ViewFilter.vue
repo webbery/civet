@@ -20,6 +20,7 @@
         >
         </el-option>
       </el-select>
+      <MutiSelect v-model="aaa" :options="test" placeholder="1111" :multiple="true" :show-labels="true"></MutiSelect>
       <!-- <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
@@ -39,13 +40,13 @@
 
 <script>
 import RangeInput from './Control/RangeInput'
-import FittedSelect from './Control/FittedSelect'
+import MutiSelect from './Control/Multiselect'
 
 export default {
   name: 'view-filter',
   components: {
     RangeInput,
-    FittedSelect
+    MutiSelect
   },
   data() {
     // current datetime
@@ -68,6 +69,8 @@ export default {
         {label: 'tif'},
         {label: 'bmp'}
       ],
+      aaa: null,
+      test: ['aa', 'bb'],
       clazz: []
     }
   },
