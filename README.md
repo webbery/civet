@@ -31,6 +31,8 @@
 | Civet  | Electron | Typescript/C++ | lmdb | 开源MIT | 地上走的
 | Eagle  | Electron | Js | Json/图片拷贝 | 私有 | 天上飞的
 | Billfish  | Qt | C++ | Sqlite + 图片拷贝/索引 | 私有 | 水里游的
+| PicSee  | ObjectC | ObjectC | Realm | 私有 | 
+|
 
 #### RoadMap
 + [ ] 增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取和展示

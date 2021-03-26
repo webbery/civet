@@ -72,8 +72,8 @@ namespace caxios {
 #define MAX_SCHEMA_DB_SIZE  5*1024*1024
 #define MAX_BIN_DB_SIZE     5*1024*1024
 #else
-#define MAX_SCHEMA_DB_SIZE  256*1024*1024
-#define MAX_BIN_DB_SIZE     512*1024*1024
+#define MAX_SCHEMA_DB_SIZE  128*1024*1024
+#define MAX_BIN_DB_SIZE     256*1024*1024
 #endif
     InitDB(m_pDatabase, dbdir.c_str(), DBSCHEMA, MAX_SCHEMA_DB_SIZE);
     InitDB(m_pBinaryDB, dbdir.c_str(), DBBIN, MAX_BIN_DB_SIZE);

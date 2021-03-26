@@ -5,6 +5,10 @@ import { autoUpdater } from 'electron-updater'
 const path = require('path')
 const fs = require('fs')
 
+// var util = require('util')
+// var logFile = fs.createWriteStream('/Users/v_yuanwenbin/debug.log', {flags: 'w'})
+// var log_stdout = process.stdout;
+
 function initUpdater() {
   const updaterCacheDirName = 'civet'
   const path = require('path')
@@ -62,6 +66,7 @@ if (process.env.NODE_ENV !== 'development') {
 //   })
 // }
 let mainWindow, workerWindow
+const url = require('url')
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : path.join(__dirname, '/index.html')
@@ -83,7 +88,8 @@ function createRendererWindow() {
   })
 
   mainWindow.maximize()
-  mainWindow.loadURL(winURL)
+  const mainpath = url.format({pathname: winURL, protocol: 'file:', slashes: true})
+  mainWindow.loadURL(mainpath)
 
   // mainWindow.onbeforeunload = (e) => {
   //   console.info('onbeforeunload')
@@ -93,7 +99,9 @@ function createRendererWindow() {
     // config.save()
     console.info('main window close')
     // mainWindow.removeAllListeners('close');
-    mainWindow.webContents.closeDevTools()
+    if (process.env.NODE_ENV === 'development') {
+      mainWindow.webContents.closeDevTools()
+    }
     workerWindow.close()
     // mainWindow.close()
   })
@@ -104,6 +112,7 @@ function createRendererWindow() {
   mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     // enableDevTools(mainWindow)
+    mainWindow.webContents.openDevTools()
   }
   mainWindow.show()
   // if (process.env.NODE_ENV !== 'development') {
@@ -112,9 +121,9 @@ function createRendererWindow() {
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
-    // show: true,
-    show: process.env.NODE_ENV === 'development',
-    frame: false,
+    show: true,
+    // show: process.env.NODE_ENV === 'development',
+    frame: true,
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
@@ -136,12 +145,15 @@ function createWorkerWindow (bFirst) {
     ? 'worker.html'
     : path.join(__dirname, '/worker.html')
   // }
+  // logFile.write(util.format(workerURL) + '\n')
+  const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
+  // logFile.write(util.format() + '\n')
   if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
-  else workerWindow.loadURL(workerURL)
-  // workerWindow.webContents.openDevTools()
-  if (process.env.NODE_ENV === 'development') {
-    workerWindow.webContents.openDevTools()
-  }
+  else workerWindow.loadURL(urlpath)
+  workerWindow.webContents.openDevTools()
+  // if (process.env.NODE_ENV === 'development') {
+  //   workerWindow.webContents.openDevTools()
+  // }
 }
 
 app.on('window-all-closed', async () => {
@@ -190,6 +202,7 @@ app.whenReady().then(() => {
 })
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)
+  createRendererWindow()
   createWorkerWindow()
   ipcMain.on('message-from-worker', (event, arg) => {
     // console.info('########################')
@@ -204,7 +217,7 @@ app.on('ready', async () => {
   })
   ipcMain.on('ready', (event, arg) => {
     console.info('child process ready')
-    createRendererWindow()
+    // createRendererWindow()
   })
   ipcMain.on('export2Diectory', (event, arg) => {
     const { dialog } = require('electron')

@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <execinfo.h>
+#include <pwd.h>
 #elif defined(WIN32)
 #include <direct.h>
 #include <io.h>
@@ -101,7 +102,15 @@ namespace caxios {
         }
         idx += 1;
       }
-      _file = fopen(filename.c_str(), "a+");
+      std::string root;
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__)
+      root = getenv("HOME");
+      if (root.empty()) {
+        root = getpwuid(getuid())->pw_dir;
+      }
+      root += "/Documents/";
+#endif
+      _file = fopen((root + filename).c_str(), "a+");
       if (_file) return true;
       return false;
     }

@@ -1,10 +1,7 @@
 const kernel = (function () {
-  const instance = require('civetkern')
-  let flag = 0
-  if (process.argv[process.argv.length - 1] === 'renderer') {
-    flag = 1
-  }
+  let instance
   let _isInit = false
+  let flag = 0
   function _init(name) {
     const cfg = require('./CivetConfig').config
     const config = cfg.getConfig(true)
@@ -25,11 +22,19 @@ const kernel = (function () {
       console.info('init civetkern exception:', exception)
     }
   }
-  return function(name) {
-    if (!_isInit) {
-      if (!_init(name)) return null
+  try {
+    instance = require('civetkern')
+    if (process.argv[process.argv.length - 1] === 'renderer') {
+      flag = 1
     }
-    return instance.civetkern
+    return function(name) {
+      if (!_isInit) {
+        if (!_init(name)) return null
+      }
+      return instance.civetkern
+    }
+  } catch (ex) {
+    console.error(ex)
   }
 })()
 
