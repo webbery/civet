@@ -29,6 +29,7 @@
       'cflags_c': [],
       'cflags_cc': [
         '-std=c++17',
+        '-frtti',
         '-Wno-pessimizing-move'
       ],
       "cflags!": [
@@ -36,7 +37,6 @@
       ],
       "cflags_cc!": [
         '-fno-exceptions',
-        '-fno-rtti'
         '-std=gnu++1y',
         '-std=gnu++0x'
       ],
@@ -74,6 +74,8 @@
               }
             }
           }
+        }],
+        ['OS=="linux"', {
         }]
       ]
     }

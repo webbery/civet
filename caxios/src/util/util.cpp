@@ -4,6 +4,7 @@
 #if defined(__gnu_linux__) || defined(__linux__) 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #elif defined(__APPLE__)
 #include <unistd.h>
 #elif defined(WIN32)
@@ -15,12 +16,13 @@
 #include <sstream>
 #include <codecvt>
 #include <locale>
+#include <iostream>
 #define CHAR_BIT_S  255
 
 namespace caxios {
   
   bool exist(const std::string& filepath) {
-#if defined(__APPLE__) || defined(UNIX) || defined(LINUX)
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__)
     if (access(filepath.c_str(), 0) != -1) return true;
 #elif defined(WIN32)
     if (_access(filepath.c_str(), 0) == 0) return true;
@@ -28,6 +30,61 @@ namespace caxios {
     return false;
   }
 
+  void MkDir(
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+    const std::string& dir
+#else
+    const std::wstring& dir
+#endif
+  ) {
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+    mkdir(dir.c_str()
+      , 0777
+#else
+    _wmkdir(dir.c_str()
+#endif
+    );
+  }
+  bool isDirectoryExist(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  ) {
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    if (access(dir.c_str(), 0) != -1) return true;
+#elif defined(WIN32)
+    if (_waccess(dir.c_str(), 0) == 0) return true;
+#endif
+    return false;
+  }
+  void createDirectories(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  ) {
+    if (isDirectoryExist(dir)) return;
+    size_t pos = dir.rfind(UNIVERSAL_DELIMITER);
+    if (pos == std::string::npos) {
+      pos = dir.rfind(OS_DELIMITER);
+      if (pos == std::string::npos) {
+        MkDir(dir);
+        return;
+      }
+    }
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    std::string parentDir;
+#elif defined(WIN32)
+    std::wstring parentDir;
+#endif
+    parentDir = dir.substr(0, pos);
+    createDirectories(parentDir);
+    MkDir(dir);
+  }
+  
   std::string serialize(const std::vector< std::vector<WordIndex> >& classes)
   {
     // len wordindexes len wordindexes ...

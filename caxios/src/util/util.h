@@ -6,6 +6,12 @@
 #include <functional>
 #include "datum_type.h"
 
+#define UNIVERSAL_DELIMITER '/'
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux)
+#define OS_DELIMITER '/'
+#else
+#define OS_DELIMITER '\\'
+#endif
 #define ROOT_CLASS_PATH   "/"
 #define ROOT_CLASS_ID     0
 
@@ -42,6 +48,13 @@ namespace caxios {
   bool isNumber(const std::string&);
   bool isHex(const std::string&);
 
+  void createDirectories(
+#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
+    const std::string& dir
+#elif defined(WIN32)
+    const std::wstring& dir
+#endif
+  );
   bool exist(const std::string& filepath);
   std::string serialize(const std::vector< std::vector<WordIndex> >& classes);
   std::string serialize(const std::vector<WordIndex>& classes);

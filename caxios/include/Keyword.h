@@ -1,4 +1,6 @@
 #pragma once
+#include <string.h>
+#include <string>
 #include <string_view>
 
 #define TABLE_PREFIX     "tb:"

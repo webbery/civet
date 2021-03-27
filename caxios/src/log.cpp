@@ -108,7 +108,11 @@ namespace caxios {
       if (root.empty()) {
         root = getpwuid(getuid())->pw_dir;
       }
-      root += "/Documents/";
+      root += "/.civet";
+      if (!exist(root)) {
+        createDirectories(root);
+      }
+      root += "/";
 #endif
       _file = fopen((root + filename).c_str(), "a+");
       if (_file) return true;

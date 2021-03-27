@@ -15,12 +15,6 @@
 #include <Table.h>
 
 #define MAX_NUM_DATABASE  64
-#define UNIVERSAL_DELIMITER '/'
-#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux)
-#define OS_DELIMITER '/'
-#else
-#define OS_DELIMITER '\\'
-#endif
 #define DBTHUMBMAIL "t_"    //thumbnail
 
 namespace caxios {
@@ -29,62 +23,6 @@ namespace caxios {
     BT_STRING,
     BT_VALUE
   };
-
-  void MkDir(
-#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
-    const std::string& dir
-#else
-    const std::wstring& dir
-#endif
-  ) {
-#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
-    mkdir(dir.c_str()
-      , 0777
-#else
-    _wmkdir(dir.c_str()
-#endif
-    );
-  }
-  bool isDirectoryExist(
-#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
-    const std::string& dir
-#elif defined(WIN32)
-    const std::wstring& dir
-#endif
-  ) {
-#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
-    if (access(dir.c_str(), 0) != -1) return true;
-#elif defined(WIN32)
-    if (_waccess(dir.c_str(), 0) == 0) return true;
-#endif
-    return false;
-  }
-  void createDirectories(
-#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
-    const std::string& dir
-#elif defined(WIN32)
-    const std::wstring& dir
-#endif
-  ) {
-    if (isDirectoryExist(dir)) return;
-    size_t pos = dir.rfind(UNIVERSAL_DELIMITER);
-    if (pos == std::string::npos) {
-      pos = dir.rfind(OS_DELIMITER);
-      if (pos == std::string::npos) {
-        MkDir(dir);
-        return;
-      }
-    }
-#if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
-    std::string parentDir;
-#elif defined(WIN32)
-    std::wstring parentDir;
-#endif
-    parentDir = dir.substr(0, pos);
-    T_LOG("database", "parentDir: %s",parentDir.c_str());
-    createDirectories(parentDir);
-    MkDir(dir);
-  }
 
   CDatabase::CDatabase(const std::string& dbpath, const std::string& name, DBFlag flag, size_t size) {
 #if defined(__APPLE__) || defined(UNIX) || defined(__linux__)
@@ -406,9 +344,9 @@ namespace caxios {
       std::vector<std::string> vTokens = split(word, '/');
       for (auto& token : vTokens)
       {
-        // È¡×ÖË÷Òý
+        // È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (!this->Get(TABLE_KEYWORD_INDX, token, pData, len)) {
-          // Èç¹ûtag×Ö·û´®²»´æÔÚ£¬Ìí¼Ó
+          // ï¿½ï¿½ï¿½tagï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú£ï¿½ï¿½ï¿½ï¿½ï¿½
           T_LOG("dict", "Add new word: %s", token.c_str());
           this->Put(TABLE_KEYWORD_INDX, token, &lastIndx, sizeof(WordIndex));
           this->Put(TABLE_INDX_KEYWORD, lastIndx, (void*)token.data(), token.size());

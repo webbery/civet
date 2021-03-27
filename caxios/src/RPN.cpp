@@ -42,7 +42,7 @@ namespace caxios {
   void RPN::recusive(std::unique_ptr< tpp::node >&& root)
   {
     if (root->children.size()) {
-      for (auto& itr = root->children.rbegin(); itr != root->children.rend(); ++itr) {
+      for (auto itr = root->children.rbegin(); itr != root->children.rend(); ++itr) {
         recusive(std::move(*itr));
       }
     }

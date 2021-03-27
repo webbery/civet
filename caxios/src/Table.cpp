@@ -25,7 +25,7 @@ namespace caxios {
   bool compare(std::unique_ptr < IExpression >& pExpr,
     MDB_val& left, std::unique_ptr<ValueInstance>& rightValue) {
     typename data_traits<T>::type leftValue = CQueryType<T>::policy(left);
-    return pExpr->compare(leftValue, rightValue->As< data_traits<T>::type >());
+    return pExpr->compare(leftValue, rightValue->As< typename data_traits<T>::type >());
   }
 
   std::unique_ptr<caxios::ValueArray> QueryInArray(
@@ -156,9 +156,10 @@ namespace caxios {
           {
             return *left.get() < *(*right).get();
           });
-        if (ptr != vItems.end() && *(*ptr) == *(*itr)) {
+        auto item = std::move(*itr);
+        if (ptr != vItems.end() && *(*ptr) == *item) {
           // find the same value
-          pResult->push(std::move(*itr));
+          pResult->push(item);
         }
       }
     }

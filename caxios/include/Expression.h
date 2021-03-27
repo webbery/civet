@@ -3,6 +3,7 @@
 #include "ISymbol.h"
 #include <memory>
 #include <cassert>
+#include <string.h>
 #include "intrinsic.h"
 
 namespace caxios {
@@ -93,26 +94,7 @@ namespace caxios {
     static std::unique_ptr< IExpression> Create(const char* name, DataType type);
 
     template<typename T>
-    static std::unique_ptr<IExpression> Create(const char* name)
-    {
-      if (strcmp(name, OP_Equal) == 0) {
-        return std::unique_ptr<ExpressEqual<T>>(new ExpressEqual<T>());
-      }
-      else if (strcmp(name, OP_In) == 0) {
-        return std::unique_ptr<ExpressIn<T>>(new ExpressIn<T>());
-      }
-      else if (strcmp(name, OP_GreateThan) == 0) {
-        return std::unique_ptr<ExpressGreatThan<T>>(new ExpressGreatThan<T>());
-      }
-      else if (strcmp(name, OP_And) == 0) {
-        return std::unique_ptr< ExpressAnd<T> >(new ExpressAnd<T>());
-      }
-      else if (strcmp(name, OP_Near) == 0) {
-        return std::unique_ptr< ExpressNear<T> >(new ExpressNear<T>(40));
-      }
-      assert(false);
-      return nullptr;
-    }
+    static std::unique_ptr<IExpression> Create(const char* name);
 
     virtual bool compare(const std::string& left, const std::string& right) {
       return false;
@@ -188,4 +170,26 @@ namespace caxios {
       return this->operator()(left, right);
     };
   };
+
+  template<typename T>
+  std::unique_ptr<IExpression> IExpression::Create(const char* name)
+  {
+      if (strcmp(name, OP_Equal) == 0) {
+        return std::unique_ptr<ExpressEqual<T>>(new ExpressEqual<T>());
+      }
+      else if (strcmp(name, OP_In) == 0) {
+        return std::unique_ptr<ExpressIn<T>>(new ExpressIn<T>());
+      }
+      else if (strcmp(name, OP_GreateThan) == 0) {
+        return std::unique_ptr<ExpressGreatThan<T>>(new ExpressGreatThan<T>());
+      }
+      else if (strcmp(name, OP_And) == 0) {
+        return std::unique_ptr< ExpressAnd<T> >(new ExpressAnd<T>());
+      }
+      else if (strcmp(name, OP_Near) == 0) {
+        return std::unique_ptr< ExpressNear<T> >(new ExpressNear<T>(40));
+      }
+      assert(false);
+      return nullptr;
+    }
 }

@@ -771,7 +771,7 @@ namespace caxios {
             std::unique_ptr<ISymbol> pRight = std::move(sSymbol.top());
             sSymbol.pop();
             std::unique_ptr< ValueInstance > pValue = dynamic_unique_cast<ValueInstance>(std::move(pRight));
-            pArray->push(std::move(pValue));
+            pArray->push(pValue);
           }
           sSymbol.emplace(std::move(pArray));
           T_LOG("query", "array count: %d", sSymbol.size());

@@ -43,6 +43,8 @@ namespace caxios {
 
   class ValueArray : public ValueInstance {
   public:
+    typedef std::vector< std::unique_ptr<ValueInstance> >::iterator iterator;
+    typedef std::vector< std::unique_ptr<ValueInstance> >::const_iterator const_iterator;
     ValueArray(): ValueInstance(nullptr, QT_Array) {
     }
     template<typename T>
@@ -77,13 +79,12 @@ namespace caxios {
     template<typename T>
     std::vector<T> GetArray() {
       std::vector<T> vArr;
-      for (auto& itr = _sArray.begin(); itr != _sArray.end(); ++itr) {
+      for (const_iterator itr = _sArray.begin(); itr != _sArray.end(); ++itr) {
         vArr.emplace_back((*itr)->As<T>());
       }
       return std::move(vArr);
     }
 
-    typedef std::vector< std::unique_ptr<ValueInstance> >::iterator iterator;
     iterator begin() { return _sArray.begin(); }
     iterator end() { return _sArray.end(); }
   private:
