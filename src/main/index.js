@@ -67,6 +67,7 @@ if (process.env.NODE_ENV !== 'development') {
 // }
 let mainWindow, workerWindow
 const url = require('url')
+// console.info('dirname: ', __dirname)
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : path.join(__dirname, '/index.html')
@@ -84,11 +85,13 @@ function createRendererWindow() {
     height: 563,
     useContentSize: true,
     width: 1000,
+    icon: path.join(__dirname, 'asset/icon/icon.png'),
     show: false
   })
 
   mainWindow.maximize()
   if (process.env.NODE_ENV === 'development') {
+    // console.info('main URL:', winURL)
     mainWindow.loadURL(winURL)
   } else {
     const mainpath = url.format({pathname: winURL, protocol: 'file:', slashes: true})
@@ -112,6 +115,7 @@ function createRendererWindow() {
   mainWindow.on('closed', () => {
     console.info('main window closed')
   })
+  // mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
@@ -154,6 +158,7 @@ function createWorkerWindow (bFirst) {
     const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
     workerWindow.loadURL(urlpath)
   }
+  // workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     workerWindow.webContents.openDevTools()
   }
@@ -205,7 +210,6 @@ app.whenReady().then(() => {
 })
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)
-  createRendererWindow()
   createWorkerWindow()
   ipcMain.on('message-from-worker', (event, arg) => {
     // console.info('########################')
@@ -220,7 +224,7 @@ app.on('ready', async () => {
   })
   ipcMain.on('ready', (event, arg) => {
     console.info('child process ready')
-    // createRendererWindow()
+    createRendererWindow()
   })
   ipcMain.on('export2Diectory', (event, arg) => {
     const { dialog } = require('electron')
