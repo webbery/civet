@@ -38,6 +38,22 @@ namespace caxios {
     typedef time_t type;
   };
 
+  template<typename T> struct cv_type_traits;
+  template<> struct cv_type_traits<uint32_t> {
+    enum {type = QT_Color};
+  };
+  template<> struct cv_type_traits<std::string> {
+    enum {
+      type = QT_String
+    };
+  };
+  template<> struct cv_type_traits<time_t> {
+    enum {
+      type = QT_DateTime
+    };
+  };
+
+
   enum SymbolType {
     Unknown,
     Statement,
@@ -49,7 +65,7 @@ namespace caxios {
   public:
     ISymbol(SymbolType t): _type(t){}
     ISymbol(const ISymbol&) = delete;
-    ISymbol(ISymbol&&) = delete;
+    //ISymbol(ISymbol&&) = delete;
     virtual ~ISymbol() {}
     virtual std::string Value() = 0;
     virtual SymbolType symbolType() { return _type; }

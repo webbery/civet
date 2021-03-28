@@ -34,6 +34,7 @@ namespace caxios {
     //void addSymbol()
   private:
     DataType _curType = QT_String;
+    int _statements = 0;
     std::deque<std::unique_ptr<ISymbol>> _sSymbols;
   };
 }

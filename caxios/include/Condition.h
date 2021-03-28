@@ -12,8 +12,9 @@ namespace caxios {
     friend bool operator < (const ValueInstance& left, const ValueInstance& right);
     friend bool operator != (const ValueInstance& left, const ValueInstance& right);
     friend bool operator==(const ValueInstance& left, const ValueInstance& right);
-    ValueInstance(const char* value, DataType dt) {
+    ValueInstance(DataType dt) {
       _type = Condition;
+      _dType |= dt;
     }
 
     ValueInstance(const std::string& s, DataType dt);
@@ -29,11 +30,20 @@ namespace caxios {
       return std::get<T>(_sCondition);
     }
 
-    DataType dataType() const { return _dType; }
+    int dataType() const { return _dType; }
+    DataType originType() const {
+      if (_dType & QT_String) return QT_String;
+      if (_dType & QT_Number) return QT_Number;
+      if (_dType & QT_DateTime) return QT_DateTime;
+      if (_dType & QT_Color) return QT_Color;
+    }
     virtual std::string Value();
-    virtual bool isArray() { return false; }
+    bool isArray() { return _dType & QT_Array; }
+
+  protected:
+    int _dType = QT_Origin;
+
   private:
-    DataType _dType;
     std::variant< std::string, time_t, double, uint32_t> _sCondition;
   };
 
@@ -45,22 +55,26 @@ namespace caxios {
   public:
     typedef std::vector< std::unique_ptr<ValueInstance> >::iterator iterator;
     typedef std::vector< std::unique_ptr<ValueInstance> >::const_iterator const_iterator;
-    ValueArray(): ValueInstance(nullptr, QT_Array) {
+    ValueArray(): ValueInstance(QT_Array) {
     }
     template<typename T>
-    ValueArray(std::vector<T>& v) : ValueInstance(nullptr, QT_Array) {
+    ValueArray(std::vector<T>& v) : ValueInstance(QT_Array) {
+      _dType |= cv_type_traits<T>::type;
       for (auto& val: v)
       {
-        std::unique_ptr<ValueInstance> p(new ValueInstance(val, QT_Origin));
+        std::unique_ptr<ValueInstance> p(new ValueInstance(val, DataType(cv_type_traits<T>::type)));
         _sArray.emplace_back(std::move(p));
       }
     }
 
+    ValueArray(ValueArray&& other);
+    ValueArray& operator = (ValueArray& other);
+
     virtual std::string Value() { return "array"; }
-    virtual bool isArray() { return true; }
 
     void push(std::unique_ptr<ValueInstance>& value) {
-      _sArray.push_back(std::move(value));
+      this->_dType |= value->originType();
+      _sArray.emplace_back(std::move(value));
     }
 
     void push(FileID* pStart, size_t cnt = 1) {

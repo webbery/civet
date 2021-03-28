@@ -32,7 +32,7 @@ namespace caxios {
   ValueInstance::ValueInstance(uint32_t s, DataType dt)
   {
     _type = Condition;
-    _dType = dt;
+    _dType |= dt;
     _sCondition = s;
   }
 
@@ -52,6 +52,21 @@ namespace caxios {
     return *this;
   }
 
+  ValueArray::ValueArray(ValueArray&& other)
+    :ValueInstance(std::move(other))
+  {
+    _sArray = std::move(other._sArray);
+  }
+
+  ValueArray& ValueArray::operator=(ValueArray& other)
+  {
+    //for (auto itr = other._sArray.begin(); itr != other._sArray.end(); ++itr)
+    //{
+    //  _sArray.emplace_back(std::move(*itr));
+    //}
+    return static_cast<ValueArray &>(ValueInstance::operator=(std::move(other)));
+  }
+
   std::string ValueInstance::Value()
   {
     std::string val;
@@ -69,7 +84,7 @@ namespace caxios {
 
   bool operator<(const ValueInstance& left, const ValueInstance& right)
   {
-    DataType dType = left.dataType();
+    int dType = left.dataType();
     switch (dType)
     {
     case caxios::QT_String:
@@ -95,4 +110,6 @@ namespace caxios {
   {
     return !operator!=(left, right);
   }
+
+
 }

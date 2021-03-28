@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Splash></Splash>
-    <!-- <DatabasePage ></DatabasePage> -->
+    <DatabasePage ></DatabasePage>
   </div>
 </template>
 

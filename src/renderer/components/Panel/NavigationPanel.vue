@@ -92,7 +92,7 @@ export default {
       ],
       // data: new Tree([]),
       newCategoryName: '',
-      index: 0,
+      // index: 0,
       menus: [
         {text: '导出到计算机', cb: this.onExportClasses},
         {text: '重命名', cb: this.onMenuChangeName},
@@ -121,11 +121,11 @@ export default {
     },
     addRootClass() {
       let name = ''
-      if (this.index !== 0) name = name + this.index
+      // if (this.index !== 0) name = name + this.index
       // let root = new TreeNode({name: name, isLeaf: false})
       // if (!this.data.children) this.data.children = []
       // this.data.addChildren(root)
-      this.index += 1
+      // this.index += 1
       this.$store.dispatch('addClass', [name])
     },
     onAddNode(node, parent) {
@@ -272,12 +272,6 @@ el-tab-pane {
 }
 .item {
   font-size: 14px;
-}
-.selected {
-  font-size: 14px;
-  /* width: 100%; */
-  /* display: inline-block; */
-  background-color:rgb(16, 125, 197);
 }
 table {
   width: 100%;

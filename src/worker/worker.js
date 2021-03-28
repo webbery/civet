@@ -49,35 +49,6 @@ function updateStatus(status) {
 // your background code here
 const fs = require('fs')
 
-// let bakDir
-// // console.info(configPath, '............', userDir)
-// // 递归创建目录 同步方法
-// function mkdirsSync(dirname) {
-//   if (fs.existsSync(dirname)) {
-//     return true
-//   } else {
-//     const path = require('path')
-//     if (mkdirsSync(path.dirname(dirname))) {
-//       fs.mkdirSync(dirname)
-//       return true
-//     }
-//   }
-// }
-
-// function initHardLinkDir(resourcName) {
-//   const config = cvtConfig.getConfig()
-//   for (let resource of config.resources) {
-//     if (resourcName === resource.name) {
-//       bakDir = resource.linkdir
-//       if (!fs.existsSync(bakDir)) {
-//         console.info('mkdir: ', bakDir)
-//         mkdirsSync(bakDir)
-//       }
-//       break
-//     }
-//   }
-// }
-
 async function readImages(msgid, fullpath) {
   const info = fs.statSync(fullpath)
   if (info.isDirectory()) {
@@ -196,7 +167,7 @@ const messageProcessor = {
   },
   addCategory: (msgid, mutation) => {
     console.info('add class', mutation)
-    if (!Array.isArray(mutation)) {
+    if (typeof mutation === 'string') {
       mutation = [mutation]
     }
     storage.addClasses(mutation)

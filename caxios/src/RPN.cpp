@@ -55,11 +55,13 @@ namespace caxios {
           pSym = std::unique_ptr< ISymbol>(new ITableProxy(root->source.substr(strlen(TABLE_PREFIX)).c_str()));
         }
         else if (is_operator(view)) {
+          _statements = 0;
           pSym = IExpression::Create(root->string().c_str(), _curType);
         }
         else if(is_value(view)){
           T_LOG("rpn", "value: %s", root->source.c_str());
           _curType = getType(view);
+          _statements += 1;
           pSym = std::unique_ptr< ISymbol>(new ValueInstance(root->source.substr(strlen(VALUE_PREFIX)), QT_Origin));
         }
         else {
@@ -76,11 +78,12 @@ namespace caxios {
           pSym = IExpression::Create(OP_Equal, _curType);
         }
         else if (is_in(root->type)) {
-          pSym = IExpression::Create(OP_In, _curType);
+          pSym = IExpression::Create(OP_In, _curType, _statements);
         }
         else {
           break;
         }
+        _statements = 0;
         _sSymbols.emplace_back(std::move(pSym));
       }
       break;

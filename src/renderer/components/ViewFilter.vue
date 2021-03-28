@@ -20,7 +20,7 @@
         >
         </el-option>
       </el-select>
-      <MutiSelect v-model="aaa" :options="test" placeholder="1111" :multiple="true" :show-labels="true"></MutiSelect>
+      <!-- <MutiSelect v-model="aaa" :options="test" placeholder="1111" :multiple="true" :show-labels="true"></MutiSelect> -->
       <!-- <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
@@ -126,7 +126,7 @@ export default {
       this.color = color
       const tinyColor = require('tinycolor2')
       const hex = tinyColor(color).toHexString()
-      this.$store.dispatch('query', {color: hex})
+      this.$store.dispatch('query', {color: {$near: hex}})
     }
   }
 }

@@ -1,11 +1,9 @@
 #include "util.h"
 #include <iostream>
 #include "log.h"
-#if defined(__gnu_linux__) || defined(__linux__) 
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#elif defined(__APPLE__)
 #include <unistd.h>
 #elif defined(WIN32)
 #include <direct.h>

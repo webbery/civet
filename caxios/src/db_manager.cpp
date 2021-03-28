@@ -767,7 +767,9 @@ namespace caxios {
         std::unique_ptr<IExpression> pExpr = dynamic_unique_cast<IExpression>(std::move(*itr));
         if (pExpr->Value() == OP_In) { // array
           std::unique_ptr<ValueArray> pArray(new ValueArray);
-          while (!sSymbol.empty()) {
+          int loop = (pExpr->statementCount() == 0 ? sSymbol.size() : pExpr->statementCount());
+          for (int idx =0; idx< loop; ++idx)
+          {
             std::unique_ptr<ISymbol> pRight = std::move(sSymbol.top());
             sSymbol.pop();
             std::unique_ptr< ValueInstance > pValue = dynamic_unique_cast<ValueInstance>(std::move(pRight));
@@ -777,6 +779,7 @@ namespace caxios {
           T_LOG("query", "array count: %d", sSymbol.size());
         }
         else {
+          T_LOG("query", "stack count: %d", sSymbol.size());
           std::unique_ptr<ISymbol> pLeft = std::move(sSymbol.top());
           sSymbol.pop();
           std::unique_ptr<ISymbol> pRight = std::move(sSymbol.top());

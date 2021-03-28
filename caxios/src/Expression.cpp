@@ -40,7 +40,7 @@ namespace caxios {
   //  time_t _point;
   //};
 
-  std::unique_ptr< caxios::IExpression> IExpression::Create(const char* name, DataType type)
+  std::unique_ptr< caxios::IExpression> IExpression::Create(const char* name, DataType type, int statements)
   {
     switch (type) {
     case QT_Color: return IExpression::Create<data_traits<QT_Color>::type>(name);
@@ -48,7 +48,7 @@ namespace caxios {
     default:
       break;
     }
-    return IExpression::Create< data_traits<QT_String>::type>(name);
+    return IExpression::Create< data_traits<QT_String>::type>(name, statements);
   }
 
 }

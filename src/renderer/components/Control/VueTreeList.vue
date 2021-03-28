@@ -56,6 +56,7 @@
           :value="model.name"
           @input="updateName"
           @blur="setUnEditable"
+          @keyup.enter="setUnEditable"
         />
         <div class="vtl-count" v-if="model.count>0"><span>{{ model.count }}</span></div>
       </div>
@@ -173,8 +174,9 @@ export default {
     },
 
     treeNodeClass() {
+      console.info('tree node', this)
       const {
-        model: { dragDisabled, disabled },
+        model: { dragDisabled, disabled, selected },
         isDragEnterNode
       } = this
 
@@ -182,7 +184,8 @@ export default {
         'vtl-node-main': true,
         'vtl-active': isDragEnterNode,
         'vtl-drag-disabled': dragDisabled,
-        'vtl-disabled': disabled
+        'vtl-disabled': disabled,
+        'selected': selected
       }
     },
 
@@ -247,7 +250,7 @@ export default {
         return
       }
       // var oldName = this.model.name
-      // console.info('new name: ', e.target.value)
+      console.info('new name: ', e.target.value)
       this.model.changeName(e.target.value)
       this.rootNode.$emit('change-name', {
         id: this.model.id,
@@ -280,6 +283,7 @@ export default {
     },
 
     click() {
+      this.model.selected = true
       this.rootNode.$emit('click', {
         toggle: this.toggle,
         ...this.model

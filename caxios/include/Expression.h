@@ -91,10 +91,10 @@ namespace caxios {
   public:
     virtual std::string Value() { return _name; }
 
-    static std::unique_ptr< IExpression> Create(const char* name, DataType type);
+    static std::unique_ptr< IExpression> Create(const char* name, DataType type, int statements = 0);
 
     template<typename T>
-    static std::unique_ptr<IExpression> Create(const char* name);
+    static std::unique_ptr<IExpression> Create(const char* name, int statements = 0);
 
     virtual bool compare(const std::string& left, const std::string& right) {
       return false;
@@ -109,10 +109,14 @@ namespace caxios {
       return false;
     }
 
+    int statementCount() { return _statements; }
   protected:
-    IExpression(const char* name)
-      :_name(name), ISymbol(Expression){
+    IExpression(const char* name, int statements = 0)
+      :_name(name), _statements(statements), ISymbol(Expression){
     }
+
+  protected:
+    int _statements = 0;
 
   private:
     std::string _name;
@@ -133,7 +137,7 @@ namespace caxios {
   template<typename T>
   class ExpressIn : public IExpression, public In<T> {
   public:
-    ExpressIn() : IExpression(OP_In) {}
+    ExpressIn(int statements) : IExpression(OP_In, statements) {}
 
     virtual bool compare(const T& left, const T& right) {
       return this->operator ()(left, right);
@@ -172,13 +176,13 @@ namespace caxios {
   };
 
   template<typename T>
-  std::unique_ptr<IExpression> IExpression::Create(const char* name)
+  std::unique_ptr<IExpression> IExpression::Create(const char* name, int statements)
   {
       if (strcmp(name, OP_Equal) == 0) {
         return std::unique_ptr<ExpressEqual<T>>(new ExpressEqual<T>());
       }
       else if (strcmp(name, OP_In) == 0) {
-        return std::unique_ptr<ExpressIn<T>>(new ExpressIn<T>());
+        return std::unique_ptr<ExpressIn<T>>(new ExpressIn<T>(statements));
       }
       else if (strcmp(name, OP_GreateThan) == 0) {
         return std::unique_ptr<ExpressGreatThan<T>>(new ExpressGreatThan<T>());

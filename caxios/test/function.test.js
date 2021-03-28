@@ -275,6 +275,8 @@ describe('civetkern read only test', function() {
     let result = instance.query({type: 'jpeg'})
     // console.info('jjjjj', result)
     expect(result).to.lengthOf(1)
+    result = instance.query({type: ['jpeg']})
+    expect(result).to.lengthOf(1)
     result = instance.query({type: 'png'})
     expect(result).to.lengthOf(2)
   })
@@ -297,6 +299,8 @@ describe('civetkern read only test', function() {
   })
   it('search ensamble', function() {
     let result = instance.query({type: 'jpeg', tag: 'test'})
+    expect(result).to.lengthOf(1)
+    result = instance.query({type: ['jpeg'], tag: 'test'})
     expect(result).to.lengthOf(1)
   })
   after(function() {

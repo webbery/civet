@@ -27,6 +27,17 @@ namespace caxios {
     typename data_traits<T>::type leftValue = CQueryType<T>::policy(left);
     return pExpr->compare(leftValue, rightValue->As< typename data_traits<T>::type >());
   }
+  template<DataType T>
+  bool compare(std::unique_ptr < IExpression >& pExpr,
+    typename data_traits<T>::type& leftValue, std::unique_ptr<ValueInstance>& rightValue) {
+    return pExpr->compare(leftValue, rightValue->As< typename data_traits<T>::type >());
+  }
+  template<DataType T>
+  bool compare(std::unique_ptr < IExpression >& pExpr,
+    MDB_val& left, typename data_traits<T>::type& right) {
+    typename data_traits<T>::type leftValue = CQueryType<T>::policy(left);
+    return pExpr->compare(leftValue, right);
+  }
 
   std::unique_ptr<caxios::ValueArray> QueryInArray(
     CDatabase* pDB,
@@ -70,6 +81,42 @@ namespace caxios {
     return std::move(std::unique_ptr<ValueArray>(new ValueArray(outFilesID)));
   }
 
+  void StringCompare(
+    std::unique_ptr<caxios::ValueArray>& out,
+    std::unique_ptr < IExpression >& pExpr,
+    std::pair<MDB_val, MDB_val>& item,
+    std::unique_ptr<ValueInstance>& rightValue
+  ) {
+      if (compare<QT_String>(pExpr, item.first, rightValue)) {
+        FileID* start = (FileID*)(item.second.mv_data);
+        out->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
+      }
+  }
+  //void ArrayLogic(
+  //  std::unique_ptr<caxios::ValueArray>& out,
+  //  std::unique_ptr < IExpression >& pExpr,
+  //  std::pair<MDB_val,MDB_val>& item,
+  //  std::unique_ptr<ValueInstance>& rightValue
+  //) {
+  //  std::unique_ptr<ValueArray> pArray = dynamic_unique_cast<ValueArray>(std::move(rightValue));
+  //  DataType arrType = pArray->dataType();
+  //  switch (arrType) {
+  //  case QT_Color:
+  //    break;
+  //  case QT_String:
+  //  {
+  //    auto array = pArray->GetArray<std::string>();
+  //    for (int idx = 0; idx < array.size(); ++idx)
+  //    {
+  //      ItemLogic(out, pExpr, item, )
+  //    }
+  //  }
+  //  break;
+  //  default:
+  //    break;
+  //  }
+  //}
+
   std::unique_ptr<caxios::ValueArray> Query(
     CDatabase* pDB,
     std::unique_ptr < IExpression > pExpr,
@@ -83,37 +130,59 @@ namespace caxios {
       T_LOG("query", "meta(%s)", tableName.c_str());
       // meta
       auto cursor = std::begin(*pMetaTable);
+      std::unique_ptr<ValueArray> pArray;
+      if (rightValue->isArray()) {
+        pArray = dynamic_unique_cast<ValueArray>(std::move(rightValue));
+      }
       auto end = Iterator();
       for (; cursor != end; ++cursor) {
         auto item = *cursor;
         auto val = item.first;
-        DataType dtype = rightValue->dataType();
-        switch (dtype)
-        {
-        case caxios::QT_String:
-        {
-          if (compare<QT_String>(pExpr, item.first, rightValue)) {
-            FileID* start = (FileID*)(item.second.mv_data);
-            pResult->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
+        if(pArray){
+          DataType arrType = pArray->originType();
+          switch (arrType) {
+          case QT_Color:
+            break;
+          case QT_String:
+          {
+            auto array = pArray->GetArray<std::string>();
+            for (int idx = 0; idx < array.size(); ++idx)
+            {
+              if (compare<QT_String>(pExpr, item.first, array[idx])) {
+                FileID* start = (FileID*)(item.second.mv_data);
+                pResult->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
+                break;
+              }
+            }
+          }
+          default:
+            break;
           }
         }
-          break;
-        case caxios::QT_Number:
-          break;
-        case caxios::QT_DateTime:
-          if (compare<QT_DateTime>(pExpr, item.first, rightValue)) {
-            FileID* start = (FileID*)(item.second.mv_data);
-            pResult->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
+        else {
+          DataType dtype = rightValue->originType();
+          switch (dtype)
+          {
+          case caxios::QT_String:
+            StringCompare(pResult, pExpr, item, rightValue);
+            break;
+          case caxios::QT_Number:
+            break;
+          case caxios::QT_DateTime:
+            if (compare<QT_DateTime>(pExpr, item.first, rightValue)) {
+              FileID* start = (FileID*)(item.second.mv_data);
+              pResult->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
+            }
+            break;
+          case caxios::QT_Color:
+            if (compare<QT_Color>(pExpr, item.first, rightValue)) {
+              FileID* start = (FileID*)(item.second.mv_data);
+              pResult->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
+            }
+            break;
+          default:
+            break;
           }
-          break;
-        case caxios::QT_Color:
-          if (compare<QT_Color>(pExpr, item.first, rightValue)) {
-            FileID* start = (FileID*)(item.second.mv_data);
-            pResult->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
-          }
-          break;
-        default:
-          break;
         }
       }
     }

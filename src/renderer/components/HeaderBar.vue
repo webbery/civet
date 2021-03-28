@@ -20,7 +20,7 @@
     </el-col>
     <el-col :span="1">
       <el-dropdown size="mini" trigger="click" @command="onQueryKindChange">
-        <span class="selected">
+        <span class="query-kind">
           {{queryKinds[queryIdx].name}}<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
@@ -222,7 +222,7 @@ export default {
   border-left-style: solid;
   padding-left: 10px;
 }
-.selected{
+.query-kind{
   font-size: 12px;
 }
 </style>
