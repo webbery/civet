@@ -111,7 +111,7 @@
     ]
   },
   "dependencies": {
-    "civetkern": "^0.2.0",
+    "civetkern": "^0.2.1",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
     "exifreader": "^3.9.0",
@@ -128,7 +128,8 @@
     "vue-multiselect": "^2.1.6",
     "vue-router": "^3.4.1",
     "vue-tree-list": "^1.5.0",
-    "vuex": "^3.5.1"
+    "vuex": "^3.5.1",
+    "yallist": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.0",

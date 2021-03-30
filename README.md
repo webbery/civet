@@ -1,9 +1,11 @@
-# <img src="https://raw.fastgit.org/webbery/civet/master/build/icons/icon.png" width="52"/>civet
+# <img src="https://raw.fastgit.org/webbery/civet/master/src/main/asset/icon/icon.png" width="52"/>civet
 
 
 ![](https://github.com/webbery/civet/workflows/win-build/badge.svg)
 ![](https://github.com/webbery/civet/workflows/mac-build/badge.svg)
 ![](https://github.com/webbery/civet/workflows/linux-build/badge.svg)
+![](https://img.shields.io/cocoapods/l/Alamofire.svg?style=flat)  
+简体中文 | [English](./README-Zh.md)  
 > :kissing_heart: 支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
 目标是希望像VSCode那样，以扩展的形式为用户提供一个数字资产(图片、文档、视频、文献、网页等)的管理软件。
 
@@ -11,12 +13,12 @@
 
 ### 下载
 
-[测试版本](https://github.com/webbery/civet/releases)
+[测试版本](https://github.com/webbery/civet/releases)  
 
 ### 相关资源
 
-![开发文档](https://webbery.gitbook.io/civet/)
-![项目讨论区](https://www.yuque.com/g/webberg/dacstu/docs)  
+[开发文档](https://webbery.gitbook.io/civet/)  
+[项目讨论区](https://www.yuque.com/g/webberg/dacstu/docs)  
 
 **道阻且长，行则将至。**
 
