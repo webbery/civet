@@ -27,8 +27,8 @@ export class ImageService {
     file.meta.push({name: 'path', value: filepath, type: 'str'})
     for (let parser of this._parsers) {
       if (!await parser.parse(file)) {
-        console.error('parse error')
-        break
+        console.error('parse error:', typeof parser)
+        // break
       }
     }
     return file

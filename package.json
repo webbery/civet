@@ -34,6 +34,7 @@
   "build": {
     "productName": "Civet",
     "appId": "com.civet.app",
+    "asar": false,
     "publish": [
       {
         "provider": "github",
@@ -117,6 +118,7 @@
     "exifreader": "^3.9.0",
     "image-hash": "^4.0.1",
     "import-html-entry": "^1.11.1",
+    "lru-cache": "^6.0.0",
     "node-kmeans": "^1.1.9",
     "segment": "^0.1.3",
     "sharp": "^0.27.2",
