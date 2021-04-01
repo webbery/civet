@@ -83,7 +83,7 @@ class ImageMetaParser extends ImageParser {
       return false
     }
     file.id = storage.generateFilesID(1)[0]
-    file.meta.push({name: 'createtime', value: new Date().toString(), type: 'date'})
+    file.meta.push({name: 'addtime', value: new Date().toString(), type: 'date'})
     // this.callback(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file])
     storage.addFiles([file.toJson()])
     return true;

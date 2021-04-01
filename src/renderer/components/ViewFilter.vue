@@ -90,27 +90,27 @@ export default {
       console.info('keys:', keys)
       switch (keys) {
         case 'today':
-          query = {datetime: {$gt: today}}
+          query = {addtime: {$gt: today}}
           break
         case 'near7':
           let near7 = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
           near7.setHours(0, 0, 0, 0)
-          query = {datetime: {$gt: near7}}
+          query = {addtime: {$gt: near7}}
           break
         case 'near30':
           let near30 = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
           near30.setHours(0, 0, 0, 0)
-          query = {datetime: {$gt: near30}}
+          query = {addtime: {$gt: near30}}
           break
         case 'near90':
           let near90 = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000)
           near90.setHours(0, 0, 0, 0)
-          query = {datetime: {$gt: near90}}
+          query = {addtime: {$gt: near90}}
           break
         case 'near365':
           let near365 = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000)
           near365.setHours(0, 0, 0, 0)
-          query = {datetime: {$gt: near365}}
+          query = {addtime: {$gt: near365}}
           break
         default:
           break
