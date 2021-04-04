@@ -110,7 +110,7 @@ namespace caxios {
     if (m_dOperator == NORMAL) {
       m_dOperator = TRANSACTION;
     }
-    T_LOG("database", "mdb_put %d, key: %d", m_mDBs[dbname], k);
+    // T_LOG("database", "mdb_put %d, key: %d", m_mDBs[dbname], k);
     return true;
   }
 
@@ -129,7 +129,7 @@ namespace caxios {
     if (m_dOperator == NORMAL) {
       m_dOperator = TRANSACTION;
     }
-    T_LOG("database", "mdb_put %d, key: %s", m_mDBs[tbName], k.c_str());
+    // T_LOG("database", "mdb_put %d, key: %s", m_mDBs[tbName], k.c_str());
     return true;
   }
 
@@ -148,7 +148,7 @@ namespace caxios {
     }
     len = datum.mv_size;
     pData = datum.mv_data;
-    T_LOG("database", "mdb_get %d, key: %u, len: %d", m_mDBs[tbName], k, len);
+    // T_LOG("database", "mdb_get %d, key: %u, len: %d", m_mDBs[tbName], k, len);
     return true;
   }
 
@@ -166,7 +166,7 @@ namespace caxios {
     }
     len = datum.mv_size;
     pData = datum.mv_data;
-    T_LOG("database", "mdb_get %d, key: %s, len: %d", m_mDBs[tbName], k.c_str(), len);
+    // T_LOG("database", "mdb_get %d, key: %s, len: %d", m_mDBs[tbName], k.c_str(), len);
     return true;
   }
 

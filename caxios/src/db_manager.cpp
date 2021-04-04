@@ -148,6 +148,7 @@ namespace caxios {
     if (_flag == ReadOnly) return false;
     WRITE_BEGIN();
     for (auto item : files) {
+      T_LOG("performance", "Start");
       if (!AddFile(std::get<0>(item), std::get<1>(item), std::get<2>(item))) {
         return false;
       }
@@ -862,16 +863,16 @@ namespace caxios {
       T_LOG("file", "Put TABLE_FILESNAP Fail %s", sSnaps.c_str());
       return false;
     }
-    T_LOG("file", "Write Snap: %s", sSnaps.c_str());
+    // T_LOG("file", "Write Snap: %s", sSnaps.c_str());
     // meta
     for (MetaItem m : meta) {
       std::string& name = m["name"];
       auto pTable = m_pDatabase->GetMetaTable(name);
       if (!pTable) continue;
-      std::vector<FileID> vID;
-      vID.emplace_back(fileid);
-      T_LOG("file", "add meta(%s): %s, %d", name.c_str(), m["value"].c_str(), fileid);
-      pTable->Add(m["value"], vID);
+      // std::vector<FileID> vID;
+      // vID.emplace_back(fileid);
+      // T_LOG("file", "add meta(%s): %s, %d", name.c_str(), m["value"].c_str(), fileid);
+      pTable->Add(m["value"], { fileid });
     }
     // counts
     SetSnapStep(fileid, BIT_INIT_OFFSET);
@@ -1513,7 +1514,7 @@ namespace caxios {
     nlohmann::json jSnap;
     int step = GetSnapStep(fileID, jSnap);
     bool bs = step & (1 << offset);
-    T_LOG("snap", "step: %d, offset: %d, result: %d", step, offset, bs);
+    // T_LOG("snap", "step: %d, offset: %d, result: %d", step, offset, bs);
     if (bs == bSet) return;
     if (bSet) {
       step |= (1 << offset);
@@ -1523,7 +1524,7 @@ namespace caxios {
     }
     jSnap["step"] = step;
     std::string snap = jSnap.dump();
-    T_LOG("snap", "put snap value: file %d, %d, bit %d", fileID, step, offset);
+    // T_LOG("snap", "put snap value: file %d, %d, bit %d", fileID, step, offset);
     m_pDatabase->Put(TABLE_FILESNAP, fileID, (void*)snap.data(), snap.size());
   }
 
