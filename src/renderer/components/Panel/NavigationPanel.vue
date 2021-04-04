@@ -148,6 +148,7 @@ export default {
       }
       const clsPath = parentPath + node.name
       this.$store.dispatch('getClassesAndFiles', clsPath)
+      this.handleResourceClick({label: clsPath})
     },
     onChangeName(params) {
       if (params.eventType === 'blur') {
@@ -227,7 +228,7 @@ export default {
           this.$router.push({path: '/', query: {name: node.label, cmd: 'display-all'}})
           break
         default:
-          this.$router.push({path: '/', query: {cmd: 'display-all'}})
+          this.$router.push({path: '/', query: {name: node.label, cmd: 'display-other'}})
           break
       }
     }

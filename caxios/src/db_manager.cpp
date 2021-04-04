@@ -419,8 +419,8 @@ namespace caxios {
     m_pDatabase->Filter(TABLE_FILESNAP, [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
       if (k == 0) return false;
       using namespace nlohmann;
-      std::string js((char*)pData, len);
-      json file=json::parse(js);
+      std::vector<uint8_t> js((uint8_t*)pData, (uint8_t*)pData + len);
+      json file=json::from_cbor(js);
       T_LOG("snap", "GetFilesSnap: %s", js.c_str());
       try {
         std::string display = trunc(to_string(file["value"]));
@@ -715,11 +715,11 @@ namespace caxios {
         if (itr.key() == "filename") {
           // if mutaion is filename, update snap
           m_pDatabase->Get(TABLE_FILESNAP, fileID, pData, len);
-          std::string s((char*)pData, len);
+          std::vector<uint8_t> s((uint8_t*)pData, (uint8_t*)pData + len);
           T_LOG("file", "mutation snap: %s", s.c_str());
-          json jsn = json::parse(s);
+          json jsn = json::from_cbor(s);
           jsn["name"] = itr.value().dump();
-          s = to_string(jsn);
+          s = json::to_cbor(jsn);
           m_pDatabase->Put(TABLE_FILESNAP, fileID, s.data(), s.size());
           // TODO: how to update keyword
         }
@@ -842,8 +842,8 @@ namespace caxios {
     using namespace nlohmann;
     json dbMeta;
     dbMeta = meta;
-    std::string value = to_string(dbMeta);
-    T_LOG("file", "Write ID: %d, Meta Info: %s", fileid, value.c_str());
+    // std::string value = to_string(dbMeta);
+    // T_LOG("file", "Write ID: %d, Meta Info: %s", fileid, value.c_str());
     auto vData = json::to_cbor(dbMeta);
     if (!m_pDatabase->Put(TABLE_FILE_META, fileid, (void*)(&vData[0]), vData.size())) {
       return false;
@@ -858,9 +858,10 @@ namespace caxios {
       }
     }
     snaps["step"] = (char)0x1;
-    std::string sSnaps = to_string(snaps);
-    if (!m_pDatabase->Put(TABLE_FILESNAP, fileid, (void*)(sSnaps.data()), sSnaps.size())) {
-      T_LOG("file", "Put TABLE_FILESNAP Fail %s", sSnaps.c_str());
+    // std::string sSnaps = to_string(snaps);
+    auto sSnaps = json::to_cbor(snaps);
+    if (!m_pDatabase->Put(TABLE_FILESNAP, fileid, (void*)(&sSnaps[0]), sSnaps.size())) {
+      T_LOG("file", "Put TABLE_FILESNAP Fail");
       return false;
     }
     // T_LOG("file", "Write Snap: %s", sSnaps.c_str());
@@ -1523,9 +1524,10 @@ namespace caxios {
       step &= ~(1 << offset);
     }
     jSnap["step"] = step;
-    std::string snap = jSnap.dump();
+    // std::string snap = jSnap.dump();
+    auto snap = json::to_cbor(jSnap);
     // T_LOG("snap", "put snap value: file %d, %d, bit %d", fileID, step, offset);
-    m_pDatabase->Put(TABLE_FILESNAP, fileID, (void*)snap.data(), snap.size());
+    m_pDatabase->Put(TABLE_FILESNAP, fileID, (void*)(&snap[0]), snap.size());
   }
 
   char DBManager::GetSnapStep(FileID fileID, nlohmann::json& jSnap)
@@ -1534,9 +1536,10 @@ namespace caxios {
     uint32_t len = 0;
     m_pDatabase->Get(TABLE_FILESNAP, fileID, pData, len);
     if (len == 0) return 0;
-    std::string snap((char*)pData, len);
-    T_LOG("snap", "snap: %s", snap.c_str());
-    jSnap = nlohmann::json::parse(snap);
+    std::vector<uint8_t> snap((uint8_t*)pData, (uint8_t*)pData + len);
+    // T_LOG("snap", "snap: %s", snap.c_str());
+    jSnap = nlohmann::json::from_cbor(snap)
+    // jSnap = nlohmann::json::parse(snap);
     int step = atoi(jSnap["step"].dump().c_str());
     return step;
   }
@@ -1548,8 +1551,8 @@ namespace caxios {
     uint32_t len = 0;
     m_pDatabase->Get(TABLE_FILESNAP, fileID, pData, len);
     if (len) {
-      std::string js((char*)pData, len);
-      nlohmann::json jSnap = nlohmann::json::parse(js);
+      std::vector<uint8_t> snap((uint8_t*)pData, (uint8_t*)pData + len);
+      nlohmann::json jSnap = nlohmann::json::from_cbor(snap);
       std::get<2>(snap) = atoi(jSnap["step"].dump().c_str());
       std::get<0>(snap) = fileID;
       std::get<1>(snap) = trunc(jSnap["value"].dump());
