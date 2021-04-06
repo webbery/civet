@@ -4,6 +4,11 @@
 
 #define CVDB_VERSION  1
 namespace caxios {
+  enum DBFlag {
+    ReadWrite,
+    ReadOnly
+  };
+
   typedef unsigned int FileID;
   //struct 
   typedef uint32_t WordIndex;

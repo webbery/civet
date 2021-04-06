@@ -8,7 +8,7 @@ namespace caxios {
 
   class TableMeta : public ITable {
   public:
-    TableMeta(CDatabase* pDatabase, const std::string& name/*, const std::string& stp*/);
+    TableMeta(CStorageProxy* pDatabase, const std::string& name/*, const std::string& stp*/);
     virtual ~TableMeta();
 
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid);

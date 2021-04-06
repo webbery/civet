@@ -53,8 +53,9 @@ export default {
       this.msg += JSON.stringify(classes)
     },
     onQuery() {
-      console.info('query', this.sql)
-      let result = storage.query(JSON.parse(this.sql))
+      const q = JSON.parse(this.sql)
+      console.info('query', q)
+      let result = storage.query(q)
       this.msg = JSON.stringify(result, null, 4)
     }
   }

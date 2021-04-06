@@ -302,6 +302,7 @@ describe('civetkern read only test', function() {
     expect(result).to.lengthOf(1)
     result = instance.query({type: ['jpeg'], tag: 'test'})
     expect(result).to.lengthOf(1)
+    result = instance.query({"type":[],"datetime":{"$gt":"2021-03-22T16:00:00.000Z"},"color":{"$near":"#de9a3e"}})
   })
   after(function() {
     instance.release()

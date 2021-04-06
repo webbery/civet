@@ -364,8 +364,12 @@ const actions = {
   },
   async query({ commit }, query) {
     for (const k in query) {
-      console.info('query add key', k, Cache.query)
+      if (Array.isArray(query[k]) && query[k].length === 0) {
+        delete Cache.query[k]
+        continue
+      }
       Cache.query[k] = query[k]
+      console.info('query add key', k, Cache.query)
     }
     const result = await Service.getServiceInstance().get(Service.QUERY_FILES, Cache.query)
     console.info('query: ', Cache.query, 'result: ', result)

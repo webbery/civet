@@ -1,12 +1,12 @@
 #include "TableMeta.h"
-#include "database.h"
+#include "StorageProxy.h"
 #include <regex>
 #include "log.h"
 #include "util/util.h"
 
 namespace caxios {
 
-  TableMeta::TableMeta(CDatabase* pDatabase, const std::string& name/*, const std::string& tp*/)
+  TableMeta::TableMeta(CStorageProxy* pDatabase, const std::string& name/*, const std::string& tp*/)
     :ITable(pDatabase)
     ,_table(name)
   {

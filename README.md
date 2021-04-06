@@ -19,6 +19,7 @@
 
 [开发文档](https://webbery.gitbook.io/civet/)  
 [项目讨论区](https://www.yuque.com/g/webberg/dacstu/docs)  
+[插件开发](https://github.com/webbery/civet-extension)  
 
 **道阻且长，行则将至。**
 
@@ -28,12 +29,12 @@
 或者反馈到[**Trello**](https://trello.com/b/M4hmAF2h/civet)
 
 ### 类似软件对比
-|  软件   | 界面 | 开发语言  | 本地存储  | 协议 | 其他
+|  软件   | 界面 | 开发语言  | 本地存储  | 协议 | 平台
 | :----: | :----: | :----:  |  :----: | :----: | :----: |
-| Civet  | Electron | Typescript/C++ | [lmdb](https://zhuanlan.zhihu.com/p/70359311) | 开源MIT | 地上走的
-| Eagle  | Electron | Js | Json/图片拷贝 | 私有 | 天上飞的
-| Billfish  | Qt | C++ | Sqlite + 图片拷贝/索引 | 私有 | 水里游的
-| PicSee  | ObjectC | ObjectC | Realm | 私有 | 
+| Civet  | Electron | Typescript/C++ | [lmdb](https://zhuanlan.zhihu.com/p/70359311) | 开源MIT | Windows/Mac/Ubuntu
+| Eagle  | Electron | Js | Json/图片拷贝 | 私有 | Windows/Mac
+| Billfish  | Qt | C++ | Sqlite + 图片拷贝/索引 | 私有 | Windows/Mac
+| PicSee  | ObjectC | ObjectC | Realm | 私有 | Mac
 
 #### RoadMap
 + [ ] 增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取和展示

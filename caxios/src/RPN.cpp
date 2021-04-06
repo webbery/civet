@@ -77,7 +77,7 @@ namespace caxios {
         else if (root->type.find("literal_eq") != std::string::npos) {
           pSym = IExpression::Create(OP_Equal, _curType);
         }
-        else if (is_in(root->type)) {
+        else if (is_in(root->type) && _statements) {
           pSym = IExpression::Create(OP_In, _curType, _statements);
         }
         else {

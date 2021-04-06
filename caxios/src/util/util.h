@@ -56,6 +56,7 @@ namespace caxios {
 #endif
   );
   bool exist(const std::string& filepath);
+  bool replace(const std::string& oldpath, const std::string& newpath);
   std::string serialize(const std::vector< std::vector<WordIndex> >& classes);
   std::string serialize(const std::vector<WordIndex>& classes);
 

@@ -40,7 +40,7 @@ namespace caxios {
   }
 
   std::unique_ptr<caxios::ValueArray> QueryInArray(
-    CDatabase* pDB,
+    CStorageProxy* pDB,
     const std::string& tableName,
     std::unique_ptr<ValueInstance>& rightValue)
   {
@@ -118,7 +118,7 @@ namespace caxios {
   //}
 
   std::unique_ptr<caxios::ValueArray> Query(
-    CDatabase* pDB,
+    CStorageProxy* pDB,
     std::unique_ptr < IExpression > pExpr,
     std::unique_ptr < ITableProxy > leftValue,
     std::unique_ptr<ValueInstance> rightValue)
@@ -140,6 +140,7 @@ namespace caxios {
         auto val = item.first;
         if(pArray){
           DataType arrType = pArray->originType();
+          T_LOG("query", "loop array: %d", arrType);
           switch (arrType) {
           case QT_Color:
             break;
@@ -196,7 +197,7 @@ namespace caxios {
   }
 
   std::unique_ptr<caxios::ValueArray> Query(
-    CDatabase* pDB,
+    CStorageProxy* pDB,
     std::unique_ptr < IExpression > pExpr,
     std::unique_ptr<ValueInstance> leftValue,
     std::unique_ptr<ValueInstance> rightValue)

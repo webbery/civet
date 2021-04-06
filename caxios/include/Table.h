@@ -2,7 +2,7 @@
 #include <string>
 #include <variant>
 #include "datum_type.h"
-#include "database.h"
+#include "StorageProxy.h"
 #include <string.h>
 #include <limits>
 #include "ISymbol.h"
@@ -58,7 +58,7 @@ namespace caxios {
     {
       *_refs += 1;
     }
-    Iterator(CDatabase* pDatabase, const std::string& table)
+    Iterator(CStorageProxy* pDatabase, const std::string& table)
       :_end(false)
       , _pDatabase(pDatabase)
     {
@@ -102,17 +102,17 @@ namespace caxios {
     int* _refs = nullptr;
     MDB_val _key;
     MDB_val _datum;
-    CDatabase* _pDatabase = nullptr;
+    CStorageProxy* _pDatabase = nullptr;
     MDB_cursor* _cursor = nullptr;
   };
 
   std::unique_ptr<ValueArray> Query(
-    CDatabase* pDB,
+    CStorageProxy* pDB,
     std::unique_ptr < IExpression > pExpr,
     std::unique_ptr < ITableProxy > leftValue,
     std::unique_ptr<ValueInstance> rightValue);
   std::unique_ptr<ValueArray> Query(
-    CDatabase* pDB,
+    CStorageProxy* pDB,
     std::unique_ptr < IExpression > pExpr,
     std::unique_ptr<ValueInstance> leftValue,
     std::unique_ptr<ValueInstance> rightValue);
@@ -124,7 +124,7 @@ namespace caxios {
   class ITable {
   public:
     //std::string Name() { return _table; }
-    ITable(CDatabase* pDB) :  _pDatabase(pDB) {}
+    ITable(CStorageProxy* pDB) :  _pDatabase(pDB) {}
     virtual ~ITable() {}
 
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid) = 0;
@@ -135,14 +135,14 @@ namespace caxios {
     virtual Iterator begin() = 0;
     virtual Iterator end() = 0;
   protected:
-    CDatabase* _pDatabase = nullptr;
+    CStorageProxy* _pDatabase = nullptr;
   };
 
   class ITriger {
   public:
-    ITriger(CDatabase* pDB) : _pDatabase(pDB) {}
+    ITriger(CStorageProxy* pDB) : _pDatabase(pDB) {}
     virtual void Trig() = 0;
   private:
-    CDatabase* _pDatabase = nullptr;
+    CStorageProxy* _pDatabase = nullptr;
   };
 }

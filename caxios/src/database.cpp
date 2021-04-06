@@ -10,9 +10,7 @@
 #endif
 #include "util/util.h"
 #include "log.h"
-#include "table/TableMeta.h"
 #include "json.hpp"
-#include <Table.h>
 
 #define MAX_NUM_DATABASE  64
 #define DBTHUMBMAIL "t_"    //thumbnail
@@ -57,14 +55,12 @@ namespace caxios {
     if (const int rc = mdb_txn_begin(m_pDBEnv, 0, m_flag, &m_pTransaction)) {
       T_LOG("database", "mdb_txn_begin fail: %s", err2str(rc).c_str());
     }
-    initKeyword();
   }
   CDatabase::~CDatabase() {
-    for (auto item : m_mTables) {
-      delete item.second;
+    if (m_pDBEnv) {
+      mdb_env_close(m_pDBEnv);
+      m_pDBEnv = nullptr;
     }
-    m_mTables.clear();
-    mdb_env_close(m_pDBEnv);
     T_LOG("database", "~CDatabase()");
   }
 
@@ -73,37 +69,39 @@ namespace caxios {
     MDB_dbi dbi = -1;
     unsigned int flag = MDB_CREATE;
     if (m_flag & MDB_RDONLY) flag = 0;
-    std::string tbName = realTableName(dbname);
-    if (m_mDBs.find(tbName) != m_mDBs.end()) return m_mDBs[tbName];
-    if (const int rc = mdb_dbi_open(m_pTransaction, tbName.c_str(), flag, &dbi)) {
-      T_LOG("database", "mdb_dbi_open %s fail %s", tbName.c_str(), err2str(rc).c_str());
+    if (const int rc = mdb_dbi_open(m_pTransaction, dbname.c_str(), flag, &dbi)) {
+      T_LOG("database", "mdb_dbi_open %s fail %s", dbname.c_str(), err2str(rc).c_str());
       return dbi;
     }
-    m_mDBs[tbName] = dbi;
-    T_LOG("database", "mdb_dbi_open %d, %s", dbi, tbName.c_str());
     return dbi;
   }
 
-  void CDatabase::CloseDatabase(const std::string& dbname)
+  void CDatabase::CloseDatabase(MDB_dbi dbi)
   {
     if (m_pDBEnv) {
       this->Commit();
+      //mdb_close(m_pDBEnv, dbi);
       mdb_env_sync(m_pDBEnv, 1);
-      m_pDBEnv = nullptr;
     }
-    std::string tbName = realTableName(dbname);
-    T_LOG("database", "mdb_close %d", m_mDBs[tbName]);
-    //mdb_close(m_pDBEnv, dbi);
   }
 
-  bool CDatabase::Put(const std::string& dbname, uint32_t k, void* pData, uint32_t len, int flag) {
+  bool CDatabase::Copy2(const std::string& path)
+  {
+    int rc = 0;
+    if ((rc = mdb_env_copy2(m_pDBEnv, path.c_str(), MDB_CP_COMPACT)) != 0) {
+      T_LOG("database", "mdb_env_copy2 %s, fail reason: %s", path.c_str(), err2str(rc).c_str());
+      return false;
+    }
+    return true;
+  }
+
+  bool CDatabase::Put(MDB_dbi dbi, uint32_t k, void* pData, uint32_t len, int flag) {
     MDB_val key, datum;
     key.mv_data = reinterpret_cast<void*>(&k);
     key.mv_size = sizeof(uint32_t);
     datum.mv_data = pData;
     datum.mv_size = len;
-    std::string tbName = realTableName(dbname);
-    if (int rc = mdb_put(m_pTransaction, m_mDBs[tbName], &key, &datum, 0)) {
+    if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
       T_LOG("database", "mdb_put fail: %s, key: %d, data: %p, len: %d", err2str(rc).c_str(), k, pData, len);
       return false;
     }
@@ -114,15 +112,14 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Put(const std::string& dbname, const std::string& k, void* pData, uint32_t len, int flag /*= MDB_CURRENT*/)
+  bool CDatabase::Put(MDB_dbi dbi, const std::string& k, void* pData, uint32_t len, int flag /*= MDB_CURRENT*/)
   {
     MDB_val key, datum;
     key.mv_data = (void*)(k.data());
     key.mv_size = k.size();
     datum.mv_data = pData;
     datum.mv_size = len;
-    std::string tbName = realTableName(dbname);
-    if (int rc = mdb_put(m_pTransaction, m_mDBs[tbName], &key, &datum, 0)) {
+    if (int rc = mdb_put(m_pTransaction, dbi, &key, &datum, 0)) {
       T_LOG("database", "mdb_put fail: %s, key: %s", err2str(rc).c_str(), k.c_str());
       return false;
     }
@@ -133,15 +130,14 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Get(const std::string& dbname, uint32_t k, void*& pData, uint32_t& len)
+  bool CDatabase::Get(MDB_dbi dbi, uint32_t k, void*& pData, uint32_t& len)
   {
     MDB_val key, datum = { 0 };
     key.mv_data = reinterpret_cast<void*>(&k);
     key.mv_size = sizeof(uint32_t);
     this->Begin();
-    std::string tbName = realTableName(dbname);
-    if (int rc = mdb_get(m_pTransaction, m_mDBs[tbName], &key, &datum)) {
-      T_LOG("database", "mdb_get %s fail: %s, key: %d", tbName.c_str(), err2str(rc).c_str(), k);
+    if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
+      T_LOG("database", "mdb_get %d fail: %s, key: %d", dbi, err2str(rc).c_str(), k);
       //pData = nullptr;
       len = 0;
       return false;
@@ -152,14 +148,13 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Get(const std::string& dbname, const std::string& k, void*& pData, uint32_t& len)
+  bool CDatabase::Get(MDB_dbi dbi, const std::string& k, void*& pData, uint32_t& len)
   {
     MDB_val key, datum = { 0 };
     key.mv_data = (void*)(k.data());
     key.mv_size = k.size();
     this->Begin();
-    std::string tbName = realTableName(dbname);
-    if (int rc = mdb_get(m_pTransaction, m_mDBs[tbName], &key, &datum)) {
+    if (int rc = mdb_get(m_pTransaction, dbi, &key, &datum)) {
       T_LOG("database", "mdb_get fail: %s", err2str(rc).c_str());
       len = 0;
       return false;
@@ -170,13 +165,12 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Filter(const std::string& dbname, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb)
+  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb)
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
     this->Begin();
-    std::string tbName = realTableName(dbname);
-    if (rc = mdb_cursor_open(m_pTransaction, m_mDBs[tbName], &cursor)) {
+    if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
       T_LOG("database", "mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
       return false;
     }
@@ -194,13 +188,12 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Filter(const std::string& dbname, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb)
+  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb)
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
     this->Begin();
-    std::string tbName = realTableName(dbname);
-    if (rc = mdb_cursor_open(m_pTransaction, m_mDBs[tbName], &cursor)) {
+    if (rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
       T_LOG("database", "mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
       return false;
     }
@@ -219,14 +212,13 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Del(const std::string& dbname, uint32_t k)
+  bool CDatabase::Del(MDB_dbi dbi, uint32_t k)
   {
     MDB_val key, datum = { 0 };
     key.mv_data = reinterpret_cast<void*>(&k);
     key.mv_size = sizeof(uint32_t);
 
-    std::string tbName = realTableName(dbname);
-    if (int rc = mdb_del(m_pTransaction, m_mDBs[tbName], &key, NULL)) {
+    if (int rc = mdb_del(m_pTransaction, dbi, &key, NULL)) {
       T_LOG("database", "mdb_del fail: %s", err2str(rc).c_str());
       return false;
     }
@@ -236,14 +228,13 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Del(const std::string& dbname, const std::string& k)
+  bool CDatabase::Del(MDB_dbi dbi, const std::string& k)
   {
     MDB_val key, datum = { 0 };
     key.mv_data = (void*)(k.data());
     key.mv_size = k.size();
 
-    std::string tbName = realTableName(dbname);
-    if (int rc = mdb_del(m_pTransaction, m_mDBs[tbName], &key, NULL)) {
+    if (int rc = mdb_del(m_pTransaction, dbi, &key, NULL)) {
       T_LOG("database", "mdb_del fail: %s", err2str(rc).c_str());
       return false;
     }
@@ -253,12 +244,11 @@ namespace caxios {
     return true;
   }
 
-  MDB_cursor* CDatabase::OpenCursor(const std::string& dbname)
+  MDB_cursor* CDatabase::OpenCursor(MDB_dbi dbi)
   {
     MDB_cursor* cursor = nullptr;
     this->Begin();
-    std::string tbName = realTableName(dbname);
-    if (int rc = mdb_cursor_open(m_pTransaction, m_mDBs[tbName], &cursor)) {
+    if (int rc = mdb_cursor_open(m_pTransaction, dbi, &cursor)) {
       T_LOG("database", "mdb_cursor_open fail: %s, transaction: %d", err2str(rc).c_str(), m_pTransaction);
       return nullptr;
     }
@@ -298,94 +288,6 @@ namespace caxios {
     T_LOG("database", "mdb_txn_commit");
     m_dOperator = NORMAL;
     return true;
-  }
-
-  ITable* CDatabase::GetMetaTable(const std::string& name)
-  {
-    if (m_mTables.find(name) != m_mTables.end()) return m_mTables[name];
-    void* pData = nullptr;
-    uint32_t len = 0;
-    this->Get(TABLE_MATCH_META, name, pData, len);
-    if (len == 0) return nullptr;
-    //std::vector<uint8_t> vInfo((uint8_t*)pData, (uint8_t*)pData + len);
-    //nlohmann::json info = nlohmann::json::from_cbor(vInfo);
-    m_mTables[name] = new TableMeta(this, name/*, info["type"]*/);
-    return m_mTables[name];
-  }
-
-  ITable* CDatabase::GetOrCreateMetaTable(const std::string& name, const std::string& type)
-  {
-    ITable* pTable = GetMetaTable(name);
-    if (!pTable) {
-      nlohmann::json meta;
-      meta["type"] = type;
-      auto sInfo = nlohmann::json::to_cbor(meta);
-      this->Put(TABLE_MATCH_META, name, sInfo.data(), sInfo.size());
-      m_mTables[name] = new TableMeta(this, name/*, type*/);
-      return m_mTables[name];
-    }
-    return pTable;
-  }
-
-  std::map<std::string, caxios::WordIndex> CDatabase::GetWordsIndex(const std::vector<std::string>& words)
-  {
-    std::map<std::string, caxios::WordIndex> mIndexes;
-    WordIndex lastIndx = 0;
-    void* pData = nullptr;
-    uint32_t len = 0;
-    if (this->Get(TABLE_KEYWORD_INDX, 0, pData, len)) {
-      if (pData != nullptr) {
-        lastIndx = *(WordIndex*)pData;
-      }
-    }
-    lastIndx += 1;
-    bool bUpdate = false;
-    for (auto& word : words) {
-      std::vector<std::string> vTokens = split(word, '/');
-      for (auto& token : vTokens)
-      {
-        // ȡ������
-        if (!this->Get(TABLE_KEYWORD_INDX, token, pData, len)) {
-          // ���tag�ַ��������ڣ�����
-          T_LOG("dict", "Add new word: %s", token.c_str());
-          this->Put(TABLE_KEYWORD_INDX, token, &lastIndx, sizeof(WordIndex));
-          this->Put(TABLE_INDX_KEYWORD, lastIndx, (void*)token.data(), token.size());
-          mIndexes[token] = lastIndx;
-          lastIndx += 1;
-          bUpdate = true;
-          continue;
-        }
-        mIndexes[token] = *(WordIndex*)pData;
-        T_LOG("dict", "Get word: %s, %d", token.c_str(), mIndexes[token]);
-      }
-    }
-    if (bUpdate) {
-      this->Put(TABLE_KEYWORD_INDX, 0, &lastIndx, sizeof(WordIndex));
-    }
-    //m_pDatabase->Filter(m_mDBs[TABLE_KEYWORD_INDX], [](const std::string& k, void* pData, uint32_t len)->bool {
-    //  T_LOG("keyword indx: %s", k.c_str());
-    //  return false;
-    //});
-    return std::move(mIndexes);
-  }
-
-  std::string CDatabase::realTableName(const std::string& name)
-  {
-    if (m_mDBs.find(name) == m_mDBs.end()) {
-      auto itr = m_mKeywordMap.find(name);
-      if (itr == m_mKeywordMap.end()) return std::move(name);
-      return itr->second;
-    }
-    return std::move(name);
-  }
-
-  void CDatabase::initKeyword()
-  {
-    m_mKeywordMap[TB_Keyword] = TABLE_KEYWORD2FILE;
-    m_mKeywordMap[TB_Tag] = TABLE_TAG2FILE;
-    m_mKeywordMap[TB_Class] = TABLE_CLASS2FILE;
-    //m_mKeywordMap[TB_Annotation] = TABLE_KEYWORD2FILE;
-    m_mKeywordMap[TB_FileID] = TABLE_FILE_META;
   }
 
 }

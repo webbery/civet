@@ -8,7 +8,7 @@
 #include <utility>
 #include <deque>
 #include "util/pinyin.h"
-//#include "QueryAction.h"
+#include "StorageProxy.h"
 #include "QuerySelector.h"
 #include "RPN.h"
 #include <stack>
@@ -70,15 +70,8 @@ namespace caxios {
   DBManager::DBManager(const std::string& dbdir, int flag, const std::string& meta/* = ""*/)
   {
     _flag = (flag == 0 ? ReadWrite : ReadOnly);
-#ifdef _DEBUG
-#define MAX_SCHEMA_DB_SIZE  5*1024*1024
-#define MAX_BIN_DB_SIZE     5*1024*1024
-#else
-#define MAX_SCHEMA_DB_SIZE  128*1024*1024
-#define MAX_BIN_DB_SIZE     256*1024*1024
-#endif
     InitDB(m_pDatabase, dbdir.c_str(), DBSCHEMA, MAX_SCHEMA_DB_SIZE);
-    InitDB(m_pBinaryDB, dbdir.c_str(), DBBIN, MAX_BIN_DB_SIZE);
+    //InitDB(m_pBinaryDB, dbdir.c_str(), DBBIN, MAX_BIN_DB_SIZE);
     
     // open all database
     int cnt = sizeof(g_tables) / sizeof(char*);
@@ -95,20 +88,11 @@ namespace caxios {
         InitClass(ROOT_CLASS_PATH, 0, 0);
       }
     }
-    // 检查数据库版本是否匹配, 如果不匹配, 则开启线程，将当前数据库copy一份，进行升级, 并同步后续的所有写操作
-    if (!ValidVersion()) {
-
-    }
-    // 如果期间程序退出中断, 记录中断点, 下次启动时继续 
+    TryUpdate();
   }
 
   DBManager::~DBManager()
   {
-    if (m_pBinaryDB) {
-      delete m_pBinaryDB;
-      m_pBinaryDB = nullptr;
-    }
-
     if (m_pDatabase != nullptr) {
       int cnt = sizeof(g_tables) / sizeof(char*);
       for (int idx = 0; idx < cnt; ++idx) {
@@ -421,7 +405,6 @@ namespace caxios {
       using namespace nlohmann;
       std::vector<uint8_t> js((uint8_t*)pData, (uint8_t*)pData + len);
       json file=json::from_cbor(js);
-      T_LOG("snap", "GetFilesSnap: %s", js.c_str());
       try {
         std::string display = trunc(to_string(file["value"]));
         std::string val = trunc(file["step"].dump());
@@ -716,7 +699,6 @@ namespace caxios {
           // if mutaion is filename, update snap
           m_pDatabase->Get(TABLE_FILESNAP, fileID, pData, len);
           std::vector<uint8_t> s((uint8_t*)pData, (uint8_t*)pData + len);
-          T_LOG("file", "mutation snap: %s", s.c_str());
           json jsn = json::from_cbor(s);
           jsn["name"] = itr.value().dump();
           s = json::to_cbor(jsn);
@@ -810,31 +792,21 @@ namespace caxios {
     return GetFilesInfo(array->GetArray<FileID>(), filesInfo);
   }
 
-  bool DBManager::ValidVersion()
-  {
-    void* pData = nullptr;
-    uint32_t len = 0;
-    m_pDatabase->Get(TABLE_SCHEMA, (uint32_t)SCHEMA_INFO::Version, pData, len);
-    if (len == 0) {
-      char dbvs = SCHEMA_VERSION;
-      m_pDatabase->Put(TABLE_SCHEMA, (uint32_t)SCHEMA_INFO::Version, &dbvs, sizeof(char));
-      return true;
-    }
-    char* pV = (char*)pData;
-    if (*pV == SCHEMA_VERSION) return true;
-    return false;
-  }
-
-  void DBManager::InitDB(CDatabase*& pDB, const char* dir, const char* name, size_t size)
+  void DBManager::InitDB(CStorageProxy*& pDB, const char* dir, const char* name, size_t size)
   {
     T_LOG("init", "max db size: %d", size);
     if (pDB == nullptr) {
-      pDB = new CDatabase(dir, name, _flag, size);
+      pDB = new CStorageProxy(dir, name, _flag, size);
     }
     if (pDB == nullptr) {
       std::cerr << "new CDatabase fail.\n";
       return;
     }
+  }
+
+  void DBManager::TryUpdate()
+  {
+    m_pDatabase->TryUpdate();
   }
 
   bool DBManager::AddFile(FileID fileid, const MetaItems& meta, const Keywords& keywords)
@@ -1525,7 +1497,7 @@ namespace caxios {
     }
     jSnap["step"] = step;
     // std::string snap = jSnap.dump();
-    auto snap = json::to_cbor(jSnap);
+    auto snap = nlohmann::json::to_cbor(jSnap);
     // T_LOG("snap", "put snap value: file %d, %d, bit %d", fileID, step, offset);
     m_pDatabase->Put(TABLE_FILESNAP, fileID, (void*)(&snap[0]), snap.size());
   }
@@ -1538,7 +1510,7 @@ namespace caxios {
     if (len == 0) return 0;
     std::vector<uint8_t> snap((uint8_t*)pData, (uint8_t*)pData + len);
     // T_LOG("snap", "snap: %s", snap.c_str());
-    jSnap = nlohmann::json::from_cbor(snap)
+    jSnap = nlohmann::json::from_cbor(snap);
     // jSnap = nlohmann::json::parse(snap);
     int step = atoi(jSnap["step"].dump().c_str());
     return step;
@@ -1551,8 +1523,8 @@ namespace caxios {
     uint32_t len = 0;
     m_pDatabase->Get(TABLE_FILESNAP, fileID, pData, len);
     if (len) {
-      std::vector<uint8_t> snap((uint8_t*)pData, (uint8_t*)pData + len);
-      nlohmann::json jSnap = nlohmann::json::from_cbor(snap);
+      std::vector<uint8_t> tmp((uint8_t*)pData, (uint8_t*)pData + len);
+      nlohmann::json jSnap = nlohmann::json::from_cbor(tmp);
       std::get<2>(snap) = atoi(jSnap["step"].dump().c_str());
       std::get<0>(snap) = fileID;
       std::get<1>(snap) = trunc(jSnap["value"].dump());

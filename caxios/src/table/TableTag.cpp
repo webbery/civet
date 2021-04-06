@@ -10,7 +10,7 @@ namespace caxios {
       TABLE_TAG_INDX
     };
   }
-  TableTag::TableTag(CDatabase* pDatabase)
+  TableTag::TableTag(CStorageProxy* pDatabase)
     :ITable(pDatabase)
   {
     int cnt = sizeof(g_tag_table) / sizeof(char*);

@@ -19,6 +19,8 @@
         "src/Condition.cpp",
         "src/Table.cpp",
         "src/Expression.cpp",
+        "src/StorageProxy.cpp",
+        "src/upgrader.cpp",
         "src/civetkern.cpp" ],
       "include_dirs": [
         "include",

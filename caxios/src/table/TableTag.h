@@ -5,7 +5,7 @@
 namespace caxios {
   class TableTag : public ITable {
   public:
-    TableTag(CDatabase* pDatabase);
+    TableTag(CStorageProxy* pDatabase);
     virtual ~TableTag();
 
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid);

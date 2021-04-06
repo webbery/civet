@@ -11,11 +11,10 @@ import { ImageService } from './service/ImageService'
 import { ReplyType } from './transfer'
 import { IFileImpl, Message } from '../public/civet'
 import { MessagePipeline } from './MessageTransfer'
+import { serviceHub } from './ServiceHub'
 
 const pipeline = new MessagePipeline(200, new Map())
-// pipeline.regist('test', (id, data) => {
-//   console.info('111')
-// })
+serviceHub.registObserver()
 
 // 尽早打开主窗口
 const { ipcRenderer } = require('electron')
@@ -242,14 +241,6 @@ pipeline.regist('updateImageCategory', messageProcessor.updateImageCategory)
 pipeline.regist('updateCategoryName', messageProcessor.updateCategoryName)
 pipeline.regist('updateFileName', messageProcessor.updateFileName)
 pipeline.regist('reInitDB', messageProcessor.reInitDB)
-
-// if message is received, pass it back to the renderer via the main thread
-// ipcRenderer.on('message-from-main', (event, arg) => {
-//   console.info('==================')
-//   console.info('arg', arg)
-//   console.info('==================')
-//   messageProcessor[arg.type](arg.data)
-// })
 
 ipcRenderer.on('checking-for-update', (event, arg) => {
   console.info('checking-for-update, event:', event, arg)

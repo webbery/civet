@@ -1,6 +1,5 @@
 #ifndef _CAXIOS_DB_MANAGER_H_
 #define _CAXIOS_DB_MANAGER_H_
-#include "database.h"
 #include "json.hpp"
 #include <map>
 #include "log.h"
@@ -16,6 +15,8 @@ namespace caxios {
   template<DataType Q, CompareType C> struct CQuery;
   template<> struct CQuery<QT_String, CT_IN>;
   template<> struct CQuery<QT_Color, CT_EQUAL>;
+
+  class CStorageProxy;
 
   class DBManager {
   public:
@@ -48,9 +49,9 @@ namespace caxios {
     bool Query(const std::string& query, std::vector< FileInfo>& filesInfo);
 
   private:
-    bool ValidVersion();
-    void InitDB(CDatabase*& pDB, const char* dir, const char* name, size_t size);
+    void InitDB(CStorageProxy*& pDB, const char* dir, const char* name, size_t size);
     void InitMap();
+    void TryUpdate();
     bool AddFile(FileID, const MetaItems&, const Keywords&);
     //bool AddBinMeta(FileID, )
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);
@@ -134,8 +135,7 @@ namespace caxios {
 
   private:
     DBFlag _flag = ReadWrite;
-    CDatabase* m_pDatabase = nullptr;
-    CDatabase* m_pBinaryDB = nullptr; // store binary data such as thumbnail etc.
+    CStorageProxy* m_pDatabase = nullptr;
   };
   
 }

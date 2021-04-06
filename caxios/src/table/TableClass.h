@@ -9,7 +9,7 @@ namespace caxios {
 
     };
   public:
-    TableClass(CDatabase* pDatabase);
+    TableClass(CStorageProxy* pDatabase);
     virtual ~TableClass() {}
 
     virtual bool Add(const std::string& value, const std::vector<FileID>& fileid);

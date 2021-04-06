@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #elif defined(WIN32)
+#include <windows.h>
 #include <direct.h>
 #include <io.h>
 #endif
@@ -27,6 +28,23 @@ namespace caxios {
 #endif
     return false;
   }
+
+  bool replace(const std::string& oldpath, const std::string& newpath)
+  {
+#if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
+    int rc = remove(newpath.c_str());
+    if (rc) {
+      T_LOG("upgrade", "error: %s", strerror(*_errno()));
+    }
+    rename(oldpath.c_str(), newpath.c_str());
+#else
+    auto wpath = string2wstring(newpath);
+    DeleteFileW(wpath.c_str());
+    auto opath = string2wstring(oldpath);
+    MoveFileW(opath.c_str(), wpath.c_str());
+#endif
+    return true;
+}
 
   void MkDir(
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
