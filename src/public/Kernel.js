@@ -67,6 +67,7 @@ export default {
   getClassDetail: (category) => { return kernel().getClassesInfo(category) },
   getAllTags: () => { return kernel().getAllTags() },
   query: (condition) => { return kernel().query(condition) },
+  getTagsOfFiles: (filesID) => { return kernel().getTagsOfFiles({id: filesID}) },
   writeLog: (str) => { kernel.writeLog(str) },
   // 以下接口为可写接口
   generateFilesID: (num) => { return kernel().generateFilesID(num) },

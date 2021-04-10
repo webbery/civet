@@ -70,6 +70,8 @@ namespace caxios{
 
     void UpgradeThread();
     void ExecuteDML(const DML&, std::map<std::string, MDB_dbi >&);
+    void ReplaceDB();
+    void ReleaseCurrentDB();
 
   private:
     std::map<std::string, MDB_dbi > m_mDBs;

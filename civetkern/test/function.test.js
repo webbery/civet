@@ -262,6 +262,7 @@ describe('civetkern read only test', function() {
   it('search files by datetime', function() {
     let result = instance.query({datetime: {$gt: new Date('2020-09-20T00:00:00.000Z')}})
     expect(result).to.lengthOf(1)
+    console.info(result)
     let day = new Date(new Date().toLocaleDateString())
     day.setFullYear(2020, 8, 20)
     result = instance.query({datetime: {$gt: day}})
@@ -325,7 +326,7 @@ describe('civetkern clean test', function() {
   })
   it('remove classes', function() {
     let rootClasses = instance.getClassesInfo()
-    // console.info(rootClasses)
+    console.info(rootClasses)
     expect(rootClasses).to.lengthOf(4)
     instance.removeClasses(['新分类1'])
     // console.info('----------------')

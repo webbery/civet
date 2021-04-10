@@ -87,8 +87,10 @@ namespace caxios {
     std::pair<MDB_val, MDB_val>& item,
     std::unique_ptr<ValueInstance>& rightValue
   ) {
-      if (compare<QT_String>(pExpr, item.first, rightValue)) {
+    T_LOG("query", "StringCompare");
+    if (compare<QT_String>(pExpr, item.first, rightValue)) {
         FileID* start = (FileID*)(item.second.mv_data);
+        T_LOG("query", "size: %d", item.second.mv_size / sizeof(FileID));
         out->push((FileID*)(item.second.mv_data), item.second.mv_size / sizeof(FileID));
       }
   }
@@ -165,6 +167,7 @@ namespace caxios {
           switch (dtype)
           {
           case caxios::QT_String:
+            T_LOG("query", "right: %s", rightValue->Value().c_str());
             StringCompare(pResult, pExpr, item, rightValue);
             break;
           case caxios::QT_Number:

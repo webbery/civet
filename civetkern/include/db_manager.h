@@ -50,8 +50,9 @@ namespace caxios {
 
   private:
     void InitDB(CStorageProxy*& pDB, const char* dir, const char* name, size_t size);
+    void InitTable(const std::string& meta);
     void InitMap();
-    void TryUpdate();
+    void TryUpdate(const std::string& meta);
     bool AddFile(FileID, const MetaItems&, const Keywords&);
     //bool AddBinMeta(FileID, )
     bool AddFileID2Tag(const std::vector<FileID>&, WordIndex);

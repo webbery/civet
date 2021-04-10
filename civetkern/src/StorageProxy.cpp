@@ -21,7 +21,7 @@ namespace caxios{
       dml._ktype = KeyType_UInt32;
       dml._dbname = dbname;
       dml._key = std::string((char*)&key, sizeof(uint32_t));
-      dml._data = std::string((char*)pData, len);
+      dml._data.assign((char*)pData, len);
       {
         std::unique_lock<std::mutex> l(g_qMutex);
         g_dqDML.emplace_back(dml);
@@ -32,9 +32,12 @@ namespace caxios{
       DML dml;
       dml._type = DML_Put;
       dml._ktype = KeyType_String;
+      if (dbname == "type") {
+        T_LOG("qqq", "www");
+      }
       dml._dbname = dbname;
       dml._key = key;
-      dml._data = std::string((char*)pData, len);
+      dml._data.assign((char*)pData, len);
       {
         std::unique_lock<std::mutex> l(g_qMutex);
         g_dqDML.emplace_back(dml);
@@ -76,24 +79,10 @@ namespace caxios{
   CStorageProxy::~CStorageProxy()
   {
     m_bExit = true;
-    for (auto item : m_mTables) {
-      delete item.second;
-    }
-    m_mTables.clear();
-    m_pCurrent->CloseDatabase(0);
-    delete m_pCurrent;
+    ReleaseCurrentDB();
     if (m_tUpgrade.joinable()) {
       m_tUpgrade.join();
-      // swap database, upgrade finish
-      std::string dbpath = m_dir + "/" + m_dbname;
-      std::string oldName = m_dir + "/" + m_dbname + ".tmp";
-      if (m_dir[0] != '/' && m_dir[1] != ':') {
-        auto abspath = std::filesystem::current_path();
-        dbpath = abspath.string() + "/" + dbpath;
-        oldName = abspath.string() + "/" + oldName;
-      }
-      replace(oldName, dbpath);
-      T_LOG("upgrade", "rm: %s, remain: %s", oldName.c_str(), dbpath.c_str());
+      ReplaceDB();
     }
   }
 
@@ -269,13 +258,20 @@ namespace caxios{
 
   bool CStorageProxy::TryUpdate()
   {
-    // 检查数据库版本是否匹配, 如果不匹配, 则开启线程，将当前数据库copy一份，进行升级, 并同步后续的所有写操作
-    //if (!ValidVersion()) {
-      std::thread th(std::bind(&CStorageProxy::UpgradeThread, this));
-      m_tUpgrade = std::move(th);
-    //}
-    // 如果期间程序退出中断, 记录中断点, 下次启动时继续
-    return true;
+    // TODO: 检查数据库版本是否匹配, 如果不匹配, 则开启线程，将当前数据库copy一份，进行升级, 并同步后续的所有写操作
+    if (!ValidVersion()) {
+      //std::thread th(std::bind(&CStorageProxy::UpgradeThread, this));
+      //m_tUpgrade = std::move(th);
+      std::string upgradePath = "/" + m_dbname + ".tmp";
+      m_pCurrent->Copy2(m_dir + upgradePath);
+      ReleaseCurrentDB();
+      ReplaceDB();
+      m_pCurrent = new CDatabase(m_dir, m_dbname, ReadWrite, MAX_SCHEMA_DB_SIZE);
+      //m_pUpgrade = new CDatabase(m_dir, upgradePath, ReadWrite, MAX_SCHEMA_DB_SIZE);
+      return true;
+    }
+    // TODO: 如果期间程序退出中断, 记录中断点, 下次启动时继续
+    return false;
   }
 
   std::string CStorageProxy::realTableName(const std::string& name)
@@ -343,6 +339,12 @@ namespace caxios{
       }
       ExecuteDML(dml, mDBs);
     }
+    while (g_dqDML.size()) {
+      DML dml = g_dqDML.front();
+      g_dqDML.pop_front();
+      ExecuteDML(dml, mDBs);
+    }
+    m_pUpgrade->Commit();
     // finish
     m_pUpgrade->CloseDatabase(0);
     delete m_pUpgrade;
@@ -352,6 +354,9 @@ namespace caxios{
   void CStorageProxy::ExecuteDML(const DML& dml, std::map<std::string, MDB_dbi >& dbs)
   {
     if (dml._type == DML_None) return;
+    if (dml._dbname == "type") {
+      T_LOG("uery", "11");
+    }
     if (dbs.find(dml._dbname) == dbs.end()) {
       MDB_dbi dbi = m_pUpgrade->OpenDatabase(dml._dbname);
       if (dbi == -1) return;
@@ -371,6 +376,31 @@ namespace caxios{
     else if (dml._type == DML_Del && dml._ktype == KeyType_String) {
       m_pUpgrade->Del(dbs[dml._dbname], dml._key);
     }
+  }
+
+  void CStorageProxy::ReplaceDB()
+  {
+    // swap database, upgrade finish
+    std::string dbpath = m_dir + "/" + m_dbname;
+    std::string oldName = m_dir + "/" + m_dbname + ".tmp";
+    if (m_dir[0] != '/' && m_dir[1] != ':') {
+      auto abspath = std::filesystem::current_path();
+      dbpath = abspath.string() + "/" + dbpath;
+      oldName = abspath.string() + "/" + oldName;
+    }
+    replace(oldName, dbpath);
+    T_LOG("upgrade", "rm: %s, remain: %s", oldName.c_str(), dbpath.c_str());
+  }
+
+  void CStorageProxy::ReleaseCurrentDB()
+  {
+    m_mDBs.clear();
+    for (auto item : m_mTables) {
+      delete item.second;
+    }
+    m_mTables.clear();
+    m_pCurrent->CloseDatabase(0);
+    delete m_pCurrent;
   }
 
 }

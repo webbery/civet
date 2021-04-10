@@ -1,4 +1,7 @@
 import {ExtensionService} from './ExtensionService'
+import {ResourceService} from './ResourceService'
+import { MessagePipeline } from './MessageTransfer'
+
 class ServiceHub {
   constructor() {
     const WebSocketServer = require('ws').Server
@@ -9,9 +12,12 @@ class ServiceHub {
       ws.send('Hello extension');
       _self.extensions.push(new ExtensionService(ws))
     })
+    const pipeline = new MessagePipeline(200, new Map())
+    this.resourceService = new ResourceService(pipeline);
   }
   registObserver() {}
   private server: any;
+  private resourceService: ResourceService;
   private extensions: ExtensionService[] = [];
 }
 

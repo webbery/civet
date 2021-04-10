@@ -11,6 +11,8 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noImplicitThis": true,
     "sourceMap": true,
     "allowJs": true,
     // 

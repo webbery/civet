@@ -74,21 +74,13 @@ namespace caxios {
     //InitDB(m_pBinaryDB, dbdir.c_str(), DBBIN, MAX_BIN_DB_SIZE);
     
     // open all database
-    int cnt = sizeof(g_tables) / sizeof(char*);
-    for (int idx = 0; idx < cnt; ++idx) {
-      MDB_dbi dbi = m_pDatabase->OpenDatabase(g_tables[idx]);
-    }
-    //m_mTables["class"] = new TableClass(m_pDatabase, "class");
-    //m_mTables["tag"] = new TableTag(m_pDatabase);
-    if (!meta.empty() && meta.size()>4 && meta != "[]") {
-      ParseMeta(meta);
-    }
+    InitTable(meta);
     if (_flag == ReadWrite) {
       if (!IsClassExist(ROOT_CLASS_PATH)) {
         InitClass(ROOT_CLASS_PATH, 0, 0);
       }
     }
-    TryUpdate();
+    TryUpdate(meta);
   }
 
   DBManager::~DBManager()
@@ -804,9 +796,22 @@ namespace caxios {
     }
   }
 
-  void DBManager::TryUpdate()
+  void DBManager::InitTable(const std::string& meta)
   {
-    m_pDatabase->TryUpdate();
+    int cnt = sizeof(g_tables) / sizeof(char*);
+    for (int idx = 0; idx < cnt; ++idx) {
+      m_pDatabase->OpenDatabase(g_tables[idx]);
+    }
+    if (!meta.empty() && meta.size() > 4 && meta != "[]") {
+      ParseMeta(meta);
+    }
+  }
+
+  void DBManager::TryUpdate(const std::string& meta)
+  {
+    if (m_pDatabase->TryUpdate()) {
+      InitTable(meta);
+    }
   }
 
   bool DBManager::AddFile(FileID fileid, const MetaItems& meta, const Keywords& keywords)
