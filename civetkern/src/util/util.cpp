@@ -34,7 +34,7 @@ namespace caxios {
 #if defined(__APPLE__) || defined(__gnu_linux__) || defined(__linux__) 
     int rc = remove(newpath.c_str());
     if (rc) {
-      T_LOG("upgrade", "error: %s", strerror(*_errno()));
+      T_LOG("upgrade", "error: %s", strerror(errno));
     }
     rename(oldpath.c_str(), newpath.c_str());
 #else

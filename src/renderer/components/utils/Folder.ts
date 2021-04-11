@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-function deleteF(path) {
+export function deleteFolder(path: string) {
   let files = []
   if (fs.existsSync(path)) {
     if (fs.statSync(path).isDirectory()) {
@@ -8,7 +8,7 @@ function deleteF(path) {
       for (const file of files) {
         const curPath = path + '/' + file
         if (fs.statSync(curPath).isDirectory()) {
-          deleteF(curPath)
+          deleteFolder(curPath)
         } else {
           fs.unlinkSync(curPath)
         }
@@ -20,7 +20,7 @@ function deleteF(path) {
   }
 }
 
-function copyF(from, to) { // 复制文件夹到指定目录
+export function copyFolder(from: string, to: string) { // 复制文件夹到指定目录
   let files = []
   if (fs.existsSync(to)) { // 文件是否存在 如果不存在则创建
     files = fs.readdirSync(from)
@@ -28,18 +28,14 @@ function copyF(from, to) { // 复制文件夹到指定目录
       const targetPath = from + '/' + file
       const toPath = to + '/' + file
       if (fs.statSync(targetPath).isDirectory()) { // 复制文件夹
-        copyF(targetPath, toPath)
+        copyFolder(targetPath, toPath)
       } else { // 拷贝文件
         fs.copyFileSync(targetPath, toPath)
       }
     }
   } else {
     fs.mkdirSync(to)
-    copyF(from, to)
+    copyFolder(from, to)
   }
 }
 
-export default {
-  deleteFolder: deleteF,
-  copyFolder: copyF
-}

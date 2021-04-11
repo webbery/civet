@@ -1,13 +1,13 @@
+import { config } from './CivetConfig'
 const kernel = (function () {
   let instance
   let _isInit = false
   let flag = 0
   function _init(name) {
-    const cfg = require('./CivetConfig').config
-    const config = cfg.getConfig(true)
-    if (config.resources.length === 0) return false
+    const cfg = config.getConfig(true)
+    if (cfg.resources.length === 0) return false
     try {
-      if (!instance.civetkern.init(config, flag, true)) {
+      if (!instance.civetkern.init(cfg, flag, true)) {
         console.info('init fail')
         return false
       }
@@ -16,7 +16,7 @@ const kernel = (function () {
       //   return false
       // }
       _isInit = true
-      console.info(config, flag, instance.civetkern)
+      console.info(cfg, flag, instance.civetkern)
       return true
     } catch (exception) {
       console.info('init civetkern exception:', exception)

@@ -17,8 +17,7 @@
 
 ### 相关资源
 
-[开发文档](https://webbery.gitbook.io/civet/)  
-[项目讨论区](https://www.yuque.com/g/webberg/dacstu/docs)  
+[主页](http://webberg.gitee.io/civet/)  
 [插件开发](https://github.com/webbery/civet-extension)  
 
 **道阻且长，行则将至。**

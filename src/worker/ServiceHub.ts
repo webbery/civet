@@ -4,17 +4,17 @@ import { MessagePipeline } from './MessageTransfer'
 
 class ServiceHub {
   constructor() {
+    const pipeline = new MessagePipeline(200, new Map())
+    this.resourceService = new ResourceService(pipeline);
     const WebSocketServer = require('ws').Server
     this.server = new WebSocketServer({address: 'localhost', port: 21313 })
     const self = this
     this.server.on('connection', function(ws: any) {
       const _self = self
-      ws.send('Hello extension');
-      _self.extensions.push(new ExtensionService(ws))
+      _self.extensions.push(new ExtensionService(ws, _self.resourceService));
     })
-    const pipeline = new MessagePipeline(200, new Map())
-    this.resourceService = new ResourceService(pipeline);
   }
+
   registObserver() {}
   private server: any;
   private resourceService: ResourceService;

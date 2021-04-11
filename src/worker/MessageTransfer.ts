@@ -37,7 +37,7 @@ class Timer {
       this.threshod = threshod
       this.processor = processor
 
-      ipcRenderer.on('message-from-main', async (event, arg) => {
+      ipcRenderer.on('message-from-main', async (event: any, arg: any) => {
         console.info('==================')
         console.info('arg', arg)
         console.info('==================')

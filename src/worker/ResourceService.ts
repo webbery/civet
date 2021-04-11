@@ -6,6 +6,13 @@ import { IFileImpl, Message } from '../public/civet'
 import storage from '../public/Kernel'
 import fs from 'fs'
 
+let isStart: boolean = false;
+function updateStatus(status: any) {
+  if (isStart === false) {
+    window['eventBus'].$emit('status', status)
+  }
+}
+
 export class ResourceService{
   constructor(pipeline: MessagePipeline) {
     this.pipeline = pipeline
@@ -38,7 +45,7 @@ export class ResourceService{
   }
 
   getImagesInfo(msgid: number, data: any) {
-    // this.updateStatus('reading files')
+    updateStatus('reading files')
     let imagesIndex = []
     if (data === undefined) {
       // 全部图片信息
@@ -127,7 +134,7 @@ export class ResourceService{
     return {type: ReplyType.REPLY_CLASSES_INFO, data: category}
   }
   async getUncategoryImages(msgid: number, data: any) {
-    // this.updateStatus('reading unclassify info')
+    updateStatus('reading unclassify info')
     const uncateimgs = storage.getUnClassifyFiles()
     console.info('ppopopo', data)
     // reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
@@ -135,7 +142,7 @@ export class ResourceService{
     return {type: ReplyType.REPLY_UNCATEGORY_IMAGES, data: uncateimgs}
   }
   getUntagImages() {
-    // this.updateStatus('reading untag info')
+    updateStatus('reading untag info')
     const untagimgs = storage.getUnTagFiles()
     // reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
     console.info('untag', untagimgs)
@@ -158,12 +165,6 @@ export class ResourceService{
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
     return {type: ReplyType.REPLY_RELOAD_DB_STATUS, data: true}
-  }
-
-  private updateStatus(status: any) {
-    if (this.isStart === false) {
-      window['eventBus'].$emit('status', status)
-    }
   }
 
   private async readImages(msgid: number, fullpath: string) {
@@ -210,5 +211,4 @@ export class ResourceService{
   private pipeline: MessagePipeline;
   private totalFiles: number = 0;
   private progressLoad: number = 0;
-  private isStart: boolean = false;
 }

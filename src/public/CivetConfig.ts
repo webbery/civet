@@ -1,5 +1,7 @@
 const fs = require('fs')
 class CivetConfig {
+  configPath: string;
+  config: any;
   constructor() {
     const app = require('./System').default.app()
     const civet = require('../../package.json')
@@ -28,7 +30,7 @@ class CivetConfig {
     this.config = cfg
   }
 
-  getConfig(reload) {
+  getConfig(reload: boolean) {
     if (reload) {
       this.config = JSON.parse(fs.readFileSync(this.configPath))
     }
@@ -39,7 +41,7 @@ class CivetConfig {
     return this.config.app.default
   }
 
-  getDBPath(name) {
+  getDBPath(name: string) {
     for (const resource of this.config.resources) {
       if (this.config.app.default === resource.name) {
         return resource.db.path
@@ -66,13 +68,13 @@ class CivetConfig {
     return this.config.app.first
   }
 
-  isDBExist(name) {
+  isDBExist(name: string) {
     const path = this.getDBPath(name)
     console.info('is db exist:', path)
     return fs.existsSync(path)
   }
 
-  switchResource(name) {}
+  switchResource(name: string) {}
 
   getResourcesName() {
     const resources = []
@@ -91,7 +93,7 @@ class CivetConfig {
 
   getRecentResources() {}
 
-  addResource(name, path) {
+  addResource(name: string, path: string) {
     for (const resource of this.config.resources) {
       if (resource.name === name) {
         resource.db.path = path
@@ -106,7 +108,7 @@ class CivetConfig {
     })
   }
 
-  isMetaDisplay(name, meta) {
+  isMetaDisplay(name: string, meta: any) {
     console.info('meta name:', name)
     for (const item of meta) {
       if (item.name === name && item.display === true) return true
@@ -120,7 +122,7 @@ class CivetConfig {
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }
 
-  schema(filetype = 'img') {
+  schema(filetype: string = 'img') {
     return [
       { name: 'color', value: '主色', type: 'val/array', query: true, size: 3, display: true },
       { name: 'size', value: '大小', type: 'str', query: true, display: true },
@@ -135,6 +137,4 @@ class CivetConfig {
   }
 }
 
-const gconfig = new CivetConfig()
-
-export const config = gconfig
+export const config = new CivetConfig()
