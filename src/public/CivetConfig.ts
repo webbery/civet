@@ -37,11 +37,11 @@ class CivetConfig {
     return this.config
   }
 
-  getCurrentDB() {
+  getCurrentDB(): string {
     return this.config.app.default
   }
 
-  getDBPath(name: string) {
+  getDBPath(name: string): string | null {
     for (const resource of this.config.resources) {
       if (this.config.app.default === resource.name) {
         return resource.db.path

@@ -41,8 +41,8 @@ class Timer {
         console.info('==================')
         console.info('arg', arg)
         console.info('==================')
-        const func = this.processor.get(arg.type)
-        const reply = await func.call(this, arg.id, arg.data)
+        const [func, self] = this.processor.get(arg.type)
+        const reply = await func.call(self, arg.id, arg.data)
         console.info('replay', reply)
         if (reply === undefined) return
         let msg = new Message()
@@ -99,8 +99,8 @@ class Timer {
       }, 200);
       // ipcRenderer.send('message-from-worker', msgs)
     }
-    regist(msgType: string, msgFunc: IMessageCallback) {
-      this.processor.set(msgType, msgFunc);
+    regist(msgType: string, msgFunc: IMessageCallback, pointer: any) {
+      this.processor.set(msgType, [msgFunc, pointer]);
     }
     private indentify(id: number, type: string): string {
       return type + ',' + id;
