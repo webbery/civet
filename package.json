@@ -112,7 +112,8 @@
     ]
   },
   "dependencies": {
-    "civetkern": "^0.2.2",
+    "civetkern": "^0.2.1",
+    "download": "^8.0.0",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
     "exifreader": "^3.9.0",

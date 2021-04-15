@@ -1,9 +1,10 @@
 import { MessagePipeline } from './MessageTransfer'
 import JString from '../public/String'
 import { ImageService } from './service/ImageService'
-import { ReplyType } from './transfer'
+import { ReplyType } from './Message'
 import { IFileImpl, Message } from '../public/civet'
 import storage from '../public/Kernel'
+import { ResourcePath } from './common/ResourcePath'
 import fs from 'fs'
 
 let isStart: boolean = false;
@@ -16,7 +17,7 @@ function updateStatus(status: any) {
 export class ResourceService{
   constructor(pipeline: MessagePipeline) {
     this.pipeline = pipeline
-    pipeline.regist('addImagesByDirectory', this.readDir, this)
+    pipeline.regist('addImagesByDirectory', this.addFilesByDir, this)
     pipeline.regist('addImagesByPaths', this.addImagesByPaths, this)
     pipeline.regist('getImagesInfo', this.getImagesInfo, this)
     pipeline.regist('getFilesSnap', this.getFilesSnap, this)
@@ -38,9 +39,27 @@ export class ResourceService{
     pipeline.regist('reInitDB', this.reInitDB, this)
   }
 
-  addImagesByPaths(msgid: number, data: string[]) {
+  private addFilesByDir(msgid: number, dir: string) {
+    let self = this;
+    fs.readdir(dir, async function(err, menu) {
+      if (err) return
+      // console.info(menu)
+      self.totalFiles += menu.length
+      for (const item of menu) {
+        await self.readImages(msgid, new ResourcePath(JString.joinPath(dir, item)))
+      }
+      // reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
+      self.progressLoad += menu.length
+      if (self.progressLoad === self.totalFiles) {
+        self.totalFiles = 0
+        self.progressLoad = 0
+      }
+    })
+  }
+
+  private addImagesByPaths(msgid: number, data: string[]) {
     for (const fullpath of data) {
-      this.readImages.call(this, msgid, fullpath)
+      this.readImages.call(this, msgid, new ResourcePath(fullpath))
     }
   }
 
@@ -167,10 +186,14 @@ export class ResourceService{
     return {type: ReplyType.REPLY_RELOAD_DB_STATUS, data: true}
   }
 
-  private async readImages(msgid: number, fullpath: string) {
-    const info = fs.statSync(fullpath)
+  error(msg: string|null) {
+    this.pipeline.error(msg)
+  }
+
+  async readImages(msgid: number, resourcePath: ResourcePath) {
+    const info = fs.statSync(resourcePath.local())
     if (info.isDirectory()) {
-      this.readDir.call(this, msgid, fullpath)
+      this.readDir.call(this, msgid, resourcePath)
     } else {
       // if (bakDir === undefined) {
       //   const config = cvtConfig.getConfig()
@@ -178,7 +201,7 @@ export class ResourceService{
       //   initHardLinkDir(config.app.default)
       // }
       const service = new ImageService(this.pipeline)
-      const file = await service.read(fullpath)
+      const file = await service.read(resourcePath)
       console.info('readImages', file, this)
       let msg = new Message()
       msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
@@ -190,14 +213,14 @@ export class ResourceService{
     }
   }
 
-  private readDir(msgid: number, path: string) {
+  private readDir(msgid: number, path: ResourcePath) {
     let self = this;
-    fs.readdir(path, async function(err, menu) {
+    fs.readdir(path.local(), async function(err, menu) {
       if (err) return
       // console.info(menu)
       self.totalFiles += menu.length
       for (const item of menu) {
-        await self.readImages(msgid, JString.joinPath(path, item))
+        await self.readImages(msgid, new ResourcePath(JString.joinPath(path.local(), item), path.remote()))
       }
       // reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
       self.progressLoad += menu.length

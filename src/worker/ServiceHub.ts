@@ -1,4 +1,5 @@
 import {ExtensionService} from './ExtensionService'
+import { RendererMock } from './RendererMock'
 import {ResourceService} from './ResourceService'
 import { MessagePipeline } from './MessageTransfer'
 
@@ -11,13 +12,14 @@ class ServiceHub {
     const self = this
     this.server.on('connection', function(ws: any) {
       const _self = self
-      _self.extensions.push(new ExtensionService(ws, _self.resourceService));
+      _self.mocks.push(new RendererMock(ws, _self.resourceService));
     })
   }
 
   registObserver() {}
   private server: any;
   private resourceService: ResourceService;
+  private mocks: RendererMock[] = [];
   private extensions: ExtensionService[] = [];
 }
 

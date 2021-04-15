@@ -1,6 +1,7 @@
 
 export const ReplyType = {
   WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
+  INFOM_ERROR_MESSAGE: 'onErrorMessage',
   REPLY_FILES_LOAD_COUNT: 'replyFilesLoadCount',
   IS_DIRECTORY_EXIST: 'isDirectoryExist',
   REPLY_IMAGES_DIRECTORY: 'replyImagesWithDirectory',

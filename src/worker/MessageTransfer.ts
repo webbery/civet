@@ -1,4 +1,5 @@
 import { Message, MessageState, IMessagePipeline } from '../public/civet'
+import { ReplyType } from './Message'
 const { ipcRenderer } = require('electron')
 
 class Timer {
@@ -88,7 +89,7 @@ class Timer {
           if (!message) continue
           const [_, type] = this.unzip(id)
           if (message.msg !== undefined && message.msg.length === 1) {
-            console.info('send ', message.msg, 'to renderer')
+            console.info('send struct', message.msg, 'to renderer')
             ipcRenderer.send('message-from-worker', { type: type, data: message })
           } else {
             console.info('send ', message, 'to renderer')
@@ -97,7 +98,9 @@ class Timer {
         }
         this.messageQueue.clear()
       }, 200);
-      // ipcRenderer.send('message-from-worker', msgs)
+    }
+    error(msg: string|null) {
+      ipcRenderer.send('message-from-worker', { type: ReplyType.INFOM_ERROR_MESSAGE, data: msg })
     }
     regist(msgType: string, msgFunc: IMessageCallback, pointer: any) {
       this.processor.set(msgType, [msgFunc, pointer]);

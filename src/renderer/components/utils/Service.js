@@ -100,7 +100,7 @@ export default {
   REMOVE_CLASSES: 'removeClasses',
   QUERY_FILES: 'queryFiles',
   ON_IMAGE_UPDATE: 'updateImageList',
-  ON_FILE_RESOLVE_FAIL: 'onFileResolveFail',
+  ON_ERROR_MESSAFGE: 'onErrorMessage',
   UPDATE_IMAGE_CATEGORY: 'updateImageCategory',
   UPDATE_CATEGORY_NAME: 'updateCategoryName',
   UPDATE_FILE_NAME: 'updateFileName',

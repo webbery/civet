@@ -30,7 +30,7 @@ export default {
     }
     // regist ipc message process function
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
-    this.$ipcRenderer.on(Service.ON_FILE_RESOLVE_FAIL, this.onFileResolveFail)
+    this.$ipcRenderer.on(Service.ON_ERROR_MESSAFGE, this.onErrorTips)
     this.$nextTick(() => {
       this.$store.dispatch('init')
     })
@@ -40,7 +40,7 @@ export default {
       if (error) console.log(error)
       this.$store.dispatch('addFiles', updateImages)
     },
-    onFileResolveFail(info) {
+    onErrorTips(info) {
       console.info(info)
       const h = this.$createElement
       this.$notify.error({

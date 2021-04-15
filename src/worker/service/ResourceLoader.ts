@@ -1,12 +1,13 @@
-import http from 'http'
 import url from 'url'
 import fs from 'fs'
 import { config } from '../../public/CivetConfig'
+import { Result } from '../common/Result'
+import path from 'path'
 
 export class ResourceLoader {
   constructor() {}
 
-  download(data: string, dbname: string = '') {
+  async download(data: any, dbname: string = ''): Promise<Result<string, string>>  {
     let downloadDir = 'download'
     if (dbname === '') {
       dbname = config.getCurrentDB()
@@ -16,29 +17,32 @@ export class ResourceLoader {
         fs.mkdirSync(downloadDir);
       }
     }
-    if (data.indexOf('http')) {
-      // download from network
-      this.downloadByHttp(data, downloadDir);
+    console.info('download to', downloadDir)
+    let fullpath: string | null = null;
+    try{
+      if (data['bin'] !== undefined) {
+
+      } else if (data['url']) {
+        // download from network
+        fullpath = await this.downloadByHttp(data['url'], downloadDir);
+      }
+    } catch (err) {
+      return Result.failure(err);
+      // throw new Error(`download ${data} error`)
     }
+    return Result.success(fullpath!);
   }
 
-  private downloadByHttp(resourceUrl: string, downloadDir: string) {
-    let options = {
-      host: url.parse(resourceUrl).host,
-      port: 80,
-      path: url.parse(resourceUrl).pathname
-    };
-    let filename = url.parse(resourceUrl!).pathname!.split('/').pop();
-    let file = fs.createWriteStream(downloadDir + '/' + filename);
-    http.get(options, function(res) {
-      res.on('data', function(data) {
-        file.write(data);
-      }).on('end', function() {
-        file.end();
-        console.log(filename + ' downloaded to ' + downloadDir);
-      }).on('error', function(err) {
-        console.info(`download ${filename} error: ${err}`)
-      });
-    });
+  private async downloadByHttp(resourceUrl: string, downloadDir: string) {
+    const resource = url.parse(resourceUrl)
+    console.info('download:', resource.path, ',', downloadDir + resource.pathname)
+    const dest = downloadDir + resource.pathname;
+    const end = dest.lastIndexOf('/')
+    const destname = dest.substr(end, dest.length - end)
+    console.info('destname:', path.resolve(downloadDir + destname))
+    const dl = require('download')
+    fs.writeFileSync(downloadDir + destname, await dl(resourceUrl));
+    // dl(resourceUrl).pipe(fs.createWriteStream(downloadDir + destname));
+    return path.resolve(downloadDir + destname)
   }
 }

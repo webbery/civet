@@ -1,34 +1,42 @@
 import { IFileImpl, Parser } from '../../public/civet'
 import storage from '../../public/Kernel'
 import { getSuffixFromString, convert2ValidDate } from '../../public/Utility'
-import { ReplyType } from '../transfer'
+import { ReplyType } from '../Message'
 import { MessagePipeline } from '../MessageTransfer'
 import NLP from '../algorithm/strextract/NLP'
 import util from 'util'
+import { ResourcePath } from '../common/ResourcePath'
+
 const Kmeans = require('node-kmeans')
 const kmeans = util.promisify(Kmeans.clusterize)
 const tinyColor = require('tinycolor2')
 
 export class ImageService {
   private _parsers: ImageParser[] = [];
+  private _pipeline: MessagePipeline;
   constructor(pipeline: MessagePipeline) {
+    this._pipeline = pipeline;
     this._parsers.push(new ImageMetaParser(pipeline))
     this._parsers.push(new ThumbnailParser(pipeline))
     this._parsers.push(new ImagePathParser(pipeline))
     this._parsers.push(new ColorParser(pipeline))
   }
-  async read(filepath: string): Promise<IFileImpl> {
+  async read(filepath: ResourcePath): Promise<IFileImpl> {
     const path = require('path')
-    const f = path.parse(filepath)
+    const f = path.parse(filepath.local())
     let file = new IFileImpl(undefined)
     file.filename = f.base
-    file.path = filepath
+    file.path = filepath.local()
+    if (filepath.remote()) {
+      file.remote = filepath.remote()
+    }
     file.meta.push({name: 'filename', value: f.base, type: 'str'})
-    file.meta.push({name: 'path', value: filepath, type: 'str'})
+    file.meta.push({name: 'path', value: filepath.local(), type: 'str'})
     for (let parser of this._parsers) {
       if (!await parser.parse(file)) {
         console.error('parse error:', typeof parser)
         // break
+        this._pipeline.error(`${file.filename} parse error: ${typeof parser}`)
       }
     }
     return file
