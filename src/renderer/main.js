@@ -10,10 +10,12 @@ import 'element-theme-dark'
 import Service from './components/utils/Service'
 import VueLazyload from 'vue-lazyload'
 import Kernel from '../public/Kernel'
+import VueHotkey from 'v-hotkey'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 // Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+Vue.use(VueHotkey)
 Vue.use(VueLazyload, {
   // lazyComponent: true,
   // dispatchEvent: true

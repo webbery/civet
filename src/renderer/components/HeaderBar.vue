@@ -7,7 +7,7 @@
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>{{resource}}</el-dropdown-item>
             <el-dropdown-item v-for="(res, idx) of recentResources" :key="idx" @click="onSelectResource(res)">{{res}}</el-dropdown-item>
-            <el-dropdown-item divided>新建资源库</el-dropdown-item>
+            <el-dropdown-item divided>资源库</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
         <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
@@ -44,6 +44,7 @@ import bus from './utils/Bus'
 import ViewFilter from '@/components/ViewFilter'
 import ImageOperator from '@/components/ImageOperator'
 import Service from '@/components/utils/Service'
+import PageMenu from '@/components/Menu/PageMenu'
 import { config } from '@/../public/CivetConfig'
 
 export default {
@@ -71,7 +72,8 @@ export default {
   },
   components: {
     ViewFilter,
-    ImageOperator
+    ImageOperator,
+    PageMenu
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)

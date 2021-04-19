@@ -69,6 +69,9 @@ namespace caxios{
       g_qCV.notify_one();
     }
   }
+
+  char CStorageProxy::_curVersion;
+
   CStorageProxy::CStorageProxy(const std::string& dbpath, const std::string& name, DBFlag flag, size_t size)
     :m_dir(dbpath), m_dbname(name)
   {
@@ -133,13 +136,13 @@ namespace caxios{
     return m_pCurrent->Get(dbi, key, pData, len);
   }
 
-  bool CStorageProxy::Filter(const std::string& dbname, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb)
+  bool CStorageProxy::Filter(const std::string& dbname, std::function<bool(uint32_t key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb)
   {
     auto dbi = getDBI(dbname);
     return m_pCurrent->Filter(dbi, cb);
   }
 
-  bool CStorageProxy::Filter(const std::string& dbname, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb)
+  bool CStorageProxy::Filter(const std::string& dbname, std::function<bool(const std::string& key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb)
   {
     auto dbi = getDBI(dbname);
     return m_pCurrent->Filter(dbi, cb);
@@ -311,9 +314,9 @@ namespace caxios{
       m_pCurrent->Put(dbi, (uint32_t)SCHEMA_INFO::Version, &dbvs, sizeof(char));
       return true;
     }
-    char* pV = (char*)pData;
-    if (*pV == SCHEMA_VERSION) return true;
-    T_LOG("update", "current: %d, next: %d", *pV, SCHEMA_VERSION);
+    _curVersion = *(char*)pData;
+    if (_curVersion == SCHEMA_VERSION) return true;
+    T_LOG("update", "current: %d, next: %d", _curVersion, SCHEMA_VERSION);
     return false;
   }
 

@@ -37,6 +37,8 @@ namespace caxios{
 
   class CStorageProxy {
   public:
+    static char _curVersion;
+
     CStorageProxy(const std::string& dbpath, const std::string& name, DBFlag flag, size_t size);
     ~CStorageProxy();
 
@@ -47,8 +49,8 @@ namespace caxios{
     bool Put(const std::string& dbname, const std::string&, void* pData, uint32_t len, int flag = MDB_CURRENT);
     bool Get(const std::string& dbname, uint32_t key, void*& pData, uint32_t& len);
     bool Get(const std::string& dbname, const std::string& key, void*& pData, uint32_t& len);
-    bool Filter(const std::string& dbname, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb);
-    bool Filter(const std::string& dbname, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb);
+    bool Filter(const std::string& dbname, std::function<bool(uint32_t key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb);
+    bool Filter(const std::string& dbname, std::function<bool(const std::string& key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb);
     bool Del(const std::string& dbname, uint32_t key);
     bool Del(const std::string& dbname, const std::string& key);
     MDB_cursor* OpenCursor(const std::string& dbname);
@@ -82,7 +84,6 @@ namespace caxios{
     std::string m_dbname;
     bool m_bExit = false;
     std::thread m_tUpgrade;
-
 
   private:
     CDatabase* m_pCurrent = nullptr;

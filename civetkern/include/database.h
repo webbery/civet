@@ -29,8 +29,8 @@ namespace caxios{
     bool Put(MDB_dbi dbi, const std::string&, void* pData, uint32_t len, int flag = MDB_CURRENT);
     bool Get(MDB_dbi dbi, uint32_t key, void*& pData, uint32_t& len);
     bool Get(MDB_dbi dbi, const std::string& key, void*& pData, uint32_t& len);
-    bool Filter(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb);
-    bool Filter(MDB_dbi dbi, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb);
+    bool Filter(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb);
+    bool Filter(MDB_dbi dbi, std::function<bool(const std::string& key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb);
     bool Del(MDB_dbi dbi, uint32_t key);
     bool Del(MDB_dbi dbi, const std::string& key);
     MDB_cursor* OpenCursor(MDB_dbi dbi);

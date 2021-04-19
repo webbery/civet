@@ -25,8 +25,10 @@ export default {
     // CV.sumaryColors(data)
     if (config.isFirstTime()) {
       const guider = this.$refs.guider
-      console.info('show model')
       guider.showModal()
+    }
+    if (config.shouldUpgrade()) {
+      config.save()
     }
     // regist ipc message process function
     this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)

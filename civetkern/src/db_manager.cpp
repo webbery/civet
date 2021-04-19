@@ -12,6 +12,7 @@
 #include "QuerySelector.h"
 #include "RPN.h"
 #include <stack>
+#include "upgrader.h"
 
 #define CHILD_START_OFFSET  2
 
@@ -392,7 +393,7 @@ namespace caxios {
   bool DBManager::GetFilesSnap(std::vector< Snap >& snaps)
   {
     READ_BEGIN(TABLE_FILESNAP);
-    m_pDatabase->Filter(TABLE_FILESNAP, [&snaps](uint32_t k, void* pData, uint32_t len) -> bool {
+    m_pDatabase->Filter(TABLE_FILESNAP, [&snaps](uint32_t k, void* pData, uint32_t len, void*& newVal, uint32_t& newLen) -> bool {
       if (k == 0) return false;
       using namespace nlohmann;
       std::vector<uint8_t> js((uint8_t*)pData, (uint8_t*)pData + len);
@@ -602,7 +603,7 @@ namespace caxios {
     READ_BEGIN(TABLE_TAG_INDX);
     READ_BEGIN(TABLE_TAG2FILE);
 
-    m_pDatabase->Filter(TABLE_TAG_INDX, [this, &tags](const std::string& alphabet, void* pData, uint32_t len)->bool {
+    m_pDatabase->Filter(TABLE_TAG_INDX, [this, &tags](const std::string& alphabet, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)->bool {
       typedef std::tuple<std::string, std::string, std::vector<FileID>> TagInfo;
       WordIndex* pIndx = (WordIndex*)pData;
       size_t cnt = len / sizeof(WordIndex);
@@ -811,6 +812,7 @@ namespace caxios {
   {
     if (m_pDatabase->TryUpdate()) {
       InitTable(meta);
+      upgrade(m_pDatabase, CStorageProxy::_curVersion, SCHEMA_VERSION);
     }
   }
 
@@ -1450,7 +1452,7 @@ namespace caxios {
       FileID fid = *((FileID*)pData + idx);
       vFilesID.push_back(fid);
     }
-    m_pDatabase->Filter(TABLE_CLASS2FILE, [](uint32_t k, void* pData, uint32_t len)->bool {
+    m_pDatabase->Filter(TABLE_CLASS2FILE, [](uint32_t k, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)->bool {
       std::vector<FileID> vFiles((FileID*)pData,(FileID*)pData + len/sizeof(FileID));
       T_LOG("class", "view result: %u, %s", k, format_vector(vFiles).c_str());
       return false;

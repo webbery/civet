@@ -1,5 +1,6 @@
 <template>
   <div class="config">
+    <div>软件版本：{{version}}</div>
     <el-collapse v-model="activeResource" accordion>
       <el-collapse-item title="资源库" name="1">
         <div>
@@ -83,6 +84,7 @@ export default {
   name: 'config-page',
   data() {
     return {
+      version: '',
       activeResource: ['1'],
       configPath: '',
       enableTransfer: false,
@@ -107,6 +109,7 @@ export default {
     for (let s of schema) {
       this.properties.push(s)
     }
+    this.version = config.version
     // console.info('schema', this.properties)
   },
   methods: {

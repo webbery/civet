@@ -30,10 +30,10 @@
 #define TABLE_MATCH         "match_t"
 #define TABLE_RECYCLE_ID    "recycle"
 
-#define SCHEMA_VERSION    1
+#define SCHEMA_VERSION    2
 
 enum class SCHEMA_INFO {
-  Version = 1
+  Version = 1,
 };
 
 namespace caxios {

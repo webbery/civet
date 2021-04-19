@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, Menu, ipcMain, protocol } from 'electron'
+import { app, BrowserWindow, Menu, ipcMain, protocol, globalShortcut } from 'electron'
 import { autoUpdater } from 'electron-updater'
 const path = require('path')
 const fs = require('fs')
@@ -207,6 +207,7 @@ app.whenReady().then(() => {
     console.info('file url:', pathname)
     callback(pathname)
   })
+  globalShortcut.unregisterAll()
 })
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)

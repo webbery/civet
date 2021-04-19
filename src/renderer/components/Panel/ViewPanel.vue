@@ -7,7 +7,7 @@
     </div>
   </div>
   <div v-else> 
-    <div id="main-content" @drop="dropFiles($event)" @dragover.prevent>
+    <div id="main-content" @drop="dropFiles($event)" @dragover.prevent v-hotkey="keymap">
     <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="mainView"></PopMenu>
     <el-scrollbar style="height:96vh;" @click.native="onPanelClick($event)" wrap-style="overflow-x:hidden;">
       <div v-if="classList.length > 0">
@@ -58,6 +58,7 @@ import { mapState } from 'vuex'
 import Waterfall from '../Layout/waterfall'
 import WaterfallSlot from '../Layout/waterfall-slot'
 import InputLabel from '../Control/InputLabel'
+import { Shortcut } from '../../shortcut/Shortcut'
 
 export default {
   name: 'view-panel',
@@ -84,6 +85,7 @@ export default {
   mounted() {
     console.info('mounted')
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+    Shortcut.bind('Ctrl+A', () => { return true })
     // this.width = document.getElementById('main-content').offsetWidth
     // this.height = document.getElementById('main-content').offsetHeight
     // console.info('width: ', this.width, 'height:', this.height)
@@ -98,6 +100,13 @@ export default {
         }
       }
       return state.Cache.viewClass
+    },
+    keymap() {
+      console.info('keymap')
+      return {
+        'ctrl+a': this.onSelectAll,
+        '⌘+a': this.onSelectAll
+      }
     }
   }),
   watch: {
@@ -269,6 +278,9 @@ export default {
       ipcRenderer.send('export2Diectory', filespath)
     },
     onScrollNearBottom() {},
+    onSelectAll(e) {
+      console.info('select all:', e)
+    },
     onLoadFilesTest() {
     }
   }

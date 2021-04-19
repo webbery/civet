@@ -165,7 +165,7 @@ namespace caxios {
     return true;
   }
 
-  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len)> cb)
+  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(uint32_t key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb)
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
@@ -180,15 +180,25 @@ namespace caxios {
       //printf("key: %u, data: %d %s\n",
       //  *(uint32_t*)(key.mv_data),
       //  (int)datum.mv_size, (char*)datum.mv_data);
-      if (cb(*(uint32_t*)(key.mv_data), datum.mv_data, datum.mv_size)) {
+      void* pNewData = nullptr;
+      uint32_t newLen = 0;
+      if (cb(*(uint32_t*)(key.mv_data), datum.mv_data, datum.mv_size, pNewData, newLen)) {
         break;
+      }
+      if (newLen) {
+        MDB_val newVal = { 0 };
+        newVal.mv_data = pNewData;
+        newVal.mv_size = newLen;
+        if ((rc = mdb_cursor_put(cursor, &key, &newVal, MDB_CURRENT)) != 0) {
+          T_LOG("database", "cursor put error: %s", err2str(rc).c_str());
+        }
       }
     }
     mdb_cursor_close(cursor);
     return true;
   }
 
-  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(const std::string& key, void* pData, uint32_t len)> cb)
+  bool CDatabase::Filter(MDB_dbi dbi, std::function<bool(const std::string& key, void* pData, uint32_t len, void*& newVal, uint32_t& newLen)> cb)
   {
     MDB_cursor* cursor = nullptr;
     int rc = 0;
@@ -203,9 +213,19 @@ namespace caxios {
       //printf("key: %u, data: %d %s\n",
       //  *(uint32_t*)(key.mv_data),
       //  (int)datum.mv_size, (char*)datum.mv_data);
+      void* pNewData = nullptr;
+      uint32_t newLen = 0;
       std::string sKey((char*)key.mv_data, key.mv_size);
-      if (cb(sKey, datum.mv_data, datum.mv_size)) {
+      if (cb(sKey, datum.mv_data, datum.mv_size, pNewData, newLen)) {
         break;
+      }
+      if (newLen) {
+        MDB_val newVal = { 0 };
+        newVal.mv_data = pNewData;
+        newVal.mv_size = newLen;
+        if ((rc = mdb_cursor_put(cursor, &key, &newVal, MDB_GET_CURRENT)) != 0) {
+          T_LOG("database", "cursor put error: %s", err2str(rc).c_str());
+        }
       }
     }
     mdb_cursor_close(cursor);

@@ -2,6 +2,8 @@ const fs = require('fs')
 class CivetConfig {
   configPath: string;
   config: any;
+  oldVersion: boolean = false;
+
   constructor() {
     const app = require('./System').default.app()
     const civet = require('../../package.json')
@@ -24,6 +26,9 @@ class CivetConfig {
       // cfg.app.first = false
       if (!config.app.version || config.app.version !== version) {
         // upgrade config here
+        console.info('software should be upgrade')
+        this.oldVersion = true;
+        config.app.version = version
       }
       cfg = config
     }
@@ -120,6 +125,14 @@ class CivetConfig {
     this.config.app.first = false
     console.info('save config', this.config)
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
+  }
+
+  shouldUpgrade() {
+    return this.oldVersion;
+  }
+
+  get version() {
+    return this.config.app.version
   }
 
   schema(filetype: string = 'img') {
