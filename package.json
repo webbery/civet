@@ -13,7 +13,7 @@
     "preview"
   ],
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder -p onTag",
+    "build": "node .electron-vue/build.js && electron-builder -mwp onTag",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:emscripten": "node ./caxios/build.js",
@@ -64,7 +64,10 @@
       ],
       "sign": false
     },
-    "AppImage": {},
+    "appImage": {
+      "synopsis": "Civet",
+      "category": "Utility"
+    },
     "mac": {
       "identity": "v_yuanwenbin",
       "category": "public.app-category.graphics-design",

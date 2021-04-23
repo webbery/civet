@@ -1,12 +1,20 @@
-# <img src="https://raw.fastgit.org/webbery/civet/master/src/main/asset/icon/icon.png" width="52"/>civet
+<div align="center">
+<img src="https://raw.fastgit.org/webbery/civet/master/src/main/asset/icon/icon.png" alt=""/>
+<h1>Civet</h1>
+<blockquote>资源管理新体验</blockquote>
+<a href="https://github.com/webbery/civet/actions">
+<img src="https://github.com/webbery/civet/workflows/win-build/badge.svg" alt="">
+</a>
+<a href="https://github.com/webbery/civet/actions">
+<img src="https://github.com/webbery/civet/workflows/mac-build/badge.svg" alt="">
+</a>
+<a href="https://github.com/webbery/civet/actions">
+<img src="https://github.com/webbery/civet/workflows/linux-build/badge.svg" alt="">
+</a>
+</div>
 
-
-![](https://github.com/webbery/civet/workflows/win-build/badge.svg)
-![](https://github.com/webbery/civet/workflows/mac-build/badge.svg)
-![](https://github.com/webbery/civet/workflows/linux-build/badge.svg)
-![](https://img.shields.io/cocoapods/l/Alamofire.svg?style=flat)  
-[主页](http://webberg.gitee.io/civet/)  
 简体中文 | [English](./README-en.md)  
+# 应用概述  
 > :kissing_heart: 支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
 目标是希望像VSCode那样，以扩展的形式为用户提供一个数字资产(图片、文档、视频、文献、网页等)的管理软件。
 
