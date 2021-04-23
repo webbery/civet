@@ -79,9 +79,11 @@ class CivetConfig {
     return fs.existsSync(path)
   }
 
-  switchResource(name: string) {}
+  switchResource(name: string) {
+    this.config.app.default = name
+  }
 
-  getResourcesName() {
+  getResourcesName(): string[] {
     const resources = []
     for (const resource of this.config.resources) {
       resources.push(resource.name)

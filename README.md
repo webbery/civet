@@ -26,8 +26,8 @@
 
 ### 相关资源
 
-[插件开发](https://github.com/webbery/civet-extension)  
-[插件市场](https://webberg.gitee.io/civet/market.html)
+[插件开发](https://webberg.gitee.io/civet/extension.html)  
+[插件市场](https://webberg.gitee.io/civet/market.html)  
 
 **道阻且长，行则将至。**
 

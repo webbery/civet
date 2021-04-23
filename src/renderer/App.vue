@@ -1,7 +1,11 @@
 <template>
   <div id="app">
     <LandingPage></LandingPage>
-    <Guider ref="guider"></Guider>
+    <dialog id="guider" class="modal">
+      <label>配置你的第一个资源库:</label>
+      <Guider @onclose="onCloseGuider"></Guider>
+    </dialog>
+    <!-- <Guider ref="guider"></Guider> -->
   </div>
 </template>
 
@@ -24,8 +28,10 @@ export default {
     // let data = {data: test, info: {width: 2, height: 1}}
     // CV.sumaryColors(data)
     if (config.isFirstTime()) {
-      const guider = this.$refs.guider
+      const guider = document.getElementById('guider')
       guider.showModal()
+      // const guider = this.$refs.guider
+      // guider.showModal()
     }
     if (config.shouldUpgrade()) {
       config.save()
@@ -52,11 +58,16 @@ export default {
         // duration: 0,
         position: 'bottom_right'
       })
+    },
+    onCloseGuider() {
+      console.info('close guider')
+      const cfg = document.getElementById('guider')
+      cfg.close()
     }
   },
   destroyed: function() {
-    const Storage = require('../public/Kernel')
-    Storage.release()
+    // const Storage = require('../public/Kernel')
+    // Storage.release()
   }
 }
 </script>

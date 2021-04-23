@@ -180,7 +180,7 @@ export class ResourceService{
     storage.updateFile({ id: [data.id], filename: data.filename })
   }
   async reInitDB(msgid: number, data: any) {
-    console.info('init db')
+    console.info('init db', data)
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
     return {type: ReplyType.REPLY_RELOAD_DB_STATUS, data: true}

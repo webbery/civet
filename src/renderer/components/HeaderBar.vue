@@ -2,12 +2,13 @@
   <el-row >
       <el-col :span="4">
         <el-button @click="onClickConfig" type="text" size="mini" icon="el-icon-setting" circle></el-button>
-        <el-dropdown>
-          <el-button @click="onClickResource" size="mini" round>{{resource}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>{{resource}}</el-dropdown-item>
+        <el-dropdown trigger="click" hide-on-click="false">
+          <el-button size="mini" round>{{allResources[current]}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+          <el-dropdown-menu slot="dropdown" style="width: 200px" @visible-change="onResourceDropDown">
+            <PageMenu :resources="allResources" :current="current"></PageMenu>
+            <!-- <el-dropdown-item>{{resource}}</el-dropdown-item>
             <el-dropdown-item v-for="(res, idx) of recentResources" :key="idx" @click="onSelectResource(res)">{{res}}</el-dropdown-item>
-            <el-dropdown-item divided>资源库</el-dropdown-item>
+            <el-dropdown-item divided>资源库</el-dropdown-item> -->
           </el-dropdown-menu>
         </el-dropdown>
         <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
@@ -54,8 +55,9 @@ export default {
       comName: ViewFilter,
       scaleValue: 20,
       keyword: '',
-      resource: '资源库',
       recentResources: [],
+      allResources: [],
+      current: 0,
       viewDesc: '全部',
       disabled: true,
       style: {
@@ -81,13 +83,32 @@ export default {
     console.info(config)
     const resource = config.getCurrentResource()
     console.info('header', resource)
-    this.resource = resource.name
+    // this.resource = resource.name
+    this.allResources = config.getResourcesName()
+    const current = config.getCurrentDB()
+    for (let idx = 0; idx < this.allResources.length; ++idx) {
+      if (current === this.allResources[idx]) {
+        this.current = idx
+        break
+      }
+    }
     this.recentResources.push(resource.name)
   },
   methods: {
-    onClickResource() {},
+    onResourceDropDown(display) {
+      if (display) {
+        this.allResources = config.getResourcesName()
+        const current = config.getCurrentDB()
+        for (let idx = 0; idx < this.allResources.length; ++idx) {
+          if (current === this.allResources[idx]) {
+            this.current = idx
+            break
+          }
+        }
+      }
+    },
     onInitResourceDB(dbname) {
-      this.resource = dbname
+      // this.resource = dbname
     },
     onSelectResource(resname) {
       console.info(resname)

@@ -1,17 +1,15 @@
 <template>
   <div>
-    <dialog id="guider-config" class="modal">
-      <label>配置你的第一个资源库:</label>
-      <el-input placeholder="资源库名称" size="mini" v-model="resourceName" maxlength="16" show-word-limit @input="onInputChange"></el-input>
-      <div style="margin-top: 15px;" size="mini">
-        <el-input placeholder="资源库路径" v-model="resourceDBPath" class="input-with-select" :disabled="true" size="mini">
-          <!-- <template slot="prepend">资源库路径：</template> -->
-          <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()" size="mini"></el-button>
-        </el-input>
-      </div>
-      <div class="error">{{msg}}</div>
-    <el-button @click="onStartCivet()" size="mini" type="success" :disabled="isDisable">完成</el-button>
-    </dialog>
+    <el-input placeholder="资源库名称" size="mini" v-model="resourceName" maxlength="16" show-word-limit @input="onInputChange"></el-input>
+    <div style="margin-top: 15px;" size="mini">
+      <el-input placeholder="资源库路径" v-model="resourceDBPath" class="input-with-select" :disabled="true" size="mini">
+        <!-- <template slot="prepend">资源库路径：</template> -->
+        <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()" size="mini"></el-button>
+      </el-input>
+    </div>
+    <div class="error">{{msg}}</div>
+  <el-button @click="onStartCivet()" size="mini" type="success" :disabled="isDisable">完成</el-button>
+  <el-button @click="onClose()" size="mini" type="info" v-if="enableClose">取消</el-button>
   </div>
 </template>
 <script>
@@ -30,12 +28,17 @@ export default {
       msg: ''
     }
   },
+  props: {
+    enableClose: {
+      type: Boolean,
+      default: false
+    }
+  },
   mounted() {
   },
   methods: {
-    showModal() {
-      const cfg = document.getElementById('guider-config')
-      cfg.showModal()
+    onClose() {
+      this.$emit('onclose')
     },
     onInputChange(val) {
       const input = val.trim()
@@ -57,10 +60,9 @@ export default {
       }
       config.addResource(this.resourceName, this.resourceDBPath)
       config.save()
-      const cfg = document.getElementById('guider-config')
-      cfg.close()
       bus.emit(bus.EVENT_INIT_RESOURCE_DB, this.resourceName)
       this.$ipcRenderer.send(Service.REINIT_DB)
+      this.$emit('onclose')
     },
     onSelectDBPath() {
       let self = this
@@ -82,12 +84,6 @@ export default {
 }
 </script>
 <style scoped>
-.modal{
-  background-color: #222933;
-  font-size: 14px;
-  font-weight: 600;
-  color: aliceblue;
-}
 .error {
   color: rgb(199, 12, 12);
 }

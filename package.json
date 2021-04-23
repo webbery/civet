@@ -1,6 +1,6 @@
 {
   "name": "civet",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "webberg <webbery@foxmail.com>",
   "description": "素材管理软件",
   "license": "MIT",
@@ -13,7 +13,7 @@
     "preview"
   ],
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder -mwp onTag",
+    "build": "node .electron-vue/build.js && electron-builder -p onTag",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:emscripten": "node ./caxios/build.js",
