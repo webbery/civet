@@ -15,6 +15,9 @@
 
 简体中文 | [English](./README-en.md)  
 # 应用概述  
+
+[![Join the chat at https://gitter.im/webbery/civet](https://badges.gitter.im/webbery/civet.svg)](https://gitter.im/webbery/civet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 > :kissing_heart: 支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
 目标是希望像VSCode那样，以扩展的形式为用户提供一个数字资产(图片、文档、视频、文献、网页等)的管理软件。
 
