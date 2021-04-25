@@ -5,10 +5,7 @@
         <el-dropdown trigger="click" hide-on-click="false">
           <el-button size="mini" round>{{allResources[current]}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown" style="width: 200px" @visible-change="onResourceDropDown">
-            <PageMenu :resources="allResources" :current="current"></PageMenu>
-            <!-- <el-dropdown-item>{{resource}}</el-dropdown-item>
-            <el-dropdown-item v-for="(res, idx) of recentResources" :key="idx" @click="onSelectResource(res)">{{res}}</el-dropdown-item>
-            <el-dropdown-item divided>资源库</el-dropdown-item> -->
+            <PageMenu :resources="allResources" :current="current" @onswitch="onResourceSwitch" @ondelete="onResourceDelete"></PageMenu>
           </el-dropdown-menu>
         </el-dropdown>
         <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
@@ -104,6 +101,22 @@ export default {
             this.current = idx
             break
           }
+        }
+      }
+    },
+    onResourceSwitch(resource) {
+      for (let idx = 0; idx < this.allResources.length; ++idx) {
+        if (this.allResources[idx] === resource) {
+          this.current = idx
+          break
+        }
+      }
+    },
+    onResourceDelete(resource) {
+      for (let idx = 0; idx < this.allResources.length; ++idx) {
+        if (this.allResources[idx] === resource) {
+          this.allResources.splice(idx, 1)
+          break
         }
       }
     },

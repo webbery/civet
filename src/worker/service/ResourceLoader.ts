@@ -7,10 +7,11 @@ import path from 'path'
 export class ResourceLoader {
   constructor() {}
 
-  async download(data: any, dbname: string = ''): Promise<Result<string, string>>  {
+  async download(data: any, dbname: string|undefined = ''): Promise<Result<string, string>>  {
     let downloadDir = 'download'
     if (dbname === '') {
       dbname = config.getCurrentDB()
+      if (!dbname) return Result.failure('current resource is undefined')
       const dir = config.getDBPath(dbname);
       downloadDir = dir + '/' + downloadDir;
       if (!fs.existsSync(downloadDir)) {

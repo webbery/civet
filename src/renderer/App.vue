@@ -27,11 +27,9 @@ export default {
     // rgb2hsv(test, 2)
     // let data = {data: test, info: {width: 2, height: 1}}
     // CV.sumaryColors(data)
-    if (config.isFirstTime()) {
+    if (config.isFirstTime() || config.getCurrentDB() === undefined) {
       const guider = document.getElementById('guider')
       guider.showModal()
-      // const guider = this.$refs.guider
-      // guider.showModal()
     }
     if (config.shouldUpgrade()) {
       config.save()

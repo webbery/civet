@@ -14,8 +14,9 @@
   </div>
   <div class="page" :id="pageid[2]" v-show="currentPage === 2">
     <li class="item-header"><span class="el-icon-arrow-left dock-left" @click="delete2Main"></span>删除</li>
-    <li v-for="resource of resources" :key="resource" class="page-menu-item">
-      {{resource}}
+    <li v-for="(resource, idx) in resources" :key="idx" class="page-menu-item" >
+      <span v-if="idx===current" class="current">{{resource}}</span>
+      <span v-else>{{resource}}<span class="el-icon-close dock-right" @click="onDelete(resource)"></span></span>
     </li>
   </div>
   <!-- <el-dialog title="新建资源库" :visible.sync="showDialog" :close-on-click-modal="false">
@@ -23,7 +24,7 @@
   </el-dialog> -->
   <dialog id="newresource" class="modal">
     <label>新建资源库:</label>
-    <Guider @onclose="onCloseGuider" :enableClose="true"></Guider>
+    <Guider @onclose="onCloseGuider" @onsuccess="onSuccess" :enableClose="true"></Guider>
   </dialog>
 </el-container>
 </template>
@@ -65,9 +66,17 @@ export default {
       this.$nextTick(() => {
         this.$store.dispatch('init')
       })
+      this.$emit('onswitch', resource)
     },
     deleteResource() {
       this.currentPage = 2
+    },
+    onDelete(resource) {
+      this.$ipcRenderer.send('removeDB', resource)
+      if (config.getCurrentDB() === resource) {
+        this.$store.dispatch('clear')
+      }
+      this.$emit('ondelete', resource)
     },
     createResource() {
       const guider = document.getElementById('newresource')
@@ -83,6 +92,12 @@ export default {
     onCloseGuider() {
       const cfg = document.getElementById('newresource')
       cfg.close()
+    },
+    onSuccess(name) {
+      const cfg = document.getElementById('newresource')
+      cfg.close()
+      // this.resources.push(name)
+      // this.current = this.resources.length - 1
     }
   }
 }
@@ -121,5 +136,8 @@ export default {
 }
 .dock-left:hover{
   background-color:rgb(55, 80, 97);
+}
+.el-icon-close:hover {
+  background-color:rgb(48, 108, 148);
 }
 </style>

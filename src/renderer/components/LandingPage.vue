@@ -4,7 +4,7 @@
       <HeaderBar></HeaderBar>
     </el-header>
     <el-row type="flex" class="row-bg">
-      <el-col :span="4">
+      <el-col :span="4" class="nav-light">
         <NavigationPanel></NavigationPanel>
       </el-col>
       <el-col :span="16">
@@ -13,7 +13,7 @@
           <router-view></router-view>
         </div>
       </el-col>
-      <el-col :span="4">
+      <el-col :span="4" class="nav-light">
         <PropertyPanel></PropertyPanel>
       </el-col>
     </el-row>
@@ -92,10 +92,13 @@ export default {
   padding: 0;
 }
 .display{
-  border: 1px rgb(200, 240, 247);
+  /* border: 1px rgb(200, 240, 247);
   border-style: none dashed;
-  border-radius: 5px;
+  border-radius: 5px; */
   margin: 0 10px 0 10px;
+}
+.nav-light {
+  background: #2b3440;
 }
 /* #loading-progress {
   position: relative;

@@ -104,5 +104,6 @@ export default {
   UPDATE_IMAGE_CATEGORY: 'updateImageCategory',
   UPDATE_CATEGORY_NAME: 'updateCategoryName',
   UPDATE_FILE_NAME: 'updateFileName',
-  REINIT_DB: 'reInitDB'
+  REINIT_DB: 'reInitDB',
+  REMOVE_DB: 'removeDB'
 }

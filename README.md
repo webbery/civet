@@ -11,6 +11,9 @@
 <a href="https://github.com/webbery/civet/actions">
 <img src="https://github.com/webbery/civet/workflows/linux-build/badge.svg" alt="">
 </a>
+<a href="https://gitter.im/webbery/civet?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge">
+<img src="https://badges.gitter.im/webbery/civet.svg" alt="">
+</a>
 </div>
 
 简体中文 | [English](./README-en.md)  

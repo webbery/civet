@@ -6,6 +6,7 @@ import { IFileImpl, Message } from '../public/civet'
 import storage from '../public/Kernel'
 import { ResourcePath } from './common/ResourcePath'
 import fs from 'fs'
+import { config } from '../public/CivetConfig'
 
 let isStart: boolean = false;
 function updateStatus(status: any) {
@@ -37,6 +38,7 @@ export class ResourceService{
     pipeline.regist('updateCategoryName', this.updateCategoryName, this)
     pipeline.regist('updateFileName', this.updateFileName, this)
     pipeline.regist('reInitDB', this.reInitDB, this)
+    pipeline.regist('removeDB', this.removeDB, this)
   }
 
   private addFilesByDir(msgid: number, dir: string) {
@@ -184,6 +186,15 @@ export class ResourceService{
     storage.init()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
     return {type: ReplyType.REPLY_RELOAD_DB_STATUS, data: true}
+  }
+
+  removeDB(msgid: number, data: any) {
+    console.info('remove db', data)
+    if (data === config.getCurrentDB()) {
+      storage.release()
+    }
+    // remove db
+    config.removeResource(data)
   }
 
   error(msg: string|null) {

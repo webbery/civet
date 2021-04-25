@@ -42,13 +42,16 @@ class CivetConfig {
     return this.config
   }
 
-  getCurrentDB(): string {
+  getCurrentDB(): string|undefined {
     return this.config.app.default
   }
 
-  getDBPath(name: string): string | null {
+  getDBPath(name: string|undefined): string | null {
+    if (!name) {
+      name = this.config.app.default
+    }
     for (const resource of this.config.resources) {
-      if (this.config.app.default === resource.name) {
+      if (name === resource.name) {
         return resource.db.path
       }
     }
@@ -131,6 +134,25 @@ class CivetConfig {
 
   shouldUpgrade() {
     return this.oldVersion;
+  }
+
+  removeResource(name: string) {
+    const fullpath = this.getDBPath(name)
+    console.info('remove path:', fullpath)
+    if (fullpath !== null) {
+      fs.rmdirSync(fullpath, { recursive: true })
+    }
+    const resources = this.config.resources
+    for (let idx = 0; idx < resources.length; ++idx) {
+      if (resources[idx].name === name) {
+        resources.splice(idx, 1)
+        break
+      }
+    }
+    if (this.config.app.default === name) {
+      this.config.app.default = resources[0]
+    }
+    this.save()
   }
 
   get version() {

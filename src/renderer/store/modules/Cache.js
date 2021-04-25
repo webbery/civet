@@ -342,6 +342,9 @@ const mutations = {
       }
     }
     // console.info('display classes', state.viewClass)
+  },
+  clear(state, data) {
+    state.viewItems = []
   }
 }
 
@@ -428,6 +431,9 @@ const actions = {
   async getClassesAndFiles({ commit }, query) {
     const allClasses = await Service.getServiceInstance().get(Service.GET_CATEGORY_DETAIL, query)
     commit('getClassesAndFiles', allClasses)
+  },
+  clear({ commit }, data) {
+    commit('clear', data)
   },
   update({ commit }, sql) {
     /*

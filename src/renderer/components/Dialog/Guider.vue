@@ -62,7 +62,7 @@ export default {
       config.save()
       bus.emit(bus.EVENT_INIT_RESOURCE_DB, this.resourceName)
       this.$ipcRenderer.send(Service.REINIT_DB)
-      this.$emit('onclose')
+      this.$emit('onsuccess', this.resourceName)
     },
     onSelectDBPath() {
       let self = this
