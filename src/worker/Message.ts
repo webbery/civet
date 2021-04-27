@@ -17,3 +17,21 @@ export const ReplyType = {
   REPLY_UNTAG_IMAGES: 'replyUntagImages',
   REPLY_RELOAD_DB_STATUS: 'replyReloadDBStatus'
 }
+
+export enum MessageState{
+  UNINIT = 0,
+  PENDING = 1,
+  FINISH = 2
+}
+
+export class Message {
+  id: number = 0;
+  type: string = '';
+  state: number = MessageState.UNINIT;
+  tick: number = 0;   // waitting time, unit second
+  msg: any;
+}
+
+export interface IMessagePipeline {
+  post: any;
+}

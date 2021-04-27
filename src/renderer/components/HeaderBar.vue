@@ -2,7 +2,7 @@
   <el-row >
       <el-col :span="4">
         <el-button @click="onClickConfig" type="text" size="mini" icon="el-icon-setting" circle></el-button>
-        <el-dropdown trigger="click" hide-on-click="false">
+        <el-dropdown trigger="click" :hide-on-click="false">
           <el-button size="mini" round>{{allResources[current]}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown" style="width: 200px" @visible-change="onResourceDropDown">
             <PageMenu :resources="allResources" :current="current" @onswitch="onResourceSwitch" @ondelete="onResourceDelete"></PageMenu>
@@ -22,7 +22,7 @@
           {{queryKinds[queryIdx].name}}<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item :key="queryKind" v-for="queryKind of queryKinds" :command="queryKind.command">
+          <el-dropdown-item :key="idx" v-for="(queryKind, idx) in queryKinds" :command="queryKind.command">
             {{queryKind.name}}
           </el-dropdown-item>
         </el-dropdown-menu>

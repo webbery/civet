@@ -46,7 +46,7 @@ export default {
   },
   props: {
     resources: {
-      type: String,
+      type: Array,
       default: []
     },
     current: {type: Number, default: 0}

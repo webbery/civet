@@ -1,5 +1,4 @@
-import { Message, MessageState, IMessagePipeline } from '../public/civet'
-import { ReplyType } from './Message'
+import { ReplyType, Message, MessageState, IMessagePipeline } from './Message'
 const { ipcRenderer } = require('electron')
 
 class Timer {

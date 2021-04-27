@@ -1,4 +1,4 @@
-import FileBase from '@/../public/FileBase'
+import { civet } from '@/../public/civet'
 import Service from '@/components/utils/Service'
 import { Tree, TreeNode } from '@/components/Control/Tree'
 import { isEmpty } from '@/../public/Utility'
@@ -82,7 +82,7 @@ const mutations = {
     // }
     const images = data.allImages
     for (const image of images) {
-      Cache.files[image.id] = new FileBase(image)
+      Cache.files[image.id] = new civet.IResource(image)
       // if (Cache.files.length > maxCacheSize) break
     }
     // const len = state.cache.length
@@ -154,7 +154,7 @@ const mutations = {
         Cache.files[file.id].update(file)
         continue
       }
-      Cache.files[file.id] = new FileBase(file)
+      Cache.files[file.id] = new civet.IResource(file)
       cnt += 1
       // setting view panel item
       // if (Cache.files.length > maxCacheSize) break

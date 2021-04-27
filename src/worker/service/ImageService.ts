@@ -1,7 +1,7 @@
-import { IFileImpl, Parser } from '../../public/civet'
+import { civet } from '../../public/civet'
 import storage from '../../public/Kernel'
 import { getSuffixFromString, convert2ValidDate } from '../../public/Utility'
-import { ReplyType } from '../Message'
+import { ReplyType, IMessagePipeline } from '../Message'
 import { MessagePipeline } from '../MessageTransfer'
 import NLP from '../algorithm/strextract/NLP'
 import util from 'util'
@@ -21,10 +21,10 @@ export class ImageService {
     this._parsers.push(new ImagePathParser(pipeline))
     this._parsers.push(new ColorParser(pipeline))
   }
-  async read(filepath: ResourcePath): Promise<IFileImpl> {
+  async read(filepath: ResourcePath): Promise<civet.IResource> {
     const path = require('path')
     const f = path.parse(filepath.local())
-    let file = new IFileImpl(undefined)
+    let file = new civet.IResource(undefined)
     file.filename = f.base
     file.path = filepath.local()
     if (filepath.remote()) {
@@ -48,8 +48,9 @@ class MessageTransfer {
   msg: any;
 }
 
-class ImageParser extends Parser {
-  parse(file: IFileImpl): boolean | Promise<boolean> {
+class ImageParser extends civet.IParser {
+  pipeline?: IMessagePipeline;
+  parse(file: civet.IResource): boolean | Promise<boolean> {
     return true
   }
 }
@@ -68,7 +69,7 @@ class ImageMetaParser extends ImageParser {
     this._typeParser.set('bmp', sharpParser);
     this._typeParser.set('fit', sharpParser);
   }
-  parse(file: IFileImpl): boolean {
+  parse(file: civet.IResource): boolean {
     console.info('ImageMetaParser,', file)
     // first try type by suffix
     let type = getSuffixFromString(file.path)
@@ -115,7 +116,7 @@ class ImagePathParser extends ImageParser {
     // const cpus = require('os').cpus().length
     // this.pool = workerpool.pool(algorithmpath, { minWokers: cpus > 4 ? 4 : cpus, workerType: 'process' })
   }
-  parse(file: IFileImpl): boolean {
+  parse(file: civet.IResource): boolean {
     // file.tag = await this.pool.exec('getNouns', [file.path]);
     file.tag = NLP.getNouns(file.path)
     if (file.tag.length > 0) {
@@ -135,13 +136,13 @@ class ImagePathParser extends ImageParser {
 }
 
 class FileTypeMetaParser {
-  parse(file: IFileImpl): Promise<boolean> | boolean {
+  parse(file: civet.IResource): Promise<boolean> | boolean {
     return false;
   }
 }
 
 class SharpMetaParser extends FileTypeMetaParser{
-  async parse(file: IFileImpl): Promise<boolean> {
+  async parse(file: civet.IResource): Promise<boolean> {
     const sharp = require('sharp')
     try{
       const image = sharp(file.path)
@@ -156,7 +157,7 @@ class SharpMetaParser extends FileTypeMetaParser{
 }
 
 class ExifMetaParser extends FileTypeMetaParser{
-  parse(file: IFileImpl): boolean {
+  parse(file: civet.IResource): boolean {
     const fs = require('fs')
     const buffer = fs.readFileSync(file.path)
     const ExifReader = require('exifreader')
@@ -203,7 +204,7 @@ class ThumbnailParser extends ImageParser{
     super()
   }
 
-  async parse(file: IFileImpl): Promise<boolean> {
+  async parse(file: civet.IResource): Promise<boolean> {
     const sharp = require('sharp')
     try {
       const image = sharp(file.path)
@@ -236,7 +237,7 @@ class ColorParser extends ImageParser {
     super()
     this._plate = []
   }
-  async parse(file: IFileImpl): Promise<boolean> {
+  async parse(file: civet.IResource): Promise<boolean> {
     if (!!file.raw) {
       const count = file.raw.length / 3;
       let counter = new Map<number, number>()

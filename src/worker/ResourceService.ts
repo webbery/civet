@@ -1,8 +1,8 @@
 import { MessagePipeline } from './MessageTransfer'
 import JString from '../public/String'
 import { ImageService } from './service/ImageService'
-import { ReplyType } from './Message'
-import { IFileImpl, Message } from '../public/civet'
+import { ReplyType, Message } from './Message'
+import { civet } from '../public/civet'
 import storage from '../public/Kernel'
 import { ResourcePath } from './common/ResourcePath'
 import fs from 'fs'
@@ -81,7 +81,7 @@ export class ResourceService{
     console.info('getImagesInfo', imgs, this)
     const images = []
     for (const img of imgs) {
-      images.push(new IFileImpl(img))
+      images.push(new civet.IResource(img))
     }
     return {type: ReplyType.REPLY_IMAGES_INFO, data: images}
     // reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
@@ -97,7 +97,7 @@ export class ResourceService{
   getImageInfo(msgid: number, imageID: string) {
     const img = storage.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
-    const image = new IFileImpl(img[0])
+    const image = new civet.IResource(img[0])
     // reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
     return {type: ReplyType.REPLY_IMAGE_INFO, data: image}
   }
