@@ -11,6 +11,7 @@
 #define TB_Class      "class"
 #define TB_Annotation "annotation"
 #define TB_FileID     "fileid"
+#define TB_Snap       "snap"
 
 #define OP_GreateThanEqual    "$gte"
 #define OP_GreateThan         "$gt"
@@ -26,11 +27,13 @@
 //#define OP_Greate     "$nin"
 //#define OP_Greate     "$all"
 //#define OP_Greate     "$not"
+#define OP_Limit              "limit"
+#define OP_Offset             "offset"
 
 inline bool is_table(const std::string_view view) {
   return view.compare(0, strlen(TABLE_PREFIX), TABLE_PREFIX) == 0
     || view == TB_Keyword || view == TB_Tag || view == TB_Class
-    || view == TB_FileID || view == TB_Annotation;
+    || view == TB_FileID  || view == TB_Snap || view == TB_Annotation;
 }
 
 inline bool is_value(const std::string_view view) {
@@ -39,7 +42,8 @@ inline bool is_value(const std::string_view view) {
 
 inline bool is_operator(const std::string_view view) {
   return view == OP_And || view == OP_GreateThanEqual || view == OP_GreateThan
-    || view == OP_LessThan || view == OP_LessThanEqual || view == OP_Or || view == OP_Near;
+    || view == OP_LessThan || view == OP_LessThanEqual || view == OP_Or || view == OP_Near
+    || view == OP_Limit || view == OP_Offset;
 }
 
 inline bool is_and(const std::string_view view) {

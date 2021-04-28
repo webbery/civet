@@ -3,7 +3,7 @@
     <LandingPage></LandingPage>
     <dialog id="guider" class="modal">
       <label>配置你的第一个资源库:</label>
-      <Guider @onclose="onCloseGuider"></Guider>
+      <Guider @onclose="onCloseGuider" @onsuccess="onCloseGuider"></Guider>
     </dialog>
     <!-- <Guider ref="guider"></Guider> -->
   </div>
@@ -58,7 +58,6 @@ export default {
       })
     },
     onCloseGuider() {
-      console.info('close guider')
       const cfg = document.getElementById('guider')
       cfg.close()
     }

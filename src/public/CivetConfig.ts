@@ -110,6 +110,7 @@ class CivetConfig {
         return
       }
     }
+    this.config.app.first = false
     this.config.app.default = name
     this.config.resources.push({
       name: name,
@@ -127,7 +128,6 @@ class CivetConfig {
   }
 
   save() {
-    this.config.app.first = false
     console.info('save config', this.config)
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }

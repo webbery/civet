@@ -301,6 +301,7 @@ namespace caxios{
     m_mKeywordMap[TB_Class] = TABLE_CLASS2FILE;
     //m_mKeywordMap[TB_Annotation] = TABLE_KEYWORD2FILE;
     m_mKeywordMap[TB_FileID] = TABLE_FILE_META;
+    m_mKeywordMap[TB_Snap] = TABLE_FILESNAP;
   }
 
   bool CStorageProxy::ValidVersion()

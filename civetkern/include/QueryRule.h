@@ -10,6 +10,7 @@ namespace caxios {
   struct literal_indent_cn : utf8::ranges< U'\u2E80', U'\u9FFF'> {};
   struct literal_string_cn : plus < not_one<'\'', '"'> > {};
   struct literal_quote : one<'\'', '"'> {};
+  struct literal_star: one<'*'> {};
   struct literal_spaces : star<space> {};
   //template< char Q >
   //struct str_impl : if_must< one< Q >, until< one< Q >, literal_string > > {};
@@ -34,7 +35,7 @@ namespace caxios {
   //struct literal_series : plus<literal_indent, '/'> {};
   struct literal_string : sor< literal_string_cn, literal_keyword> {};
 
-  struct literal_value_impl : sor<literal_color, literal_datetime_string, literal_datetime_double, literal_string> {};
+  struct literal_value_impl : sor<literal_color, literal_datetime_string, literal_datetime_double, literal_string, literal_star> {};
   struct literal_string_value : seq<literal_quote, literal_value_impl, literal_quote > {};
 
   struct literal_gt : string<'$', 'g', 't'> {};
@@ -43,6 +44,8 @@ namespace caxios {
   struct literal_lte : string<'$', 'l', 't', 'e'> {};
   struct literal_ne : string<'$', 'n', 'e'> {};
   struct literal_near : string<'$', 'n', 'e', 'a', 'r'> {};
+  struct literal_near : string<'l', 'i', 'm', 'i', 't'> {};
+  struct literal_near : string<'o', 'f', 'f', 's', 'e', 't'> {};
   struct literal_eq : one<':'> {};
   struct literal_and : one<','> {};
   struct literal_or : string<'$', 'o', 'r'> {};
