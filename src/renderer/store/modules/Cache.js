@@ -1,17 +1,15 @@
 import { civet } from '@/../public/civet'
 import Service from '@/components/utils/Service'
-import { Tree, TreeNode } from '@/components/Control/Tree'
+import { TreeNode } from '@/components/Control/Tree'
 import { isEmpty } from '@/../public/Utility'
 import Vue from 'vue'
+import { Cache } from './CacheInstance'
+import * as Assist from './CacheAssist'
 
-const Cache = {
-  query: {},
-  files: {}
-}
 // const maxCacheSize = 40 + 20 + 10
 
 const state = {
-  classes: new Tree([]),
+  classes: new TreeNode({ name: 'root', isLeaf: false, id: 0 }),
   // classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
   classesName: [],
   viewItems: [],
@@ -185,7 +183,7 @@ const mutations = {
   },
   updateTag(state, info) {
     // const {unclasses, untags} = await remote.recieveCounts()
-    state.untags = info.untags
+    state.untags = info.untags.length
     // update tags
     state.tags = info.tags
   },
@@ -227,28 +225,14 @@ const mutations = {
     console.info(file)
     if (!file.category) file.category = []
     file.category.push(classpath)
+    state.classes.increaseChildrenCount(classpath, 1)
     Service.getServiceInstance().send(Service.ADD_CATEGORY, { id: [fileid], class: [classpath] })
   },
   removeClass(state, mutation) {
     console.info('remove class', mutation, state.classesName)
     if (Array.isArray(mutation)) {
       for (const clsName of mutation) {
-        // remove from className
-        state.classesName.splice(state.classesName.indexOf(clsName), 1)
-        // remove from classes
-        for (let idx = state.classes.length - 1; idx >= 0; --idx) {
-          if (state.classes[idx].name === clsName) {
-            state.classes.splice(idx, 1)
-            break
-          }
-        }
-        // remove from relavent files
-        for (const fileid in Cache.files) {
-          const file = Cache.files[fileid]
-          // console.info(file)
-          const pos = file.category.indexOf(clsName)
-          if (pos >= 0) file.category.splice(pos, 1)
-        }
+        Assist.removeClass(state, clsName)
       }
     } else {
       let classPath = mutation.name
@@ -276,6 +260,7 @@ const mutations = {
         break
       }
     }
+    state.classes.minusChildrenCount(classpath, 1)
   },
   changeClassName(state, mutation) {
     console.info('changeClassName', mutation, state.classesName)
@@ -341,7 +326,7 @@ const mutations = {
         Vue.set(state.viewItems, fileIdx++, Cache.files[classesFiles[idx].id])
       }
     }
-    // console.info('display classes', state.viewClass)
+    console.info('display classes', state.viewClass)
   },
   clear(state, data) {
     state.viewItems = []
@@ -350,7 +335,7 @@ const mutations = {
 
 const actions = {
   async init({ commit }, flag) {
-    console.info('+++++++++++++++')
+    // console.info('+++++++++++++++')
     const { unclasses, untags } = await remote.recieveCounts()
     const allClasses = await Service.getServiceInstance().get(Service.GET_ALL_CATEGORY, '/')
     console.info('all classes:', allClasses)
@@ -374,8 +359,9 @@ const actions = {
       Cache.query[k] = query[k]
       console.info('query add key', k, Cache.query)
     }
+    console.info('query:', Cache.query)
     const result = await Service.getServiceInstance().get(Service.QUERY_FILES, Cache.query)
-    console.info('query: ', Cache.query, 'result: ', result)
+    console.info('result: ', result)
     commit('query', result)
   },
   display({ commit }, data) {
@@ -400,8 +386,8 @@ const actions = {
     file.tag.push(tag)
     Service.getServiceInstance().send(Service.SET_TAG, { id: [fileID], tag: file.tag })
     const tags = await remote.recieveTags()
-    const { ...untags } = await remote.recieveCounts()
-    commit('updateTag', {tags, untags})
+    const { ...counts } = await remote.recieveCounts()
+    commit('updateTag', {tags, untags: counts.untags})
   },
   addClass({ commit }, mutation) {
     commit('addClass', mutation)

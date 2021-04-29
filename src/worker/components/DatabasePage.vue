@@ -1,12 +1,10 @@
 <template>
 <div>
-  <el-button @click="loadImages()" type="primary" round>load</el-button>
-  <el-button @click="testCorrection()" type="danger" round>testCorrection</el-button>
-  <div>查询: <el-input type="textarea" :rows="2" v-model="sql" @keyup.enter="onQuery"></el-input><el-button type="primary" @click="onQuery">执行</el-button></div>
+  <button @click="loadImages()" type="primary" round>load</button>
+  <button @click="testCorrection()" type="danger" round>testCorrection</button>
+  <div>查询: <input type="textarea" :rows="2" v-model="sql" @keyup.enter="onQuery"></input><button type="primary" @click="onQuery">执行</button></div>
   <div class="console">
-    <el-scrollbar style="height:32vh;" wrap-style="overflow-x:hidden;">
-      {{msg}}
-    </el-scrollbar>
+    {{msg}}
   </div>
 </div>
 </template>

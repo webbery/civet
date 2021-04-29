@@ -1,5 +1,5 @@
 <template>
-  <div v-if="imageList.length === 0" @drop="dropFiles($event)" @dragover.prevent>
+  <div v-if="imageList.length === 0 && classList.length === 0" @drop="dropFiles($event)" @dragover.prevent>
     <div @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true" style="height:96vh;widht: 100%">
       <div class="initial" @click="onLoadFilesTest">
         请拖拽文件或文件夹到此处

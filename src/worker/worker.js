@@ -1,11 +1,12 @@
 // import CV from '../public/CV'
 // import { JImage } from './Image'
 // import { CategoryArray } from './Category'
-import ElementUI from 'element-ui'
+// import ElementUI from 'element-ui'
 import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
 import { serviceHub } from './ServiceHub'
+import { ExtensionManager } from './ExtensionManager'
 
 serviceHub.registObserver()
 
@@ -15,7 +16,7 @@ const { ipcRenderer } = require('electron')
 // ready()
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false
-Vue.use(ElementUI)
+// Vue.use(ElementUI)
 Vue.prototype.$ipcRenderer = ipcRenderer
 window['eventBus'] = new Vue()
 
@@ -31,3 +32,6 @@ Array.prototype.remove = function (val) {
     this.splice(index, 1)
   }
 }
+
+const extManager = new ExtensionManager()
+extManager.run()

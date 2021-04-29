@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-color-picker v-model="color" size="mini" style="" @active-change="onColorChanged"></el-color-picker>
+    <el-color-picker v-model="color" size="mini" style="" @active-change="onColorChanged" @change="onColorChanged"></el-color-picker>
     <span class="custom">
       <el-select v-model="fileType" @change="onFileTypeChanged" clearable placeholder=" 类型" size="mini" multiple>
         <el-option
@@ -51,7 +51,7 @@ export default {
   data() {
     // current datetime
     return {
-      color: '#409EFF',
+      color: null,
       tags: [],
       timeRange: '',
       timeRanges: [
@@ -113,20 +113,28 @@ export default {
           query = {addtime: {$gt: near365}}
           break
         default:
+          query = {addtime: '*'}
           break
       }
       this.$store.dispatch('query', query)
     },
     onFileTypeChanged(keys) {
       console.info('onFileTypeChanged', keys)
+      if (keys.length === 0) {
+        keys = ['*']
+      }
       this.$store.dispatch('query', {type: keys})
     },
     onColorChanged(color) {
-      // console.info('onColorChanged:', color)
+      console.info('onColorChanged:', color)
       this.color = color
-      const tinyColor = require('tinycolor2')
-      const hex = tinyColor(color).toHexString()
-      this.$store.dispatch('query', {color: {$near: hex}})
+      if (!color) {
+        this.$store.dispatch('query', {color: '*'})
+      } else {
+        const tinyColor = require('tinycolor2')
+        const hex = tinyColor(color).toHexString()
+        this.$store.dispatch('query', {color: {$near: hex}})
+      }
     }
   }
 }

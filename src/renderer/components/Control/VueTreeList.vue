@@ -56,9 +56,9 @@
           :value="model.name"
           @input="updateName"
           @blur="setUnEditable"
-          @keyup.enter="setUnEditable"
+          @keyup.enter="resetUnEditable"
         />
-        <div class="vtl-count" v-if="model.count>0"><span>{{ model.count }}</span></div>
+        <div class="vtl-count" v-if="count>0"><span>{{ count }}</span></div>
       </div>
 
       <div
@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import { TreeNode } from './Tree.js'
+import { TreeNode } from './Tree'
 import { addHandler, removeHandler } from './tools.js'
 import { isEmpty } from '@/../public/Utility'
 
@@ -191,6 +191,10 @@ export default {
 
     editable() {
       return this.model.editable
+    },
+
+    count() {
+      return this.model.count
     }
   },
   beforeCreate() {
@@ -243,13 +247,17 @@ export default {
       })
     },
 
-    setUnEditable(e) {
+    resetUnEditable(e) {
       this.model.editable = false
       if (isEmpty(this.model.name)) {
         this.delNode()
-        return
+        return true
       }
-      // var oldName = this.model.name
+      return false
+    },
+
+    setUnEditable(e) {
+      if (this.resetUnEditable(e)) return
       console.info('new name: ', e.target.value)
       this.model.changeName(e.target.value)
       this.rootNode.$emit('change-name', {

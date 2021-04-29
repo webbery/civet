@@ -4,9 +4,7 @@ const kernel = (function () {
   let _isInit = false
   let flag = 0
   let current = config.getCurrentDB()
-  function _init(name) {
-    const cfg = config.getConfig(true)
-    if (cfg.resources.length === 0) return false
+  function _init(cfg) {
     try {
       if (!instance.civetkern.init(cfg, flag, true)) {
         console.info('init fail')
@@ -31,12 +29,14 @@ const kernel = (function () {
     if (process.argv[process.argv.length - 1] === 'renderer') {
       flag = 1
     }
-    return function(name) {
-      if (current !== undefined && name !== current) {
+    return function() {
+      const cfg = config.getConfig(true)
+      if (cfg.resources.length === 0) return null
+      if (current !== undefined && cfg.app.default !== current) {
         _release(current)
       }
-      if (!_isInit || name !== current) {
-        if (!_init(name)) return null
+      if (!_isInit || cfg.app.default !== current) {
+        if (!_init(cfg)) return null
       }
       return instance.civetkern
     }

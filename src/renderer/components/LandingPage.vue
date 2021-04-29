@@ -5,7 +5,14 @@
     </el-header>
     <el-row type="flex" class="row-bg">
       <el-col :span="4" class="nav-light">
-        <NavigationPanel></NavigationPanel>
+        <TabMenu>
+          <template v-slot:navigation>
+            <NavigationPanel></NavigationPanel>
+          </template>
+          <template v-slot:extension>
+            <ExtensionPanel></ExtensionPanel>
+          </template>
+        </TabMenu>
       </el-col>
       <el-col :span="16">
         <div class="display">
@@ -22,7 +29,9 @@
 
 <script>
 import HeaderBar from '@/components/HeaderBar'
+import TabMenu from '@/components/Menu/TabMenu'
 import NavigationPanel from '@/components/Panel/NavigationPanel'
+import ExtensionPanel from '@/components/Panel/ExtensionPanel'
 import ViewPanel from '@/components/Panel/ViewPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/Panel/TagPanel'
@@ -34,7 +43,9 @@ export default {
   name: 'landing-page',
   components: {
     HeaderBar,
+    TabMenu,
     NavigationPanel,
+    ExtensionPanel,
     ViewPanel,
     PropertyPanel,
     TagPanel,

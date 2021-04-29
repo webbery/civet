@@ -6,7 +6,7 @@
         <div>
           <el-input placeholder="请输入内容" v-model="config" class="input-with-select" :disabled="true">
             <template slot="prepend">数据库路径：</template>
-            <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()"></el-button>
+            <!-- <el-button slot="append" icon="el-icon-more" @click="onSelectDBPath()"></el-button> -->
           </el-input>
           <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
         </div>

@@ -34,7 +34,7 @@
   "build": {
     "productName": "Civet",
     "appId": "com.civet.app",
-    "asar": false,
+    "asar": true,
     "publish": [
       {
         "provider": "github",
@@ -47,7 +47,10 @@
       "output": "build"
     },
     "files": [
-      "dist/electron/**/*"
+      "dist/electron/**/*",
+      "!**/*.{gyp,h,hpp,cpp,c,svg,md}",
+      "!**/*.{ilk,pdb,obj,tlog,vcxproj,filters,iobj,ipdb,exp,lib}",
+      "!**/LICENSE"
     ],
     "dmg": {
       "contents": [
@@ -116,7 +119,7 @@
     ]
   },
   "dependencies": {
-    "civetkern": "^0.2.3",
+    "civetkern": "^0.2.6",
     "download": "^8.0.0",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",

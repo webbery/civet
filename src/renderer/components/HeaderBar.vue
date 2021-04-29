@@ -1,7 +1,6 @@
 <template>
   <el-row >
       <el-col :span="4">
-        <el-button @click="onClickConfig" type="text" size="mini" icon="el-icon-setting" circle></el-button>
         <el-dropdown trigger="click" :hide-on-click="false">
           <el-button size="mini" round>{{allResources[current]}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown" style="width: 200px" @visible-change="onResourceDropDown">
@@ -157,10 +156,6 @@ export default {
           // bus.emit(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
         }
       })
-    },
-    onClickConfig() {
-      this.viewDesc = '配置'
-      this.$router.push({path: '/config'})
     },
     onUpdateHeadNav(query) {
       this.viewDesc = query.name

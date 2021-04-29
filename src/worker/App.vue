@@ -25,6 +25,7 @@ export default {
   },
   mounted() {
     // if (!this.isFirst) {
+    // start main window
     this.$ipcRenderer.send('ready')
     // }
   }

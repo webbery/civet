@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { MessagePipeline } from './MessageTransfer'
 import JString from '../public/String'
 import { ImageService } from './service/ImageService'
@@ -5,8 +6,8 @@ import { ReplyType, Message } from './Message'
 import { civet } from '../public/civet'
 import storage from '../public/Kernel'
 import { ResourcePath } from './common/ResourcePath'
-import fs from 'fs'
 import { config } from '../public/CivetConfig'
+import { ResourceObserver } from './ResourceObserver'
 
 let isStart: boolean = false;
 function updateStatus(status: any) {
@@ -16,7 +17,8 @@ function updateStatus(status: any) {
 }
 
 export class ResourceService{
-  constructor(pipeline: MessagePipeline) {
+  constructor(pipeline: MessagePipeline, observer: ResourceObserver) {
+    this.observer = observer
     this.pipeline = pipeline
     pipeline.regist('addImagesByDirectory', this.addFilesByDir, this)
     pipeline.regist('addImagesByPaths', this.addImagesByPaths, this)
@@ -128,8 +130,9 @@ export class ResourceService{
     // reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   }
   queryFiles(msgid: number, nsql: any) {
+    console.info('query:', nsql)
     const allFiles = storage.query(nsql)
-    console.info(nsql, 'reply: ', allFiles)
+    console.info('reply: ', allFiles)
     // reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
     return {type: ReplyType.REPLY_QUERY_FILES, data: allFiles}
   }
@@ -245,4 +248,5 @@ export class ResourceService{
   private pipeline: MessagePipeline;
   private totalFiles: number = 0;
   private progressLoad: number = 0;
+  private observer: ResourceObserver;
 }
