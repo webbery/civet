@@ -5,10 +5,13 @@ import { isEmpty } from '@/../public/Utility'
 import Vue from 'vue'
 import { Cache } from './CacheInstance'
 import * as Assist from './CacheAssist'
+import { config } from '@/../public/CivetConfig'
 
 // const maxCacheSize = 40 + 20 + 10
 
 const state = {
+  resources: [],
+  currentResource: '',
   classes: new TreeNode({ name: 'root', isLeaf: false, id: 0 }),
   // classes: [{name: 'test', id: 2, count: 15, children: [{name: 'child', id: 3, count: 1, children: [{name: 'aaa', id: 5, count: 1, children: [{name: 'bbb', id: 7, count: 0}]}]}]}, {name: '测试', id: 4, count: 10}],
   classesName: [],
@@ -35,6 +38,8 @@ const getters = {
   viewClass: state => {
     return state.viewClass
   },
+  resources: state => { return state.resources },
+  currentResource: state => state.currentResource,
   classes: state => { return state.classes },
   getFiles: (state, getters) => {
     return (filesID) => {
@@ -72,6 +77,12 @@ const remote = {
 const mutations = {
   init(state, data) {
     console.info('cache init', data)
+    state.currentResource = config.getCurrentDB()
+    state.resources.splice(0, state.resources.length)
+    const resources = config.getResourcesName()
+    for (let idx = 0, len = resources.length; idx < len; ++idx) {
+      Vue.set(state.resources, idx, resources[idx])
+    }
     // let snaps = data.filesSnap
     // let imagesID = []
     // for (let snap of snaps) {
@@ -330,6 +341,27 @@ const mutations = {
   },
   clear(state, data) {
     state.viewItems = []
+    Cache.files = {}
+  },
+  addResource(state, data) {
+    config.addResource(data)
+    config.save()
+    state.resources.push(data)
+  },
+  delResource(state, name) {
+    config.removeResource(name)
+    for (let idx = 0, len = state.resources.length; idx < len; ++idx) {
+      if (state.resources[idx] === name) {
+        Vue.delete(state.resources, idx)
+        break
+      }
+    }
+    state.currentResource = config.getCurrentDB()
+  },
+  switchResource(state, name) {
+    config.switchResource(name)
+    config.save()
+    state.currentResource = name
   }
 }
 
@@ -440,6 +472,15 @@ const actions = {
   },
   updateHistoryLength({ commit }, value) {
     commit('updateHistoryLength', value)
+  },
+  delResource({commit}, name) {
+    commit('delResource', name)
+  },
+  addResource({commit}, data) {
+    commit('addResource', data)
+  },
+  switchResource({commit}, name) {
+    commit('switchResource', name)
   }
 }
 

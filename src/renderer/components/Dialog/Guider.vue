@@ -49,7 +49,7 @@ export default {
         this.isDisable = true
       }
     },
-    onStartCivet() {
+    async onStartCivet() {
       if (this.resourceName.trim().length === 0 || this.resourceDBPath.length === 0) return
       // is file exist?
       const fs = require('fs')
@@ -59,9 +59,11 @@ export default {
         return
       }
       config.addResource(this.resourceName, this.resourceDBPath)
+      console.info('config:', config)
       config.save()
       bus.emit(bus.EVENT_INIT_RESOURCE_DB, this.resourceName)
-      this.$ipcRenderer.send(Service.REINIT_DB)
+      await this.$ipcRenderer.get(Service.REINIT_DB, this.resourceName)
+      // this.$ipcRenderer.send(Service.REINIT_DB)
       this.$emit('onsuccess', this.resourceName)
     },
     onSelectDBPath() {

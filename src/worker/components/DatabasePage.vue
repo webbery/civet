@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import storage from '../../public/Kernel'
+import { CivetDatabase } from '../Kernel'
 
 export default {
   data() {
@@ -44,16 +44,16 @@ export default {
       // this.tableData = data
     },
     loadOtherDisplayInfo() {
-      let unclazzImages = storage.getUnClassifyFiles()
-      let untagImages = storage.getUnTagFiles()
-      let classes = storage.getClasses('/')
+      let unclazzImages = CivetDatabase.getUnClassifyFiles()
+      let untagImages = CivetDatabase.getUnTagFiles()
+      let classes = CivetDatabase.getClasses('/')
       this.msg = '未分类: ' + unclazzImages.length + '\n未标签: ' + untagImages.length + '\n'
       this.msg += JSON.stringify(classes)
     },
     onQuery() {
       const q = JSON.parse(this.sql)
       console.info('query', q)
-      let result = storage.query(q)
+      let result = CivetDatabase.query(q)
       this.msg = JSON.stringify(result, null, 4)
     }
   }

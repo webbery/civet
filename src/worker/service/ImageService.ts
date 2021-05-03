@@ -1,5 +1,5 @@
 import { civet } from '../../public/civet'
-import storage from '../../public/Kernel'
+import { CivetDatabase } from '../Kernel'
 import { getSuffixFromString, convert2ValidDate } from '../../public/Utility'
 import { ReplyType, IMessagePipeline } from '../Message'
 import { MessagePipeline } from '../MessageTransfer'
@@ -91,10 +91,10 @@ class ImageMetaParser extends ImageParser {
       this.pipeline!.post('onFileResolveFail', [{filname: file.filename, path: file.path, msg: 'resolve file error'}])
       return false
     }
-    file.id = storage.generateFilesID(1)[0]
+    file.id = CivetDatabase.generateFilesID(1)[0]
     file.meta.push({name: 'addtime', value: new Date().toString(), type: 'date'})
     // this.callback(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file])
-    storage.addFiles([file.toJson()])
+    CivetDatabase.addFiles([file.toJson()])
     return true;
   }
 }
@@ -124,7 +124,7 @@ class ImagePathParser extends ImageParser {
       console.info('ImageTextParser', file.tag)
       try {
         console.info(file)
-        storage.setTags([file.id], file.tag)
+        CivetDatabase.setTags([file.id], file.tag)
       } catch (err) {
         console.info('parse text error', err)
         return false
@@ -265,7 +265,7 @@ class ColorParser extends ImageParser {
         return tinyColor({r: item.centroid[0], g: item.centroid[1], b: item.centroid[2]}).toHexString()
       })
       file.addMeta('color', centroid, 'color')
-      storage.addMeta([file.id], {name: 'color', value: centroid, type: 'color', query: true})
+      CivetDatabase.addMeta([file.id], {name: 'color', value: centroid, type: 'color', query: true})
     }
     return true;
   }

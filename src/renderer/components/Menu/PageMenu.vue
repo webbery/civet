@@ -8,14 +8,14 @@
   <div class="page" :id="pageid[1]" v-show="currentPage === 1">
     <li class="item-header"><span class="el-icon-arrow-left dock-left" @click="switch2Main"></span>切换</li>
     <li v-for="(resource, idx) in resources" :key="idx" class="page-menu-item" @click="onSwitch(resource)">
-      <span v-if="idx===current" class="current">{{resource}}</span>
+      <span v-if="resource===current" class="current">{{resource}}</span>
       <span v-else>{{resource}}</span>
     </li>
   </div>
   <div class="page" :id="pageid[2]" v-show="currentPage === 2">
     <li class="item-header"><span class="el-icon-arrow-left dock-left" @click="delete2Main"></span>删除</li>
     <li v-for="(resource, idx) in resources" :key="idx" class="page-menu-item" >
-      <span v-if="idx===current" class="current">{{resource}}</span>
+      <span v-if="resource===current" class="current">{{resource}}</span>
       <span v-else>{{resource}}<span class="el-icon-close dock-right" @click="onDelete(resource)"></span></span>
     </li>
   </div>
@@ -30,8 +30,8 @@
 </template>
 <script>
 import Guider from '@/components/Dialog/Guider'
-import { config } from '@/../public/CivetConfig'
-import Service from '../utils/Service'
+// import { config } from '@/../public/CivetConfig'
+// import Service from '../utils/Service'
 
 export default {
   name: 'page-menu',
@@ -49,7 +49,10 @@ export default {
       type: Array,
       default: []
     },
-    current: {type: Number, default: 0}
+    current: {
+      type: String,
+      default: ''
+    }
   },
   mounted() {
   },
@@ -57,15 +60,17 @@ export default {
     switchResource() {
       this.currentPage = 1
     },
-    async onSwitch(resource) {
+    onSwitch(resource) {
       // config
-      console.info('resourcename:', resource)
-      config.switchResource(resource)
-      config.save()
-      await this.$ipcRenderer.get(Service.REINIT_DB, resource)
-      this.$nextTick(() => {
-        this.$store.dispatch('init')
-      })
+      // console.info('resourcename:', resource)
+      // config.switchResource(resource)
+      // console.info('switch config:', config)
+      // config.save()
+      // await this.$ipcRenderer.get(Service.REINIT_DB, resource)
+      // this.$nextTick(() => {
+      //   this.$store.dispatch('clear')
+      //   this.$store.dispatch('init')
+      // })
       this.$emit('onswitch', resource)
     },
     deleteResource() {
@@ -73,9 +78,6 @@ export default {
     },
     onDelete(resource) {
       this.$ipcRenderer.send('removeDB', resource)
-      if (config.getCurrentDB() === resource) {
-        this.$store.dispatch('clear')
-      }
       this.$emit('ondelete', resource)
     },
     createResource() {
@@ -96,8 +98,10 @@ export default {
     onSuccess(name) {
       const cfg = document.getElementById('newresource')
       cfg.close()
-      // this.resources.push(name)
-      // this.current = this.resources.length - 1
+      this.$nextTick(() => {
+        this.$store.dispatch('init')
+      })
+      this.$emit('onswitch', name)
     }
   }
 }

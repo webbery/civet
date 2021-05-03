@@ -8,6 +8,7 @@ import { ExtensionActiveType, ExtensionService } from './ExtensionService'
 export class ExtensionManager {
   constructor() {
     let extensionPath = path.resolve('.') + '/extensions'
+    if (!fs.existsSync(extensionPath)) return
     const exts = fs.readdirSync(extensionPath)
     console.info(exts)
     for (let ext of exts) {

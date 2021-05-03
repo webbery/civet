@@ -4,7 +4,7 @@ import JString from '../public/String'
 import { ImageService } from './service/ImageService'
 import { ReplyType, Message } from './Message'
 import { civet } from '../public/civet'
-import storage from '../public/Kernel'
+import { CivetDatabase } from './Kernel'
 import { ResourcePath } from './common/ResourcePath'
 import { config } from '../public/CivetConfig'
 import { ResourceObserver } from './ResourceObserver'
@@ -72,14 +72,14 @@ export class ResourceService{
     let imagesIndex = []
     if (data === undefined) {
       // 全部图片信息
-      const imagesSnap = storage.getFilesSnap()
+      const imagesSnap = CivetDatabase.getFilesSnap(undefined)
       for (const imgID in imagesSnap) {
         imagesIndex.push(imgID)
       }
     } else {
       imagesIndex = data
     }
-    const imgs = storage.getFilesInfo(imagesIndex)
+    const imgs = CivetDatabase.getFilesInfo(imagesIndex)
     console.info('getImagesInfo', imgs, this)
     const images = []
     for (const img of imgs) {
@@ -91,13 +91,13 @@ export class ResourceService{
 
   getFilesSnap(msgid: number, data: any) {
     // 全部图片信息
-    const imagesSnap = storage.getFilesSnap()
+    const imagesSnap = CivetDatabase.getFilesSnap(undefined)
     return {type: ReplyType.REPLY_FILES_SNAP, data: imagesSnap}
     // reply2Renderer(ReplyType.REPLY_FILES_SNAP, imagesSnap)
   }
 
-  getImageInfo(msgid: number, imageID: string) {
-    const img = storage.getFilesInfo([imageID])
+  getImageInfo(msgid: number, imageID: number) {
+    const img = CivetDatabase.getFilesInfo([imageID])
     // console.info('getImagesInfo', img)
     const image = new civet.IResource(img[0])
     // reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
@@ -105,33 +105,33 @@ export class ResourceService{
   }
   setTag(msgid: number, data: any) {
     console.info(data)
-    storage.setTags(data.id, data.tag)
+    CivetDatabase.setTags(data.id, data.tag)
   }
   removeFiles(msgid: number, filesID: any) {
     console.info('removeFiles:', filesID)
-    storage.removeFiles(filesID)
+    CivetDatabase.removeFiles(filesID)
   }
   removeTag(msgid: number, data: any) {
     console.info(data)
-    storage.removeTags(data.filesID, data.tag)
+    CivetDatabase.removeTags(data.filesID, data.tag)
   }
   removeClasses(msgid: number, mutation: any) {
     console.info('removeClasses', mutation)
-    storage.removeClasses(mutation)
+    CivetDatabase.removeClasses(mutation)
   }
   getAllTags(msgid: number, data: any) {
-    const allTags = storage.getAllTags()
+    const allTags = CivetDatabase.getAllTags()
     // reply2Renderer(ReplyType.REPLY_ALL_TAGS, allTags)
     return {type: ReplyType.REPLY_ALL_TAGS, data: allTags}
   }
   getAllTagsWithImages(msgid: number, data: any) {
-    const allTags = storage.getTagsOfFiles()
+    const allTags = CivetDatabase.getTagsOfFiles(data)
     console.info('allTags', allTags)
     // reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   }
   queryFiles(msgid: number, nsql: any) {
     console.info('query:', nsql)
-    const allFiles = storage.query(nsql)
+    const allFiles = CivetDatabase.query(nsql)
     console.info('reply: ', allFiles)
     // reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
     return {type: ReplyType.REPLY_QUERY_FILES, data: allFiles}
@@ -141,17 +141,17 @@ export class ResourceService{
     if (typeof mutation === 'string') {
       mutation = [mutation]
     }
-    storage.addClasses(mutation)
+    CivetDatabase.addClasses(mutation)
   }
   getAllCategory(msgid: number, parent: any) {
-    const category = storage.getClasses()
+    const category = CivetDatabase.getClasses('/')
     // let category = await CategoryArray.loadFromDB()
     console.info('getAllCategory', category)
     // reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
     return {type: ReplyType.REPLAY_ALL_CATEGORY, data: category}
   }
   getCategoryDetail(msgid: number, parent: any) {
-    const category = storage.getClassDetail(parent)
+    const category = CivetDatabase.getClassDetail(parent)
     // let category = await CategoryArray.loadFromDB()
     console.info('getCategoryDetail', category)
     // reply2Renderer(ReplyType.REPLY_CLASSES_INFO, category)
@@ -159,7 +159,7 @@ export class ResourceService{
   }
   async getUncategoryImages(msgid: number, data: any) {
     updateStatus('reading unclassify info')
-    const uncateimgs = storage.getUnClassifyFiles()
+    const uncateimgs = CivetDatabase.getUnClassifyFiles()
     console.info('ppopopo', data)
     // reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
     console.info('unclasses', uncateimgs)
@@ -167,7 +167,7 @@ export class ResourceService{
   }
   getUntagImages() {
     updateStatus('reading untag info')
-    const untagimgs = storage.getUnTagFiles()
+    const untagimgs = CivetDatabase.getUnTagFiles()
     // reply2Renderer(ReplyType.REPLY_UNTAG_IMAGES, untagimgs)
     console.info('untag', untagimgs)
     return {type: ReplyType.REPLY_UNTAG_IMAGES, data: untagimgs}
@@ -177,16 +177,16 @@ export class ResourceService{
   // }
   updateCategoryName(msgid: number, data: any) {
     console.info('old:', data.oldName, 'new:', data.newName)
-    storage.updateClassName(data.oldName, data.newName)
+    CivetDatabase.updateClassName(data.oldName, data.newName)
   }
   updateFileName(msgid: number, data: any) {
     console.info('updateFileName id:', data.id, 'new:', data.filename)
     // {id: [fileids[0]], filename: '测试'}
-    storage.updateFile({ id: [data.id], filename: data.filename })
+    CivetDatabase.updateFile({ id: [data.id], filename: data.filename })
   }
   async reInitDB(msgid: number, data: any) {
     console.info('init db', data)
-    storage.init()
+    CivetDatabase.reload()
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
     return {type: ReplyType.REPLY_RELOAD_DB_STATUS, data: true}
   }
@@ -194,10 +194,10 @@ export class ResourceService{
   removeDB(msgid: number, data: any) {
     console.info('remove db', data)
     if (data === config.getCurrentDB()) {
-      storage.release()
+      CivetDatabase.release()
     }
     // remove db
-    config.removeResource(data)
+    // config.removeResource(data)
   }
 
   error(msg: string|null) {

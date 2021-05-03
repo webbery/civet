@@ -47,7 +47,6 @@ background-color: #111;
 } */
 .sidenav {
 height: 94vh;
-width: 45px;
 display: flex;
 flex-direction: column;
 z-index: 1;
@@ -61,14 +60,13 @@ padding-top: 20px;
 .sidenav span, .dropdown-btn {
 padding: 6px;
 text-decoration: none;
-font-size: 20px;
+font-size: 24px;
 display: block;
 border: none;
 background: none;
-width:100%;
-text-align: left;
 cursor: pointer;
 outline: none;
+text-align: center;
 }
 .sidenav span:hover, .dropdown-btn:hover {
 color: #f1f1f1;

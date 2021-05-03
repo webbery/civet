@@ -2,9 +2,9 @@
   <el-row >
       <el-col :span="4">
         <el-dropdown trigger="click" :hide-on-click="false">
-          <el-button size="mini" round>{{allResources[current]}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
-          <el-dropdown-menu slot="dropdown" style="width: 200px" @visible-change="onResourceDropDown">
-            <PageMenu :resources="allResources" :current="current" @onswitch="onResourceSwitch" @ondelete="onResourceDelete"></PageMenu>
+          <el-button size="mini" round>{{currentResource}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+          <el-dropdown-menu slot="dropdown" style="width: 200px">
+            <PageMenu :resources="allResources" :current="currentResource" @onswitch="onResourceSwitch" @ondelete="onResourceDelete"></PageMenu>
           </el-dropdown-menu>
         </el-dropdown>
         <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
@@ -42,7 +42,8 @@ import ViewFilter from '@/components/ViewFilter'
 import ImageOperator from '@/components/ImageOperator'
 import Service from '@/components/utils/Service'
 import PageMenu from '@/components/Menu/PageMenu'
-import { config } from '@/../public/CivetConfig'
+import { mapState } from 'vuex'
+// import { config } from '@/../public/CivetConfig'
 
 export default {
   name: 'header-bar',
@@ -52,8 +53,6 @@ export default {
       scaleValue: 20,
       keyword: '',
       recentResources: [],
-      allResources: [],
-      current: 0,
       viewDesc: '全部',
       disabled: true,
       style: {
@@ -73,57 +72,42 @@ export default {
     ImageOperator,
     PageMenu
   },
+  computed: mapState({
+    allResources: state => {
+      return state.Cache.resources
+    },
+    currentResource: state => state.Cache.currentResource
+  }),
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
     bus.on(bus.EVENT_INIT_RESOURCE_DB, this.onInitResourceDB)
-    console.info(config)
-    const resource = config.getCurrentResource()
-    console.info('header', resource)
-    // this.resource = resource.name
-    this.allResources = config.getResourcesName()
-    const current = config.getCurrentDB()
-    for (let idx = 0; idx < this.allResources.length; ++idx) {
-      if (current === this.allResources[idx]) {
-        this.current = idx
-        break
-      }
-    }
-    this.recentResources.push(resource.name)
+    // this.recentResources.push(resource.name)
   },
   methods: {
-    onResourceDropDown(display) {
-      if (display) {
-        this.allResources = config.getResourcesName()
-        const current = config.getCurrentDB()
-        for (let idx = 0; idx < this.allResources.length; ++idx) {
-          if (current === this.allResources[idx]) {
-            this.current = idx
-            break
-          }
+    getCurrentIndex() {
+      const resources = this.$store.state.Cache.resources
+      const currentName = this.$store.state.Cache.currentResource
+      console.info('current display', currentName)
+      for (let idx = 0, len = resources.length; idx < len; ++idx) {
+        if (currentName === resources[idx]) {
+          return idx
         }
       }
     },
-    onResourceSwitch(resource) {
-      for (let idx = 0; idx < this.allResources.length; ++idx) {
-        if (this.allResources[idx] === resource) {
-          this.current = idx
-          break
-        }
-      }
+    async onResourceSwitch(resource) {
+      this.$store.dispatch('switchResource', resource)
+      await this.$ipcRenderer.get(Service.REINIT_DB, resource)
+      this.$nextTick(() => {
+        this.current = this.getCurrentIndex()
+        this.$store.dispatch('clear')
+        this.$store.dispatch('init')
+      })
     },
     onResourceDelete(resource) {
-      for (let idx = 0; idx < this.allResources.length; ++idx) {
-        if (this.allResources[idx] === resource) {
-          this.allResources.splice(idx, 1)
-          break
-        }
-      }
+      this.$store.dispatch('delResource', resource)
     },
     onInitResourceDB(dbname) {
       // this.resource = dbname
-    },
-    onSelectResource(resname) {
-      console.info(resname)
     },
     onQueryKindChange(cmd) {
       switch (cmd) {

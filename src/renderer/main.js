@@ -9,7 +9,6 @@ import ElementUI from 'element-ui'
 import 'element-theme-dark'
 import Service from './components/utils/Service'
 import VueLazyload from 'vue-lazyload'
-import Kernel from '../public/Kernel'
 import VueHotkey from 'v-hotkey'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 // Vue.http = Vue.prototype.$http = axios
@@ -22,8 +21,6 @@ Vue.use(VueLazyload, {
 })
 
 Vue.prototype.$ipcRenderer = Service.getServiceInstance()
-
-Vue.prototype.$kernel = Kernel
 
 router.afterEach((to, from) => {
   console.info('afterEach, from', from.fullPath, ', to', to.fullPath)
