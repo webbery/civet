@@ -44,11 +44,11 @@ export default {
       // this.tableData = data
     },
     loadOtherDisplayInfo() {
-      let unclazzImages = CivetDatabase.getUnClassifyFiles()
-      let untagImages = CivetDatabase.getUnTagFiles()
-      let classes = CivetDatabase.getClasses('/')
-      this.msg = '未分类: ' + unclazzImages.length + '\n未标签: ' + untagImages.length + '\n'
-      this.msg += JSON.stringify(classes)
+      // let unclazzImages = CivetDatabase.getUnClassifyFiles()
+      // let untagImages = CivetDatabase.getUnTagFiles()
+      // let classes = CivetDatabase.getClasses('/')
+      // this.msg = '未分类: ' + unclazzImages.length + '\n未标签: ' + untagImages.length + '\n'
+      // this.msg += JSON.stringify(classes)
     },
     onQuery() {
       const q = JSON.parse(this.sql)

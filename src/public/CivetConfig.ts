@@ -10,7 +10,7 @@ class CivetConfig {
     const version = civet.version
     console.info('version:', version)
     const userDir = app.getPath('userData')
-    this.configPath = (app.isPackaged ? userDir + '/cfg.json' : 'cfg.json')
+    this.configPath = (app.isPackaged ? userDir + '/cfg.json' : './cfg.json')
     let cfg = {
       app: {
         first: true,

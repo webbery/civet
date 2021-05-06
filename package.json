@@ -48,8 +48,10 @@
     },
     "files": [
       "dist/electron/**/*",
-      "!**/*.{gyp,h,hpp,cpp,c,svg,md}",
+      "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md}",
       "!**/*.{ilk,pdb,obj,tlog,vcxproj,filters,iobj,ipdb,exp,lib}",
+      "!**/*.{o,Makefile,mk,tlog,vcxproj,filters,iobj,ipdb,exp,lib}",
+      "!**/Makefile",
       "!**/LICENSE"
     ],
     "dmg": {

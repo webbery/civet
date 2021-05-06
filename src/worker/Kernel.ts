@@ -11,12 +11,12 @@ let _current: string|undefined = undefined;
 let _flag: OpenFlag = OpenFlag.ReadWrite;
 const _enableLog: boolean = true;
 
-function Initialze(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function Initialze() {
   if (!_current) {
-    _current = config.getCurrentDB()
     _instance = require('civetkern').civetkern
-    const cfg = config.getConfig(true)
-    _instance.init(cfg, _flag, _enableLog)
+    const c = config.getConfig(true)
+    _current = config.getCurrentDB()
+    _instance.init(c, _flag, _enableLog)
   }
   // console.info('_instance', _instance)
 }
@@ -32,51 +32,89 @@ export class CivetDatabase {
     console.info('reload database', _current, cfg)
   }
 
-  @Initialze
+  
   static getFilesSnap(flag: any): any {
+    Initialze()
     return _instance.getFilesSnap(flag)
   }
   
-  @Initialze
-  static getFilesInfo(filesID: number[]) { return _instance.getFilesInfo(filesID) }
-  @Initialze
-  static getUnTagFiles() {return _instance.getUnTagFiles()}
-  @Initialze
+  static getFilesInfo(filesID: number[]) {
+    Initialze()
+    return _instance.getFilesInfo(filesID)
+  }
+
+  static getUnTagFiles() {
+    Initialze()
+    return _instance.getUnTagFiles()
+  }
   static getUnClassifyFiles() {
+    Initialze()
     return _instance.getUnClassifyFiles()
   }
-  @Initialze
-  static getClasses(parent: string) {return _instance.getClasses(parent)}
-  @Initialze
-  static getClassDetail(category: any) {return _instance.getClassesInfo(category)}
-  @Initialze
-  static getAllTags() {return _instance.getAllTags()}
-  @Initialze
-  static query(sql: any) { return _instance.query(sql) }
-  @Initialze
-  static getTagsOfFiles(filesID: number[]) {return _instance.getTagsOfFiles({id: filesID})}
-  @Initialze
-  static writeLog(str: string) {_instance.writeLog(str)}
-  @Initialze
-  static generateFilesID(num: number) {return _instance.generateFilesID(num)}
-  @Initialze
-  static addFiles(src: any) { return _instance.addFiles(src) }
-  @Initialze
-  static addMeta(filesID: number[], meta: any) { return _instance.addMeta({id: filesID, meta: meta}) }
-  @Initialze
-  static removeFiles(filesID: number[]) { _instance.removeFiles(filesID) }
-  @Initialze
-  static setTags(filesID: number[], tags: string[]) { return _instance.setTags({ id: filesID, tag: tags }) }
-  @Initialze
-  static removeTags(filesID: number[], tags: string[]) { return _instance.removeTags({ id: filesID, tag: tags }) }
-  @Initialze
-  static addClasses(sql: any) { return _instance.addClasses(sql) }
-  @Initialze
-  static removeClasses(classes: any) { return _instance.removeClasses(classes) }
-  @Initialze
-  static updateFile(sql: any) { return _instance.updateFile(sql) }
-  @Initialze
-  static updateClassName(classPath: string, newPath: string) { return _instance.updateClassName(classPath, newPath) }
+  static getClasses(parent: string) {
+    Initialze()
+    return _instance.getClasses(parent)
+  }
+  static getClassDetail(category: any) {
+    Initialze()
+    return _instance.getClassesInfo(category)
+  }
+  static getAllTags() {
+    Initialze()
+    return _instance.getAllTags()
+  }
+  static query(sql: any) {
+    Initialze()
+    return _instance.query(sql)
+  }
+  static getTagsOfFiles(filesID: number[]) {
+    Initialze()
+    return _instance.getTagsOfFiles({id: filesID})
+  }
+  static writeLog(str: string) {
+    Initialze()
+    _instance.writeLog(str)
+  }
+  static generateFilesID(num: number) {
+    Initialze()
+    return _instance.generateFilesID(num)
+  }
+  static addFiles(src: any) {
+    Initialze()
+    return _instance.addFiles(src)
+  }
+  static addMeta(filesID: number[], meta: any) {
+    Initialze()
+    return _instance.addMeta({id: filesID, meta: meta})
+  }
+  static removeFiles(filesID: number[]) {
+    Initialze()
+    _instance.removeFiles(filesID)
+  }
+  static setTags(filesID: number[], tags: string[]) {
+    Initialze()
+    return _instance.setTags({ id: filesID, tag: tags })
+  }
+  static removeTags(filesID: number[], tags: string[]) {
+    Initialze()
+    return _instance.removeTags({ id: filesID, tag: tags })
+  }
+  static addClasses(sql: any) {
+    Initialze()
+    return _instance.addClasses(sql)
+  }
+  static removeClasses(classes: any) {
+    Initialze()
+    return _instance.removeClasses(classes)
+  }
+  static updateFile(sql: any) {
+    Initialze()
+    return _instance.updateFile(sql)
+  }
+  static updateClassName(classPath: string, newPath: string) {
+    Initialze()
+    return _instance.updateClassName(classPath, newPath)
+  }
   static release() {
     _instance.release()
   }
