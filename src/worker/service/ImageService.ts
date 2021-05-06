@@ -67,7 +67,8 @@ class ImageMetaParser extends ImageParser {
     this._typeParser.set('gif', exifParser);
     const sharpParser = new SharpMetaParser;
     this._typeParser.set('bmp', sharpParser);
-    this._typeParser.set('fit', sharpParser);
+    this._typeParser.set('fnt', sharpParser);
+    // this._typeParser.set('fit', sharpParser);
   }
   parse(file: civet.IResource): boolean {
     console.info('ImageMetaParser,', file)
@@ -143,15 +144,10 @@ class FileTypeMetaParser {
 
 class SharpMetaParser extends FileTypeMetaParser{
   async parse(file: civet.IResource): Promise<boolean> {
-    const sharp = require('sharp')
-    try{
-      const image = sharp(file.path)
-      const info = await image.on('info')
-      console.info('SharpMetaParser', info)
-    } catch (err) {
-      console.error('SharpMetaParser(' + file.path + ')', err,)
-      return false
-    }
+    const Jimp = require('jimp')
+    const img = await Jimp.readAsync(file.local())
+    file.addMeta('width', img.bitmap.width, 'val')
+    file.addMeta('height', img.bitmap.height, 'val')
     return true;
   }
 }
