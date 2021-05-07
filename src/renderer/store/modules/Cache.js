@@ -83,7 +83,7 @@ const mutations = {
     for (let idx = 0, len = resources.length; idx < len; ++idx) {
       Vue.set(state.resources, idx, resources[idx])
     }
-    // let snaps = data.filesSnap
+    Cache.snaps = data.filesSnap
     // let imagesID = []
     // for (let snap of snaps) {
     //   imagesID.push(snap.id)

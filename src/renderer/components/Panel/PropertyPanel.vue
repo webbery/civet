@@ -4,10 +4,12 @@
         <div style="padding: 4px;" class="image-name">
           <InputLabel>{{filename}}</InputLabel>
         </div>
-        <JImage :src="imagepath" :interact="false"></JImage>
-        <div class="color-container">
-          <span v-if="picture.colors.length!==0" ><span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span></span>
-          <span v-else icon="el-icon-loading"></span>
+        <div v-if="picture.id !== null">
+          <JImage :src="imagepath" :interact="false"></JImage>
+          <div class="color-container">
+            <span v-if="picture.colors.length!==0" ><span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span></span>
+            <span v-else icon="el-icon-loading"></span>
+          </div>
         </div>
       </div>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
@@ -98,7 +100,24 @@ export default {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
   },
   methods: {
-    displayProperty(imageID) {
+    displayProperty(filesid) {
+      if (Array.isArray(filesid)) {
+        if (filesid.length === 1) {
+          this.displayFileProperty(filesid[0])
+        } else {
+          this.displayMultiFileProperty(filesid)
+        }
+      } else {
+        if (filesid === 'all') {
+        } else if (filesid === 'none') {
+        }
+      }
+    },
+    displayMultiFileProperty(filesid) {
+      this.picture.id = null
+      this.filename = filesid.length + '个文件'
+    },
+    displayFileProperty(imageID) {
       let getSize = (sz) => {
         let v = sz / 1024
         let unit = 'Kb'
@@ -112,7 +131,7 @@ export default {
       // console.info(this.$store)
       const files = this.$store.getters.getFiles([imageID])
       if (!files) return
-      console.info('PropertyPanel', files)
+      // console.info('PropertyPanel', files)
       const localize = new Intl.DateTimeFormat('zh-cn')
       if (files.length === 1) {
         let file = files[0]

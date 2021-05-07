@@ -58,7 +58,7 @@ import { mapState } from 'vuex'
 import Waterfall from '../Layout/waterfall'
 import WaterfallSlot from '../Layout/waterfall-slot'
 import InputLabel from '../Control/InputLabel'
-import { Shortcut } from '../../shortcut/Shortcut'
+// import { Shortcut } from '../../shortcut/Shortcut'
 
 export default {
   name: 'view-panel',
@@ -85,7 +85,6 @@ export default {
   mounted() {
     console.info('mounted')
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
-    Shortcut.bind('Ctrl+A', () => { return true })
     // this.width = document.getElementById('main-content').offsetWidth
     // this.height = document.getElementById('main-content').offsetHeight
     // console.info('width: ', this.width, 'height:', this.height)
@@ -105,7 +104,9 @@ export default {
       console.info('keymap')
       return {
         'ctrl+a': this.onSelectAll,
-        '⌘+a': this.onSelectAll
+        '⌘+a': this.onSelectAll,
+        'ctrl+d': this.onSelectNone,
+        '⌘+d': this.onSelectNone
       }
     }
   }),
@@ -280,6 +281,9 @@ export default {
     onScrollNearBottom() {},
     onSelectAll(e) {
       console.info('select all:', e)
+    },
+    onSelectNone(e) {
+      console.info('select none:', e)
     },
     onLoadFilesTest() {
     }

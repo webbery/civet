@@ -1,5 +1,7 @@
 
 export const Cache = {
+  snaps: [],
   query: {},
-  files: {}
+  files: {},
+  selectFlag: 'all'
 }

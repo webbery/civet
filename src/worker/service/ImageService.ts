@@ -201,23 +201,23 @@ class ThumbnailParser extends ImageParser{
   }
 
   async parse(file: civet.IResource): Promise<boolean> {
-    const sharp = require('sharp')
+    const Jimp = require('jimp')
     try {
-      const image = sharp(file.path)
+      const image = await Jimp.readAsync(file.path)
       let scale = 1
       if (file.width > 200) {
         scale = 200.0 / file.width
       }
       const width = Math.round(file.width * scale)
       const height = Math.round(file.height * scale)
-      const data = await image.resize(width, height)
-        .jpeg().toBuffer()
+      image.resize(width, height).quality(50)
+      const data = await image.getBufferAsync(Jimp.MIME_JPEG)
       // console.info('ThumbnailParser:', data)
       file.thumbnail = data
-      console.info('thumbnail:', typeof data)
+      // console.info('thumbnail:', typeof data)
       // storage.addMeta([file.id], {name: 'thumbnail', value: file.thumbnail, type: 'bin'})
-      file.raw = await image.resize(width, height)
-        .raw().toBuffer()
+      // file.raw = await image.resize(width, height)
+      //   .raw().toBuffer()
       return true;
     } catch(err) {
       console.error(err)
