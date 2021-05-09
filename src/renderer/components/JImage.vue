@@ -76,19 +76,19 @@ export default {
       this.context = this.canvas.getContext('2d')
       // console.info(src)
       if (typeof src === 'string') {
-        const Jimp = require('jimp')
-        const image = await Jimp.readAsync(src)
+        const sharp = require('sharp')
+        let {data, info} = await sharp(src).jpeg({force: true}).ensureAlpha()
+          .raw().toBuffer({ resolveWithObject: true })
         // let {data, info} = await sharp(src).jpeg({force: true}).ensureAlpha()
         // .raw().toBuffer({ resolveWithObject: true })
         // this.$store.dispatch('updateThumbnail', {path: this.src, thumbnail: data})
         // log.info(info)
-        this.originWidth = image.bitmap.width
-        this.originHeight = image.bitmap.height
-        this.imagewidth = image.bitmap.width
-        this.imageheight = image.bitmap.height
-        const data = await image.getBufferAsync(Jimp.MIME_JPEG)
+        this.originWidth = info.width
+        this.originHeight = info.height
+        this.imagewidth = info.width
+        this.imageheight = info.height
         // console.info(data)
-        let img = new ImageData(new Uint8ClampedArray(data), image.bitmap.width, image.bitmap.height)
+        let img = new ImageData(new Uint8ClampedArray(data), info.width, info.height)
         this.image = await createImageBitmap(img)
       } else {
         // console.info('object', this.imagewidth, this.imageheight)

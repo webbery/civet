@@ -154,7 +154,7 @@ const mutations = {
     console.info('init finish')
   },
   addFiles(state, files) {
-    const idx = 0
+    // const idx = 0
     console.info('addFiles:', files)
     let cnt = 0
     for (const file of files) {
@@ -167,20 +167,22 @@ const mutations = {
       cnt += 1
       // setting view panel item
       // if (Cache.files.length > maxCacheSize) break
-      const pos = state.viewItems.length + idx
-      Vue.set(state.viewItems, pos, Cache.files[file.id])
+      state.viewItems.unshift(Cache.files[file.id])
+      // const pos = state.viewItems.length + idx
+      // Vue.set(state.viewItems, pos, Cache.files[file.id])
     }
     state.allCount += cnt
   },
   display(state, data) {
-    let idx = 0
+    // let idx = 0
     if (data) {
       // for (let datum of data) {}
     }
     state.viewClass.splice(0, state.viewClass.length)
     for (const k in Cache.files) {
-      Vue.set(state.viewItems, idx, Cache.files[k])
-      idx += 1
+      state.viewItems.unshift(Cache.files[k])
+      // Vue.set(state.viewItems, idx, Cache.files[k])
+      // idx += 1
       // if (idx > maxCacheSize) break
     }
   },
@@ -188,9 +190,10 @@ const mutations = {
     //   console.info('++++++')QUERY_FILES
     state.viewItems.splice(0, state.viewItems.length)
     for (let idx = 0; idx < result.length; ++idx) {
-      Vue.set(state.viewItems, idx, Cache.files[result[idx].id])
+      state.viewItems.unshift(Cache.files[result[idx].id])
+      // Vue.set(state.viewItems, idx, Cache.files[result[idx].id])
     }
-    console.info(state.viewItems, result)
+    // console.info(state.viewItems, result)
   },
   updateTag(state, info) {
     // const {unclasses, untags} = await remote.recieveCounts()

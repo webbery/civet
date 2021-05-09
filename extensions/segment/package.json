@@ -1,0 +1,20 @@
+{
+  "name": "image",
+  "displayName": "Civet基本图像处理扩展",
+  "description": "Civet基本图像处理扩展",
+  "version": "0.0.1",
+  "engines": {
+    "civet": "^0.1.4"
+  },
+  "main": "./main.js",
+  "civet": {
+    "activeEvents": [
+      "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png",
+      "onView:",
+      "onSave:"
+    ]
+  },
+  "dependencies": {
+    "segment": "^0.1.3"
+  }
+}

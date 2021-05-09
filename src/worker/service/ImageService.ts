@@ -144,10 +144,15 @@ class FileTypeMetaParser {
 
 class SharpMetaParser extends FileTypeMetaParser{
   async parse(file: civet.IResource): Promise<boolean> {
-    const Jimp = require('jimp')
-    const img = await Jimp.readAsync(file.local())
-    file.addMeta('width', img.bitmap.width, 'val')
-    file.addMeta('height', img.bitmap.height, 'val')
+    const sharp = require('sharp')
+    try{
+      const image = sharp(file.path)
+      const info = await image.on('info')
+      console.info('SharpMetaParser', info)
+    } catch (err) {
+      console.error('SharpMetaParser(' + file.path + ')', err,)
+      return false
+    }
     return true;
   }
 }
@@ -201,17 +206,17 @@ class ThumbnailParser extends ImageParser{
   }
 
   async parse(file: civet.IResource): Promise<boolean> {
-    const Jimp = require('jimp')
+    const sharp = require('sharp')
     try {
-      const image = await Jimp.readAsync(file.path)
+      const image = sharp(file.path)
       let scale = 1
       if (file.width > 200) {
         scale = 200.0 / file.width
       }
       const width = Math.round(file.width * scale)
       const height = Math.round(file.height * scale)
-      image.resize(width, height).quality(50)
-      const data = await image.getBufferAsync(Jimp.MIME_JPEG)
+      const data = await image.resize(width, height)
+        .jpeg().toBuffer()
       // console.info('ThumbnailParser:', data)
       file.thumbnail = data
       // console.info('thumbnail:', typeof data)

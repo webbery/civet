@@ -40,3 +40,9 @@ function mkdir(dirname: string): boolean {
 export function createDirectories(str: string): boolean {
   return mkdir(str);
 }
+
+export function getAbsolutePath(relativePath: string): string {
+  let p = relativePath.replace('/./', '/')
+  p = p.replace('//', '/')
+  return p
+}

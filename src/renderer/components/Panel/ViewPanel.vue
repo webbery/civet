@@ -163,7 +163,7 @@ export default {
       console.info('onImageClick', e, image)
       this.imageSelected = true
       if (!Global.ctrlPressed) {
-        bus.emit(bus.EVENT_SELECT_IMAGE, image.id)
+        bus.emit(bus.EVENT_SELECT_IMAGE, [image.id])
         if (event.button === 2) { // 选择多个后右键
           // right click
           this.imageSelected = false

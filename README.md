@@ -25,7 +25,7 @@
 
 ### 下载
 
-[v0.1.2-for_test](https://github.com/webbery/civet/releases)  
+[Release](https://github.com/webbery/civet/releases)  
 
 ### 相关资源
 

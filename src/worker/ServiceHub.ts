@@ -7,7 +7,7 @@ import { ResourceObserver } from './ResourceObserver'
 class ServiceHub {
   constructor() {
     const pipeline = new MessagePipeline(200, new Map())
-    this.extensionManager = new ExtensionManager();
+    this.extensionManager = new ExtensionManager(pipeline);
     this.resourceObserver = new ResourceObserver(this.extensionManager);
     this.resourceService = new ResourceService(pipeline, this.resourceObserver);
     const WebSocketServer = require('ws').Server

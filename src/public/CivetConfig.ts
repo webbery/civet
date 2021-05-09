@@ -94,9 +94,9 @@ class CivetConfig {
     return resources
   }
 
-  getCurrentResource() {
+  getResourceByName(name: string) {
     for (const resource of this.config.resources) {
-      if (resource.name === this.config.app.default) return resource
+      if (resource.name === name) return resource
     }
     return null
   }
@@ -115,6 +115,7 @@ class CivetConfig {
     this.config.resources.push({
       name: name,
       db: { path: path + '/' + name },
+      extensions: [],
       meta: this.schema()
     })
   }
@@ -159,7 +160,31 @@ class CivetConfig {
     return this.config.app.version
   }
 
+  addExtension(dbname: string, extension: string) {
+    const resource = this.getResourceByName(dbname)
+    if (!resource['extensions']) {
+      resource['extensions'] = []
+    }
+    for (let ext of resource['extensions']) {
+      if (ext === extension) return
+    }
+    resource['extensions'].push(extension)
+  }
+
+  getExtensions(dbname: string) {
+    const resource = this.getResourceByName(dbname)
+    return resource['extensions']
+  }
+
   schema(filetype: string = 'img') {
+    /**
+     * {
+     *  name: name,
+     *  db: { path: path + '/' + name },
+     *  extensions: [id...],
+     *  meta: this.schema()
+     * }
+     */
     return [
       { name: 'color', value: '主色', type: 'val/array', query: true, size: 3, display: true },
       { name: 'size', value: '大小', type: 'str', query: true, display: true },

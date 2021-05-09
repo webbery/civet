@@ -41,6 +41,7 @@
 <script>
 import RangeInput from './Control/RangeInput'
 import MutiSelect from './Control/Multiselect'
+import { debounce } from 'lodash'
 
 export default {
   name: 'view-filter',
@@ -125,7 +126,7 @@ export default {
       }
       this.$store.dispatch('query', {type: keys})
     },
-    onColorChanged(color) {
+    onColorChanged: debounce(function (color) {
       console.info('onColorChanged:', color)
       this.color = color
       if (!color) {
@@ -135,7 +136,7 @@ export default {
         const hex = tinyColor(color).toHexString()
         this.$store.dispatch('query', {color: {$near: hex}})
       }
-    }
+    }, 100)
   }
 }
 </script>

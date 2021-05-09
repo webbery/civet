@@ -6,7 +6,6 @@ import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
 import { serviceHub } from './ServiceHub'
-import { ExtensionManager } from './ExtensionManager'
 
 serviceHub.registObserver()
 
@@ -32,6 +31,3 @@ Array.prototype.remove = function (val) {
     this.splice(index, 1)
   }
 }
-
-const extManager = new ExtensionManager()
-extManager.run()

@@ -187,6 +187,7 @@ export class ResourceService{
   async reInitDB(msgid: number, data: any) {
     console.info('init db', data)
     CivetDatabase.reload()
+    this.observer.switchResourceDB(data)
     // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
     return {type: ReplyType.REPLY_RELOAD_DB_STATUS, data: true}
   }
@@ -209,11 +210,8 @@ export class ResourceService{
     if (info.isDirectory()) {
       this.readDir.call(this, msgid, resourcePath)
     } else {
-      // if (bakDir === undefined) {
-      //   const config = cvtConfig.getConfig()
-      //   console.info('--------2----------', config)
-      //   initHardLinkDir(config.app.default)
-      // }
+      // const result = this.observer.read(resourcePath)
+      // console.info(result)
       const service = new ImageService(this.pipeline)
       const file = await service.read(resourcePath)
       console.info('readImages', file, this)
