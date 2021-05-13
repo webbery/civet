@@ -11,6 +11,7 @@ export class Result<TSuccess, TFailure>{
   }
 
   static failure<TSuccess, TFailure>(error: TFailure) {
+    console.error(error)
     return new Result<TSuccess, TFailure>(null, error);
   }
 

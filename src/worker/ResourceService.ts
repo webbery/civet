@@ -1,7 +1,6 @@
 import fs from 'fs'
 import { MessagePipeline } from './MessageTransfer'
 import JString from '../public/String'
-import { ImageService } from './service/ImageService'
 import { ReplyType, Message } from './Message'
 import { civet } from '../public/civet'
 import { CivetDatabase } from './Kernel'
@@ -98,7 +97,7 @@ export class ResourceService{
 
   getImageInfo(msgid: number, imageID: number) {
     const img = CivetDatabase.getFilesInfo([imageID])
-    // console.info('getImagesInfo', img)
+    console.info('getImagesInfo', img)
     const image = new civet.IResource(img[0])
     // reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
     return {type: ReplyType.REPLY_IMAGE_INFO, data: image}
@@ -210,18 +209,16 @@ export class ResourceService{
     if (info.isDirectory()) {
       this.readDir.call(this, msgid, resourcePath)
     } else {
-      // const result = this.observer.read(resourcePath)
-      // console.info(result)
-      const service = new ImageService(this.pipeline)
-      const file = await service.read(resourcePath)
-      console.info('readImages', file, this)
-      let msg = new Message()
-      msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
-      msg.msg = [file.toJson()]
-      msg.tick = 0
-      msg.id = msgid
-      this.pipeline.post(msg)
-      // reply2Renderer(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file.toJson()])
+      const result = await this.observer.read(resourcePath)
+      console.info(result)
+      if (result.isSuccess()) {
+        let msg = new Message()
+        msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
+        msg.msg = [(<civet.IResource>result.value).toJson()]
+        msg.tick = 0
+        msg.id = msgid
+        this.pipeline.post(msg)
+      }
     }
   }
 

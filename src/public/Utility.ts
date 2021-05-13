@@ -46,3 +46,25 @@ export function getAbsolutePath(relativePath: string): string {
   p = p.replace('//', '/')
   return p
 }
+
+export function isFileExist(filepath: string): boolean {
+  // let result = path.parse(filepath)
+  if (fs.existsSync(filepath)) {
+    // let stat = fs.statSync(filepath)
+    return true;
+  }
+  return false;
+}
+
+export function runCommand(cmd: string, dir: string): boolean {
+  const curDir = process.cwd()
+  process.chdir(dir)
+  const { execSync } = require('child_process');
+  let child = execSync(cmd)
+  process.chdir(curDir)
+  if (child.error) {
+    console.error(child.error)
+    return false
+  }
+  return true
+}

@@ -56,7 +56,7 @@ const getServiceInstance = (function() {
       service.get = async (msgType, params) => {
         service.send(msgType, params)
         if (replyMessageMap[msgType] === undefined) {
-          console.log(msgType, ' reply is not defined')
+          console.error(`reply[${msgType}] is not defined, params: ${params}`)
         }
         const result = await promiseOn(replyMessageMap[msgType])
         return result
@@ -64,7 +64,7 @@ const getServiceInstance = (function() {
       ipcRenderer.on('message-to-renderer', (sender, msg) => {
         const callbacks = callbackCache[msg.type]
         if (callbacks === undefined) {
-          console.info(msg.type, 'no callback')
+          console.error(`reply[${msg.type}] is not defined, params: ${msg.data}`)
           return
         }
         console.info('message-to-renderer', msg.type)
@@ -105,5 +105,8 @@ export default {
   UPDATE_CATEGORY_NAME: 'updateCategoryName',
   UPDATE_FILE_NAME: 'updateFileName',
   REINIT_DB: 'reInitDB',
-  REMOVE_DB: 'removeDB'
+  REMOVE_DB: 'removeDB',
+  INSTALL_EXTENSION: 'install',
+  UNINSTALL_EXTENSION: 'uninstall',
+  UPDATE_EXTENSION: 'update'
 }

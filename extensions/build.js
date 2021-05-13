@@ -11,14 +11,20 @@ function runCommand(cmd) {
   return true
 }
 
-process.chdir('./extensions')
 for (let extension of dirs) {
   if (extension === 'build.js') continue
   console.info('build extensions', extension)
-  process.chdir('./' + extension)
-  if (runCommand('npm install')) {
-    runCommand('tsc main.ts')
+  const pack = fs.readFileSync('./extensions/' + extension + '/package.json', 'utf-8')
+  const jsn = JSON.parse(pack)
+  for (let name in jsn['dependencies']) {
+    let child = execSync('node -p "require(\'' + name + '\') === undefined')
+    if (child === 'false') {
+      console.info(`install ${name}@${jsn['dependencies'][name]}`)
+      runCommand('npm install -S ' + name + '@' + jsn['dependencies'][name])
+    }
   }
-  process.chdir('../')
+  process.chdir('./extensions/' + extension)
+  runCommand('tsc main.ts')
+  process.chdir('../..')
 }
-process.chdir('..')
+// process.chdir('..')

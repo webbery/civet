@@ -1,5 +1,5 @@
 {
-  "name": "segment",
+  "name": "color-parser",
   "displayName": "Civet基本图像处理扩展",
   "description": "Civet基本图像处理扩展",
   "version": "0.0.1",
@@ -9,12 +9,16 @@
   "main": "./main.js",
   "civet": {
     "activeEvents": [
-      "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png,gif",
+      "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png",
       "onView:",
       "onSave:"
-    ]
+    ],
+    "dependency": {
+      "imagedata": "0.0.1"
+    }
   },
   "dependencies": {
-    "segment": "^0.1.3"
+    "tinycolor2": "^1.4.2",
+    "node-kmeans": "^1.1.9"
   }
 }

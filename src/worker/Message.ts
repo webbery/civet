@@ -35,3 +35,7 @@ export class Message {
 export interface IMessagePipeline {
   post: any;
 }
+
+export class ErrorMessage {
+  constructor(command: string, args: any) {}
+}
