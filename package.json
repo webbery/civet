@@ -16,6 +16,7 @@
     "build": "node extensions/build.js && node .electron-vue/build.js && electron-builder -p onTag",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
+    "build:extend": "node .electron-vue/extension.js",
     "dev": "node extensions/build.js && npm run pack:dev_woker && node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && mocha test/e2e",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src test",
@@ -47,7 +48,7 @@
     },
     "files": [
       "dist/electron/**/*",
-      "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md}",
+      "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md,ts,json}",
       "!**/*.{ilk,pdb,obj,tlog,vcxproj,filters,iobj,ipdb,exp,lib}",
       "!**/*.{o,Makefile,mk,yml,vcxproj,filters,iobj,ipdb,exp,lib}",
       "!**/Makefile",
@@ -111,8 +112,8 @@
         ]
       },
       {
-        "from": "./src/worker/algorithm",
-        "to": "./extension",
+        "from": "./extensions",
+        "to": "./extensions",
         "filter": [
           "**/*"
         ]
@@ -181,6 +182,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
+    "dts-bundle": "^0.7.3",
     "electron": "^11.2.3",
     "electron-builder": "^22.9.1",
     "electron-builder-squirrel-windows": "^22.3.5",

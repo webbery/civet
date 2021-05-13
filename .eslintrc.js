@@ -39,6 +39,7 @@ module.exports = {
       }
     }],
     "no-callback-literal": 0,
+    "no-unused-vars": ["warn", { "vars": "all" }],
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
   }
 }

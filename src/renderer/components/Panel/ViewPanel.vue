@@ -41,6 +41,7 @@
           </div>
         </WaterfallSlot>
       </Waterfall>
+      <div v-html="viewHtml"></div>
       </el-scrollbar>
     </div>
   </div>
@@ -54,7 +55,6 @@ import ImgTool from '../utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
 import Global from '../utils/Global'
 import { mapState } from 'vuex'
-// import ExtensionManager from '@/../public/ExtensionManager'
 import Waterfall from '../Layout/waterfall'
 import WaterfallSlot from '../Layout/waterfall-slot'
 import InputLabel from '../Control/InputLabel'
@@ -68,6 +68,7 @@ export default {
   data() {
     return {
       firstLoad: true,
+      viewHtml: '',
       lastSelections: {},
       imageSelected: false,
       menus: [

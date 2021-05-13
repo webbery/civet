@@ -2,7 +2,7 @@ import fs from 'fs'
 import { MessagePipeline } from './MessageTransfer'
 import JString from '../public/String'
 import { ReplyType, Message } from './Message'
-import { civet } from '../public/civet'
+import { Resource } from '../public/Resource'
 import { CivetDatabase } from './Kernel'
 import { ResourcePath } from './common/ResourcePath'
 import { config } from '../public/CivetConfig'
@@ -82,7 +82,7 @@ export class ResourceService{
     console.info('getImagesInfo', imgs, this)
     const images = []
     for (const img of imgs) {
-      images.push(new civet.IResource(img))
+      images.push(new Resource(img))
     }
     return {type: ReplyType.REPLY_IMAGES_INFO, data: images}
     // reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
@@ -97,8 +97,8 @@ export class ResourceService{
 
   getImageInfo(msgid: number, imageID: number) {
     const img = CivetDatabase.getFilesInfo([imageID])
-    console.info('getImagesInfo', img)
-    const image = new civet.IResource(img[0])
+    // console.info('getImagesInfo', img)
+    const image = new Resource(img[0])
     // reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
     return {type: ReplyType.REPLY_IMAGE_INFO, data: image}
   }

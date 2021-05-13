@@ -33,3 +33,8 @@ new Vue({
   store,
   template: '<App/>'
 }).$mount('#app')
+
+/* exported fetchData */
+function fetchData() {
+  let service = Service.getServiceInstance()
+}

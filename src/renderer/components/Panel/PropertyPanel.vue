@@ -61,6 +61,7 @@
       </el-col>
     </el-row>
     </fieldset>
+    <div v-html="propertyHtml"></div>
   </div>
 </template>
 
@@ -87,7 +88,8 @@ export default {
       checkValue: [],
       filename: '',
       metaNames: [],
-      metaValues: []
+      metaValues: [],
+      propertyHtml: ''
     }
   },
   components: {

@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { ExtensionActiveType, ExtensionService } from './ExtensionService'
 import { MessagePipeline } from './MessageTransfer'
-import { civet } from '@/../public/civet'
+import { Resource } from '@/../public/Resource'
 import { ResourcePath } from './common/ResourcePath'
 import { Result } from './common/Result'
 import { config } from '@/../public/CivetConfig'
@@ -117,17 +117,9 @@ export class ExtensionManager {
       let service = extServs[idx]
       console.info('service:', service)
       if (!service.dependency) {
-        let activeType = service.activeType(ExtensionActiveType.ExtContentType)
-        if (!activeType) continue
-        for (let active of activeType) {
-          let events = this._actives.get(active)
-          if (!events) {
-            events = []
-          }
-          events.push(service)
-          this._actives.set(active, events)
-          // extServs.splice(idx, 1)
-        }
+        this._initContentTypeExtension(service)
+        this._initViewExtension(service)
+        this._initStorageExtension(service)
       }
     }
   }
@@ -166,19 +158,34 @@ export class ExtensionManager {
     let extPackPath = path.resolve('.') + '/extensions/' + extname + '/package.json'
     if (!isFileExist(extPackPath)) return
   }
+  private _initContentTypeExtension(service: ExtensionService) {
+    let activeType = service.activeType(ExtensionActiveType.ExtContentType)
+    if (!activeType) return
+    for (let active of activeType) {
+      let events = this._actives.get(active)
+      if (!events) {
+        events = []
+      }
+      events.push(service)
+      this._actives.set(active, events)
+      // extServs.splice(idx, 1)
+    }
+  }
+
+  private _initViewExtension(service: ExtensionService) {}
+  private _initStorageExtension(service: ExtensionService) {}
 
   switchResourceDB(dbname: string) {
     const resource = config.getResourceByName(dbname)
     this._extensionsOfConfig = resource['extensions']
   }
 
-  async read(uri: ResourcePath): Promise<Result<civet.IResource, string>> {
+  async read(uri: ResourcePath): Promise<Result<Resource, string>> {
     const f = path.parse(uri.local())
     const extname = f.ext.substr(1)
     const extensions = this._actives.get(extname)
     if (!extensions || extensions.length === 0) return Result.failure('empty extensions')
-    console.info('extensions:', extensions)
-    let resource: civet.IResource = APIFactory.createResource(this._pipeline);
+    let resource: Resource = APIFactory.createResource(this._pipeline);
     resource.filename = f.base
     resource.path = uri.local()
     if (uri.remote()) {
@@ -193,13 +200,15 @@ export class ExtensionManager {
     }
     return Result.success(resource)
   }
-  // run() {
-    // for (const extension of this.extensions) {
-    //   try {
-    //     extension()
-    //   } catch (err) {
-    //     console.error(`run extension ${extension.name} error: ${err}`)
-    //   }
-    // }
-  // }
+  
+  onPropertyView(resource: Resource): string[] | Result<string, string> {
+    const extensions = this._actives.get('property')
+    if (!extensions || extensions.length === 0) return Result.failure('empty extensions')
+    let html: string[] = [];
+    for (const extension of extensions) {
+      extension.run('onview', 'property', resource)
+    }
+    return html
+  }
+
 }

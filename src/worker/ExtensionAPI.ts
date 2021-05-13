@@ -1,4 +1,4 @@
-import { civet } from '@/../public/civet'
+import { Resource } from '@/../public/Resource'
 import { MessagePipeline } from './MessageTransfer'
 import { CivetDatabase } from './Kernel'
 
@@ -6,7 +6,7 @@ export class APIFactory {
   constructor() {}
 
   static createResource(pipeline: MessagePipeline): any {
-    let resource = new civet.IResource(undefined)
+    let resource = new Resource(undefined)
     resource.id = CivetDatabase.generateFilesID(1)[0]
     const handler = {
       set(target: any, key: any, value: any) {

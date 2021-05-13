@@ -3,7 +3,7 @@ import path from 'path'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { createDecorator } from './ServiceDecorator'
 import { Result } from './common/Result'
-import { civet } from '@/../public/civet'
+// import { civet } from '@/../public/civet'
 import { getAbsolutePath } from '@/../public/Utility'
 
 const Module = require('module');
