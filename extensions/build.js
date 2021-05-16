@@ -17,14 +17,14 @@ for (let extension of dirs) {
   const pack = fs.readFileSync('./extensions/' + extension + '/package.json', 'utf-8')
   const jsn = JSON.parse(pack)
   for (let name in jsn['dependencies']) {
-    let child = execSync('node -p "require(\'' + name + '\') === undefined')
+    let child = execSync('node -p "require(\'' + name + '\') === undefined"')
     if (child === 'false') {
       console.info(`install ${name}@${jsn['dependencies'][name]}`)
       runCommand('npm install -S ' + name + '@' + jsn['dependencies'][name])
     }
   }
   process.chdir('./extensions/' + extension)
-  runCommand('tsc main.ts')
+  runCommand('npx tsc main.ts')
   process.chdir('../..')
 }
 // process.chdir('..')
