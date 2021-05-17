@@ -17,9 +17,9 @@ for (let extension of dirs) {
   const pack = fs.readFileSync('./extensions/' + extension + '/package.json', 'utf-8')
   const jsn = JSON.parse(pack)
   for (let name in jsn['dependencies']) {
+    console.info(`install ${name}@${jsn['dependencies'][name]}`)
     let child = execSync('node -p "require(\'' + name + '\') === undefined"')
     if (child === 'false') {
-      console.info(`install ${name}@${jsn['dependencies'][name]}`)
       runCommand('npm install -S ' + name + '@' + jsn['dependencies'][name])
     }
   }

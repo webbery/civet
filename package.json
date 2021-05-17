@@ -48,7 +48,7 @@
     },
     "files": [
       "dist/electron/**/*",
-      "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md,ts,json}",
+      "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md,ts}",
       "!**/*.{ilk,pdb,obj,tlog,vcxproj,filters,iobj,ipdb,exp,lib}",
       "!**/*.{o,Makefile,mk,yml,vcxproj,filters,iobj,ipdb,exp,lib}",
       "!**/Makefile",
@@ -69,6 +69,10 @@
       ],
       "sign": false
     },
+    "appImage": {
+      "synopsis": "Civet",
+      "category": "Utility"
+    },
     "mac": {
       "identity": "v_yuanwenbin",
       "category": "public.app-category.graphics-design",
@@ -85,7 +89,7 @@
     },
     "linux": {
       "icon": "src/main/asset/icon/icon.png",
-      "target": "deb"
+      "target": "AppImage"
     },
     "nsis": {
       "oneClick": false,
@@ -102,7 +106,7 @@
     "extraResources": [
       {
         "from": "./extensions",
-        "to": "./extensions",
+        "to": "../extensions",
         "filter": [
           "**/*"
         ]
