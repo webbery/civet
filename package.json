@@ -34,7 +34,7 @@
   "build": {
     "productName": "Civet",
     "appId": "com.civet.app",
-    "asar": false,
+    "asar": true,
     "publish": [
       {
         "provider": "github",
@@ -69,10 +69,6 @@
       ],
       "sign": false
     },
-    "appImage": {
-      "synopsis": "Civet",
-      "category": "Utility"
-    },
     "mac": {
       "identity": "v_yuanwenbin",
       "category": "public.app-category.graphics-design",
@@ -89,7 +85,7 @@
     },
     "linux": {
       "icon": "src/main/asset/icon/icon.png",
-      "target": "AppImage"
+      "target": "deb"
     },
     "nsis": {
       "oneClick": false,
@@ -105,13 +101,6 @@
     },
     "extraResources": [
       {
-        "from": "./node_modules/sharp",
-        "to": "./resources/app.asar.unpacked/node_modules/sharp",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
         "from": "./extensions",
         "to": "./extensions",
         "filter": [
@@ -121,7 +110,6 @@
     ]
   },
   "dependencies": {
-    "app-module-path": "^2.2.0",
     "civetkern": "^0.2.6",
     "download": "^8.0.0",
     "electron-updater": "^4.3.5",

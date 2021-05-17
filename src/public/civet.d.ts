@@ -38,8 +38,18 @@ declare module 'civet' {
     // export let extensionContext: ExtensionContext;
     export let activate: ((context: ExtensionContext) => any) | null = null;
     export let unactivate: (() => any) | null = null;
+
+    export enum PropertyType {
+        String,
+        Number,
+        Color,
+        Image
+    }
+
     export interface IProperty {
         readonly key: string;
+        readonly type: PropertyType;
+        readonly query: boolean;
     }
     /**
              * resource of uri, such as file, web page, or remote machine setting etc.

@@ -214,7 +214,7 @@ export class ResourceService{
       if (result.isSuccess()) {
         let msg = new Message()
         msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
-        msg.msg = [(<civet.IResource>result.value).toJson()]
+        msg.msg = [(<Resource>result.value).toJson()]
         msg.tick = 0
         msg.id = msgid
         this.pipeline.post(msg)

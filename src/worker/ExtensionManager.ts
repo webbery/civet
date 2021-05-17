@@ -23,7 +23,7 @@ export class ExtensionManager {
     this._pipeline = pipeline
     const dbname = config.getCurrentDB()
     const resource = config.getResourceByName(dbname!)
-    this._extensionsOfConfig = resource['extensions']||[]
+    this._extensionsOfConfig = (!resource || resource['extensions'] === undefined)?[]:resource['extensions']
 
     let extensionPath = path.resolve('.') + '/extensions'
     if (!fs.existsSync(extensionPath)) return

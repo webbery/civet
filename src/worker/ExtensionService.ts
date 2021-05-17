@@ -6,15 +6,15 @@ import { Result } from './common/Result'
 // import { civet } from '@/../public/civet'
 import { getAbsolutePath } from '@/../public/Utility'
 
-const Module = require('module');
-const original = Module.prototype.require;
+// const Module = require('module');
+// const original = Module.prototype.require;
 
-Module.prototype.require = function(request: string) {
-  if (request !== 'civet') {
-    return original.apply(this, arguments);
-  }
-  return require('./ExtensionAPI');
-}
+// Module.prototype.require = function(request: string) {
+//   if (request !== 'civet') {
+//     return original.apply(this, arguments);
+//   }
+//   return require('./ExtensionAPI');
+// }
 
 export enum ExtensionActiveType {
   ExtContentType = 0, //
