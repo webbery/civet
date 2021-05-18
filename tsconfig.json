@@ -21,7 +21,7 @@
       "@/*": ["src/public/*", "src/worker/service/*", "src/renderer/*"]
     }
   },
-  "include": ["src/public/*.ts", "src/worker/*.ts"],
+  "include": ["src/public/*.ts", "src/worker/*.ts", "src/renderer/*.ts"],
   "exclude": [
     "node_modules"
   ]

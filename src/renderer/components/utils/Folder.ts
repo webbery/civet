@@ -1,4 +1,4 @@
-import fs from 'fs'
+const fs = require('fs')
 
 export function deleteFolder(path: string) {
   let files = []
