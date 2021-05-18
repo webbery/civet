@@ -1,4 +1,3 @@
-const fs = require('fs')
 
 class DataParser{
   constructor() {

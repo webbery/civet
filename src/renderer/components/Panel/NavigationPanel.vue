@@ -188,15 +188,14 @@ export default {
     onSelectMenu(indexList) {
       console.info('navi menu')
     },
-    renderContent(h, {node, data, store}) {
-      // console.info('renderContent', data)
-      return (
-        <span>
-          <i class={data.icon}></i>
-          <span> {node.label}</span>
-        </span>
-      )
-    },
+    // renderContent(h, {node, data, store}) {
+    //   return (
+    //     <span>
+    //       <i class={data.icon}></i>
+    //       <span> {node.label}</span>
+    //     </span>
+    //   )
+    // },
     resetSelected(idx) {
       for (let i = 0; i < 4; ++i) {
         if (i === idx) this.headOptions[i].isSelected = !this.headOptions[i].isSelected

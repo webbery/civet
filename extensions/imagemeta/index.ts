@@ -1,4 +1,3 @@
-const fs = require('fs')
 
 function convert2ValidDate(str: string): string {
   if (str.match(/[0-9]{4}:[0-9]{2}:[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/g)) {
@@ -15,6 +14,7 @@ class MetaParser {
   constructor() {}
 
   parse(filepath: string, file: any) {
+    const fs = require('fs')
     const buffer = fs.readFileSync(filepath)
     const ExifReader = require('exifreader')
     const meta = ExifReader.load(buffer)

@@ -6,7 +6,7 @@
   "engines": {
     "civet": "^0.1.4"
   },
-  "main": "./main.js",
+  "main": "./index.js",
   "civet": {
     "activeEvents": [
       "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png,gif",

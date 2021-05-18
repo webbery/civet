@@ -12,6 +12,7 @@ const webpackHotMiddleware = require('webpack-hot-middleware')
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const workerConfig = require('./webpack.worker.config')
+const extensionConfig = require('./webpack.extension.config')
 
 let electronProcess = null
 let manualRestart = false
@@ -76,6 +77,46 @@ function startRenderer () {
     )
 
     server.listen(9080)
+  })
+}
+
+function startExtension() {
+  return new Promise((resolve, reject) => {
+    extensionConfig.entry.renderer = [].concat(extensionConfig.entry.worker)
+    extensionConfig.mode = 'development'
+    const compiler = webpack(extensionConfig)
+    hotMiddleware = webpackHotMiddleware(compiler, {
+      log: false,
+      heartbeat: 2500
+    })
+
+    compiler.hooks.compilation.tap('compilation', compilation => {
+      compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
+        hotMiddleware.publish({ action: 'reload' })
+        cb()
+      })
+    })
+
+    compiler.hooks.done.tap('done', stats => {
+      logStats('extensions', stats)
+    })
+
+    console.info('[[EXTENSIONS[[', path.join(__dirname, '../'))
+    const server = new WebpackDevServer(
+      compiler,
+      {
+        contentBase: path.join(__dirname, '../'),
+        quiet: true,
+        before (app, ctx) {
+          app.use(hotMiddleware)
+          ctx.middleware.waitUntilValid(() => {
+            resolve()
+          })
+        }
+      }
+    )
+
+    server.listen(9082)
   })
 }
 
@@ -220,7 +261,7 @@ function greeting () {
 function init () {
   greeting()
 
-  Promise.all([startRenderer(), startWorker(), startMain()])
+  Promise.all([startRenderer(), startWorker(), startMain(), startExtension()])
     .then(() => {
       startElectron()
     })

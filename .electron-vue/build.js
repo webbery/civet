@@ -14,6 +14,7 @@ const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const workerConfig = require('./webpack.worker.config')
 const webConfig = require('./webpack.web.config')
+const extensionConfig = require('./webpack.extension.config')
 
 const doneLog = chalk.bgGreen.white(' DONE ') + ' '
 const errorLog = chalk.bgRed.white(' ERROR ') + ' '
@@ -35,7 +36,7 @@ function build () {
 
   del.sync(['dist/electron/*', '!.gitkeep'])
 
-  const tasks = ['main', 'renderer', 'worker']
+  const tasks = ['main', 'renderer', 'worker', 'extensions']
   const m = new Multispinner(tasks, {
     preText: 'building',
     postText: 'process'
@@ -76,6 +77,16 @@ function build () {
   }).catch(err => {
     m.error('worker')
     console.log(`\n  ${errorLog}failed to build worker process`)
+    console.error(`\n${err}\n`)
+    process.exit(1)
+  })
+
+  pack(extensionConfig).then(result => {
+    results += result + '\n\n'
+    m.success('extensions')
+  }).catch(err => {
+    m.error('extensions')
+    console.log(`\n  ${errorLog}failed to build extension process`)
     console.error(`\n${err}\n`)
     process.exit(1)
   })
