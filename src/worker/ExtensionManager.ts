@@ -30,9 +30,11 @@ export class ExtensionManager {
     let exts = fs.readdirSync(extensionPath)
     // remove files
     for (let idx = exts.length - 1; idx >= 0; --idx) {
-      if (fs.statSync(extensionPath + '/' + exts[idx]).isDirectory()) continue
+      console.info(exts[idx])
+      if (fs.statSync(extensionPath + '/' + exts[idx]).isDirectory() && exts[idx] !== 'node_modules') continue
       exts.splice(idx, 1)
     }
+    console.info('-------', exts)
     this._initServices(extensionPath, exts, pipeline)
     this._buildGraph()
     console.info('graph:', this._actives)

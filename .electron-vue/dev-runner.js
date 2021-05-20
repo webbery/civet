@@ -7,16 +7,17 @@ const { say } = require('cfonts')
 const { spawn } = require('child_process')
 const webpack = require('webpack')
 const WebpackDevServer = require('webpack-dev-server')
+// const MultiCompiler = require('mu')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const workerConfig = require('./webpack.worker.config')
-const extensionConfig = require('./webpack.extension.config')
+// const extensionConfig = require('./webpack.extension.config')
 
 let electronProcess = null
 let manualRestart = false
-let hotMiddleware
+let hotMiddleware = []
 
 function logStats (proc, data) {
   let log = ''
@@ -45,14 +46,14 @@ function startRenderer () {
     rendererConfig.entry.renderer = [path.join(__dirname, 'dev-client')].concat(rendererConfig.entry.renderer)
     rendererConfig.mode = 'development'
     const compiler = webpack(rendererConfig)
-    hotMiddleware = webpackHotMiddleware(compiler, {
+    let rendererMiddleware = webpackHotMiddleware(compiler, {
       log: false,
       heartbeat: 2500
     })
 
     compiler.hooks.compilation.tap('compilation', compilation => {
       compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
-        hotMiddleware.publish({ action: 'reload' })
+        rendererMiddleware.publish({ action: 'reload' })
         cb()
       })
     })
@@ -68,7 +69,7 @@ function startRenderer () {
         contentBase: path.join(__dirname, '../'),
         quiet: true,
         before (app, ctx) {
-          app.use(hotMiddleware)
+          app.use(rendererMiddleware)
           ctx.middleware.waitUntilValid(() => {
             resolve()
           })
@@ -76,63 +77,65 @@ function startRenderer () {
       }
     )
 
+    hotMiddleware.push(rendererMiddleware)
     server.listen(9080)
   })
 }
 
-function startExtension() {
-  return new Promise((resolve, reject) => {
-    extensionConfig.entry.renderer = [].concat(extensionConfig.entry.worker)
-    extensionConfig.mode = 'development'
-    const compiler = webpack(extensionConfig)
-    hotMiddleware = webpackHotMiddleware(compiler, {
-      log: false,
-      heartbeat: 2500
-    })
+// function startExtension() {
+//   return new Promise((resolve, reject) => {
+//     extensionConfig.entry.renderer = [].concat(extensionConfig.entry.renderer)
+//     extensionConfig.mode = 'development'
+//     const compiler = webpack(extensionConfig)
+//     let extensionMiddleware = webpackHotMiddleware(compiler, {
+//       log: false,
+//       heartbeat: 2500
+//     })
 
-    compiler.hooks.compilation.tap('compilation', compilation => {
-      compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
-        hotMiddleware.publish({ action: 'reload' })
-        cb()
-      })
-    })
+//     compiler.hooks.compilation.tap('compilation', compilation => {
+//       compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
+//         extensionMiddleware.publish({ action: 'reload' })
+//         cb()
+//       })
+//     })
 
-    compiler.hooks.done.tap('done', stats => {
-      logStats('extensions', stats)
-    })
+//     compiler.hooks.done.tap('done', stats => {
+//       logStats('extension', stats)
+//     })
 
-    console.info('[[EXTENSIONS[[', path.join(__dirname, '../'))
-    const server = new WebpackDevServer(
-      compiler,
-      {
-        contentBase: path.join(__dirname, '../'),
-        quiet: true,
-        before (app, ctx) {
-          app.use(hotMiddleware)
-          ctx.middleware.waitUntilValid(() => {
-            resolve()
-          })
-        }
-      }
-    )
+//     console.info('[[EXTENSION[[', path.join(__dirname, '../'))
+//     const server = new WebpackDevServer(
+//       compiler,
+//       {
+//         contentBase: path.join(__dirname, '../'),
+//         quiet: true,
+//         before (app, ctx) {
+//           app.use(extensionMiddleware)
+//           ctx.middleware.waitUntilValid(() => {
+//             resolve()
+//           })
+//         }
+//       }
+//     )
 
-    server.listen(9082)
-  })
-}
+//     hotMiddleware.push(extensionMiddleware)
+//     server.listen(9081)
+//   })
+// }
 
 function startWorker () {
   return new Promise((resolve, reject) => {
     workerConfig.entry.renderer = [].concat(workerConfig.entry.worker)
     workerConfig.mode = 'development'
     const compiler = webpack(workerConfig)
-    hotMiddleware = webpackHotMiddleware(compiler, {
+    let workerMiddleware = webpackHotMiddleware(compiler, {
       log: false,
       heartbeat: 2500
     })
 
     compiler.hooks.compilation.tap('compilation', compilation => {
       compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
-        hotMiddleware.publish({ action: 'reload' })
+        workerMiddleware.publish({ action: 'reload' })
         cb()
       })
     })
@@ -148,7 +151,7 @@ function startWorker () {
         contentBase: path.join(__dirname, '../'),
         quiet: true,
         before (app, ctx) {
-          app.use(hotMiddleware)
+          app.use(workerMiddleware)
           ctx.middleware.waitUntilValid(() => {
             resolve()
           })
@@ -156,6 +159,7 @@ function startWorker () {
       }
     )
 
+    hotMiddleware.push(workerMiddleware)
     server.listen(9081)
   })
 }
@@ -168,7 +172,9 @@ function startMain () {
 
     compiler.hooks.watchRun.tapAsync('watch-run', (compilation, done) => {
       logStats('Main', chalk.white.bold('compiling...'))
-      hotMiddleware.publish({ action: 'compiling' })
+      for (let midware of hotMiddleware) {
+        midware.publish({ action: 'compiling' })
+      }
       done()
     })
 
@@ -261,7 +267,10 @@ function greeting () {
 function init () {
   greeting()
 
-  Promise.all([startRenderer(), startWorker(), startMain(), startExtension()])
+  Promise.all([
+    startRenderer(), startWorker(), 
+    // startExtension(),
+    startMain()])
     .then(() => {
       startElectron()
     })

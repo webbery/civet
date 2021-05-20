@@ -131,6 +131,7 @@ export class ExtensionService {
       const m = new Module('', module.parent)
       m.filename = this._package.name
       m._compile(content, '')
+      console.info(m.exports)
       this._instance = m.exports.activate()
     }
     let cmd = this._instance[command]
