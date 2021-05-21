@@ -31,7 +31,7 @@ export class ExtensionManager {
     // remove files
     for (let idx = exts.length - 1; idx >= 0; --idx) {
       console.info(exts[idx])
-      if (fs.statSync(extensionPath + '/' + exts[idx]).isDirectory() && exts[idx] !== 'node_modules') continue
+      if (fs.statSync(extensionPath + '/' + exts[idx]).isDirectory() && this._isExtension(exts[idx])) continue
       exts.splice(idx, 1)
     }
     console.info('-------', exts)
@@ -54,6 +54,11 @@ export class ExtensionManager {
     //   console.info('node paths:', paths)
     //   return paths
     // }
+  }
+
+  private _isExtension(name: string) {
+    if (name === 'node_modules' || name === '.DS_Store') return false
+    return true
   }
 
   private _initServices(root: string, extensionsName: string[], pipeline: MessagePipeline) {
@@ -164,6 +169,7 @@ export class ExtensionManager {
     let activeType = service.activeType(ExtensionActiveType.ExtContentType)
     if (!activeType) return
     for (let active of activeType) {
+      active = active.toLowerCase()
       let events = this._actives.get(active)
       if (!events) {
         events = []
@@ -184,9 +190,11 @@ export class ExtensionManager {
 
   async read(uri: ResourcePath): Promise<Result<Resource, string>> {
     const f = path.parse(uri.local())
-    const extname = f.ext.substr(1)
+    const extname = f.ext.substr(1).toLowerCase()
     const extensions = this._actives.get(extname)
-    if (!extensions || extensions.length === 0) return Result.failure('empty extensions')
+    if (!extensions || extensions.length === 0) {
+      return Result.failure('empty extensions')
+    }
     let resource: Resource = APIFactory.createResource(this._pipeline);
     resource.filename = f.base
     resource.path = uri.local()

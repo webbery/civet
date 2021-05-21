@@ -150,7 +150,7 @@ function loadExtensions() {
     const dirs = fs.readdirSync(path.join(__dirname, '../extensions'))
     let extDependencies = {}
     for (let extname of dirs) {
-        if (extname === 'node_modules' || extname === 'package-lock.json') continue
+        if (extname === 'node_modules' || extname === 'package-lock.json' || extname === '.DS_Store') continue
         let config = genExtensionConfig(extname)
         extensionsConfig.push(config)
         let stream = fs.readFileSync(path.join(__dirname, '../extensions/' + extname + '/package.json'))

@@ -13,7 +13,7 @@
     "preview"
   ],
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder -p onTag",
+    "build": "cross-env NODE_ENV=production webpack --config .electron-vue/webpack.extension.config.js && node .electron-vue/build.js && electron-builder -p onTag",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:extend": "node .electron-vue/extension.js",
@@ -76,7 +76,7 @@
     "mac": {
       "identity": "v_yuanwenbin",
       "category": "public.app-category.graphics-design",
-      "icon": "build/icons/icon512.icns",
+      "icon": "build/icons/icon.icns",
       "type": "distribution",
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
