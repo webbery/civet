@@ -173,9 +173,6 @@ let workerConfig = {
   target: 'electron-renderer'
 }
 
-/**
- * 发版打开此处
- */
 if (process.env.NODE_ENV === 'production') {
   workerConfig.devtool = ''
 

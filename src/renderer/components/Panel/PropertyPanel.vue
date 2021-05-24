@@ -5,7 +5,8 @@
           <InputLabel>{{filename}}</InputLabel>
         </div>
         <!-- <div v-if="picture.id !== null"> -->
-          <JImage :src="imagepath" :interact="false"></JImage>
+          <Preview :src="thumbnail"></Preview>
+          <!-- <JImage :src="imagepath" :interact="false"></JImage> -->
           <div class="color-container">
             <span v-if="picture.colors.length!==0" ><span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span></span>
             <span v-else icon="el-icon-loading"></span>
@@ -68,9 +69,10 @@
 <script>
 import bus from '../utils/Bus'
 import IconTag from '@/components/IconTag'
+import Preview from '../Control/Preview'
 import JString from '@/../public/String'
-import JImage from '../JImage'
-import ImgTool from '../utils/ImgTool'
+// import JImage from '../JImage'
+// import ImgTool from '../utils/ImgTool'
 import InputLabel from '../Control/InputLabel'
 import { config } from '@/../public/CivetConfig'
 import { mapState } from 'vuex'
@@ -80,7 +82,7 @@ export default {
   data() {
     return {
       picture: { id: null, width: 0, height: 0, size: 0, colors: [] },
-      imagepath: '',
+      thumbnail: '',
       dynamicTags: [],
       dynamicClass: [],
       inputVisible: false,
@@ -93,7 +95,7 @@ export default {
     }
   },
   components: {
-    IconTag, JImage, InputLabel
+    IconTag, Preview, InputLabel
   },
   computed: mapState({
     candidateClasses: state => state.Cache.classesName
@@ -158,7 +160,7 @@ export default {
             // this.filename = meta.value
             continue
           }
-          if (item.name === 'color') {
+          if (item.name === 'color' || item.type === 'bin') {
             continue
           }
           if (displayTable[item.name] !== false) {
@@ -199,7 +201,7 @@ export default {
             this.$set(this.picture.colors, idx, color)
           }
         }
-        this.imagepath = file.path
+        this.thumbnail = file.thumbnail
         this.dynamicTags = file.tag ? file.tag.slice(0) : []
         this.dynamicClass = file.category
         const isClassExist = function (clsName, dynamicClass) {
@@ -295,8 +297,8 @@ export default {
       }
     },
     getSrc(image) {
-      console.info('++++++++', ImgTool.getSrc(image))
-      return ImgTool.getSrc(image)
+      console.info('src:', image)
+      return image
     }
   }
 }

@@ -15,6 +15,26 @@ function updateStatus(status: any) {
   }
 }
 
+function readThumbnail(thumbnail: any) {
+  return 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
+  // return new Promise(function (resolve, reject) {
+    // console.info('blob', thumbnail)
+    // let blob = new Blob(thumbnail, { type: 'image/jpeg' })
+    // let reader = new FileReader()
+    // reader.onload = function(e) {
+    //   if (!e || !e.target) {
+    //     reject('load empty');
+    //     return
+    //   }
+    //   console.info('image preview', e.target.result)
+    //   resolve(thumbnail)
+    //   // resolve(e.target.result)
+    // }
+    // reader.readAsDataURL(blob)
+    // resolve(thumbnail)
+  // })
+}
+
 export class ResourceService{
   constructor(pipeline: MessagePipeline, observer: ResourceObserver) {
     this.observer = observer
@@ -82,7 +102,10 @@ export class ResourceService{
     console.info('getImagesInfo', imgs, this)
     const images = []
     for (const img of imgs) {
-      images.push(new Resource(img))
+      let resource = new Resource(img)
+      const thumbnail = readThumbnail(resource.thumbnail)
+      resource.setMeta('thumbnail', thumbnail)
+      images.push(resource)
     }
     return {type: ReplyType.REPLY_IMAGES_INFO, data: images}
     // reply2Renderer(ReplyType.REPLY_IMAGES_INFO, images)
@@ -97,7 +120,14 @@ export class ResourceService{
 
   getImageInfo(msgid: number, imageID: number) {
     const img = CivetDatabase.getFilesInfo([imageID])
-    // console.info('getImagesInfo', img)
+    console.info('getImagesInfo', img)
+    // let blob = new Blob([file.thumbnail], { type: 'image/jpeg' })
+    //     let reader = new FileReader()
+    //     reader.onload = function(e) {
+    //       this.thumbnail = e.target.result
+    //       console.info('this.thumbnail', this.thumbnail)
+    //     }
+    // reader.readAsDataURL(blob)
     const image = new Resource(img[0])
     // reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
     return {type: ReplyType.REPLY_IMAGE_INFO, data: image}
@@ -212,9 +242,13 @@ export class ResourceService{
       const result = await this.observer.read(resourcePath)
       console.info(result)
       if (result.isSuccess()) {
+        let resource = <Resource>result.value
+        console.info('preview', resource.thumbnail)
+        const thumbnail = readThumbnail(resource.thumbnail)
+        resource.setMeta('thumbnail', thumbnail)
         let msg = new Message()
         msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
-        msg.msg = [(<Resource>result.value).toJson()]
+        msg.msg = [resource.toJson()]
         msg.tick = 0
         msg.id = msgid
         this.pipeline.post(msg)

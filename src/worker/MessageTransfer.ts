@@ -98,6 +98,7 @@ class Timer {
         this.messageQueue.clear()
       }, 200);
     }
+    // post() {}
     error(msg: string|null) {
       ipcRenderer.send('message-from-worker', { type: ReplyType.INFOM_ERROR_MESSAGE, data: msg })
     }

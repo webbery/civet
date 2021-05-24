@@ -15,13 +15,16 @@ export class APIFactory {
           case 'filename':
             break;
           case 'color':
-            CivetDatabase.addFiles([target.toJson()])
-            console.info('save color meta', target.id, value)
-            CivetDatabase.addMeta([target.id], {name: key, value: value, type: 'color', query: true})
+            // CivetDatabase.addFiles([target.toJson()])
+            // console.info('save color meta', target.id, value)
+            // CivetDatabase.addMeta([target.id], {name: key, value: value, type: 'color', query: true})
             break
           case 'tag':
-            CivetDatabase.setTags([target.id], target.tag)
+            // CivetDatabase.setTags([target.id], target.tag)
             break
+          case 'thumbnail':
+            // console.info('type:', typeof value, value)
+            // CivetDatabase.addMeta([target.id], {name: key, value: value, type: 'bin'})
           default:
             break;
         }

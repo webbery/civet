@@ -25,100 +25,90 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 // let whiteListedModules = ['vue']
 
 function genExtensionConfig(extname) {
-  // let extensionConfig = {
-  //   entry: {
-  //     main: './src/index.ts'
-  //   },
-  //   module: {
-  //     rules: [
-  //       {
-  //         test: /\.tsx?$/,
-  //         use: 'ts-loader',
-  //         exclude: /node_modules/
-  //       }
-  //     ]
-  //   },
-  //   resolve: {
-  //     extensions: [ '.tsx', '.ts', '.js' ]
-  //   },
-  //   output: {
-  //     filename: 'bundle.js',
-  //     path: path.resolve(__dirname, 'dist')
-  //   }
-  // };
-
   let extensionConfig =  {
-        devtool: '#cheap-module-eval-source-map',
-        entry: {
-          renderer: path.join(__dirname, '../extensions/' + extname + '/index.ts')
-        },
-        mode: 'development',
-        externals: [
-          // ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
-        ],
-        module: {
-          rules: [
-            {
-              test: /\.js$/,
-              use: 'babel-loader',
-              exclude: /node_modules/
-            },
-            {
-              test: /\.node$/,
-              use: 'node-loader'
-            },
-            {
-              test: /\.(tsx|ts)(\?.*)?$/,
-              use: {
-                loader: 'ts-loader'
-              },
-              exclude: /node_modules/
-            }
-          ]
-        },
-        node: {
-          __dirname: process.env.NODE_ENV !== 'production',
-          __filename: process.env.NODE_ENV !== 'production'
-        },
-        plugins: [
-          // new VueLoaderPlugin(),
-          // new HtmlWebpackPlugin({
-          //   chunks: ['renderer', 'vendor'],
-          //   minify: {
-          //     collapseWhitespace: true,
-          //     removeAttributeQuotes: true,
-          //     removeComments: true
-          //   },
-          //   templateParameters(compilation, assets, options) {
-          //     return {
-          //       compilation: compilation,
-          //       webpack: compilation.getStats().toJson(),
-          //       webpackConfig: compilation.options,
-          //       htmlWebpackPlugin: {
-          //         files: assets,
-          //         options: options
-          //       },
-          //       process,
-          //     };
-          //   }
-          // }),
-          new webpack.HotModuleReplacementPlugin(),
-          new webpack.NoEmitOnErrorsPlugin()
-        ],
-        output: {
-          filename: 'index.js',
-          libraryTarget: 'commonjs2',
-          path: path.join(__dirname, '../extensions/' + extname)
-        },
-        resolve: {
-          // alias: {
-          //   '@': path.join(__dirname, '../extensions/' + extname),
-          //   'vue$': 'vue/dist/vue.esm.js'
-          // },
-          extensions: ['.js', '.ts', '.tsx']
-        },
-        target: 'node'
-    }
+    // context: path.join(__dirname, '..'),
+    devtool: '#cheap-module-eval-source-map',
+    entry: {
+      renderer: path.join(__dirname, '../extensions/' + extname + '/index.ts')
+    },
+    mode: 'development',
+    externals: [
+      // ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
+    ],
+    module: {
+      rules: [
+        // {
+        //   test: /\.js$/,
+        //   // 直接指明 loader 的绝对路径
+        //   use: path.resolve(__dirname, '../.electron-vue/extension')
+        // },
+        // {
+        //   test: /\.js$/,
+        //   use: 'babel-loader',
+        //   exclude: /node_modules/
+        // },
+        // {
+        //   test: /\.node$/,
+        //   loader: 'node-loader',
+        //   options: {
+        //     name(resourcePath, resourceQuery) {
+        //       const resource = path.parse(resourcePath)
+        //       // console.info('node loader: ', resourcePath, resourceQuery, resource.name)
+        //       return resource.name + resource.ext
+        //     }
+        //   }
+        // },
+        {
+          test: /\.(tsx|ts)(\?.*)?$/,
+          use: {
+            loader: 'ts-loader'
+          },
+          exclude: /node_modules/
+        }
+      ]
+    },
+    node: {
+      __dirname: process.env.NODE_ENV !== 'production',
+      __filename: process.env.NODE_ENV !== 'production'
+    },
+    plugins: [
+      // new VueLoaderPlugin(),
+      // new HtmlWebpackPlugin({
+      //   chunks: ['renderer', 'vendor'],
+      //   minify: {
+      //     collapseWhitespace: true,
+      //     removeAttributeQuotes: true,
+      //     removeComments: true
+      //   },
+      //   templateParameters(compilation, assets, options) {
+      //     return {
+      //       compilation: compilation,
+      //       webpack: compilation.getStats().toJson(),
+      //       webpackConfig: compilation.options,
+      //       htmlWebpackPlugin: {
+      //         files: assets,
+      //         options: options
+      //       },
+      //       process,
+      //     };
+      //   }
+      // }),
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.NoEmitOnErrorsPlugin()
+    ],
+    output: {
+      filename: 'index.js',
+      libraryTarget: 'commonjs2',
+      path: path.join(__dirname, '../extensions/' + extname)
+    },
+    resolve: {
+      // alias: {
+      //   sharp: path.join(__dirname, '../node_modules/sharp'),
+      // },
+      extensions: ['.js', '.ts', '.tsx']
+    },
+    target: 'electron-main'
+  }
     /**
      * 发版打开此处
      */
@@ -162,6 +152,10 @@ function loadExtensions() {
         }
     }
     // install and copy node_modules to extension-dist
+    let nodeModulesPath = '.'
+    if (process.env.NODE_ENV === 'production') {
+      nodeModulesPath = '.'
+    }
     process.chdir(path.join(__dirname, '../extensions'))
     for (let name in extDependencies) {
         try {
@@ -171,13 +165,13 @@ function loadExtensions() {
             console.error(err)
         }
     }
-    process.chdir(__dirname)
     // copy dir
     if (process.env.NODE_ENV !== 'production') {
       buildDev()
     } else {
       buildProd()
     }
+    process.chdir(__dirname)
     return extensionsConfig
 }
 

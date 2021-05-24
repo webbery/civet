@@ -9,6 +9,7 @@ import { config } from '@/../public/CivetConfig'
 import { APIFactory } from './ExtensionAPI'
 import { isFileExist, runCommand } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
+import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 // const loader = require('./Loader')
 
 // loader.config({})
@@ -207,7 +208,11 @@ export class ExtensionManager {
     resource.meta.push({name: 'path', value: uri.local(), type: 'str'})
     for (const extension of extensions) {
       await extension.run('read', uri.local(), resource)
+      // this._pipeline.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [resource.toJson()])
     }
+    CivetDatabase.addFiles([resource.toJson()])
+    CivetDatabase.addMeta([resource.id], {name: 'thumbnail', value: resource.thumbnail, type: 'bin'})
+    CivetDatabase.addMeta([resource.id], {name: 'color', value: resource.color, type: 'color', query: true})
     return Result.success(resource)
   }
   

@@ -186,6 +186,7 @@ export default {
       }
     },
     async onImageDbClick(image) {
+      console.info('onImageDbClick')
       let imageInfo = await this.$ipcRenderer.get(Service.GET_IMAGE_INFO, image.id)
       if (imageInfo !== null) {
         imageInfo['id'] = image.id

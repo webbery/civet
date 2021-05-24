@@ -1,9 +1,18 @@
-var dts = require('dts-bundle');
+const parser = require('@babel/parser')
+const traverse = require('@babel/traverse').default
+const generator = require('@babel/generator').default
+const t = require('@babel/types')
 
-dts.bundle({
-	name: 'civet',
-    main: 'src/public/civet.ts',
-    removeSource: true
-});
-
-console.info('bundle finish')
+// corrected dependency path to root node_modules directory
+module.exports = function(source){
+  const ast = parser.parse(source,{ sourceType: 'module'})
+  traverse(ast, {
+    CallExpression(path){
+      if(t.isMemberExpression(path.node.callee) && t.isIdentifier(path.node.callee.object, {name: "console"})){
+        path.remove()
+      }
+    }
+  })
+  const output = generator(ast, {}, source);
+  return output.code
+}

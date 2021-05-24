@@ -13,11 +13,11 @@
     "preview"
   ],
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack --config .electron-vue/webpack.extension.config.js && node .electron-vue/build.js && electron-builder -p onTag",
+    "build": "cross-env NODE_ENV=production node extensions/build.js && node .electron-vue/build.js && electron-builder -p onTag",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:extend": "node .electron-vue/extension.js",
-    "dev": "webpack --config .electron-vue/webpack.extension.config.js && npm run pack:dev_woker && node .electron-vue/dev-runner.js",
+    "dev": "node extensions/build.js && npm run pack:dev_woker && node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && mocha test/e2e",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter src test",
     "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix src test",
@@ -106,7 +106,7 @@
     "extraResources": [
       {
         "from": "./extensions-dist",
-        "to": "./extensions",
+        "to": "./app.asar.unpacked",
         "filter": [
           "**/*"
         ]
@@ -114,7 +114,7 @@
     ]
   },
   "dependencies": {
-    "civetkern": "^0.2.6",
+    "civetkern": "^0.3.1",
     "download": "^8.0.0",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
@@ -122,8 +122,6 @@
     "import-html-entry": "^1.11.1",
     "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",
-    "sharp": "^0.28.2",
-    "tinycolor2": "^1.4.2",
     "uuid": "^8.3.1",
     "v-hotkey": "^0.9.0",
     "vue": "^2.6.12",
@@ -137,6 +135,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.6.0",
+    "@babel/generator": "^7.14.3",
+    "@babel/parser": "^7.14.3",
     "@babel/plugin-proposal-class-properties": "^7.6.0",
     "@babel/plugin-proposal-decorators": "^7.6.0",
     "@babel/plugin-proposal-do-expressions": "^7.6.0",
@@ -159,6 +159,8 @@
     "@babel/preset-env": "^7.6.0",
     "@babel/register": "^7.6.0",
     "@babel/runtime-corejs2": "^7.11.2",
+    "@babel/traverse": "^7.14.2",
+    "@babel/types": "^7.14.2",
     "@vue/babel-plugin-transform-vue-jsx": "^1.2.1",
     "ajv": "^6.5.0",
     "babel-eslint": "^10.1.0",
