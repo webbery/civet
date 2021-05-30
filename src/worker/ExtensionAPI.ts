@@ -1,7 +1,9 @@
-import { Resource } from '@/../public/Resource'
+import { Resource, readThumbnail, SerializeAccessor } from '@/../public/Resource'
 import { MessagePipeline } from './MessageTransfer'
 import { CivetDatabase } from './Kernel'
+import { ReplyType } from './Message'
 
+const _accessor: SerializeAccessor = new SerializeAccessor();
 export class APIFactory {
   constructor() {}
 
@@ -25,6 +27,14 @@ export class APIFactory {
           case 'thumbnail':
             // console.info('type:', typeof value, value)
             // CivetDatabase.addMeta([target.id], {name: key, value: value, type: 'bin'})
+            const thumbnail = readThumbnail(value)
+            // console.info('thumbnail', target)
+            // let property:IProperty;
+            // target.addMeta('thumbnail', thumbnail, 'undefined')
+            const result = Reflect.set(target, key, thumbnail)
+            console.info('thumbnail', target)
+            pipeline.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, target.toJson(_accessor))
+            return result
           default:
             break;
         }
@@ -34,4 +44,8 @@ export class APIFactory {
     let proxy = new Proxy(resource, handler)
     return proxy
   }
+}
+
+export function defineAPI(factory: APIFactory) {
+  // const node_module = <any>require.__$__nodeRequire('module');
 }

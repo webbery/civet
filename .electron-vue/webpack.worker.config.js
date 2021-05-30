@@ -11,6 +11,7 @@ const TerserPlugin = require("terser-webpack-plugin")
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 
 /**
@@ -115,7 +116,7 @@ let workerConfig = {
         }
       },
       {
-        test: /\.(tsx|ts)(\?.*)?$/,
+        test: /\.(tsx|ts|d.ts)(\?.*)?$/,
         use: {
           loader: 'ts-loader'
         },
@@ -128,6 +129,7 @@ let workerConfig = {
     __filename: process.env.NODE_ENV !== 'production'
   },
   plugins: [
+    new TsconfigPathsPlugin({ configFile: path.resolve(__dirname, '../src/tsconfig.json')}),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({filename: 'styles.css'}),
     new HtmlWebpackPlugin({
@@ -166,9 +168,11 @@ let workerConfig = {
   resolve: {
     alias: {
       '@': path.join(__dirname, '../src/worker'),
-      'vue$': 'vue/dist/vue.esm.js'
+      'vue$': 'vue/dist/vue.esm.js',
+      '*': path.join(__dirname, '../src')
     },
-    extensions: ['.js', '.vue', '.json', '.css', '.node', '.ts', '.tsx']
+    extensions: ['.js', '.vue', '.json', '.css', '.node', '.ts', '.tsx', 'd.ts'],
+    modules: ['node_modules', path.resolve(__dirname, '../src')]
   },
   target: 'electron-renderer'
 }

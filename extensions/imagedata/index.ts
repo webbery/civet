@@ -1,23 +1,41 @@
-
+import { IResource, IProperty, PropertyType } from 'civet'
 class DataParser{
   constructor() {
   }
 
-  async parse(filepath: string, file: any) {
+  getNumberProperty(file: IResource, name: string): number {
+    const prop = file.getProperty(name)
+    if (!prop) {
+      return 0;
+    }
+    return prop.value
+  }
+
+  async parse(filepath: string, file: IResource) {
     const Sharp = require('sharp')
     try {
       console.info('sharp:', Sharp)
       const image = Sharp(filepath)
       let scale = 1
-      if (file.width > 200) {
-        scale = 200.0 / file.width
+      const w = this.getNumberProperty(file, 'width')
+      if (w > 200) {
+        scale = 200.0 / w
       }
-      const width = Math.round(file.width * scale)
-      const height = Math.round(file.height * scale)
+      const h = this.getNumberProperty(file, 'height')
+      const width = Math.round(w * scale)
+      const height = Math.round(h * scale)
       const data = await image.resize(width, height)
         .jpeg().toBuffer()
       // console.info('ThumbnailParser:', data)
-      file.addMeta('thumbnail', data)
+      file.putProperty({
+        name: 'thumbnail',
+        value: data,
+        type: PropertyType.Binary,
+        query: false,
+        store: true
+      })
+      // update preview
+      file.thumbnail = data
       // console.info('thumbnail:', typeof data)
       // storage.addMeta([file.id], {name: 'thumbnail', value: file.thumbnail, type: 'bin'})
       file.raw = await image.resize(width, height)
@@ -33,7 +51,7 @@ class DataParser{
 export function activate() {
   const dataParser = new DataParser()
   return {
-    read: (filepath: string, resource: any) => {
+    read: (filepath: string, resource: IResource) => {
       return dataParser.parse(filepath, resource)
     }
   }

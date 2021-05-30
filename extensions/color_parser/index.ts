@@ -1,3 +1,4 @@
+import { IResource, IProperty, PropertyType } from 'civet'
 const util = require('util')
 const Kmeans = require('node-kmeans')
 const kmeans = util.promisify(Kmeans.clusterize)
@@ -6,7 +7,7 @@ class ColorParser {
   private _plate: number[] = [];
 
   constructor() {}
-  async parse(filepath: string, file: any) {
+  async parse(filepath: string, file: IResource) {
     if (!!file.raw) {
       const count = file.raw.length / 3;
       let counter = new Map<number, number>()
@@ -33,7 +34,13 @@ class ColorParser {
       const centroid = centers.map((item: any, idx: any, arr:any) => {
         return tinyColor({r: item.centroid[0], g: item.centroid[1], b: item.centroid[2]}).toHexString()
       })
-      file.addMeta('color', centroid, 'color')
+      file.putProperty({
+        name: 'color',
+        value: centroid,
+        type: PropertyType.String,
+        query: true,
+        store: true
+      })
     }
     return true;
   }
@@ -92,7 +99,7 @@ class ColorParser {
 export function activate() {
   const metaParser = new ColorParser()
   return {
-    read: async (filepath: string, resource: any) => {
+    read: async (filepath: string, resource: IResource) => {
       return await metaParser.parse(filepath, resource)
     }
   }

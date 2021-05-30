@@ -1,19 +1,19 @@
-// const parser = require('@babel/parser')
-// const traverse = require('@babel/traverse').default
-// const generator = require('@babel/generator').default
-// const t = require('@babel/types')
-// dependency resolver
-// let DependencyResolver = function (AST) {}
-
-// module.exports = function(source){
-//   const ast = parser.parse(source,{ sourceType: 'module'})
-//   traverse(ast, {
-//     CallExpression(path){ 
-//       if(t.isMemberExpression(path.node.callee) && t.isIdentifier(path.node.callee.object, {name: "console"})){
-//         path.remove()
-//       }
-//     }
-//   })
-//   const output = generator(ast, {}, source);
-//   return output.code
-// }
+export function makeRequireFunction(mod) {
+  var Module = mod.constructor
+  var $require = function require(path) {
+    try {
+      console.info('require:', path, 'mod:', mod)
+      return mod.require(path)
+    } finally {
+      // nothing
+    }
+  }
+  $require.resolve = function resolve(request, options) {
+    console.info('request:', request, 'option:', options)
+    return Module._resolveFilename(request, mod, false, options)
+  }
+  $require.main = process.mainModule
+  $require.extensions = Module._extensions
+  $require.cache = Module._cache
+  return $require
+}

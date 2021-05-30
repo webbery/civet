@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { ExtensionActiveType, ExtensionService } from './ExtensionService'
 import { MessagePipeline } from './MessageTransfer'
-import { Resource } from '@/../public/Resource'
+import { Resource, StorageAccessor } from '@/../public/Resource'
 import { ResourcePath } from './common/ResourcePath'
 import { Result } from './common/Result'
 import { config } from '@/../public/CivetConfig'
@@ -10,6 +10,8 @@ import { APIFactory } from './ExtensionAPI'
 import { isFileExist, runCommand } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
+import { PropertyType } from '../public/ExtensionHostType'
+// import * as vscode from 'vscode'
 // const loader = require('./Loader')
 
 // loader.config({})
@@ -24,21 +26,21 @@ export class ExtensionManager {
     this._pipeline = pipeline
     const dbname = config.getCurrentDB()
     const resource = config.getResourceByName(dbname!)
-    this._extensionsOfConfig = (!resource || resource['extensions'] === undefined)?[]:resource['extensions']
+    this._extensionsOfConfig = (!resource || resource['extensions'] === undefined) ? [] : resource['extensions']
 
     let extensionPath = path.resolve('.') + '/extensions'
     if (!fs.existsSync(extensionPath)) return
     let exts = fs.readdirSync(extensionPath)
     // remove files
     for (let idx = exts.length - 1; idx >= 0; --idx) {
-      console.info(exts[idx])
+      // console.info(exts[idx])
       if (fs.statSync(extensionPath + '/' + exts[idx]).isDirectory() && this._isExtension(exts[idx])) continue
       exts.splice(idx, 1)
     }
-    console.info('-------', exts)
+    // console.info('-------', exts)
     this._initServices(extensionPath, exts, pipeline)
     this._buildGraph()
-    console.info('graph:', this._actives)
+    // console.info('graph:', this._actives)
     // npm extension
     // this._extensionPath = (process.env.NODE_ENV !== 'development'?'./resources/app.asar.unpacked':'./build/win-unpacked/resources/app.asar.unpacked')
     this._initExternalExtension()
@@ -69,7 +71,7 @@ export class ExtensionManager {
       let visited = {}
       for (let name of this._extensionsOfConfig) {
         this._initService(root, name, pipeline)
-        visited[name]=name
+        visited[name] = name
       }
       // clean service that is not in the config
       for (let idx = this._extensions.length; idx >= 0; ++idx) {
@@ -112,7 +114,7 @@ export class ExtensionManager {
     for (let idx = 0, len = extServs.length; idx < len; ++idx) {
       let service = extServs[idx]
       if (!service.dependency) continue
-      for (let pos = 0; pos < len; ++ pos) {
+      for (let pos = 0; pos < len; ++pos) {
         if (service.dependency === extServs[pos].name) {
           extServs[pos].addDependency(service)
           break
@@ -144,7 +146,7 @@ export class ExtensionManager {
     //   const pkg = fs.readFileSync(extConfig)
     //   const exts = pkg['dependencies']
     //   for (let ext of exts) {
-        
+
     //   }
     // }
   }
@@ -181,8 +183,8 @@ export class ExtensionManager {
     }
   }
 
-  private _initViewExtension(service: ExtensionService) {}
-  private _initStorageExtension(service: ExtensionService) {}
+  private _initViewExtension(service: ExtensionService) { }
+  private _initStorageExtension(service: ExtensionService) { }
 
   switchResourceDB(dbname: string) {
     const resource = config.getResourceByName(dbname)
@@ -203,19 +205,21 @@ export class ExtensionManager {
       resource.remote = uri.remote()
     }
     resource.filetype = extname
-    resource.meta.push({name: 'type', value: extname, type: 'str'})
-    resource.meta.push({name: 'filename', value: f.base, type: 'str'})
-    resource.meta.push({name: 'path', value: uri.local(), type: 'str'})
+    resource.putProperty({ name: 'type', value: extname, type: PropertyType.String, query: true, store: true })
+    resource.putProperty({ name: 'filename', value: f.base, type: PropertyType.String, query: true, store: true })
+    resource.putProperty({ name: 'path', value: uri.local(), type: PropertyType.String, query: false, store: true })
     for (const extension of extensions) {
       await extension.run('read', uri.local(), resource)
       // this._pipeline.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [resource.toJson()])
     }
-    CivetDatabase.addFiles([resource.toJson()])
-    CivetDatabase.addMeta([resource.id], {name: 'thumbnail', value: resource.thumbnail, type: 'bin'})
-    CivetDatabase.addMeta([resource.id], {name: 'color', value: resource.color, type: 'color', query: true})
+    console.info('add files:', resource)
+    const accessor = new StorageAccessor()
+    CivetDatabase.addFiles([resource.toJson(accessor)])
+    CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: resource.getPropertyValue('thumbnail'), type: 'bin' })
+    CivetDatabase.addMeta([resource.id], { name: 'color', value: resource.getPropertyValue('color'), type: 'color', query: true })
     return Result.success(resource)
   }
-  
+
   onPropertyView(resource: Resource): string[] | Result<string, string> {
     const extensions = this._actives.get('property')
     if (!extensions || extensions.length === 0) return Result.failure('empty extensions')

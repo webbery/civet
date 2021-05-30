@@ -6,8 +6,10 @@ import Vue from 'vue'
 import { Cache } from './CacheInstance'
 import * as Assist from './CacheAssist'
 import { config } from '@/../public/CivetConfig'
+// import * as civet from 'civet'
 
 // const maxCacheSize = 40 + 20 + 10
+// console.info(civet.PropertyType.String)
 
 const state = {
   resources: [],

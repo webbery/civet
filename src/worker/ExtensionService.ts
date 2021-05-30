@@ -3,8 +3,8 @@ import path from 'path'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { createDecorator } from './ServiceDecorator'
 import { Result } from './common/Result'
-// import { civet } from '@/../public/civet'
 import { getAbsolutePath } from '@/../public/Utility'
+import { ExtensionModule } from './api/ExtensionRequire'
 
 // const Module = require('module');
 // const original = Module.prototype.require;
@@ -127,10 +127,10 @@ export class ExtensionService {
       const entryPath = this._package.main
       if (!fs.existsSync(entryPath)) return Result.failure(`file not exist: ${entryPath}`)
       const content = fs.readFileSync(entryPath, 'utf-8')
-      const Module = require('module')
-      const m = new Module('', module.parent)
-      m.filename = this._package.name
-      m._compile(content, '')
+      // const Module = require('module')
+      const m = new ExtensionModule('', module.parent)
+      // m.filename = this._package.name
+      m._compile(content, this._package.name)
       console.info(m.exports)
       this._instance = m.exports.activate()
     }

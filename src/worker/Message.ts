@@ -33,6 +33,7 @@ export class Message {
 }
 
 export interface IMessagePipeline {
+  reply: any;
   post: any;
 }
 

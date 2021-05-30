@@ -32,6 +32,7 @@ class Timer {
   export class MessagePipeline implements IMessagePipeline {
     threshod: number = 200;
     messageQueue: Map<string, Message> = new Map<string, Message>();
+    VIPQueue: any[] = [];
     processor: Map<string, any> = new Map<string, any>();
     constructor(threshod: number, processor: Map<string, any>) {
       this.threshod = threshod
@@ -50,10 +51,10 @@ class Timer {
         msg.type = reply.type
         msg.msg = reply.data
         msg.tick = 0
-        this.post(msg)
+        this.reply(msg)
       })
     }
-    post(msg: Message) {
+    reply(msg: Message) {
       // if same type exist but id is different, remove smaller id message.
       for (let k of this.messageQueue.keys()) {
         const [mid, type] = this.unzip(k)
@@ -98,12 +99,35 @@ class Timer {
         this.messageQueue.clear()
       }, 200);
     }
-    // post() {}
+    post(type: string, message: any) {
+      this.VIPQueue.push({type: type, data: [message]})
+      timer.start(() => {
+        if (this.VIPQueue.length === 0) {
+          timer.stop();
+          return;
+        }
+        this.sendVIP(40);
+      }, 200)
+    }
     error(msg: string|null) {
       ipcRenderer.send('message-from-worker', { type: ReplyType.INFOM_ERROR_MESSAGE, data: msg })
     }
     regist(msgType: string, msgFunc: IMessageCallback, pointer: any) {
       this.processor.set(msgType, [msgFunc, pointer]);
+    }
+
+    private sendVIP(count: number) {
+      let len = Math.min(this.VIPQueue.length, count)
+      let msg = new Message()
+      msg.id = 0
+      msg.tick = 0
+      for (let idx = 0; idx < len; ++idx) {
+        console.info('message data:', this.VIPQueue[idx].data)
+        msg.type = this.VIPQueue[idx].type
+        msg.msg = this.VIPQueue[idx].data
+        ipcRenderer.send('message-from-worker', { type: this.VIPQueue[idx].type, data: msg })
+      }
+      this.VIPQueue.splice(0, len)
     }
     private indentify(id: number, type: string): string {
       return type + ',' + id;

@@ -2,37 +2,18 @@ import fs from 'fs'
 import { MessagePipeline } from './MessageTransfer'
 import JString from '../public/String'
 import { ReplyType, Message } from './Message'
-import { Resource } from '../public/Resource'
+import { Resource, readThumbnail, SerializeAccessor } from '../public/Resource'
 import { CivetDatabase } from './Kernel'
 import { ResourcePath } from './common/ResourcePath'
 import { config } from '../public/CivetConfig'
 import { ResourceObserver } from './ResourceObserver'
+import { PropertyType } from '../public/ExtensionHostType'
 
 let isStart: boolean = false;
 function updateStatus(status: any) {
   if (isStart === false) {
     window['eventBus'].$emit('status', status)
   }
-}
-
-function readThumbnail(thumbnail: any) {
-  return 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
-  // return new Promise(function (resolve, reject) {
-    // console.info('blob', thumbnail)
-    // let blob = new Blob(thumbnail, { type: 'image/jpeg' })
-    // let reader = new FileReader()
-    // reader.onload = function(e) {
-    //   if (!e || !e.target) {
-    //     reject('load empty');
-    //     return
-    //   }
-    //   console.info('image preview', e.target.result)
-    //   resolve(thumbnail)
-    //   // resolve(e.target.result)
-    // }
-    // reader.readAsDataURL(blob)
-    // resolve(thumbnail)
-  // })
 }
 
 export class ResourceService{
@@ -104,7 +85,7 @@ export class ResourceService{
     for (const img of imgs) {
       let resource = new Resource(img)
       const thumbnail = readThumbnail(resource.thumbnail)
-      resource.setMeta('thumbnail', thumbnail)
+      resource.putProperty({name: 'thumbnail', value: thumbnail, type: PropertyType.Binary, query: false, store: true})
       images.push(resource)
     }
     return {type: ReplyType.REPLY_IMAGES_INFO, data: images}
@@ -243,15 +224,13 @@ export class ResourceService{
       console.info(result)
       if (result.isSuccess()) {
         let resource = <Resource>result.value
-        console.info('preview', resource.thumbnail)
-        const thumbnail = readThumbnail(resource.thumbnail)
-        resource.setMeta('thumbnail', thumbnail)
         let msg = new Message()
         msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
-        msg.msg = [resource.toJson()]
+        const accessor = new SerializeAccessor()
+        msg.msg = [resource.toJson(accessor)]
         msg.tick = 0
         msg.id = msgid
-        this.pipeline.post(msg)
+        this.pipeline.reply(msg)
       }
     }
   }

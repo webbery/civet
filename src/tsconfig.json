@@ -1,27 +1,32 @@
 {
   "compilerOptions": {
-    // 与 Vue 的浏览器支持保持一致
     "target": "es6",
-    // 这可以对 `this` 上的数据 property 进行更严格的推断
     "strict": true,
-    // 如果使用 webpack 2+ 或 rollup，可以利用 tree-shake:
     "module": "es6",
     "moduleResolution": "node",
-    // 启用装饰器模式
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true,
     "suppressImplicitAnyIndexErrors": true,
     "noImplicitThis": true,
     "sourceMap": true,
+    "noImplicitReturns": true,
+		"forceConsistentCasingInFileNames": true,
+		"preserveConstEnums": true,
     "allowJs": true,
-    // 
+    "esModuleInterop": true,
+    "strictPropertyInitialization": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/public/*", "src/worker/service/*", "src/renderer/*"]
-    }
+      "civet": ["./civet.d.ts"],
+    },
+    "types": ["node"],
+    "typeRoots": [
+      "./types",
+      "./typings",
+      "node_modules/@types"
+    ]
   },
-  "include": ["src/public/*.ts", "src/worker/*.ts", "src/renderer/*.ts"],
   "exclude": [
     "node_modules"
   ]

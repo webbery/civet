@@ -1,5 +1,4 @@
 export class Maybe<T> {
-  private _value: T|null;
   private constructor(value: T|null){}
 
   static some<T>(value: T){

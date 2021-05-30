@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "strict": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noImplicitThis": true,
+    "sourceMap": true,
+    "allowJs": true
+  }
+}
