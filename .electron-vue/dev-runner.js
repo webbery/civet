@@ -13,7 +13,7 @@ const webpackHotMiddleware = require('webpack-hot-middleware')
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const workerConfig = require('./webpack.worker.config')
-// const extensionConfig = require('./webpack.extension.config')
+const installInternalExtension = require('./extension')
 
 let electronProcess = null
 let manualRestart = false
@@ -82,46 +82,12 @@ function startRenderer () {
   })
 }
 
-// function startExtension() {
-//   return new Promise((resolve, reject) => {
-//     extensionConfig.entry.renderer = [].concat(extensionConfig.entry.renderer)
-//     extensionConfig.mode = 'development'
-//     const compiler = webpack(extensionConfig)
-//     let extensionMiddleware = webpackHotMiddleware(compiler, {
-//       log: false,
-//       heartbeat: 2500
-//     })
-
-//     compiler.hooks.compilation.tap('compilation', compilation => {
-//       compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync('html-webpack-plugin-after-emit', (data, cb) => {
-//         extensionMiddleware.publish({ action: 'reload' })
-//         cb()
-//       })
-//     })
-
-//     compiler.hooks.done.tap('done', stats => {
-//       logStats('extension', stats)
-//     })
-
-//     console.info('[[EXTENSION[[', path.join(__dirname, '../'))
-//     const server = new WebpackDevServer(
-//       compiler,
-//       {
-//         contentBase: path.join(__dirname, '../'),
-//         quiet: true,
-//         before (app, ctx) {
-//           app.use(extensionMiddleware)
-//           ctx.middleware.waitUntilValid(() => {
-//             resolve()
-//           })
-//         }
-//       }
-//     )
-
-//     hotMiddleware.push(extensionMiddleware)
-//     server.listen(9081)
-//   })
-// }
+function startExtension() {
+  return new Promise((resolve, reject) => {
+    installInternalExtension()
+    resolve()
+  })
+}
 
 function startWorker () {
   return new Promise((resolve, reject) => {
@@ -268,8 +234,8 @@ function init () {
   greeting()
 
   Promise.all([
+    startExtension(),
     startRenderer(), startWorker(), 
-    // startExtension(),
     startMain()])
     .then(() => {
       startElectron()
