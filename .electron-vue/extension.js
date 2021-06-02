@@ -13,7 +13,7 @@ const inputDir = 'extensions'
 const outputDir = 'extensions'
 let installPackages = {}
 let extensions = []
-const exclude = ['node_modules', '*.ts', 'build.js', 'package-lock.json', 'shared.tsconfig.json']
+let excludeNames = ['shared.tsconfig.json', 'build.js', '.DS_Store', 'node_modules', 'package-lock.json', 'package.json']
 
 function runCommand(cmd) {
   // console.info(process.cwd(), __dirname)
@@ -75,7 +75,6 @@ function copyDir(src, dist, excludes, callback) {
   }
 }
 
-let excludeNames = ['shared.tsconfig.json', 'build.js', '.DS_Store', 'node_modules', 'package-lock.json', 'package.json']
 function isExclude(extension) {
   for (let name of excludeNames) {
     if (name === extension) return true
@@ -92,7 +91,7 @@ function parseExtensions() {
     for (let name in jsn['dependencies']) {
       try {
         let child = execSync(`npm ls ${name}`)
-        console.info(child.toString())
+        // console.info(child.toString())
         if (child.toString() === 'false') {
           installPackages[name] = jsn['dependencies'][name]
         }
@@ -150,7 +149,7 @@ function copyExtensions() {
     // copyDir(source, dest, [])
   } else {
     const dest = path.join(__dirname, '../extension-dist')
-    copyDir(source, dest, exclude)
+    copyDir(source, dest, excludeNames)
   }
 }
 
