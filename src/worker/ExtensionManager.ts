@@ -214,7 +214,8 @@ export class ExtensionManager {
     }
     console.info('add files:', resource)
     const accessor = new StorageAccessor()
-    CivetDatabase.addFiles([resource.toJson(accessor)])
+    const store = resource.toJson(accessor)
+    CivetDatabase.addFiles([store])
     CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: resource.getPropertyValue('thumbnail'), type: 'bin' })
     CivetDatabase.addMeta([resource.id], { name: 'color', value: resource.getPropertyValue('color'), type: 'color', query: true })
     return Result.success(resource)

@@ -114,6 +114,7 @@
     ]
   },
   "dependencies": {
+    "choices.js": "^9.0.1",
     "civetkern": "^0.3.1",
     "download": "^8.0.0",
     "electron-updater": "^4.3.5",

@@ -34,18 +34,3 @@ export class ExtensionModule extends Module {
     return global.require(path)
   }
 }
-
-export class ExtensionRequire{
-  main: any;
-  extensions: any;
-  cache: any;
-  paths: any;
-
-  constructor(path: string) {
-    this.paths = path
-  }
-
-  resolve(request: any, options: any) {
-    // return module.constructor._resolveFilename(request, mod, false, options);
-  }
-}

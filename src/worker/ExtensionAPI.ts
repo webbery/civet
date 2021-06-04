@@ -32,8 +32,9 @@ export class APIFactory {
             // let property:IProperty;
             // target.addMeta('thumbnail', thumbnail, 'undefined')
             const result = Reflect.set(target, key, thumbnail)
-            console.info('thumbnail', target)
-            pipeline.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, target.toJson(_accessor))
+            // console.info('thumbnail', target)
+            const data = target.toJson(_accessor)
+            pipeline.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, data)
             return result
           default:
             break;

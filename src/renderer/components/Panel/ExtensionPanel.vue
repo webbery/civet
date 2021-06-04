@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onExtentionSearch()">
+    <el-input placeholder="请输入搜索内容" v-model="keyword"  size="mini" @keyup.enter.native="onExtentionSearch()">
       <el-button slot="append" icon="el-icon-search" size="mini" round @click="onExtentionSearch()"></el-button>
     </el-input>
     <table rules="none" cellspacing=0 style="table-layout: fixed;">
@@ -53,7 +53,7 @@ export default {
       if (this.keyword !== '') {
         kw = this.keyword
       }
-      const fetchURL = 'https://api.npms.io/v2/search?q=scope:civet+keyword:' + kw
+      const fetchURL = 'https://api.npms.io/v2/search?q=scope:civet'// + kw
       // const fetchURL = 'https://api.npms.io/v2/search?q=scope:civet-ext'
       const { net } = require('electron').remote
       const request = net.request(fetchURL)

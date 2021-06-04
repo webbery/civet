@@ -19,3 +19,42 @@ jobs:
           npm run build
         env:
           CI: true
+      - name: upload
+        id: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac-build
+          path: ./build/Civet-0.1.4.dmg
+  publish:
+    runs-on: macos-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags')
+    steps:
+      - name: extract version
+        id: version
+        run: |
+          echo "##[set-output name=version;]${GITHUB_REF#$"refs/tags/v"}"
+          echo "##[set-output name=version_tag;]$GITHUB_REPOSITORY:${GITHUB_REF#$"refs/tags/v"}"
+          echo "##[set-output name=latest_tag;]$GITHUB_REPOSITORY:latest"
+      - name: prepare env
+        run: |
+          echo VERSION_TAG=$(echo ${{ steps.version.outputs.version_tag }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+          echo LASTEST_TAG=$(echo ${{ steps.version.outputs.latest_tag  }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+      - name: get Release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: view cache
+        uses: actions/download-artifact@v2
+        with:
+          name: mac-build
+          path: ~/download/
+      - name: upload mac artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CI: true
+          FILE: /Users/runner/download/Civet-${{ steps.version.outputs.version }}.dmg
+        run: |
+          curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE "https://uploads.github.com/repos/webbery/civet/releases/${{ steps.get_release.outputs.id }}/assets?name=$(basename $FILE)"
+

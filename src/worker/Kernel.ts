@@ -81,10 +81,12 @@ export class CivetDatabase {
   }
   static addFiles(src: any) {
     Initialze()
+    console.info('add Files:', src)
     return _instance.addFiles(src)
   }
   static addMeta(filesID: number[], meta: any) {
     Initialze()
+    console.info('add Meta:', filesID, meta)
     return _instance.addMeta({id: filesID, meta: meta})
   }
   static removeFiles(filesID: number[]) {

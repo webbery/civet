@@ -1,6 +1,6 @@
 <template>
   <el-row >
-      <el-col :span="4">
+      <el-col :span="2">
         <el-dropdown trigger="click" :hide-on-click="false">
           <el-button size="mini" round>{{currentResource}}<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown" style="width: 200px">
@@ -9,13 +9,10 @@
         </el-dropdown>
         <!-- <el-button @click="onClickImport" size="mini" round>导入</el-button> -->
         </el-col>
-    <el-col :span="5" class="custom">
+    <el-col :span="2" class="custom">
       <el-page-header @back="goBack" :content="viewDesc" :style="[disabled?style:'']"></el-page-header>
     </el-col>
-    <el-col :span="9" class="custom">
-      <component :is="comName"></component>
-    </el-col>
-    <el-col :span="1">
+    <!-- <el-col :span="1">
       <el-dropdown size="mini" trigger="click" @command="onQueryKindChange">
         <span class="query-kind">
           {{queryKinds[queryIdx].name}}<i class="el-icon-arrow-down el-icon--right"></i>
@@ -26,11 +23,22 @@
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-    </el-col>
-    <el-col :span="5">
-      <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onSearch()">
+    </el-col> -->
+    <el-col :span="14">
+      <div class="input-with-select el-input el-input--mini el-input-group el-input-group--append">
+        <input type="text" id="keywords" autocomplete="off" placeholder="请输入搜索内容" class="el-input__inner" value="1,2,3"/>
+        <div class="el-input-group__append">
+          <button type="button" class="el-button el-button--default el-button--mini is-round" @click="onSearch()">
+            <i class="el-icon-search"></i>
+          </button>
+        </div>
+      </div>
+      <!-- <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onSearch()">
         <el-button slot="append" icon="el-icon-search" size="mini" round @click="onSearch()"></el-button>
-      </el-input>
+      </el-input> -->
+    </el-col>
+    <el-col :span="4" class="custom">
+      <component :is="comName"></component>
     </el-col>
   </el-row>
 </template>
@@ -44,6 +52,8 @@ import Service from '@/components/utils/Service'
 import PageMenu from '@/components/Menu/PageMenu'
 import { mapState } from 'vuex'
 // import { config } from '@/../public/CivetConfig'
+import Choices from 'choices.js'
+import '@/assets/choices.css'
 
 export default {
   name: 'header-bar',
@@ -51,7 +61,7 @@ export default {
     return {
       comName: ViewFilter,
       scaleValue: 20,
-      keyword: '',
+      keyword: ['preset-1', 'preset-2'],
       recentResources: [],
       viewDesc: '全部',
       disabled: true,
@@ -64,7 +74,8 @@ export default {
         {name: '所有', command: 'all'},
         {name: '标签', command: 'tag'},
         {name: '分类', command: 'class'}
-      ]
+      ],
+      choices: null
     }
   },
   components: {
@@ -82,6 +93,19 @@ export default {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
     bus.on(bus.EVENT_INIT_RESOURCE_DB, this.onInitResourceDB)
     // this.recentResources.push(resource.name)
+    const element = document.querySelector('#keywords')
+    this.choices = new Choices(element, {
+      delimiter: ',',
+      editItems: true,
+      // addItems: true,
+      removeItemButton: true
+    })
+    // this.choices.setChoices([
+    //   { value: 'One', label: 'Label One', disabled: true },
+    //   { value: 'Two', label: 'Label Two', selected: true },
+    //   { value: 'Three', label: 'Label Three' }
+    // ], 'value', 'label', false
+    // )
   },
   methods: {
     getCurrentIndex() {
@@ -189,6 +213,9 @@ export default {
         default: break
       }
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})
+    },
+    addKeyword(value) {
+      console.info('addKeyword:', value)
     }
   }
 }
@@ -214,8 +241,9 @@ export default {
 .el-select .el-input {
   width: 80px;
 }
-.input-with-select .el-input-group__prepend {
-  background-color: #fff;
+.input-with-select {
+  z-index: 99;
+  transform: translateY(-4px);
 }
 .el-page-header__left {
   display:inline;
