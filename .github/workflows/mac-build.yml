@@ -25,14 +25,32 @@ jobs:
     if: startsWith(github.ref, 'refs/tags')
     steps:
       - name: extract version
+        id: version
         run: |
           echo "##[set-output name=version;]VERSION=${GITHUB_REF#$"refs/tags/v"}"
           echo "##[set-output name=version_tag;]$GITHUB_REPOSITORY:${GITHUB_REF#$"refs/tags/v"}"
           echo "##[set-output name=latest_tag;]$GITHUB_REPOSITORY:latest"
-      - name: prepare names
+          echo "::set-output name=version::$(./bin/azblogfilter --version)"
+      - name: prepare env
         run: |
-          echo VERSION_TAG=$(echo ${{ steps.version_step.outputs.version_tag }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-          echo LASTEST_TAG=$(echo ${{ steps.version_step.outputs.latest_tag  }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-      - uses: release-drafter/release-drafter@v5
+          echo VERSION_TAG=$(echo ${{ steps.version.outputs.version_tag }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+          echo LASTEST_TAG=$(echo ${{ steps.version.outputs.latest_tag  }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+      - name: prepare release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: Civet-v${{ steps.version.outputs.version_tag }}
+          tag_name: ${{ github.ref }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: upload mac artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/Civet-0.1.4.dmg
+          asset_name: Civet-0.1.4.dmg
+          asset_content_type: application/octet-stream
