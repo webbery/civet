@@ -25,4 +25,4 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: true
-          body_path: /Users/runner/work/civet/civet/release.md
+          body_path: /Users/runner/work/civet/release.md
