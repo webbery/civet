@@ -63,5 +63,5 @@ jobs:
           CI: true
           FILE: /Users/runner/download/Civet-0.1.4.dmg
         run: |
-          curl H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE "https://uploads.github.com/repos/webbery/civet/releases/42392443/assets?name=$(basename $FILE)"
+          curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE "https://uploads.github.com/repos/webbery/civet/releases/42392443/assets?name=$(basename $FILE)"
 
