@@ -40,17 +40,25 @@ jobs:
         run: |
           echo VERSION_TAG=$(echo ${{ steps.version.outputs.version_tag }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
           echo LASTEST_TAG=$(echo ${{ steps.version.outputs.latest_tag  }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-      - name: prepare draft
-        uses: release-drafter/release-drafter@v5
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v
+          release_name: Release Draft
+          draft: true
+          prerelease: false
       - name: view cache
         uses: actions/download-artifact@v2
         with:
           name: mac-build
           path: ~/download/
       - name: Display structure of downloaded files
-        run: echo ${{ github.event.release.upload_url }}
+        run: |
+          echo ${{ name }}
+          echo ${{ label }}
         env:
           CI: true
       - name: upload mac artifact
