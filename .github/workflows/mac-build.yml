@@ -40,18 +40,11 @@ jobs:
         run: |
           echo VERSION_TAG=$(echo ${{ steps.version.outputs.version_tag }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
           echo LASTEST_TAG=$(echo ${{ steps.version.outputs.latest_tag  }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: get Release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: true
-          body: |
-            Changes in this Release
       - name: view cache
         uses: actions/download-artifact@v2
         with:
@@ -63,5 +56,5 @@ jobs:
           CI: true
           FILE: /Users/runner/download/Civet-0.1.4.dmg
         run: |
-          curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE "https://uploads.github.com/repos/webbery/civet/releases/42392443/assets?name=$(basename $FILE)"
+          curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE "https://uploads.github.com/repos/webbery/civet/releases/${{ steps.get_release.outputs.id }}/assets?name=$(basename $FILE)"
 
