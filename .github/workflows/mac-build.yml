@@ -19,14 +19,12 @@ jobs:
           npm run build
         env:
           CI: true
-      - name: cache
-        id: cache
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-mac-dmg
+      - name: upload
+        id: upload
+        uses: actions/upload-artifact@v2
         with:
-          path: ~/mac
-          key: Civet-0.1.4.dmg
+          name: mac-build
+          path: ./build/Civet-0.1.4.dmg
   release:
     runs-on: macos-latest
     needs: build
@@ -47,14 +45,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: view cache
-        run: |
-          ls ~/mac
+        uses: actions/download-artifact@v2
+        with:
+          mac-build
+      - name: Display structure of downloaded files
+        run: ls -R
       - name: upload mac artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: https://uploads.github.com/repos/webbery/civet/releases/42392443/assets
-          asset_path: ~/mac/Civet-0.1.4.dmg
+          asset_path: ./Civet-0.1.4.dmg
           asset_name: Civet-0.1.4.dmg
           asset_content_type: application/octet-stream
