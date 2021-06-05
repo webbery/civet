@@ -49,18 +49,12 @@ jobs:
           tag_name: v
           release_name: Release Draft
           draft: true
-          prerelease: false
+          prerelease: true
       - name: view cache
         uses: actions/download-artifact@v2
         with:
           name: mac-build
           path: ~/download/
-      - name: Display structure of downloaded files
-        run: |
-          echo ${{ name }}
-          echo ${{ label }}
-        env:
-          CI: true
       - name: upload mac artifact
         uses: actions/upload-release-asset@v1
         env:
