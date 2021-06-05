@@ -25,5 +25,4 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: true
-          body: |
-            Changes in this Release
+          body_path: ./release.md
