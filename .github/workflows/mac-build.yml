@@ -54,7 +54,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CI: true
-          FILE: /Users/runner/download/Civet-${GITHUB_REF#$"refs/tags/v"}.dmg
+          FILE: /Users/runner/download/Civet-${{ steps.version.outputs.version }}.dmg
         run: |
           curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE "https://uploads.github.com/repos/webbery/civet/releases/${{ steps.get_release.outputs.id }}/assets?name=$(basename $FILE)"
 
