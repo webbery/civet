@@ -25,7 +25,7 @@ jobs:
         with:
           name: mac-build
           path: ./build/Civet-0.1.4.dmg
-  release:
+  publish:
     runs-on: macos-latest
     needs: build
     if: startsWith(github.ref, 'refs/tags')
@@ -50,13 +50,16 @@ jobs:
           name: mac-build
           path: ~/download/
       - name: Display structure of downloaded files
-        run: ls -R ~/download
+        run: echo ${{ github.event.release.upload_url }}
+        env:
+          CI: true
       - name: upload mac artifact
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          CI: true
         with:
-          upload_url: ${{ github.event.release.upload_url }} # https://uploads.github.com/repos/webbery/civet/releases/42392443/assets
+          upload_url: https://uploads.github.com/repos/webbery/civet/releases/42392443/assets
           asset_path: ~/download/Civet.0.1.4.dmg
           asset_name: Civet-0.1.4.dmg
           asset_content_type: application/octet-stream
