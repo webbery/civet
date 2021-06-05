@@ -43,7 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: www.github.com/webbery/civet
-          asset_path: ./build/Civet-0.1.4.dmg
+          upload_url: https://uploads.github.com/repos/webbery/civet/releases/42392443/assets
+          asset_path: /Users/runner/work/civet/civet/build/Civet-0.1.4.dmg
           asset_name: Civet-0.1.4.dmg
           asset_content_type: application/octet-stream
