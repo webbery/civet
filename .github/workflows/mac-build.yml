@@ -48,6 +48,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: mac-build
+          path: ~/download/
       - name: Display structure of downloaded files
         run: ls -R
       - name: upload mac artifact
@@ -56,6 +57,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: https://uploads.github.com/repos/webbery/civet/releases/42392443/assets
-          asset_path: ./Civet-0.1.4.dmg
+          asset_path: ~/download/Civet-0.1.4.dmg
           asset_name: Civet-0.1.4.dmg
           asset_content_type: application/octet-stream
