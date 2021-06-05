@@ -35,7 +35,7 @@ jobs:
           echo VERSION_TAG=$(echo ${{ steps.version.outputs.version_tag }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
           echo LASTEST_TAG=$(echo ${{ steps.version.outputs.latest_tag  }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - name: prepare draft
-        uses: release-drafter/release-drafter@v1
+        uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: upload mac artifact
