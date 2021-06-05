@@ -30,7 +30,7 @@ jobs:
   release:
     runs-on: macos-latest
     needs: build
-    if: startsWith(github.ref, 'refs/tags') && steps.cache.outputs.cache-hit == 'true'
+    if: startsWith(github.ref, 'refs/tags')
     steps:
       - name: extract version
         id: version
