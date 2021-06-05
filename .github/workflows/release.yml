@@ -5,6 +5,8 @@ on:
     tags:
       - 'v*.*.*'
       - 'pre-v*.*.*'
+    branches:
+      - draft
 
 jobs:
   release:
