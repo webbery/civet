@@ -136,7 +136,7 @@ function copyModules() {
     console.info('develop mode')
     copyDir(source, dest, [])
   } else {
-    const dest = path.join(__dirname, '../extension-dist/node_modules')
+    const dest = path.join(__dirname, '../extensions-dist/node_modules')
     copyDir(source, dest, [])
   }
 }
@@ -148,7 +148,7 @@ function copyExtensions() {
     // console.info('develop mode')
     // copyDir(source, dest, [])
   } else {
-    const dest = path.join(__dirname, '../extension-dist')
+    const dest = path.join(__dirname, '../extensions-dist')
     copyDir(source, dest, excludeNames)
   }
 }

@@ -129,6 +129,20 @@ export class Resource implements IResource {
     return false
   }
 
+  public update(resource: Resource) {
+    console.info('update', resource)
+    const props = Object.getOwnPropertyNames(resource)
+    for (let prop of props) {
+      this._update(prop, resource[prop])
+    }
+    console.info('updated', this)
+  }
+
+  private _update(propname: string, value: any) {
+    if (!value) return
+    this[propname] = value
+  }
+
   public toJson(accessor?: SerializeAccessor|StorageAccessor) {
     let serialize = {
       id: this.id,
@@ -146,7 +160,7 @@ export class Resource implements IResource {
     }
     serialize['meta'] = []
     for (let prop of this.meta) {
-      if (serialize[prop.name]) continue
+      // if (serialize[prop.name]) continue
       const p = accessor.access(prop)
       if (!p) continue
       serialize['meta'].push(p)

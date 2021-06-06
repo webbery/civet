@@ -35,7 +35,7 @@ export default {
       config.save()
     }
     // regist ipc message process function
-    this.$ipcRenderer.on(Service.ON_IMAGE_UPDATE, this.onUpdateImages)
+    this.$ipcRenderer.on(Service.ON_FILE_UPDATE, this.onUpdateImages)
     this.$ipcRenderer.on(Service.ON_ERROR_MESSAFGE, this.onErrorTips)
     this.$nextTick(() => {
       this.$store.dispatch('init')

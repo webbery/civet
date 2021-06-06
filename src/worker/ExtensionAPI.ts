@@ -34,6 +34,7 @@ export class APIFactory {
             const result = Reflect.set(target, key, thumbnail)
             // console.info('thumbnail', target)
             const data = target.toJson(_accessor)
+            // console.info('post data', data)
             pipeline.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, data)
             return result
           default:

@@ -19,6 +19,16 @@ jobs:
           npm run build
         env:
           CI: true
+      - name: extract version
+        id: version
+        run: |
+          echo "##[set-output name=version;]${GITHUB_REF#$"refs/tags/v"}"
+      - name: upload
+        id: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac-build
+          path: ./build/Civet Setup ${{ steps.version.outputs.version }}.exe
   publish:
     runs-on: linux-latest
     needs: build

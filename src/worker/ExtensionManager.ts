@@ -7,7 +7,7 @@ import { ResourcePath } from './common/ResourcePath'
 import { Result } from './common/Result'
 import { config } from '@/../public/CivetConfig'
 import { APIFactory } from './ExtensionAPI'
-import { isFileExist, runCommand } from '@/../public/Utility'
+import { isFileExist, getExtensionPath } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { PropertyType } from '../public/ExtensionHostType'
@@ -28,7 +28,8 @@ export class ExtensionManager {
     const resource = config.getResourceByName(dbname!)
     this._extensionsOfConfig = (!resource || resource['extensions'] === undefined) ? [] : resource['extensions']
 
-    let extensionPath = path.resolve('.') + '/extensions'
+    let extensionPath = getExtensionPath()
+    console.info('extension path:', extensionPath)
     if (!fs.existsSync(extensionPath)) return
     let exts = fs.readdirSync(extensionPath)
     // remove files
@@ -155,6 +156,7 @@ export class ExtensionManager {
     // use npm install
     // if (runCommand('npm install ' + extname, this._extensionPath)) {
     // }
+    console.info('install extension:', extname)
     let extPackPath = path.resolve('.') + '/extensions/' + extname + '/package.json'
     if (!isFileExist(extPackPath)) return
   }

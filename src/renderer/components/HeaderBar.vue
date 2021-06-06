@@ -25,14 +25,7 @@
       </el-dropdown>
     </el-col> -->
     <el-col :span="14">
-      <div class="input-with-select el-input el-input--mini el-input-group el-input-group--append">
-        <input type="text" id="keywords" autocomplete="off" placeholder="请输入搜索内容" class="el-input__inner" value="1,2,3"/>
-        <div class="el-input-group__append">
-          <button type="button" class="el-button el-button--default el-button--mini is-round" @click="onSearch()">
-            <i class="el-icon-search"></i>
-          </button>
-        </div>
-      </div>
+      <SearchBar></SearchBar>
       <!-- <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onSearch()">
         <el-button slot="append" icon="el-icon-search" size="mini" round @click="onSearch()"></el-button>
       </el-input> -->
@@ -52,8 +45,7 @@ import Service from '@/components/utils/Service'
 import PageMenu from '@/components/Menu/PageMenu'
 import { mapState } from 'vuex'
 // import { config } from '@/../public/CivetConfig'
-import Choices from 'choices.js'
-import '@/assets/choices.css'
+import SearchBar from '@/components/Control/SearchBar/SearchBar'
 
 export default {
   name: 'header-bar',
@@ -74,14 +66,14 @@ export default {
         {name: '所有', command: 'all'},
         {name: '标签', command: 'tag'},
         {name: '分类', command: 'class'}
-      ],
-      choices: null
+      ]
     }
   },
   components: {
     ViewFilter,
     ImageOperator,
-    PageMenu
+    PageMenu,
+    SearchBar
   },
   computed: mapState({
     allResources: state => {
@@ -93,19 +85,6 @@ export default {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
     bus.on(bus.EVENT_INIT_RESOURCE_DB, this.onInitResourceDB)
     // this.recentResources.push(resource.name)
-    const element = document.querySelector('#keywords')
-    this.choices = new Choices(element, {
-      delimiter: ',',
-      editItems: true,
-      // addItems: true,
-      removeItemButton: true
-    })
-    // this.choices.setChoices([
-    //   { value: 'One', label: 'Label One', disabled: true },
-    //   { value: 'Two', label: 'Label Two', selected: true },
-    //   { value: 'Three', label: 'Label Three' }
-    // ], 'value', 'label', false
-    // )
   },
   methods: {
     getCurrentIndex() {

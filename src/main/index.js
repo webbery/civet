@@ -115,7 +115,7 @@ function createRendererWindow() {
   mainWindow.on('closed', () => {
     console.info('main window closed')
   })
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
@@ -127,8 +127,8 @@ function createRendererWindow() {
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
-    // show: true,
-    show: process.env.NODE_ENV === 'development',
+    show: true,
+    // show: process.env.NODE_ENV === 'development',
     frame: false,
     webPreferences: {
       nodeIntegration: true,
@@ -158,7 +158,7 @@ function createWorkerWindow (bFirst) {
     const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
     workerWindow.loadURL(urlpath)
   }
-  // workerWindow.webContents.openDevTools()
+  workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     workerWindow.webContents.openDevTools()
   }

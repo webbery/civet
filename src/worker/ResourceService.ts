@@ -230,6 +230,7 @@ export class ResourceService{
         msg.msg = [resource.toJson(accessor)]
         msg.tick = 0
         msg.id = msgid
+        console.info('reply file')
         this.pipeline.reply(msg)
       }
     }

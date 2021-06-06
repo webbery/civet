@@ -201,7 +201,7 @@ export default {
             this.$set(this.picture.colors, idx, color)
           }
         }
-        this.thumbnail = file.thumbnail
+        this.thumbnail = (file.thumbnail === undefined ? file.path : file.thumbnail)
         this.dynamicTags = file.tag ? file.tag.slice(0) : []
         this.dynamicClass = file.category
         const isClassExist = function (clsName, dynamicClass) {

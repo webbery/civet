@@ -1,6 +1,6 @@
 {
   "name": "civet",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "author": "webberg <webbery@foxmail.com>",
   "description": "素材管理软件",
   "license": "MIT",
@@ -114,8 +114,7 @@
     ]
   },
   "dependencies": {
-    "choices.js": "^9.0.1",
-    "civetkern": "^0.3.1",
+    "civetkern": "^0.3.2",
     "download": "^8.0.0",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",

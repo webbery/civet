@@ -5,8 +5,6 @@ const { ipcRenderer } = require('electron')
 
 // [发送的消息: 回应的消息]
 const replyMessageMap = {
-  // 'addImagesByDirectory': 'updateImageList',
-  // 'addImagesByPaths': 'updateImageList',
   hasDirectory: 'isDirectoryExist',
   getImagesWithDirectoryFormat: 'replyImagesWithDirectory',
   getImagesInfo: 'replyImagesInfo',
@@ -99,7 +97,7 @@ export default {
   REMOVE_FILES: 'removeFiles',
   REMOVE_CLASSES: 'removeClasses',
   QUERY_FILES: 'queryFiles',
-  ON_IMAGE_UPDATE: 'updateImageList',
+  ON_FILE_UPDATE: 'updateImageList',
   ON_ERROR_MESSAFGE: 'onErrorMessage',
   UPDATE_IMAGE_CATEGORY: 'updateImageCategory',
   UPDATE_CATEGORY_NAME: 'updateCategoryName',

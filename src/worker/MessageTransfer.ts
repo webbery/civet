@@ -23,13 +23,14 @@ class Timer {
   }
 }
 
-  const timer = new Timer();
 
   interface IMessageCallback {
     (id: number, data: any): void;
   }
 
   export class MessagePipeline implements IMessagePipeline {
+    timer: Timer = new Timer();
+    viptimer: Timer = new Timer();
     threshod: number = 200;
     messageQueue: Map<string, Message> = new Map<string, Message>();
     VIPQueue: any[] = [];
@@ -79,9 +80,11 @@ class Timer {
       } else {
         this.messageQueue.set(id, msg);
       }
-      timer.start(() => {
+      console.info(this)
+      this.timer.start(() => {
+        console.info('timer', this)
         if (this.messageQueue.size === 0) {
-          timer.stop();
+          this.timer.stop();
           return;
         }
         for (const id of this.messageQueue.keys()) {
@@ -101,9 +104,9 @@ class Timer {
     }
     post(type: string, message: any) {
       this.VIPQueue.push({type: type, data: [message]})
-      timer.start(() => {
+      this.viptimer.start(() => {
         if (this.VIPQueue.length === 0) {
-          timer.stop();
+          this.viptimer.stop();
           return;
         }
         this.sendVIP(40);

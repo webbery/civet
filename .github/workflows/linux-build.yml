@@ -6,7 +6,7 @@ name: linux-build
 on: [push]
 
 jobs:
-  linux:
+  build:
     strategy:
       matrix:
         compiler:
@@ -23,6 +23,16 @@ jobs:
         run: |
           npm install
           npm run build
+      - name: extract version
+        id: version
+        run: |
+          echo "##[set-output name=version;]${GITHUB_REF#$"refs/tags/v"}"
+      - name: upload
+        id: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac-build
+          path: ./build/Civet-${{ steps.version.outputs.version }}.AppImage
   publish:
     runs-on: linux-latest
     needs: build
