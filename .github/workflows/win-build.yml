@@ -29,6 +29,20 @@ jobs:
         with:
           name: mac-build
           path: ./build/Civet Setup ${{ steps.version.outputs.version }}.exe
+  test:
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12
+      - name: test
+        run: |
+          npm install
+          npm run test
+        env:
+          CI: true
   publish:
     runs-on: linux-latest
     needs: build

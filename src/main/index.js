@@ -65,8 +65,18 @@ if (process.env.NODE_ENV !== 'development') {
 //     window.webContents.openDevTools()
 //   })
 // }
+
 let mainWindow, workerWindow
 const url = require('url')
+function loadURL(renderer, entryURL) {
+  if (process.env.NODE_ENV === 'development') {
+    renderer.loadURL(entryURL)
+  } else {
+    const mainpath = url.format({pathname: entryURL, protocol: 'file:', slashes: true})
+    renderer.loadURL(mainpath)
+  }
+}
+
 // console.info('dirname: ', __dirname)
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
@@ -82,21 +92,14 @@ function createRendererWindow() {
     },
     backgroundColor: '#222933',
     allowRunningInsecureContent: true,
-    height: 563,
+    height: 763,
     useContentSize: true,
-    width: 1000,
+    width: 1200,
     icon: path.join(__dirname, 'asset/icon/icon.png'),
     show: false
   })
 
   mainWindow.maximize()
-  if (process.env.NODE_ENV === 'development') {
-    // console.info('main URL:', winURL)
-    mainWindow.loadURL(winURL)
-  } else {
-    const mainpath = url.format({pathname: winURL, protocol: 'file:', slashes: true})
-    mainWindow.loadURL(mainpath)
-  }
   // mainWindow.onbeforeunload = (e) => {
   //   console.info('onbeforeunload')
   //   return true
@@ -115,11 +118,12 @@ function createRendererWindow() {
   mainWindow.on('closed', () => {
     console.info('main window closed')
   })
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
   }
+  loadURL(mainWindow, winURL)
   mainWindow.show()
   // if (process.env.NODE_ENV !== 'development') {
   //   workerWindow.hide()
@@ -127,8 +131,8 @@ function createRendererWindow() {
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
-    show: true,
-    // show: process.env.NODE_ENV === 'development',
+    // show: true,
+    show: process.env.NODE_ENV === 'development',
     frame: false,
     webPreferences: {
       nodeIntegration: true,
@@ -151,14 +155,8 @@ function createWorkerWindow (bFirst) {
     ? 'worker.html'
     : path.join(__dirname, '/worker.html')
   // }
-  // logFile.write(util.format(workerURL) + '\n')
-  // logFile.write(util.format() + '\n')
-  if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
-  else {
-    const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
-    workerWindow.loadURL(urlpath)
-  }
-  workerWindow.webContents.openDevTools()
+  loadURL(workerWindow, workerURL)
+  // workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     workerWindow.webContents.openDevTools()
   }
@@ -212,6 +210,7 @@ app.whenReady().then(() => {
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)
   createWorkerWindow()
+  createRendererWindow()
   ipcMain.on('message-from-worker', (event, arg) => {
     // console.info('########################')
     // console.info(arg.type, arg.data)
@@ -225,7 +224,7 @@ app.on('ready', async () => {
   })
   ipcMain.on('ready', (event, arg) => {
     console.info('child process ready')
-    createRendererWindow()
+    // mainWindow.show()
   })
   ipcMain.on('export2Diectory', (event, arg) => {
     const { dialog } = require('electron')

@@ -106,7 +106,7 @@
     "extraResources": [
       {
         "from": "./extensions-dist",
-        "to": "./app.asar.unpacked",
+        "to": "app.asar.unpacked",
         "filter": [
           "**/*"
         ]
@@ -208,6 +208,7 @@
     "node-sass": "^4.9.2",
     "p-finally": "^2.0.1",
     "puppeteer-core": "^8.0.0",
+    "puppeteer-in-electron": "^3.0.4",
     "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
     "source-map-loader": "^2.0.1",

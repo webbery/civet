@@ -1,7 +1,6 @@
 import { makeRequireFunction } from '@/../public/ExtensionLoader'
 import { createApiFactoryAndRegisterActors } from '../ExtensionHost.API.Impl'
 import { isFileExist, getExtensionPath } from '@/../public/Utility'
-import fs from 'fs'
 var _commonjsGlobal = typeof global === 'object' ? global : {};
 const Module = require('module')
 

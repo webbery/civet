@@ -84,7 +84,10 @@ function isExclude(extension) {
 
 function parseExtensions() {
   for (let extension of dirs) {
-    if (isExclude(extension)) continue
+    const extPath = path.join(__dirname, '../extensions/' + extension)
+    console.info('extpath', extPath)
+    const stat = fs.statSync(extPath)
+    if (isExclude(extension) || stat.isFile()) continue
     const packagePath = path.join(__dirname, '../extensions/'  + extension + '/package.json')
     const pack = fs.readFileSync(packagePath, 'utf-8')
     const jsn = JSON.parse(pack)

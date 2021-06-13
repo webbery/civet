@@ -83,7 +83,6 @@ function build () {
   })
 
   extension().then(result => {
-    console.info('22')
     m.success('extensions')
   }).catch(err => {
     m.error('extension')

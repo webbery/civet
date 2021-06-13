@@ -7,14 +7,16 @@ import { ResourcePath } from './common/ResourcePath'
 import { Result } from './common/Result'
 import { config } from '@/../public/CivetConfig'
 import { APIFactory } from './ExtensionAPI'
-import { isFileExist, getExtensionPath } from '@/../public/Utility'
+import { isFileExist, getExtensionPath, runCommand } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { PropertyType } from '../public/ExtensionHostType'
 // import * as vscode from 'vscode'
 // const loader = require('./Loader')
 
-// loader.config({})
+class ExtensionDescriptor {
+  name: string;
+}
 
 export class ExtensionManager {
   private _pipeline: MessagePipeline;
@@ -141,24 +143,36 @@ export class ExtensionManager {
     }
     return null
   }
-  _initExternalExtension() {
-    // const extConfig = this._extensionPath + '/package.json'
-    // if (isFileExist(extConfig)) {
-    //   const pkg = fs.readFileSync(extConfig)
-    //   const exts = pkg['dependencies']
-    //   for (let ext of exts) {
 
-    //   }
-    // }
+  _initExternalExtension() {
+    const extPath = getExtensionPath()
+    const extConfig = extPath + '/package.json'
+    if (isFileExist(extConfig)) {
+      const pkg = fs.readFileSync(extConfig)
+      const exts = pkg['dependencies']
+      // for (let ext of exts) {
+      // }
+    }
   }
 
   install(msgid: number, extname: string) {
-    // use npm install
-    // if (runCommand('npm install ' + extname, this._extensionPath)) {
-    // }
     console.info('install extension:', extname)
-    let extPackPath = path.resolve('.') + '/extensions/' + extname + '/package.json'
-    if (!isFileExist(extPackPath)) return
+    const extPath = getExtensionPath()
+    let extPackPath = extPath + '/' + extname + '/package.json'
+    if (isFileExist(extPackPath)) return
+    const extListPath = extPath + '/package.json'
+    if (!isFileExist(extListPath)) {
+      fs.writeFileSync(extListPath, '{}')
+    }
+    // use npm install
+    if (runCommand('npm install ' + extname, getExtensionPath())) {
+    }
+    const lists = this.installedList(msgid)
+    for (let item of lists) {
+      console.info('item:', item)
+      if (item.name === extname) return true
+    }
+    return false
   }
 
   uninstall(msgid: number, extname: string) {
@@ -170,6 +184,28 @@ export class ExtensionManager {
     let extPackPath = path.resolve('.') + '/extensions/' + extname + '/package.json'
     if (!isFileExist(extPackPath)) return
   }
+
+  installedList(msgid: number): ExtensionDescriptor[] {
+    const extPath = getExtensionPath()
+    const extConfig = extPath + '/package.json'
+    let extesions: ExtensionDescriptor[] = []
+    if (isFileExist(extConfig)) {
+      const pack = JSON.parse(fs.readFileSync(extConfig).toString())
+      const exts = pack['dependencies']
+      for (let ext of exts) {
+        let desciptor = new ExtensionDescriptor()
+        desciptor.name = Object.keys(ext)[0]
+        extesions.push(desciptor)
+      }
+    }
+    return extesions
+  }
+
+  enable(msgid: number, extname: string) {
+  }
+
+  disable(msgid: number, extname: string) {}
+  
   private _initContentTypeExtension(service: ExtensionService) {
     let activeType = service.activeType(ExtensionActiveType.ExtContentType)
     if (!activeType) return

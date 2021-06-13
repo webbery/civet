@@ -3,12 +3,13 @@ const electron = require('electron')
 const { spawn } = require('child_process')
 
 let spawnedProcess
+let app
+let mainWindowPage
 
 const run = async () => {
   const port = 9200 // Debugging port
   const startTime = Date.now()
   const timeout = 20000 // Timeout in miliseconds
-  let app
 
   // Start Electron with custom debugging port
   spawnedProcess = spawn(electron, ['.', `--remote-debugging-port=${port}`], {
@@ -25,7 +26,7 @@ const run = async () => {
     try {
       app = await puppeteer.connect({
         browserURL: `http://localhost:${port}`,
-        defaultViewport: { width: 1000, height: 600 }
+        defaultViewport: { width: 1280, height: 768 }
       })
     } catch (error) {
       if (Date.now() > startTime + timeout) {
@@ -34,7 +35,12 @@ const run = async () => {
     }
   }
 
-  // const [page] = await app.pages();
+  const pages = await app.pages();
+  // console.info(pages)
+  console.info('page 1:', await pages[0].title())
+  console.info('page 2:', await pages[1].title())
+  mainWindowPage = pages[0]
+
   // await page.waitForSelector("#demo");
   // const text = await page.$eval("#demo", element => element.innerText);
   // assert(text === "Demo of Electron + Puppeteer + Jest.");
@@ -42,8 +48,36 @@ const run = async () => {
 }
 
 run()
-  .then(() => {
-    console.log('Test passed')
+  .then(async () => {
+    console.log('Browser Extension Test')
+    // create process and use websocket as a browser extension to add resource
+    const WebSock = require('ws')
+    const sock = new WebSock('ws://localhost:21313')
+    let dbs = []
+    sock.on('message', (data) => {
+      console.info(data)
+      switch(data.id) {
+        case 'config':
+          dbs = data['config']['db']
+          break;
+        default:
+          break;
+      }
+    })
+    sock.on('open', function (data) {
+      console.info('websocket open', data)
+    })
+    let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    while(dbs.length === 0) {
+      await wait(1)
+    }
+    // const msgAddResource = {id: 'load', db: extensionContext.currentDB, data: { url: path} }
+    // sock.send(msgAddResource)
+    console.log('Browser Extension Test Passed')
+  })
+  .finally(() => {
+    console.log('close Test Electron')
+    // app.close()
   })
   .catch(error => {
     console.error(`Test failed. Error: ${error.message}`)

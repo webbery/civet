@@ -76,7 +76,11 @@ export function getExtensionPath(): string {
     switch(os.platform()) {
       case 'win32':
         extensionLocation = 'resources/app.asar.unpacked'
-        break
+        return path.resolve('.') + '/' + extensionLocation
+      case 'mac':
+        // match electron builder's path
+        extensionLocation = 'Resources/app.asar.unpacked'
+        return '/Applications/Civet.app/Contents/' + extensionLocation
       default: break
     }
   }
