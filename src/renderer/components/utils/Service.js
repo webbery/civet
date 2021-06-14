@@ -106,5 +106,6 @@ export default {
   REMOVE_DB: 'removeDB',
   INSTALL_EXTENSION: 'install',
   UNINSTALL_EXTENSION: 'uninstall',
-  UPDATE_EXTENSION: 'update'
+  UPDATE_EXTENSION: 'update',
+  LIST_EXTENSION: 'listExts'
 }

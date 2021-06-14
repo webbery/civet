@@ -68,7 +68,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 let mainWindow, workerWindow
 const url = require('url')
-function loadURL(renderer, entryURL) {
+function loadWindowURL(renderer, entryURL) {
   if (process.env.NODE_ENV === 'development') {
     renderer.loadURL(entryURL)
   } else {
@@ -123,7 +123,7 @@ function createRendererWindow() {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
   }
-  loadURL(mainWindow, winURL)
+  loadWindowURL(mainWindow, winURL)
   mainWindow.show()
   // if (process.env.NODE_ENV !== 'development') {
   //   workerWindow.hide()
@@ -155,7 +155,11 @@ function createWorkerWindow (bFirst) {
     ? 'worker.html'
     : path.join(__dirname, '/worker.html')
   // }
-  loadURL(workerWindow, workerURL)
+  if (process.env.NODE_ENV === 'development') workerWindow.loadFile(workerURL)
+  else {
+    const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
+    workerWindow.loadURL(urlpath)
+  }
   // workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV === 'development') {
     workerWindow.webContents.openDevTools()

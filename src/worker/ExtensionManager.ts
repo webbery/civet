@@ -1,4 +1,3 @@
-import fs from 'fs'
 import path from 'path'
 import { ExtensionActiveType, ExtensionService } from './ExtensionService'
 import { MessagePipeline } from './MessageTransfer'
@@ -11,8 +10,8 @@ import { isFileExist, getExtensionPath, runCommand } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { PropertyType } from '../public/ExtensionHostType'
-// import * as vscode from 'vscode'
-// const loader = require('./Loader')
+import fs from 'fs'
+// const fs = require('fs')
 
 class ExtensionDescriptor {
   name: string;
@@ -45,7 +44,6 @@ export class ExtensionManager {
     this._buildGraph()
     // console.info('graph:', this._actives)
     // npm extension
-    // this._extensionPath = (process.env.NODE_ENV !== 'development'?'./resources/app.asar.unpacked':'./build/win-unpacked/resources/app.asar.unpacked')
     this._initExternalExtension()
     pipeline.regist('install', this.install, this)
     pipeline.regist('uninstall', this.uninstall, this)

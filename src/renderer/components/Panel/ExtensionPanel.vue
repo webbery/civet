@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-input placeholder="请输入搜索内容" v-model="keyword"  size="mini" @keyup.enter.native="onExtentionSearch()">
-      <el-button slot="append" icon="el-icon-search" size="mini" round @click="onExtentionSearch()"></el-button>
     </el-input>
+    <div v-if="keyword.length > 0">
     <table rules="none" cellspacing=0 style="table-layout: fixed;">
     <!-- <el-scrollbar style="height:99vh;"> -->
       <tr>
@@ -15,6 +15,10 @@
       </tr>
     <!-- </el-scrollbar> -->
     </table>
+    </div>
+    <div v-else>
+      hello extension
+    </div>
   </div>
 </template>
 <script>

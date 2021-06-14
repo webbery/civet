@@ -1,10 +1,9 @@
-import fs from 'fs'
-import path from 'path'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { createDecorator } from './ServiceDecorator'
 import { Result } from './common/Result'
 import { getAbsolutePath } from '@/../public/Utility'
 import { ExtensionModule } from './api/ExtensionRequire'
+const fs = require('fs')
 
 // const Module = require('module');
 // const original = Module.prototype.require;

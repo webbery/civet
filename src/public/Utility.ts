@@ -1,5 +1,5 @@
-import fs from 'fs'
 import path from 'path'
+const fs = require('fs')
 
 export function convert2ValidDate(str: string): string {
   if (str.match(/[0-9]{4}:[0-9]{2}:[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/g)) {

@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { MessagePipeline } from './MessageTransfer'
 import JString from '../public/String'
 import { ReplyType, Message } from './Message'
@@ -8,6 +7,7 @@ import { ResourcePath } from './common/ResourcePath'
 import { config } from '../public/CivetConfig'
 import { ResourceObserver } from './ResourceObserver'
 import { PropertyType } from '../public/ExtensionHostType'
+const fs = require('fs')
 
 let isStart: boolean = false;
 function updateStatus(status: any) {
@@ -45,7 +45,7 @@ export class ResourceService{
 
   private addFilesByDir(msgid: number, dir: string) {
     let self = this;
-    fs.readdir(dir, async function(err, menu) {
+    fs.readdir(dir, async function(err: any, menu: any) {
       if (err) return
       // console.info(menu)
       self.totalFiles += menu.length
@@ -238,7 +238,7 @@ export class ResourceService{
 
   private readDir(msgid: number, path: ResourcePath) {
     let self = this;
-    fs.readdir(path.local(), async function(err, menu) {
+    fs.readdir(path.local(), async function(err: any, menu: any) {
       if (err) return
       // console.info(menu)
       self.totalFiles += menu.length

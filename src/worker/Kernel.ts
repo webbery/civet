@@ -16,7 +16,11 @@ function Initialze() {
     _instance = require('civetkern').civetkern
     const c = config.getConfig(true)
     _current = config.getCurrentDB()
-    _instance.init(c, _flag, _enableLog)
+    try{
+      _instance.init(c, _flag, _enableLog)
+    } catch(err) {
+      console.error(err)
+    }
   }
   // console.info('_instance', _instance)
 }

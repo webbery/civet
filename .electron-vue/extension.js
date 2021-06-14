@@ -87,7 +87,7 @@ function parseExtensions() {
     const extPath = path.join(__dirname, '../extensions/' + extension)
     console.info('extpath', extPath)
     const stat = fs.statSync(extPath)
-    if (isExclude(extension) || stat.isFile()) continue
+    if (isExclude(extension) || !stat || stat.isFile()) continue
     const packagePath = path.join(__dirname, '../extensions/'  + extension + '/package.json')
     const pack = fs.readFileSync(packagePath, 'utf-8')
     const jsn = JSON.parse(pack)
@@ -137,10 +137,10 @@ function copyModules() {
   if (process.env.NODE_ENV !== 'production') {
     const dest = path.join(__dirname, '../node_modules')
     console.info('develop mode')
-    copyDir(source, dest, [])
+    copyDir(source, dest, [], console.error)
   } else {
     const dest = path.join(__dirname, '../extensions-dist/node_modules')
-    copyDir(source, dest, [])
+    copyDir(source, dest, [], console.error)
   }
 }
 
@@ -152,7 +152,7 @@ function copyExtensions() {
     // copyDir(source, dest, [])
   } else {
     const dest = path.join(__dirname, '../extensions-dist')
-    copyDir(source, dest, excludeNames)
+    copyDir(source, dest, excludeNames, console.error)
   }
 }
 
