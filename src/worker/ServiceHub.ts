@@ -8,7 +8,7 @@ class ServiceHub {
   constructor() {
     const pipeline = new MessagePipeline(200, new Map())
     this.extensionManager = new ExtensionManager(pipeline);
-    this.resourceObserver = new ResourceObserver(this.extensionManager);
+    this.resourceObserver = new ResourceObserver(this.extensionManager, this.mocks);
     this.resourceService = new ResourceService(pipeline, this.resourceObserver);
     const WebSocketServer = require('ws').Server
     this.server = new WebSocketServer({address: 'localhost', port: 21313 })

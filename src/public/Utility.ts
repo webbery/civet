@@ -60,12 +60,14 @@ export function runCommand(cmd: string, dir: string): boolean {
   const curDir = process.cwd()
   process.chdir(dir)
   const { execSync } = require('child_process');
-  let child = execSync(cmd)
-  process.chdir(curDir)
-  if (child.error) {
-    console.error(child.error)
+  try {
+    let child = execSync(cmd).toString()
+    console.info(child)
+  }catch(error) {
+    process.chdir(curDir)
     return false
   }
+  process.chdir(curDir)
   return true
 }
 

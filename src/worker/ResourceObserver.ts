@@ -1,13 +1,19 @@
 import { ExtensionManager } from './ExtensionManager'
+import { RendererMock } from './RendererMock'
 import { ResourcePath } from './common/ResourcePath'
 
 export class ResourceObserver {
   private _listener: ExtensionManager;
-  constructor(listener: ExtensionManager) {
+  private _browsers: RendererMock[];
+  constructor(listener: ExtensionManager, browser: RendererMock[]) {
     this._listener = listener
+    this._browsers = browser
   }
 
   switchResourceDB(newdb: string) {
+    for (let browser of this._browsers) {
+      browser.switchResourceDB(newdb)
+    }
     return this._listener.switchResourceDB(newdb)
   }
   

@@ -26,7 +26,7 @@ class CivetConfig {
       // cfg.app.first = false
       if (!config.app.version || config.app.version !== version) {
         // upgrade config here
-        console.info('software should be upgrade')
+        console.info(`software should be upgrade, old version: ${config.app.version}, current version: ${version}`)
         this.oldVersion = true;
         config.app.version = version
       }

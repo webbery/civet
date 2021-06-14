@@ -22,6 +22,7 @@ export class ExtensionManager {
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
   private _actives: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // <event, service chain>
+  private _extensionPath: string;
 
   constructor(pipeline: MessagePipeline) {
     this._pipeline = pipeline
@@ -45,9 +46,7 @@ export class ExtensionManager {
     // console.info('graph:', this._actives)
     // npm extension
     this._initExternalExtension()
-    pipeline.regist('install', this.install, this)
-    pipeline.regist('uninstall', this.uninstall, this)
-    pipeline.regist('update', this.update, this)
+    this._initFrontEndEvent(pipeline)
     // set extension node_modules path
     // const Module = require('module');
     // let originModulePath = Module._nodeModulePaths;
@@ -142,6 +141,13 @@ export class ExtensionManager {
     return null
   }
 
+  private _initFrontEndEvent(pipeline: MessagePipeline) {
+    pipeline.regist('install', this.install, this)
+    pipeline.regist('uninstall', this.uninstall, this)
+    pipeline.regist('update', this.update, this)
+    pipeline.regist('getExtensions', this.installedList, this)
+  }
+  
   _initExternalExtension() {
     const extPath = getExtensionPath()
     const extConfig = extPath + '/package.json'
@@ -175,12 +181,13 @@ export class ExtensionManager {
   }
 
   uninstall(msgid: number, extname: string) {
-    let extPackPath = path.resolve('.') + '/extensions/' + extname + '/package.json'
+    if (runCommand('npm uninstall ' + extname, this._extensionPath)) {}
+    let extPackPath = this._extensionPath + '/' + extname + '/package.json'
     if (!isFileExist(extPackPath)) return
   }
 
   update(msgid: number, extname: string) {
-    let extPackPath = path.resolve('.') + '/extensions/' + extname + '/package.json'
+    let extPackPath = this._extensionPath + '/' + extname + '/package.json'
     if (!isFileExist(extPackPath)) return
   }
 

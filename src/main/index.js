@@ -5,6 +5,7 @@ import { autoUpdater } from 'electron-updater'
 const path = require('path')
 const fs = require('fs')
 
+app.setPath('crashDumps', path.join(__dirname, './logs'))
 // var util = require('util')
 // var logFile = fs.createWriteStream('/Users/v_yuanwenbin/debug.log', {flags: 'w'})
 // var log_stdout = process.stdout;
