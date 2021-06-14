@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer-core'
 const electron = require('electron')
 const { spawn } = require('child_process')
 
+let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 let spawnedProcess
 let app
 let mainWindowPage
@@ -47,6 +48,11 @@ const run = async () => {
   // await page.close();
 }
 
+async function createResourceDB(name) {
+  await mainWindowPage.waitForSelector('#guider input')
+  // await mainWindowPage.$eval('#guider input', )
+}
+
 run()
   .then(async () => {
     console.log('Browser Extension Test')
@@ -67,17 +73,18 @@ run()
     sock.on('open', function (data) {
       console.info('websocket open', data)
     })
-    let wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-    while(dbs.length === 0) {
-      await wait(1)
-    }
+    // while(dbs.length === 0) {
+    //   console.info('db empty')
+    //   await wait(1000)
+    // }
     // const msgAddResource = {id: 'load', db: extensionContext.currentDB, data: { url: path} }
     // sock.send(msgAddResource)
     console.log('Browser Extension Test Passed')
   })
-  .finally(() => {
+  .finally(async () => {
     console.log('close Test Electron')
-    // app.close()
+    await wait(30*1000)
+    app.close()
   })
   .catch(error => {
     console.error(`Test failed. Error: ${error.message}`)

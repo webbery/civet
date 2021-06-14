@@ -148,6 +148,7 @@ export class ExtensionManager {
     if (isFileExist(extConfig)) {
       const pkg = fs.readFileSync(extConfig)
       const exts = pkg['dependencies']
+      console.info('external extension:', exts)
       // for (let ext of exts) {
       // }
     }
