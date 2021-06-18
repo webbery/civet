@@ -134,7 +134,7 @@ function buildExtension() {
 
 function copyModules() {
   const source = path.join(__dirname, '../extensions/node_modules')
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV === 'development') {
     const dest = path.join(__dirname, '../node_modules')
     console.info('develop mode')
     copyDir(source, dest, [], console.error)
@@ -146,7 +146,7 @@ function copyModules() {
 
 function copyExtensions() {
   const source = path.join(__dirname, '../extensions')
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV === 'development') {
     // const dest = path.join(__dirname, '../node_modules')
     // console.info('develop mode')
     // copyDir(source, dest, [])

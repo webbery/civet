@@ -77,7 +77,7 @@ let rendererConfig = {
         use: {
           loader: 'vue-loader',
           options: {
-            extractCSS: process.env.NODE_ENV === 'production',
+            extractCSS: process.env.NODE_ENV !== 'development',
             loaders: {
               sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
               scss: 'vue-style-loader!css-loader!sass-loader',
@@ -124,8 +124,8 @@ let rendererConfig = {
     ]
   },
   node: {
-    __dirname: process.env.NODE_ENV !== 'production',
-    __filename: process.env.NODE_ENV !== 'production'
+    __dirname: process.env.NODE_ENV === 'development',
+    __filename: process.env.NODE_ENV === 'development'
   },
   plugins: [
     new VueLoaderPlugin(),
@@ -151,7 +151,7 @@ let rendererConfig = {
           process,
         };
       },
-      nodeModules: process.env.NODE_ENV !== 'production'
+      nodeModules: process.env.NODE_ENV === 'development'
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
@@ -177,7 +177,7 @@ let rendererConfig = {
 /**
  * Adjust rendererConfig for development settings
  */
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'development') {
   rendererConfig.plugins.push(
     new webpack.DefinePlugin({
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
@@ -188,7 +188,7 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Adjust rendererConfig for production settings
  */
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'development') {
   rendererConfig.devtool = ''
 
   rendererConfig.plugins.push(

@@ -7,6 +7,6 @@ Vue.use(Vuex)
 console.info('111111111111')
 export default new Vuex.Store({
   modules,
-  strict: process.env.NODE_ENV !== 'production'
+  strict: process.env.NODE_ENV === 'development'
 })
 console.info('22222222222')

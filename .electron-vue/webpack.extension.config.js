@@ -68,8 +68,8 @@ function genExtensionConfig(extname) {
       ]
     },
     node: {
-      __dirname: process.env.NODE_ENV !== 'production',
-      __filename: process.env.NODE_ENV !== 'production'
+      __dirname: process.env.NODE_ENV === 'development',
+      __filename: process.env.NODE_ENV === 'development'
     },
     plugins: [
       // new VueLoaderPlugin(),
@@ -112,7 +112,7 @@ function genExtensionConfig(extname) {
     /**
      * 发版打开此处
      */
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV !== 'development') {
       extensionConfig.devtool = ''
   
       extensionConfig.plugins.push(
@@ -153,7 +153,7 @@ function loadExtensions() {
     }
     // install and copy node_modules to extension-dist
     let nodeModulesPath = '.'
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV !== 'development') {
       nodeModulesPath = '.'
     }
     process.chdir(path.join(__dirname, '../extensions'))
@@ -166,7 +166,7 @@ function loadExtensions() {
         }
     }
     // copy dir
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV === 'development') {
       buildDev()
     } else {
       buildProd()

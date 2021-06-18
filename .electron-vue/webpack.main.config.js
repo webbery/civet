@@ -46,8 +46,8 @@ let mainConfig = {
     ]
   },
   node: {
-    __dirname: process.env.NODE_ENV !== 'production',
-    __filename: process.env.NODE_ENV !== 'production'
+    __dirname: process.env.NODE_ENV === 'development',
+    __filename: process.env.NODE_ENV === 'development'
   },
   output: {
     filename: '[name].js',
@@ -66,7 +66,7 @@ let mainConfig = {
 /**
  * Adjust mainConfig for development settings
  */
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'development') {
   mainConfig.plugins.push(
     new webpack.DefinePlugin({
       '__static': `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`
@@ -77,11 +77,11 @@ if (process.env.NODE_ENV !== 'production') {
 /**
  * Adjust mainConfig for production settings
  */
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'development') {
   mainConfig.plugins.push(
     new TerserPlugin(),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': '"production"'
+      'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"'
     })
   )
 }

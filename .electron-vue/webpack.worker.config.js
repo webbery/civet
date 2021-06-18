@@ -78,7 +78,7 @@ let workerConfig = {
         use: {
           loader: 'vue-loader',
           options: {
-            extractCSS: process.env.NODE_ENV === 'production',
+            extractCSS: process.env.NODE_ENV !== 'development',
             loaders: {
               sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
               scss: 'vue-style-loader!css-loader!sass-loader',
@@ -125,8 +125,8 @@ let workerConfig = {
     ]
   },
   node: {
-    __dirname: process.env.NODE_ENV !== 'production',
-    __filename: process.env.NODE_ENV !== 'production'
+    __dirname: process.env.NODE_ENV === 'development',
+    __filename: process.env.NODE_ENV === 'development'
   },
   plugins: [
     new TsconfigPathsPlugin({ configFile: path.resolve(__dirname, '../src/tsconfig.json')}),
@@ -153,7 +153,7 @@ let workerConfig = {
           process,
         };
       },
-      nodeModules: process.env.NODE_ENV !== 'production'
+      nodeModules: process.env.NODE_ENV === 'development'
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
@@ -177,7 +177,7 @@ let workerConfig = {
   target: 'electron-renderer'
 }
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'development') {
   workerConfig.devtool = ''
 
   workerConfig.plugins.push(

@@ -1,5 +1,6 @@
 'use strict'
 
+// console.info('++++++++++++++ENV:', process.env.NODE_ENV, '+++++++++++++++++++++' )
 process.env.NODE_ENV = 'production'
 
 const { say } = require('cfonts')
