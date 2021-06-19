@@ -88,7 +88,7 @@ run()
     while(dbs.length === 0) {
       await wait(1000)
     }
-    const msgAddResource = {id: 'load', db: dbs[0], data: { url: './show.JPG'} }
+    const msgAddResource = {id: 'load', db: dbs[0], data: {url: 'https://cn.bing.com/th?id=OHR.BurleighHeads_ZH-CN6052781534_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp'} }
     sock.send(JSON.stringify(msgAddResource))
     console.log('Browser Extension Test Passed')
   })

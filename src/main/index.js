@@ -162,8 +162,8 @@ function createWorkerWindow (bFirst) {
     const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
     workerWindow.loadURL(urlpath)
   }
-  // workerWindow.webContents.openDevTools()
-  if (process.env.NODE_ENV === 'development') {
+  workerWindow.webContents.openDevTools()
+  if (process.env.NODE_ENV !== 'production') {
     workerWindow.webContents.openDevTools()
   }
 }

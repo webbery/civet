@@ -73,9 +73,10 @@ export function runCommand(cmd: string, dir: string): boolean {
 
 export function getExtensionPath(): string {
   let extensionLocation = 'extensions'
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV === 'production') {
     const os = require('os')
     switch(os.platform()) {
+      case 'linux':
       case 'win32':
         extensionLocation = 'resources/app.asar.unpacked'
         return path.resolve('.') + '/' + extensionLocation

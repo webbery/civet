@@ -25,6 +25,7 @@ export class RendererMock {
           console.info('ws load file:', msg.data)
           const result = await RendererMock.resourceLoader.download(msg.data)
           if (result.isSuccess()) {
+            console.info('resource remote path:', result.value)
             const resourcePath = new ResourcePath(result.value, msg.data['url'])
             await resourceService.readImages(Date.now(), resourcePath)
           } else {

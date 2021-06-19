@@ -24,7 +24,7 @@
     "pack": "npm run pack:main && npm run pack:renderer && npm run pack:worker",
     "pack:main": "cross-env NODE_ENV=test webpack --progress --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=test webpack --progress --config .electron-vue/webpack.renderer.config.js",
-    "test": "npm run e2e",
+    "test": "node -e \"require('./extension.js')()\" && npm run e2e",
     "pack:worker": "cross-env NODE_ENV=test webpack --progress --config .electron-vue/webpack.worker.config.js",
     "pack:dev_woker": "cross-env NODE_ENV=development webpack --progress --config .electron-vue/webpack.worker.config.js",
     "unit": "karma start test/unit/karma.conf.js",

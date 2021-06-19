@@ -36,14 +36,29 @@ export class ResourceLoader {
 
   private async downloadByHttp(resourceUrl: string, downloadDir: string) {
     const resource = url.parse(resourceUrl)
-    console.info('download:', resource.path, ',', downloadDir + resource.pathname)
-    const dest = downloadDir + resource.pathname;
+    // console.info('download:', resource)
+    let filename = resource.pathname
+    if (resource.query) {
+      // const xxhash = require('xxhashjs')
+      // const hash = xxhash.h32('abcd', 0xABCD).toString()
+      const items = resource.query.split('&')
+      for (let item of items) {
+        const pair = item.split('=')
+        if (pair[1].indexOf('.') > 0) {
+          filename = pair[1]
+          break
+        }
+      }
+    }
+    console.info('download file name:', filename)
+    const dest = downloadDir + '/' + filename;
     const end = dest.lastIndexOf('/')
     const destname = dest.substr(end, dest.length - end)
-    console.info('destname:', path.resolve(downloadDir + destname))
+    const destpath = downloadDir + '/' + destname
+    // console.info('destname:', path.resolve(downloadDir + '/' + destname))
     const dl = require('download')
-    fs.writeFileSync(downloadDir + destname, await dl(resourceUrl));
+    fs.writeFileSync(destpath, await dl(resourceUrl));
     // dl(resourceUrl).pipe(fs.createWriteStream(downloadDir + destname));
-    return path.resolve(downloadDir + destname)
+    return path.resolve(destpath)
   }
 }

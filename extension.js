@@ -84,11 +84,11 @@ function isExclude(extension) {
 
 function parseExtensions() {
   for (let extension of dirs) {
-    const extPath = path.join(__dirname, '../extensions/' + extension)
+    const extPath = path.join(__dirname, './extensions/' + extension)
     console.info('extpath', extPath)
     const stat = fs.statSync(extPath)
     if (isExclude(extension) || !stat || stat.isFile()) continue
-    const packagePath = path.join(__dirname, '../extensions/'  + extension + '/package.json')
+    const packagePath = path.join(__dirname, './extensions/'  + extension + '/package.json')
     const pack = fs.readFileSync(packagePath, 'utf-8')
     const jsn = JSON.parse(pack)
     for (let name in jsn['dependencies']) {
@@ -133,25 +133,25 @@ function buildExtension() {
 }
 
 function copyModules() {
-  const source = path.join(__dirname, '../extensions/node_modules')
+  const source = path.join(__dirname, './extensions/node_modules')
   if (process.env.NODE_ENV === 'development') {
-    const dest = path.join(__dirname, '../node_modules')
+    const dest = path.join(__dirname, './node_modules')
     console.info('develop mode')
     copyDir(source, dest, [], console.error)
   } else {
-    const dest = path.join(__dirname, '../extensions-dist/node_modules')
+    const dest = path.join(__dirname, './extensions-dist/node_modules')
     copyDir(source, dest, [], console.error)
   }
 }
 
 function copyExtensions() {
-  const source = path.join(__dirname, '../extensions')
+  const source = path.join(__dirname, './extensions')
   if (process.env.NODE_ENV === 'development') {
     // const dest = path.join(__dirname, '../node_modules')
     // console.info('develop mode')
     // copyDir(source, dest, [])
   } else {
-    const dest = path.join(__dirname, '../extensions-dist')
+    const dest = path.join(__dirname, './extensions-dist')
     copyDir(source, dest, excludeNames, console.error)
   }
 }

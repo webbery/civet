@@ -1,5 +1,6 @@
 test/unit/coverage/**
 test/unit/*.js
 test/e2e/*.js
+test/e2e/specs/*.js
 src/generated/**
 src/public/Loader.js

@@ -15,7 +15,7 @@ const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const workerConfig = require('./webpack.worker.config')
 const webConfig = require('./webpack.web.config')
-const installExtension = require('./extension')
+const installExtension = require('../extension')
 const { resolve } = require('path')
 
 const doneLog = chalk.bgGreen.white(' DONE ') + ' '

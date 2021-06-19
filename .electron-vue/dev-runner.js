@@ -13,7 +13,7 @@ const webpackHotMiddleware = require('webpack-hot-middleware')
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const workerConfig = require('./webpack.worker.config')
-const installInternalExtension = require('./extension')
+const installInternalExtension = require('../extension')
 
 let electronProcess = null
 let manualRestart = false
