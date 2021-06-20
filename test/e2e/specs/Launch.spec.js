@@ -1,12 +1,12 @@
 import puppeteer from 'puppeteer-core'
 const electron = require('electron')
 const { spawn } = require('child_process')
+const {describe, it} = require('mocha')
+const util = require('../util')
 
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 let spawnedProcess
 let app
 let mainWindowPage
-let sock
 
 const run = async () => {
   const port = 9200 // Debugging port
@@ -31,6 +31,7 @@ const run = async () => {
         defaultViewport: { width: 1280, height: 768 }
       })
     } catch (error) {
+      console.info('111111111111111')
       if (Date.now() > startTime + timeout) {
         throw error
       }
@@ -62,45 +63,41 @@ function createResourceDB(name) {
 }
 
 createResourceDB('testdb')
-run()
-  .then(async () => {
-    console.log('Browser Extension Test')
+// before(function(resolve, reject) {
+//     console.info('0000000000')
+// })
+
+describe('verify browser extension', function (resolve, reject) {
+  this.timeout(20 * 1000);
+  const testBrowserExtension = require('../modules/testBrowserExtension')
+  before((done) => {
+    run().then((result) => {
+      done()
+    })
+  })
+  it('browser extension: add files', function(done) {
     // create process and use websocket as a browser extension to add resource
-    const WebSock = require('ws')
-    sock = new WebSock('ws://localhost:21313')
-    let dbs = []
-    sock.on('message', (str) => {
-      const data = JSON.parse(str)
-      console.info(data)
-      switch(data.id) {
-        case 'config':
-          dbs = data['config']['db']
-          console.info('recieve:', dbs)
-          break;
-        default:
-          console.info('recieve 111:', data.id)
-          break;
-      }
-    })
-    sock.on('open', function (data) {
-      console.info('websocket open', data)
-    })
-    while(dbs.length === 0) {
-      await wait(1000)
+    testBrowserExtension.run(done, mainWindowPage)
+  })
+  after((done) => {
+    try {
+      setTimeout(() => {
+        testBrowserExtension.close()
+        app.close().then(() => {
+          console.info('33333')
+          done()
+        })
+      }, 10*1000)
+    } catch(err) {
+      console.error('test error:', err)
+      app.close().then(() => {
+        done()
+      })
     }
-    const msgAddResource = {id: 'load', db: dbs[0], data: {url: 'https://cn.bing.com/th?id=OHR.BurleighHeads_ZH-CN6052781534_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp'} }
-    sock.send(JSON.stringify(msgAddResource))
-    console.log('Browser Extension Test Passed')
   })
-  .finally(async () => {
-    await wait(10*1000)
-    await app.close()
-    console.log('close Test Electron')
-  })
-  .catch(async (error) => {
-    console.error(`Test failed. Error: ${error.message}`)
-    await app.close()
-    // kill(spawnedProcess.pid, () => {
-    //   process.exit(1);
-    // });
-  })
+})
+
+// after(function(resolve, reject) {
+//   console.info('22222222')
+// })
+

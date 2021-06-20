@@ -2,6 +2,7 @@ import {ResourceService} from './ResourceService'
 import { config } from '../public/CivetConfig'
 import { ResourceLoader } from './service/ResourceLoader'
 import { ResourcePath } from './common/ResourcePath'
+import { logger } from '@/../public/Logger'
 
 const BrowserEvent = {
   EmitDownloadError: 'download',
@@ -19,18 +20,18 @@ export class RendererMock {
     sock.isAlive = true;
     sock.on('message', async function(data: string) {
       const msg = JSON.parse(data)
-      console.info(msg)
+      logger.debug(msg)
       switch(msg.id) {
         case BrowserEvent.OnLoad:
-          console.info('ws load file:', msg.data)
+          logger.debug(`ws load file: ${JSON.stringify(msg.data)}`)
           const result = await RendererMock.resourceLoader.download(msg.data)
           if (result.isSuccess()) {
-            console.info('resource remote path:', result.value)
+            logger.debug(`resource remote path: ${result.value}`)
             const resourcePath = new ResourcePath(result.value, msg.data['url'])
             await resourceService.readImages(Date.now(), resourcePath)
           } else {
-            console.info('err: ', result.value)
-            sock.send({id: BrowserEvent.EmitDownloadError, url: msg.data['url']})
+            logger.debug(`err: ${result.value}`)
+            sock.send(JSON.stringify({id: BrowserEvent.EmitDownloadError, error: result.value, url: msg.data['url']}))
             resourceService.error(result.value)
           }
           break

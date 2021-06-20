@@ -15,6 +15,4 @@ global.should = should
 global.assert = assert
 
 // Require all JS files in `./specs` for Mocha to consume
-const installInternalExtension = require('../../extension')
-installInternalExtension()
 require('require-dir')('./specs')

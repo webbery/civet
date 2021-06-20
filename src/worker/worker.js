@@ -1,7 +1,3 @@
-// import CV from '../public/CV'
-// import { JImage } from './Image'
-// import { CategoryArray } from './Category'
-// import ElementUI from 'element-ui'
 import 'element-theme-dark'
 import Vue from 'vue'
 import App from './App'
