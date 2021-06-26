@@ -46,8 +46,8 @@ let mainConfig = {
     ]
   },
   node: {
-    __dirname: process.env.NODE_ENV === 'development',
-    __filename: process.env.NODE_ENV === 'development'
+    __dirname: false, //process.env.NODE_ENV === 'production',
+    __filename: false //process.env.NODE_ENV === 'production'
   },
   output: {
     filename: '[name].js',
@@ -77,7 +77,7 @@ if (process.env.NODE_ENV === 'development') {
 /**
  * Adjust mainConfig for production settings
  */
-if (process.env.NODE_ENV !== 'development') {
+if ((process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'test')) {
   mainConfig.plugins.push(
     new TerserPlugin(),
     new webpack.DefinePlugin({

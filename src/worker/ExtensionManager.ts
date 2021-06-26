@@ -6,23 +6,22 @@ import { ResourcePath } from './common/ResourcePath'
 import { Result } from './common/Result'
 import { config } from '@/../public/CivetConfig'
 import { APIFactory } from './ExtensionAPI'
-import { isFileExist, getExtensionPath, runCommand } from '@/../public/Utility'
+import { isFileExist, getExtensionPath} from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { PropertyType } from '../public/ExtensionHostType'
+import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstallManager'
+import { logger } from '@/../public/Logger'
 import fs from 'fs'
-// const fs = require('fs')
 
-class ExtensionDescriptor {
-  name: string;
-}
+
 
 export class ExtensionManager {
   private _pipeline: MessagePipeline;
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
   private _actives: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // <event, service chain>
-  private _extensionPath: string;
+  private _installManager: ExtensionInstallManager|null = null;
 
   constructor(pipeline: MessagePipeline) {
     this._pipeline = pipeline
@@ -147,6 +146,12 @@ export class ExtensionManager {
     pipeline.regist('update', this.update, this)
     pipeline.regist('getExtensions', this.installedList, this)
   }
+
+  private _initInstaller(extensionPath: string) {
+    if (this._installManager === null) {
+      this._installManager = new ExtensionInstallManager(extensionPath)
+    }
+  }
   
   _initExternalExtension() {
     const extPath = getExtensionPath()
@@ -160,51 +165,33 @@ export class ExtensionManager {
     }
   }
 
-  install(msgid: number, extname: string) {
-    console.info('install extension:', extname)
+  install(msgid: number, extinfo: any) {
     const extPath = getExtensionPath()
-    let extPackPath = extPath + '/' + extname + '/package.json'
-    if (isFileExist(extPackPath)) return
-    const extListPath = extPath + '/package.json'
-    if (!isFileExist(extListPath)) {
-      fs.writeFileSync(extListPath, '{}')
-    }
-    // use npm install
-    if (runCommand('npm install ' + extname, getExtensionPath())) {
-    }
-    const lists = this.installedList(msgid)
-    for (let item of lists) {
-      console.info('item:', item)
-      if (item.name === extname) return true
-    }
-    return false
+    this._initInstaller(extPath)
+    const reult = this._installManager!.install(extinfo.name, extinfo.version)
+    return {type: ReplyType.REPLY_INSTALL_RESULT, data: reult}
   }
 
   uninstall(msgid: number, extname: string) {
-    if (runCommand('npm uninstall ' + extname, this._extensionPath)) {}
-    let extPackPath = this._extensionPath + '/' + extname + '/package.json'
-    if (!isFileExist(extPackPath)) return
+    const extPath = getExtensionPath()
+    this._initInstaller(extPath)
+    const result = this._installManager!.uninstall(extname)
+    return {type: ReplyType.REPLY_UNINSTALL_RESULT, data: result}
   }
 
   update(msgid: number, extname: string) {
-    let extPackPath = this._extensionPath + '/' + extname + '/package.json'
-    if (!isFileExist(extPackPath)) return
+    const extPath = getExtensionPath()
+    this._initInstaller(extPath)
+    this._installManager!.update(extname)
+    // let extPackPath = this._extensionPath + '/' + extname + '/package.json'
+    // if (!isFileExist(extPackPath)) return
   }
 
-  installedList(msgid: number): ExtensionDescriptor[] {
+  installedList(msgid: number): any {
     const extPath = getExtensionPath()
-    const extConfig = extPath + '/package.json'
-    let extesions: ExtensionDescriptor[] = []
-    if (isFileExist(extConfig)) {
-      const pack = JSON.parse(fs.readFileSync(extConfig).toString())
-      const exts = pack['dependencies']
-      for (let ext of exts) {
-        let desciptor = new ExtensionDescriptor()
-        desciptor.name = Object.keys(ext)[0]
-        extesions.push(desciptor)
-      }
-    }
-    return extesions
+    this._initInstaller(extPath)
+    const list = this._installManager!.installList()
+    return {type: ReplyType.REPLY_EXTENSION_LIST_INFO, data: list}
   }
 
   enable(msgid: number, extname: string) {

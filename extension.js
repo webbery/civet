@@ -108,8 +108,10 @@ function parseExtensions() {
 
 function installDependencies() {
   for (let name in installPackages) {
-    const stat = fs.statSync(path.resolve(__dirname, './extensions/node_modules/' + name))
-    if (stat.isFile() || stat.isDirectory()) continue
+    if (fs.existsSync(path.resolve(__dirname, './extensions/node_modules/' + name))) {
+      const stat = fs.statSync(path.resolve(__dirname, './extensions/node_modules/' + name))
+      if (stat.isFile() || stat.isDirectory()) continue
+    }
     console.info(`install ${name}@${installPackages[name]}`)
     runCommand('npm install --prefix extensions ' + name + '@' + installPackages[name])
   }

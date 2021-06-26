@@ -17,7 +17,10 @@ const replyMessageMap = {
   getUncategoryImages: 'replyUncategoryImages',
   getUntagImages: 'replyUntagImages',
   reInitDB: 'replyReloadDBStatus',
-  getFilesSnap: 'replyFilesSnap'
+  getFilesSnap: 'replyFilesSnap',
+  install: 'replyInstallResult',
+  uninstall: 'replyUninstallResult',
+  getExtensions: 'replyAllExtensions'
 }
 
 const getServiceInstance = (function() {
@@ -107,5 +110,5 @@ export default {
   INSTALL_EXTENSION: 'install',
   UNINSTALL_EXTENSION: 'uninstall',
   UPDATE_EXTENSION: 'update',
-  LIST_EXTENSION: 'listExts'
+  LIST_EXTENSION: 'getExtensions'
 }

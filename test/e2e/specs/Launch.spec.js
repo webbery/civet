@@ -2,7 +2,6 @@ import puppeteer from 'puppeteer-core'
 const electron = require('electron')
 const { spawn } = require('child_process')
 const {describe, it} = require('mocha')
-const util = require('../util')
 
 let spawnedProcess
 let app
@@ -40,12 +39,14 @@ const run = async () => {
 
   const pages = await app.pages();
   // console.info(pages)
+  console.info('~~~~~~~~~~~~~b~~~~~~~~~~~~~')
   const title = await pages[0].title()
   if (title === 'civet') {
     mainWindowPage = pages[0]
   } else {
     mainWindowPage = pages[1]
   }
+  console.info('~~~~~~~~~~~~~c~~~~~~~~~~~~~')
 
   // await page.waitForSelector("#demo");
   // const text = await page.$eval("#demo", element => element.innerText);
@@ -75,9 +76,27 @@ describe('verify browser extension', function (resolve, reject) {
       done()
     })
   })
+  it('local extensions', function(done) {
+    done()
+  })
   it('browser extension: add files', function(done) {
     // create process and use websocket as a browser extension to add resource
     testBrowserExtension.run(done, mainWindowPage)
+  })
+  it('file classify', function(done) {
+    done()
+  })
+  it('file tags', function(done) {
+    done()
+  })
+  it('file property', function(done) {
+    done()
+  })
+  it('search file', function(done) {
+    done()
+  })
+  it('delete file', function(done) {
+    done()
   })
   after((done) => {
     try {
@@ -96,8 +115,4 @@ describe('verify browser extension', function (resolve, reject) {
     }
   })
 })
-
-// after(function(resolve, reject) {
-//   console.info('22222222')
-// })
 

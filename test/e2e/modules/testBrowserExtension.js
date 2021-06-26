@@ -5,7 +5,6 @@ const WebSock = require('ws')
 let sock
 let dbs
 
-
 module.exports = {
   dbs: dbs,
   run: async (done, page) => {
@@ -17,15 +16,13 @@ module.exports = {
       switch(data.id) {
         case 'config':
           dbs = data['config']['db']
-          console.info('recieve:', dbs)
+          // console.info('recieve:', dbs)
           assert(dbs.length > 0)
           break;
         case 'download':
-          console.error(`download fail: ${data.url}`)
+          // console.error(`download fail: ${data.url}`)
           assert(data.url.length > 0)
-          console.info('222222')
           done()
-          console.info('88888')
           break;
         default:
           console.info('recieve 111:', data.id)
@@ -33,7 +30,7 @@ module.exports = {
       }
     })
     sock.on('open', function (data) {
-      console.info('websocket open', data)
+      // console.info('websocket open', data)
     })
     while(dbs.length === 0) {
       await util.wait(1000)

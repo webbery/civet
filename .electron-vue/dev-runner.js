@@ -1,4 +1,5 @@
 'use strict'
+process.env.NODE_ENV = 'development'
 
 const chalk = require('chalk')
 const electron = require('electron')
@@ -9,7 +10,6 @@ const webpack = require('webpack')
 const WebpackDevServer = require('webpack-dev-server')
 // const MultiCompiler = require('mu')
 const webpackHotMiddleware = require('webpack-hot-middleware')
-
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 const workerConfig = require('./webpack.worker.config')

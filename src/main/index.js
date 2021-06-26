@@ -78,7 +78,7 @@ function loadWindowURL(renderer, entryURL) {
   }
 }
 
-// console.info('dirname: ', __dirname)
+console.info('renderer env: ', process.env.NODE_ENV)
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : path.join(__dirname, '/index.html')
@@ -162,7 +162,6 @@ function createWorkerWindow (bFirst) {
     const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
     workerWindow.loadURL(urlpath)
   }
-  workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV !== 'production') {
     workerWindow.webContents.openDevTools()
   }

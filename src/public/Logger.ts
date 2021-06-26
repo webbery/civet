@@ -8,11 +8,11 @@ log4js_extend(log4js, {
 log4js.configure({
   appenders: {
     console: { type: 'console' },
-    worker: {type: 'fileSync', filename: 'logs/worker.log', maxLogSize: 16 * 1024 * 1024},
+    worker: {type: 'file', filename: 'logs/worker.log', maxLogSize: 16 * 1024 * 1024},
     renderer: {type: 'file', filename: 'logs/renderer.log', maxLogSize: 16 * 1024 * 1024},
     main: {type: 'file', filename: 'logs/main.log', maxLogSize: 16 * 1024 * 1024}
   },
-  categories: {default: {appenders: ['console', 'worker'], level: 'debug'}}
+  categories: {default: {appenders: ['console', 'worker', 'renderer', 'main'], level: 'debug'}}
 })
 
 // log.transports.console.format = '[{h}:{i}:{s}] [{level}] {text}'
