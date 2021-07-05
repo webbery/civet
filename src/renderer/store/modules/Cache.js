@@ -372,7 +372,6 @@ const mutations = {
 
 const actions = {
   async init({ commit }, flag) {
-    // console.info('+++++++++++++++')
     const { unclasses, untags } = await remote.recieveCounts()
     const allClasses = await Service.getServiceInstance().get(Service.GET_ALL_CATEGORY, '/')
     console.info('all classes:', allClasses)

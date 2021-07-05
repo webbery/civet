@@ -140,6 +140,11 @@ export class Resource implements IResource {
 
   private _update(propname: string, value: any) {
     if (!value) return
+    if (propname === 'meta') {
+      for (let prop of value) {
+        this._update(prop.name, prop.value)
+      }
+    }
     this[propname] = value
   }
 

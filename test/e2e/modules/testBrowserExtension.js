@@ -12,7 +12,7 @@ module.exports = {
     let dbs = []
     sock.on('message', (str) => {
       const data = JSON.parse(str)
-      console.info(data)
+      // console.info(data)
       switch(data.id) {
         case 'config':
           dbs = data['config']['db']

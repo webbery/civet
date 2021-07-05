@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer-core'
 const electron = require('electron')
 const { spawn } = require('child_process')
 const {describe, it} = require('mocha')
+const {expect, assert} = require('chai')
 
 let spawnedProcess
 let app
@@ -39,14 +40,12 @@ const run = async () => {
 
   const pages = await app.pages();
   // console.info(pages)
-  console.info('~~~~~~~~~~~~~b~~~~~~~~~~~~~')
   const title = await pages[0].title()
   if (title === 'civet') {
     mainWindowPage = pages[0]
   } else {
     mainWindowPage = pages[1]
   }
-  console.info('~~~~~~~~~~~~~c~~~~~~~~~~~~~')
 
   // await page.waitForSelector("#demo");
   // const text = await page.$eval("#demo", element => element.innerText);
@@ -69,15 +68,17 @@ createResourceDB('testdb')
 // })
 
 describe('verify browser extension', function (resolve, reject) {
-  this.timeout(20 * 1000);
+  this.timeout(60 * 1000);
   const testBrowserExtension = require('../modules/testBrowserExtension')
+  const testLocalExtension = require('../modules/testExtension')
+  const testFileOperation = require('../modules/testFileOperation')
   before((done) => {
     run().then((result) => {
       done()
     })
   })
-  it('local extensions', function(done) {
-    done()
+  it('install local extensions', async function() {
+    await testLocalExtension.install(mainWindowPage)
   })
   it('browser extension: add files', function(done) {
     // create process and use websocket as a browser extension to add resource
@@ -89,8 +90,13 @@ describe('verify browser extension', function (resolve, reject) {
   it('file tags', function(done) {
     done()
   })
-  it('file property', function(done) {
-    done()
+  it('file property', async function() {
+    await mainWindowPage.waitFor(5000)
+    const files = await mainWindowPage.$$('.vue-waterfall-slot')
+    expect(files.length).to.be.above(0)
+    await files[0].click()
+    await mainWindowPage.waitFor(1000)
+    await testFileOperation.run(mainWindowPage)
   })
   it('search file', function(done) {
     done()
@@ -98,12 +104,14 @@ describe('verify browser extension', function (resolve, reject) {
   it('delete file', function(done) {
     done()
   })
+  it('uninstall local extension', async function() {
+    await testLocalExtension.uninstall(mainWindowPage)
+  })
   after((done) => {
     try {
       setTimeout(() => {
         testBrowserExtension.close()
         app.close().then(() => {
-          console.info('33333')
           done()
         })
       }, 10*1000)

@@ -101,8 +101,7 @@ export default {
       if (this.keyword !== '') {
         kw = this.keyword
       }
-      const fetchURL = 'https://api.npms.io/v2/search?q=scope:civet'// + kw
-      // const fetchURL = 'https://api.npms.io/v2/search?q=scope:civet-ext'
+      const fetchURL = 'https://api.npms.io/v2/search?q=scope:civet-extend'// + kw
       const { net } = require('electron').remote
       const request = net.request(fetchURL)
       let self = this
