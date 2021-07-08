@@ -6,7 +6,7 @@ import Vue from 'vue'
 import { Cache } from './CacheInstance'
 import * as Assist from './CacheAssist'
 import { config } from '@/../public/CivetConfig'
-// import * as civet from 'civet'
+import { logger } from '@/../public/Logger'
 
 // const maxCacheSize = 40 + 20 + 10
 // console.info(civet.PropertyType.String)
@@ -188,8 +188,7 @@ const mutations = {
       // if (idx > maxCacheSize) break
     }
   },
-  async query(state, result) {
-    //   console.info('++++++')QUERY_FILES
+  query(state, result) {
     state.viewItems.splice(0, state.viewItems.length)
     for (let idx = 0; idx < result.length; ++idx) {
       state.viewItems.unshift(Cache.files[result[idx].id])
@@ -387,6 +386,7 @@ const actions = {
     commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
   },
   async query({ commit }, query) {
+    // logger.debug(`query value: ${JSON.stringify(query)}`)
     for (const k in query) {
       if (Array.isArray(query[k]) && query[k].length === 0) {
         delete Cache.query[k]

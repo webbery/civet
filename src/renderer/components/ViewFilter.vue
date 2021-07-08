@@ -42,6 +42,7 @@
 import RangeInput from './Control/RangeInput'
 import MutiSelect from './Control/Multiselect'
 import { debounce } from 'lodash'
+import bus from './utils/Bus'
 
 export default {
   name: 'view-filter',
@@ -125,6 +126,7 @@ export default {
         keys = ['*']
       }
       this.$store.dispatch('query', {type: keys})
+      bus.emit(bus.EVENT_UPDATE_QUERY_BAR, {type: keys})
     },
     onColorChanged: debounce(function (color) {
       console.info('onColorChanged:', color)

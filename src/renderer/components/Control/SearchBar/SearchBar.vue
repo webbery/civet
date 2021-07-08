@@ -2,8 +2,8 @@
   <div class="input-with-select el-input el-input--mini el-input-group el-input-group--append">
     <!-- <select id="keywords" class="el-input__inner" multiple></select> -->
     <div class="search-group" >
-      <div class="search-default" v-for="(item, i) of conditions" :key="i" >
-        <SearchItem :text="item"></SearchItem>
+      <div class="search-default" v-for="(item, i) in conditions" :key="i" >
+        <SearchItem :item="item"></SearchItem>
       </div>
       <SearchInput class="search-input" @addSearchItem="onAddSearchText"></SearchInput>
     </div>
@@ -17,6 +17,9 @@
 <script>
 import SearchItem from './SearchItem'
 import SearchInput from './SearchInput'
+import { mapState } from 'vuex'
+import bus from '../../utils/Bus'
+import {logger} from '@/../public/Logger'
 
 export default {
   name: 'search-bar',
@@ -28,11 +31,32 @@ export default {
     }
   },
   mounted() {
+    bus.on(bus.EVENT_UPDATE_QUERY_BAR, this.onUpdateSearchBar)
   },
   methods: {
     onAddSearchText(value) {
-      console.info('add keyword', value)
-      this.conditions.push(value)
+      if (typeof value === 'string') {
+        this.conditions.push({type: 'str', text: value})
+      } else {
+        let keys = Object.keys(value)
+        for (let k of keys) {
+          // clean this type of keywords
+          for (let idx = this.conditions.length - 1; idx >= 0; --idx) {
+            if (this.conditions[idx].type === k) {
+              this.conditions.splice(idx, 1)
+            }
+          }
+        }
+        for (let k of keys) {
+          for (let item of value[k]) {
+            if (item === '*') continue
+            this.conditions.push({type: k, text: item})
+          }
+        }
+      }
+    },
+    onUpdateSearchBar(value) {
+      this.onAddSearchText(value)
     },
     onSearch() {}
   }

@@ -22,5 +22,6 @@ export default {
   EVENT_UPDATE_UNCATEGORY_IMAGES: 'updateUncategoryImages',
   EVENT_INIT_RESOURCE_DB: 'initResourceDB',
   EVENT_SCALE_IMAGE: 'scaleImage',
-  EVENT_ROTATE_IMAGE: 'rotateImage'
+  EVENT_ROTATE_IMAGE: 'rotateImage',
+  EVENT_UPDATE_QUERY_BAR: 'updateQueryBar'
 }

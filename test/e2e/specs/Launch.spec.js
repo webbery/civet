@@ -31,7 +31,6 @@ const run = async () => {
         defaultViewport: { width: 1280, height: 768 }
       })
     } catch (error) {
-      console.info('111111111111111')
       if (Date.now() > startTime + timeout) {
         throw error
       }
@@ -46,11 +45,6 @@ const run = async () => {
   } else {
     mainWindowPage = pages[1]
   }
-
-  // await page.waitForSelector("#demo");
-  // const text = await page.$eval("#demo", element => element.innerText);
-  // assert(text === "Demo of Electron + Puppeteer + Jest.");
-  // await page.close();
 }
 
 function createResourceDB(name) {
@@ -77,32 +71,68 @@ describe('verify browser extension', function (resolve, reject) {
       done()
     })
   })
+  it('add operation in classify panel ', async function() {
+    await mainWindowPage.waitFor(6000)
+    let btnAddClass = await mainWindowPage.$('.icon-add-class')
+    expect(btnAddClass).not.to.be.null
+    await btnAddClass.click()
+    await mainWindowPage.waitFor(1000)
+    const editClass = await mainWindowPage.$('.vtl-input')
+    editClass.type('helloworld')
+    await mainWindowPage.waitFor(1000)
+    await editClass.press('Enter')
+  })
   it('install local extensions', async function() {
+    await mainWindowPage.waitFor(2000)
     await testLocalExtension.install(mainWindowPage)
   })
   it('browser extension: add files', function(done) {
     // create process and use websocket as a browser extension to add resource
     testBrowserExtension.run(done, mainWindowPage)
   })
-  it('file classify', function(done) {
-    done()
-  })
-  it('file tags', function(done) {
-    done()
-  })
   it('file property', async function() {
-    await mainWindowPage.waitFor(5000)
     const files = await mainWindowPage.$$('.vue-waterfall-slot')
+    expect(files).not.to.be.null
     expect(files.length).to.be.above(0)
     await files[0].click()
     await mainWindowPage.waitFor(1000)
     await testFileOperation.run(mainWindowPage)
   })
+  it('file classify', async function() {
+    const fieldsets = await mainWindowPage.$$('.property fieldset')
+    expect(fieldsets.length).to.be.above(0)
+    await fieldsets[1].click()
+    const classes = await mainWindowPage.$$('.el-popper label')
+    expect(fieldsets.length).to.be.above(0)
+  })
+  it('file tags', function(done) {
+    done()
+  })
+  
   it('search file', function(done) {
     done()
   })
-  it('delete file', function(done) {
-    done()
+  it('file menu operation', async function() {
+    let files = await mainWindowPage.$$('.vue-waterfall-slot')
+    expect(files).not.to.be.null
+    const beforeLength = files.length
+    expect(beforeLength).to.be.above(0)
+    await files[0].click({button: 'right'})
+    const menus = await mainWindowPage.$$('.cm-ul li')
+    expect(menus.length).to.be.above(1)
+    await menus[1].click()
+    files = await mainWindowPage.$$('.vue-waterfall-slot')
+    expect(beforeLength).to.be.above(files.length)
+  })
+  it('clean operation in classify panel ', async function() {
+    let itemClasses = await mainWindowPage.$$('.vtl-node-content')
+    const beforeLength = itemClasses.length
+    expect(beforeLength).to.be.above(0)
+    await itemClasses[0].click({button: 'right'})
+    const menus = await mainWindowPage.$$('.cm-ul li')
+    await menus[3].click()
+    itemClasses = await mainWindowPage.$$('.vtl-node-content')
+    expect(beforeLength).to.be.above(itemClasses.length)
   })
   it('uninstall local extension', async function() {
     await testLocalExtension.uninstall(mainWindowPage)

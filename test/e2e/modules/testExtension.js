@@ -3,9 +3,7 @@ const {expect, assert} = require('chai')
 const extensionSelector = '.sidenav .el-icon-menu'
 
 function installExtension(page) {
-  return page.waitFor(2000).then(() => {
-    return page.$(extensionSelector)
-  }).then((extensionBtn) => {
+  return page.$(extensionSelector).then((extensionBtn) => {
     return extensionBtn.click()
   }).then((result) => {
     return page.$('.panel input')
@@ -13,7 +11,7 @@ function installExtension(page) {
     inputElm.type('helloworld')
     return inputElm.press('Enter')
   }).then(() => {
-    return page.waitFor(5000)
+    return page.waitFor(10000)
   }).then(() =>{
     return page.$$('.extension')
   }).then((extensions) => {
@@ -23,7 +21,9 @@ function installExtension(page) {
 }
 
 function uninstallExtension(page) {
-  return page.$(extensionSelector).then((extensionBtn) => {
+  return page.waitFor(5000).then(() => {
+    return page.$(extensionSelector)
+  }).then((extensionBtn) => {
     return extensionBtn.click()
   }).then(() => {
     return page.waitFor(1000)

@@ -8,7 +8,7 @@
     aria-selected="true"
     data-deletable
   >
-    {{text}}
+    {{item["text"]}}
     <button
       type="button"
       class="search-button el-icon-close"
@@ -22,9 +22,8 @@
 export default {
   name: 'search-item',
   props: {
-    text: {
-      default: '1',
-      type: String
+    item: {
+      type: Object
     }
   },
   methods: {}

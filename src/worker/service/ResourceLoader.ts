@@ -22,7 +22,9 @@ export class ResourceLoader {
     let fullpath: string | null = null;
     try{
       if (data['bin'] !== undefined) {
-
+        // save file to local
+        fullpath = downloadDir + '/' + data['name']
+        fs.writeFileSync(fullpath, data['bin'])
       } else if (data['url']) {
         // download from network
         fullpath = await this.downloadByHttp(data['url'], downloadDir);
