@@ -23,5 +23,6 @@ export default {
   EVENT_INIT_RESOURCE_DB: 'initResourceDB',
   EVENT_SCALE_IMAGE: 'scaleImage',
   EVENT_ROTATE_IMAGE: 'rotateImage',
-  EVENT_UPDATE_QUERY_BAR: 'updateQueryBar'
+  EVENT_UPDATE_QUERY_BAR: 'updateQueryBar',
+  EVENT_UPDATE_QUERY_EXTERNAL_CONDITION: 'updateQueryCondition'
 }

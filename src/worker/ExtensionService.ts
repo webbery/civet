@@ -121,6 +121,19 @@ export class ExtensionService {
     return this._package.activeTypes.get(activeType)
   }
 
+  type(): ExtensionActiveType[] {
+    let types = this._package.activeTypes.keys()
+    let t: ExtensionActiveType[] = []
+    for (let tp of types) {
+      t.push(tp)
+    }
+    return t
+  }
+
+  hasType(type: ExtensionActiveType) {
+    return this._package.activeTypes.has(type)
+  }
+
   async run(command: string, ...args: any[]): Promise<Result<string, string>> {
     if (this._instance === null) {
       const entryPath = this._package.main

@@ -22,11 +22,7 @@ export default {
     LandingPage,
     Guider
   },
-  mounted() {
-    // const test = [240, 0, 0, 250, 235, 215]
-    // rgb2hsv(test, 2)
-    // let data = {data: test, info: {width: 2, height: 1}}
-    // CV.sumaryColors(data)
+  async mounted() {
     if (config.isFirstTime() || config.getCurrentDB() === undefined) {
       const guider = document.getElementById('guider')
       guider.showModal()
@@ -40,6 +36,8 @@ export default {
     this.$nextTick(() => {
       this.$store.dispatch('init')
     })
+    const workbench = await this.$ipcRenderer.get(Service.GET_INIT_WORKBENCH_VIEW)
+    console.info('workbench', workbench)
   },
   methods: {
     onUpdateImages(error, updateImages) {
@@ -60,7 +58,8 @@ export default {
     onCloseGuider() {
       const cfg = document.getElementById('guider')
       cfg.close()
-    }
+    },
+    onWorkbenchInit() {}
   },
   destroyed: function() {
     // const Storage = require('../public/Kernel')

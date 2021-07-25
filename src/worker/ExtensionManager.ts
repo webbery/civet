@@ -15,7 +15,6 @@ import { logger } from '@/../public/Logger'
 import fs from 'fs'
 
 
-
 export class ExtensionManager {
   private _pipeline: MessagePipeline;
   private _extensionsOfConfig: string[] = [];
@@ -210,16 +209,38 @@ export class ExtensionManager {
       }
       events.push(service)
       this._actives.set(active, events)
-      // extServs.splice(idx, 1)
     }
   }
 
-  private _initViewExtension(service: ExtensionService) { }
+  private _initViewExtension(service: ExtensionService) {
+    let activeType = service.activeType(ExtensionActiveType.ExtView)
+    if (!activeType) return
+    // for (let active of activeType) {
+    //   active = active.toLowerCase()
+    //   let events = this._actives.get(active)
+    //   if (!events) {
+    //     events = []
+    //   }
+    //   events.push(service)
+    //   this._actives.set(active, events)
+    // }
+  }
   private _initStorageExtension(service: ExtensionService) { }
 
   switchResourceDB(dbname: string) {
     const resource = config.getResourceByName(dbname)
     this._extensionsOfConfig = resource['extensions']
+  }
+
+  getExtensionsByType(extensionType: ExtensionActiveType): ExtensionService[] {
+    let extensions: ExtensionService[] = []
+    for (let idx = 0, len = this._extensions.length; idx < len; ++idx) {
+      const extension = this._extensions[idx]
+      if (extension.hasType(extensionType)) {
+        extensions.push(extension)
+      }
+    }
+    return extensions
   }
 
   async read(uri: ResourcePath): Promise<Result<Resource, string>> {
@@ -258,6 +279,16 @@ export class ExtensionManager {
     let html: string[] = [];
     for (const extension of extensions) {
       extension.run('onview', 'property', resource)
+    }
+    return html
+  }
+
+  onSearchBar(): string[] | Result<string, string> {
+    const extensions = this._actives.get('search')
+    if (!extensions || extensions.length === 0) return Result.failure('empty extensions')
+    let html: string[] = [];
+    for (const extension of extensions) {
+      extension.run('onview', 'search')
     }
     return html
   }

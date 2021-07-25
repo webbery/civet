@@ -6,6 +6,7 @@ const { ipcRenderer } = require('electron')
 // [发送的消息: 回应的消息]
 const replyMessageMap = {
   hasDirectory: 'isDirectoryExist',
+  getWorkbenchView: 'replyWorkbenchView',
   getImagesWithDirectoryFormat: 'replyImagesWithDirectory',
   getImagesInfo: 'replyImagesInfo',
   getImageInfo: 'replyImageInfo',
@@ -81,6 +82,7 @@ const getServiceInstance = (function() {
 export default {
   getServiceInstance: getServiceInstance,
   IS_DIRECTORY_EXIST: 'hasDirectory',
+  GET_INIT_WORKBENCH_VIEW: 'getWorkbenchView',
   GET_IMAGE_INFO: 'getImageInfo',
   GET_IMAGES_INFO: 'getImagesInfo',
   GET_IMAGES_INDEXES: 'getImagesIndex',

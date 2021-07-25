@@ -1,12 +1,12 @@
-import { MessagePipeline } from './MessageTransfer'
-import JString from '../public/String'
-import { ReplyType, Message } from './Message'
-import { Resource, readThumbnail, SerializeAccessor } from '../public/Resource'
-import { CivetDatabase } from './Kernel'
-import { ResourcePath } from './common/ResourcePath'
-import { config } from '../public/CivetConfig'
+import { MessagePipeline } from '../MessageTransfer'
+import JString from '../../public/String'
+import { ReplyType, Message } from '../Message'
+import { Resource, readThumbnail, SerializeAccessor } from '../../public/Resource'
+import { CivetDatabase } from '../Kernel'
+import { ResourcePath } from '../common/ResourcePath'
+import { config } from '../../public/CivetConfig'
 import { ResourceObserver } from './ResourceObserver'
-import { PropertyType } from '../public/ExtensionHostType'
+import { PropertyType } from '../../public/ExtensionHostType'
 const fs = require('fs')
 
 let isStart: boolean = false;

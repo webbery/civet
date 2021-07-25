@@ -12,8 +12,8 @@
     <button
       type="button"
       class="search-button el-icon-close"
-      aria-label="Remove item: '1'"
       data-button
+      @click="onDeleteItem(item)"
     ></button>
   </div>
 </template>
@@ -26,7 +26,12 @@ export default {
       type: Object
     }
   },
-  methods: {}
+  methods: {
+    onDeleteItem(item) {
+      console.info('earse item')
+      this.$emit('erase', item)
+    }
+  }
 }
 </script>
 <style scoped>

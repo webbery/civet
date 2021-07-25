@@ -1,4 +1,4 @@
-import {ResourceService} from './ResourceService'
+import {ResourceService} from './service/ResourceService'
 import { config } from '../public/CivetConfig'
 import { ResourceLoader } from './service/ResourceLoader'
 import { ResourcePath } from './common/ResourcePath'

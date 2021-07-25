@@ -1,6 +1,7 @@
-import { ExtensionManager } from './ExtensionManager'
-import { RendererMock } from './RendererMock'
-import { ResourcePath } from './common/ResourcePath'
+import { ExtensionManager } from '../ExtensionManager'
+import { RendererMock } from '../RendererMock'
+import { ResourcePath } from '../common/ResourcePath'
+import { WorkbenchItem } from '../../public/WorkbenchItem'
 
 export class ResourceObserver {
   private _listener: ExtensionManager;
@@ -19,6 +20,11 @@ export class ResourceObserver {
   
   read(uri: ResourcePath) {
     return this._listener.read(uri)
+  }
+
+  initWorkbenchView(): Map<string, WorkbenchItem> {
+    const items = new Map<string, WorkbenchItem>()
+    return items
   }
 }
 

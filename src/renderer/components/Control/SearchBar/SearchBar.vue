@@ -3,7 +3,7 @@
     <!-- <select id="keywords" class="el-input__inner" multiple></select> -->
     <div class="search-group" >
       <div class="search-default" v-for="(item, i) in conditions" :key="i" >
-        <SearchItem :item="item"></SearchItem>
+        <SearchItem :item="item" @erase="onItemDelete"></SearchItem>
       </div>
       <SearchInput class="search-input" @addSearchItem="onAddSearchText"></SearchInput>
     </div>
@@ -57,6 +57,16 @@ export default {
     },
     onUpdateSearchBar(value) {
       this.onAddSearchText(value)
+    },
+    onItemDelete(item) {
+      for (let idx = this.conditions.length - 1; idx >= 0; --idx) {
+        const condition = this.conditions[idx]
+        if (condition.type === item.type && condition.text === item.text) {
+          this.conditions.splice(idx, 1)
+          bus.emit(bus.EVENT_UPDATE_QUERY_EXTERNAL_CONDITION, item)
+          break
+        }
+      }
     },
     onSearch() {}
   }
