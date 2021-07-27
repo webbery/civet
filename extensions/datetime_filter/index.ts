@@ -1,9 +1,12 @@
-import { IResource, IProperty, PropertyType } from 'civet'
+import { window, ConditionItem } from 'civet'
 
-export function activate() {
-  return {
-    html: () => {
+const conditionItem = window.createConditionItem('test')
+conditionItem.html = '<select>\
+  <option value ="volvo">Volvo</option>\
+  <option value ="saab">Saab</option>\
+  <option value="opel">Opel</option>\
+  <option value="audi">Audi</option>\
+  </select>'
 
-    }
-  }
-}
+console.info('extension info:', window.searchBar)
+window.searchBar.items.push(conditionItem)

@@ -1,5 +1,5 @@
 import { MessagePipeline } from '../MessageTransfer'
-import JString from '../../public/String'
+import { joinPath } from '../../public/String'
 import { ReplyType, Message } from '../Message'
 import { Resource, readThumbnail, SerializeAccessor } from '../../public/Resource'
 import { CivetDatabase } from '../Kernel'
@@ -50,7 +50,7 @@ export class ResourceService{
       // console.info(menu)
       self.totalFiles += menu.length
       for (const item of menu) {
-        await self.readImages(msgid, new ResourcePath(JString.joinPath(dir, item)))
+        await self.readImages(msgid, new ResourcePath(joinPath(dir, item)))
       }
       // reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
       self.progressLoad += menu.length
@@ -243,7 +243,7 @@ export class ResourceService{
       // console.info(menu)
       self.totalFiles += menu.length
       for (const item of menu) {
-        await self.readImages(msgid, new ResourcePath(JString.joinPath(path.local(), item), path.remote()))
+        await self.readImages(msgid, new ResourcePath(joinPath(path.local(), item), path.remote()))
       }
       // reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
       self.progressLoad += menu.length

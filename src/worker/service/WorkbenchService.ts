@@ -9,7 +9,12 @@ export class WorkbenchService {
   }
 
   initWorkbenchFromExtension(msgid: number, data: any) {
-    return {type: ReplyType.REPLY_WORKBENCH_VIEW, data: {}}
+    const views = this.observer.getWorkbenchView()
+    let fragments = []
+    for (let view of views) {
+      fragments.push({name: view.name, html: '<span>extension</span>'})
+    }
+    return {type: ReplyType.REPLY_WORKBENCH_VIEW, data: fragments}
   }
 
   private observer: WorkbenchObserver;

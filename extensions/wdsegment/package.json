@@ -10,7 +10,6 @@
   "civet": {
     "activeEvents": [
       "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png,gif",
-      "onView:",
       "onSave:"
     ]
   },

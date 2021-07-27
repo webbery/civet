@@ -1,6 +1,7 @@
 import { makeRequireFunction } from '@/../public/ExtensionLoader'
 import { createApiFactoryAndRegisterActors } from '../ExtensionHost.API.Impl'
 import { isFileExist, getExtensionPath } from '@/../public/Utility'
+import { MessagePipeline } from '../MessageTransfer'
 var _commonjsGlobal = typeof global === 'object' ? global : {};
 const Module = require('module')
 
@@ -9,10 +10,12 @@ export class ExtensionModule extends Module {
   private _vm: any;
   private _extensionRequirePaths: string[] = [];
   private _r: any;
+  private _pipeline: MessagePipeline;
 
-  constructor(id: string, parent: NodeModule|null|undefined) {
+  constructor(id: string, parent: NodeModule|null|undefined, pipeline: MessagePipeline) {
     super(id, parent)
     this._vm = require('vm')
+    this._pipeline = pipeline
     this._initSearchPath()
   }
 
@@ -31,7 +34,7 @@ export class ExtensionModule extends Module {
   require(path: string) {
     if (path === 'civet') {
       // inject civet to extension
-      const apiFactory = createApiFactoryAndRegisterActors()
+      const apiFactory = createApiFactoryAndRegisterActors(this._pipeline)
       return apiFactory(null, null, null)
     }
     if (this._extRequire(path)) {

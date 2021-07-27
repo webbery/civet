@@ -84,12 +84,30 @@ declare module 'civet' {
         Property = 1,
         Navigation = 2,
         Overview = 3,
-        DetailView = 4
+        DetailView = 4,
+        Search = 5
     }
 
-    export interface ISearchIcon {}
-    // export namespace window {
+    export enum ConditionStyle {
+        MultipleSelect = 1,
+        SingleSelect = 2,
+        RangeSelect = 3,
+        ColorSelect = 4
+    }
+    /**
+     * ConditionItem is embeded into search bar, which is to update search conditions
+     */
+    export interface ConditionItem {
+        html: string;
+        conditions: string[];
+        // onQueryChange();
+    }
+    export interface SearchBar {
+        items: ConditionItem[];
+    }
+    export namespace window {
+        export let searchBar: SearchBar | undefined;
     //     export function createWebviewPanel(viewtype: ViewType): IWebview;
-    //     export function createSearchIcon(): ISearchIcon;    
-    // }
+        export function createConditionItem(id: string): ConditionItem;
+    }
 }

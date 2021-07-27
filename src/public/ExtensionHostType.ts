@@ -10,5 +10,13 @@ export enum ViewType {
   Property = 1,
   Navigation = 2,
   Overview = 3,
-  DetailView = 4
+  DetailView = 4,
+  Search = 5
+}
+
+export enum ConditionStyle {
+  MultipleSelect = 1,
+  SingleSelect = 2,
+  RangeSelect = 3,
+  ColorSelect = 4
 }

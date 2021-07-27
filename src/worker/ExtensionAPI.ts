@@ -46,6 +46,7 @@ export class APIFactory {
     let proxy = new Proxy(resource, handler)
     return proxy
   }
+
 }
 
 export function defineAPI(factory: APIFactory) {

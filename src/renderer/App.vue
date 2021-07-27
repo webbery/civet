@@ -22,7 +22,7 @@ export default {
     LandingPage,
     Guider
   },
-  async mounted() {
+  mounted() {
     if (config.isFirstTime() || config.getCurrentDB() === undefined) {
       const guider = document.getElementById('guider')
       guider.showModal()
@@ -36,8 +36,6 @@ export default {
     this.$nextTick(() => {
       this.$store.dispatch('init')
     })
-    const workbench = await this.$ipcRenderer.get(Service.GET_INIT_WORKBENCH_VIEW)
-    console.info('workbench', workbench)
   },
   methods: {
     onUpdateImages(error, updateImages) {

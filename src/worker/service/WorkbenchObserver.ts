@@ -12,6 +12,6 @@ export class WorkbenchObserver {
   }
 
   getWorkbenchView() {
-    this._listener.getExtensionsByType(ExtensionActiveType.ExtView)
+    return this._listener.getExtensionsByType(ExtensionActiveType.ExtView)
   }
 }

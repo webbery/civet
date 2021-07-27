@@ -34,6 +34,9 @@
           <RangeInput firstPlaceholder="最小" lastPlaceholder="最大" unit="Kb"></RangeInput>
         </el-dropdown-menu>
       </el-dropdown> -->
+      <span v-for="(item, i) of extensions" :key="i">
+        <span v-html="item.html"></span>
+      </span>
     </span>
   </div>
 </template>
@@ -42,6 +45,7 @@
 import RangeInput from './Control/RangeInput'
 import MutiSelect from './Control/Multiselect'
 import { debounce } from 'lodash'
+import Service from '@/components/utils/Service'
 import bus from './utils/Bus'
 
 export default {
@@ -75,11 +79,18 @@ export default {
           {label: 'bmp'}
         ]
       },
-      clazz: []
+      clazz: [],
+      extensions: []
     }
   },
-  mounted() {
+  async mounted() {
     bus.on(bus.EVENT_UPDATE_QUERY_EXTERNAL_CONDITION, this.onQueryConditionChanged)
+    const workbench = await this.$ipcRenderer.get(Service.GET_INIT_WORKBENCH_VIEW)
+    console.info('workbench', workbench)
+    for (let idx = 0, len = workbench.length; idx < len; ++idx) {
+      this.$set(this.extensions, idx, workbench[idx])
+    }
+    console.info('extension:', this.extensions)
   },
   methods: {
     onLoadTags() {

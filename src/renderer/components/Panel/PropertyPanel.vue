@@ -70,7 +70,7 @@
 import bus from '../utils/Bus'
 import IconTag from '@/components/IconTag'
 import Preview from '../Control/Preview'
-import JString from '@/../public/String'
+import { i18n, formatOutput } from '@/../public/String'
 // import JImage from '../JImage'
 // import ImgTool from '../utils/ImgTool'
 import InputLabel from '../Control/InputLabel'
@@ -165,7 +165,7 @@ export default {
           }
           if (displayTable[item.name] !== false) {
             console.info('propterty name:', item.name, 'type:', item.type)
-            names.push(JString.i18n(item.name))
+            names.push(i18n(item.name))
             const meta = getItem(item.name, file.meta)
             if (!meta) {
               if (!file[item.name]) {
@@ -185,7 +185,7 @@ export default {
                   console.info('date: ', dt, meta.value)
                   values.push(dt)
                 } else {
-                  values.push(JString.formatOutput(meta.value))
+                  values.push(formatOutput(meta.value))
                 }
               }
             }

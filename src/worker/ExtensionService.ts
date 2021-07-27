@@ -1,7 +1,9 @@
 import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
+import { MessagePipeline } from './MessageTransfer'
 import { createDecorator } from './ServiceDecorator'
 import { Result } from './common/Result'
 import { getAbsolutePath } from '@/../public/Utility'
+import { ViewType } from '@/../public/ExtensionHostType'
 import { ExtensionModule } from './api/ExtensionRequire'
 const fs = require('fs')
 
@@ -22,6 +24,14 @@ export enum ExtensionActiveType {
 }
 interface ITest {
   _name: string;
+}
+
+const ViewTypeTable = {
+  Navigation: ViewType.Navigation,
+  Overview: ViewType.Overview,
+  DetailView: ViewType.DetailView,
+  Property: ViewType.Property,
+  SearchBar: ViewType.Search
 }
 class ExtensionPackage {
   private _name: string = '';
@@ -56,6 +66,12 @@ class ExtensionPackage {
         array.push.apply(array, contentTypes)
         this._activeEvents.set(ExtensionActiveType.ExtContentType, array)
       } else if (map[0] === 'onView') {
+        const vt = ViewTypeTable[map[1]]
+        if (vt !== undefined) {
+          this._activeEvents.set(ExtensionActiveType.ExtView, vt);
+        } else {
+          console.error(`[package.json]${dir}: ${map[1]} is not in ViewType`)
+        }
       } else if (map[0] === 'onSave') {
       }
     }
@@ -78,31 +94,18 @@ class ExtensionPackage {
 
 const decoratorTest = createDecorator<ITest>('ITest');
 
-let ITest: ITest;
 export class ExtensionService {
   private _package: ExtensionPackage;
-  private _pipe: IMessagePipeline;
+  private _pipe: MessagePipeline;
   private _instance: any = null;
   private _nexts: ExtensionService[] = [];  //dependency service
 
-  constructor(@decoratorTest packagePath: string, pipe: IMessagePipeline) {
+  constructor(@decoratorTest packagePath: string, pipe: MessagePipeline) {
     this._package = new ExtensionPackage(packagePath)
     this._pipe = pipe
-    // add require path
-    // console.info('module', Module.paths)
-    // if (!Module.paths) {
-    //   Module.paths = [path.normalize(packagePath + '/node_modules')]
-    // } else {
-    //   Module.paths.push(path.normalize(packagePath + '/node_modules'))
-    // }
-    // module.paths.push(packagePath + '/node_modules')
-    // let _NODE_PATH = process.env.NODE_PATH
-    // console.info('node path: ', _NODE_PATH)
-    // if (!process.env.NODE_PATH) {
-    //   process.env.NODE_PATH = packagePath + '/node_modules'
-    // } else {
-    //   process.env.NODE_PATH += ':' + packagePath + '/node_modules'
-    // }
+    if (this.hasType(ExtensionActiveType.ExtView)) {
+      this._initialize()
+    }
   }
 
   get name() {
@@ -134,17 +137,30 @@ export class ExtensionService {
     return this._package.activeTypes.has(type)
   }
 
+  private _initialize(): Result<string, string> {
+    const entryPath = this._package.main
+    if (!fs.existsSync(entryPath)) return Result.failure(`file not exist: ${entryPath}`)
+    const content = fs.readFileSync(entryPath, 'utf-8')
+    const m = new ExtensionModule('', module.parent, this._pipe)
+    m._compile(content, this._package.name)
+    console.info(m.exports)
+    try {
+      // m.exports.run()
+      if (m.exports.activate) {
+        this._instance = m.exports.activate()
+      }
+      return Result.success('ok')
+    } catch (error) {
+      const msg = `initialize ${this._package.name} fail: ${error}`
+      this._pipe!.post('onErrorMessage', {msg: msg})
+      return Result.failure(msg)
+    }
+  }
+
   async run(command: string, ...args: any[]): Promise<Result<string, string>> {
     if (this._instance === null) {
-      const entryPath = this._package.main
-      if (!fs.existsSync(entryPath)) return Result.failure(`file not exist: ${entryPath}`)
-      const content = fs.readFileSync(entryPath, 'utf-8')
-      // const Module = require('module')
-      const m = new ExtensionModule('', module.parent)
-      // m.filename = this._package.name
-      m._compile(content, this._package.name)
-      console.info(m.exports)
-      this._instance = m.exports.activate()
+      const result = this._initialize()
+      if(!result.isSuccess()) return result
     }
     let cmd = this._instance[command]
     if (!cmd) return Result.failure(`${command} function not exist`)
