@@ -2,6 +2,7 @@ import { makeRequireFunction } from '@/../public/ExtensionLoader'
 import { createApiFactoryAndRegisterActors } from '../ExtensionHost.API.Impl'
 import { isFileExist, getExtensionPath } from '@/../public/Utility'
 import { MessagePipeline } from '../MessageTransfer'
+import { logger } from '@/../public/Logger'
 var _commonjsGlobal = typeof global === 'object' ? global : {};
 const Module = require('module')
 
@@ -17,6 +18,7 @@ export class ExtensionModule extends Module {
     this._vm = require('vm')
     this._pipeline = pipeline
     this._initSearchPath()
+    logger.debug(`${id} init finished`)
   }
 
   _compile(content: string, filename: string) {
@@ -35,6 +37,7 @@ export class ExtensionModule extends Module {
     if (path === 'civet') {
       // inject civet to extension
       const apiFactory = createApiFactoryAndRegisterActors(this._pipeline)
+      logger.debug(`createApiFactoryAndRegisterActors finish`)
       return apiFactory(null, null, null)
     }
     if (this._extRequire(path)) {

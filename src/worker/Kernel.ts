@@ -9,7 +9,7 @@ enum OpenFlag {
 let _instance: any;
 let _current: string|undefined = undefined;
 let _flag: OpenFlag = OpenFlag.ReadWrite;
-const _enableLog: boolean = true;
+const _enableLog: boolean = false;
 
 function Initialze() {
   if (!_current) {

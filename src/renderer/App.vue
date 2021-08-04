@@ -22,6 +22,11 @@ export default {
     LandingPage,
     Guider
   },
+  beforeMount() {
+    // regist ipc message process function
+    this.$ipcRenderer.on(Service.ON_FILE_UPDATE, this.onUpdateImages)
+    this.$ipcRenderer.on(Service.ON_ERROR_MESSAGE, this.onErrorTips)
+  },
   mounted() {
     if (config.isFirstTime() || config.getCurrentDB() === undefined) {
       const guider = document.getElementById('guider')
@@ -30,12 +35,11 @@ export default {
     if (config.shouldUpgrade()) {
       config.save()
     }
-    // regist ipc message process function
-    this.$ipcRenderer.on(Service.ON_FILE_UPDATE, this.onUpdateImages)
-    this.$ipcRenderer.on(Service.ON_ERROR_MESSAGE, this.onErrorTips)
     this.$nextTick(() => {
       this.$store.dispatch('init')
     })
+    // send this message to worker, and recieve workbench extension view for initial.
+    this.$ipcRenderer.send(Service.MOUNTED)
   },
   methods: {
     onUpdateImages(error, updateImages) {

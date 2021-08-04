@@ -1,12 +1,12 @@
 import util from 'util'
 // import Log from '@/../public/Logger'
+import { ViewType } from '@/../public/ExtensionHostType'
 
 const { ipcRenderer } = require('electron')
 
 // [发送的消息: 回应的消息]
 const replyMessageMap = {
   hasDirectory: 'isDirectoryExist',
-  getWorkbenchView: 'replyWorkbenchView',
   getImagesWithDirectoryFormat: 'replyImagesWithDirectory',
   getImagesInfo: 'replyImagesInfo',
   getImageInfo: 'replyImageInfo',
@@ -27,6 +27,14 @@ const replyMessageMap = {
 const getServiceInstance = (function() {
   let hasInited
   const callbackCache = {}
+  const EventMap = {
+    Search: ViewType.Search,
+    DetailView: ViewType.DetailView,
+    Overview: ViewType.Overview,
+    Navigation: ViewType.Navigation,
+    Property: ViewType.Property
+  }
+  let viewCallback = {}
   let service
   let promiseOn
   let requestID = 0
@@ -52,6 +60,13 @@ const getServiceInstance = (function() {
           } else {
             callbackCache[type].push(callback)
           }
+        },
+        onViewUpdate: (type, callback) => {
+          if (viewCallback[type] === undefined) {
+            viewCallback[type] = [callback]
+          } else {
+            viewCallback[type].push(callback)
+          }
         }
       }
       promiseOn = util.promisify(service.on)
@@ -66,10 +81,21 @@ const getServiceInstance = (function() {
       ipcRenderer.on('message-to-renderer', (sender, msg) => {
         const callbacks = callbackCache[msg.type]
         if (callbacks === undefined) {
-          console.error(`reply[${msg.type}] is not defined, params: ${msg.data}`)
+          const msgType = msg.type.split('.')
+          if (msgType.length >= 2) {
+            //
+            const viewFunc = viewCallback[msgType[0]]
+            if (viewFunc !== undefined) {
+              for (const f of viewFunc) {
+                f(msgType[2], msgType[1], msg.data.msg[0])
+              }
+            }
+          } else {
+            console.error(`reply[${msg.type}] is not defined, params: ${msg.data}`)
+          }
           return
         }
-        console.info('message-to-renderer', msg.type)
+        // console.info('message-to-renderer', msg.type)
         callbacks.forEach(callback => {
           callback(null, msg.data.msg)
         })
@@ -82,7 +108,6 @@ const getServiceInstance = (function() {
 export default {
   getServiceInstance: getServiceInstance,
   IS_DIRECTORY_EXIST: 'hasDirectory',
-  GET_INIT_WORKBENCH_VIEW: 'getWorkbenchView',
   GET_IMAGE_INFO: 'getImageInfo',
   GET_IMAGES_INFO: 'getImagesInfo',
   GET_IMAGES_INDEXES: 'getImagesIndex',
@@ -109,6 +134,7 @@ export default {
   UPDATE_FILE_NAME: 'updateFileName',
   REINIT_DB: 'reInitDB',
   REMOVE_DB: 'removeDB',
+  MOUNTED: 'mounted',
   INSTALL_EXTENSION: 'install',
   UNINSTALL_EXTENSION: 'uninstall',
   UPDATE_EXTENSION: 'update',

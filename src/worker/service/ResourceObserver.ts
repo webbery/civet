@@ -2,7 +2,9 @@ import { ExtensionManager } from '../ExtensionManager'
 import { RendererMock } from '../RendererMock'
 import { ResourcePath } from '../common/ResourcePath'
 import { WorkbenchItem } from '../../public/WorkbenchItem'
+import { injectable } from '../Singleton'
 
+@injectable
 export class ResourceObserver {
   private _listener: ExtensionManager;
   private _browsers: RendererMock[];

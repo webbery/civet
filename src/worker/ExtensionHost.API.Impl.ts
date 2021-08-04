@@ -1,23 +1,30 @@
 import type * as civet from 'civet';
-import { PropertyType, ViewType, ConditionStyle } from '../public/ExtensionHostType'
+import { PropertyType, ViewType } from '../public/ExtensionHostType'
 import { RPCProtocal } from './common/RpcProtocal'
-import { SearchBar, ExtConditionItem, ExtSearchBar } from './view/SearchBar'
 import { MessagePipeline } from './MessageTransfer'
+import { registSingletonObject, getSingleton } from './Singleton'
+import { logger } from '@/../public/Logger'
+import { ExtSearchBar } from './view/extHostSearchBar'
+import { ExtPropertyView } from './view/extHostPropertyView'
 
 export interface IExtensionApiFactory {
 	(extension: any, registry: any, configProvider: any): typeof civet;
 }
 
 export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline): IExtensionApiFactory {
-  const rpcProtocal = new RPCProtocal(pipeline)
-  const extSearchBar = new ExtSearchBar(rpcProtocal);
+  registSingletonObject(RPCProtocal)
+  const extSearchBar = registSingletonObject(ExtSearchBar)
+  const extPropertyView = registSingletonObject(ExtPropertyView)
 
   const window: typeof civet.window = {
     get searchBar() { return extSearchBar.searchBar },
   
     createConditionItem(id: string): civet.ConditionItem {
+      logger.debug(`${id} create entry ${extSearchBar.proxy}`)
       return extSearchBar.createConditionItemEntry(id)
-    }
+    },
+
+    get propertyView() { return extPropertyView.propertyView }
   }
   
   return function (extension: any, extensionRegistry: any, configProvider: any): typeof civet {
@@ -28,7 +35,6 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline): IE
       // enum
       PropertyType: PropertyType,
       ViewType: ViewType,
-      ConditionStyle: ConditionStyle,
       //
       activate: null,
       unactivate: null

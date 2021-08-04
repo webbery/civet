@@ -1,4 +1,5 @@
 import { ReplyType, Message, MessageState, IMessagePipeline } from './Message'
+import { injectable, registSingletonObject } from './Singleton'
 const { ipcRenderer } = require('electron')
 
 class Timer {
@@ -28,24 +29,23 @@ class Timer {
     (id: number, data: any): void;
   }
 
-  export class MessagePipeline implements IMessagePipeline {
+@injectable
+export class MessagePipeline implements IMessagePipeline {
     timer: Timer = new Timer();
     viptimer: Timer = new Timer();
     threshod: number = 200;
     messageQueue: Map<string, Message> = new Map<string, Message>();
     VIPQueue: any[] = [];
     processor: Map<string, any> = new Map<string, any>();
-    constructor(threshod: number, processor: Map<string, any>) {
+    constructor(threshod: number) {
       this.threshod = threshod
-      this.processor = processor
-
       ipcRenderer.on('message-from-main', async (event: any, arg: any) => {
         console.info('==================')
         console.info('arg', arg)
         console.info('==================')
         const [func, self] = this.processor.get(arg.type)
         const reply = await func.call(self, arg.id, arg.data)
-        console.info('replay', reply)
+        console.info('reply', reply)
         if (reply === undefined) return
         let msg = new Message()
         msg.id = arg.id
@@ -54,6 +54,7 @@ class Timer {
         msg.tick = 0
         this.reply(msg)
       })
+      console.info('pipeline init finish')
     }
     reply(msg: Message) {
       // if same type exist but id is different, remove smaller id message.
@@ -125,7 +126,7 @@ class Timer {
       msg.id = 0
       msg.tick = 0
       for (let idx = 0; idx < len; ++idx) {
-        console.info('message data:', this.VIPQueue[idx].data)
+        console.info('type:', this.VIPQueue[idx].type, 'message data:', this.VIPQueue[idx].data)
         msg.type = this.VIPQueue[idx].type
         msg.msg = this.VIPQueue[idx].data
         ipcRenderer.send('message-from-worker', { type: this.VIPQueue[idx].type, data: msg })

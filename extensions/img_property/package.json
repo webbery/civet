@@ -1,16 +1,16 @@
 {
-  "name": "datetime_filter",
-  "displayName": "时间筛选",
-  "description": "按时间筛选文件",
+  "name": "img_property",
+  "displayName": "图像属性面板",
+  "description": "展示图像属性的面板",
   "version": "0.0.1",
   "engines": {
-    "civet": "^0.1.4"
+    "civet": "^0.2.0"
   },
   "main": "./index.js",
   "civet": {
     "activeEvents": [
       "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png",
-      "onView:Search",
+      "onView:Property",
       "onSave:"
     ]
   },

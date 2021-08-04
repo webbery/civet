@@ -13,8 +13,9 @@ import { PropertyType } from '../public/ExtensionHostType'
 import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstallManager'
 import { logger } from '@/../public/Logger'
 import fs from 'fs'
+import { injectable, registSingletonObject } from './Singleton'
 
-
+@injectable
 export class ExtensionManager {
   private _pipeline: MessagePipeline;
   private _extensionsOfConfig: string[] = [];

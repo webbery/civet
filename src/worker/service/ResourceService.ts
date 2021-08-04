@@ -7,6 +7,7 @@ import { ResourcePath } from '../common/ResourcePath'
 import { config } from '../../public/CivetConfig'
 import { ResourceObserver } from './ResourceObserver'
 import { PropertyType } from '../../public/ExtensionHostType'
+import { injectable } from '../Singleton'
 const fs = require('fs')
 
 let isStart: boolean = false;
@@ -16,6 +17,7 @@ function updateStatus(status: any) {
   }
 }
 
+@injectable
 export class ResourceService{
   constructor(pipeline: MessagePipeline, observer: ResourceObserver) {
     this.observer = observer

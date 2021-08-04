@@ -71,72 +71,72 @@ describe('verify browser extension', function (resolve, reject) {
       done()
     })
   })
-  it('add operation in classify panel ', async function() {
-    await mainWindowPage.waitFor(6000)
-    let btnAddClass = await mainWindowPage.$('.icon-add-class')
-    expect(btnAddClass).not.to.be.null
-    await btnAddClass.click()
-    await mainWindowPage.waitFor(1000)
-    const editClass = await mainWindowPage.$('.vtl-input')
-    editClass.type('helloworld')
-    await mainWindowPage.waitFor(1000)
-    await editClass.press('Enter')
-  })
-  it('install local extensions', async function() {
-    await mainWindowPage.waitFor(2000)
-    await testLocalExtension.install(mainWindowPage)
-  })
-  it('browser extension: add files', function(done) {
-    // create process and use websocket as a browser extension to add resource
-    testBrowserExtension.run(done, mainWindowPage)
-  })
-  it('file property', async function() {
-    const files = await mainWindowPage.$$('.vue-waterfall-slot')
-    expect(files).not.to.be.null
-    expect(files.length).to.be.above(0)
-    await files[0].click()
-    await mainWindowPage.waitFor(1000)
-    await testFileOperation.run(mainWindowPage)
-  })
-  it('file classify', async function() {
-    const fieldsets = await mainWindowPage.$$('.property fieldset')
-    expect(fieldsets.length).to.be.above(0)
-    await fieldsets[1].click()
-    const classes = await mainWindowPage.$$('.el-popper label')
-    expect(fieldsets.length).to.be.above(0)
-  })
-  it('file tags', function(done) {
-    done()
-  })
+  // it('add operation in classify panel ', async function() {
+  //   await mainWindowPage.waitFor(6000)
+  //   let btnAddClass = await mainWindowPage.$('.icon-add-class')
+  //   expect(btnAddClass).not.to.be.null
+  //   await btnAddClass.click()
+  //   await mainWindowPage.waitFor(1000)
+  //   const editClass = await mainWindowPage.$('.vtl-input')
+  //   editClass.type('helloworld')
+  //   await mainWindowPage.waitFor(1000)
+  //   await editClass.press('Enter')
+  // })
+  // it('install local extensions', async function() {
+  //   await mainWindowPage.waitFor(2000)
+  //   await testLocalExtension.install(mainWindowPage)
+  // })
+  // it('browser extension: add files', function(done) {
+  //   // create process and use websocket as a browser extension to add resource
+  //   testBrowserExtension.run(done, mainWindowPage)
+  // })
+  // it('file property', async function() {
+  //   const files = await mainWindowPage.$$('.vue-waterfall-slot')
+  //   expect(files).not.to.be.null
+  //   expect(files.length).to.be.above(0)
+  //   await files[0].click()
+  //   await mainWindowPage.waitFor(1000)
+  //   await testFileOperation.run(mainWindowPage)
+  // })
+  // it('file classify', async function() {
+  //   const fieldsets = await mainWindowPage.$$('.property fieldset')
+  //   expect(fieldsets.length).to.be.above(0)
+  //   await fieldsets[1].click()
+  //   const classes = await mainWindowPage.$$('.el-popper label')
+  //   expect(fieldsets.length).to.be.above(0)
+  // })
+  // it('file tags', function(done) {
+  //   done()
+  // })
   
-  it('search file', function(done) {
-    done()
-  })
-  it('file menu operation', async function() {
-    let files = await mainWindowPage.$$('.vue-waterfall-slot')
-    expect(files).not.to.be.null
-    const beforeLength = files.length
-    expect(beforeLength).to.be.above(0)
-    await files[0].click({button: 'right'})
-    const menus = await mainWindowPage.$$('.cm-ul li')
-    expect(menus.length).to.be.above(1)
-    await menus[1].click()
-    files = await mainWindowPage.$$('.vue-waterfall-slot')
-    expect(beforeLength).to.be.above(files.length)
-  })
-  it('clean operation in classify panel ', async function() {
-    let itemClasses = await mainWindowPage.$$('.vtl-node-content')
-    const beforeLength = itemClasses.length
-    expect(beforeLength).to.be.above(0)
-    await itemClasses[0].click({button: 'right'})
-    const menus = await mainWindowPage.$$('.cm-ul li')
-    await menus[3].click()
-    itemClasses = await mainWindowPage.$$('.vtl-node-content')
-    expect(beforeLength).to.be.above(itemClasses.length)
-  })
-  it('uninstall local extension', async function() {
-    await testLocalExtension.uninstall(mainWindowPage)
-  })
+  // it('search file', function(done) {
+  //   done()
+  // })
+  // it('file menu operation', async function() {
+  //   let files = await mainWindowPage.$$('.vue-waterfall-slot')
+  //   expect(files).not.to.be.null
+  //   const beforeLength = files.length
+  //   expect(beforeLength).to.be.above(0)
+  //   await files[0].click({button: 'right'})
+  //   const menus = await mainWindowPage.$$('.cm-ul li')
+  //   expect(menus.length).to.be.above(1)
+  //   await menus[1].click()
+  //   files = await mainWindowPage.$$('.vue-waterfall-slot')
+  //   expect(beforeLength).to.be.above(files.length)
+  // })
+  // it('clean operation in classify panel ', async function() {
+  //   let itemClasses = await mainWindowPage.$$('.vtl-node-content')
+  //   const beforeLength = itemClasses.length
+  //   expect(beforeLength).to.be.above(0)
+  //   await itemClasses[0].click({button: 'right'})
+  //   const menus = await mainWindowPage.$$('.cm-ul li')
+  //   await menus[3].click()
+  //   itemClasses = await mainWindowPage.$$('.vtl-node-content')
+  //   expect(beforeLength).to.be.above(itemClasses.length)
+  // })
+  // it('uninstall local extension', async function() {
+  //   await testLocalExtension.uninstall(mainWindowPage)
+  // })
   after((done) => {
     try {
       setTimeout(() => {

@@ -5,6 +5,7 @@ import { Result } from './common/Result'
 import { getAbsolutePath } from '@/../public/Utility'
 import { ViewType } from '@/../public/ExtensionHostType'
 import { ExtensionModule } from './api/ExtensionRequire'
+import { logger } from '@/../public/Logger'
 const fs = require('fs')
 
 // const Module = require('module');
@@ -31,7 +32,7 @@ const ViewTypeTable = {
   Overview: ViewType.Overview,
   DetailView: ViewType.DetailView,
   Property: ViewType.Property,
-  SearchBar: ViewType.Search
+  Search: ViewType.Search
 }
 class ExtensionPackage {
   private _name: string = '';
@@ -143,7 +144,7 @@ export class ExtensionService {
     const content = fs.readFileSync(entryPath, 'utf-8')
     const m = new ExtensionModule('', module.parent, this._pipe)
     m._compile(content, this._package.name)
-    console.info(m.exports)
+    logger.debug(`${m.exports}`)
     try {
       // m.exports.run()
       if (m.exports.activate) {

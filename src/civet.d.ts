@@ -88,26 +88,28 @@ declare module 'civet' {
         Search = 5
     }
 
-    export enum ConditionStyle {
-        MultipleSelect = 1,
-        SingleSelect = 2,
-        RangeSelect = 3,
-        ColorSelect = 4
-    }
     /**
      * ConditionItem is embeded into search bar, which is to update search conditions
      */
     export interface ConditionItem {
         html: string;
-        conditions: string[];
+        conditions: Array<string|Date>;
         // onQueryChange();
     }
     export interface SearchBar {
         items: ConditionItem[];
     }
+
+    export interface PropertyView {
+        name: string;
+        html: string;
+    }
+
     export namespace window {
-        export let searchBar: SearchBar | undefined;
+        export let searchBar: SearchBar;
     //     export function createWebviewPanel(viewtype: ViewType): IWebview;
         export function createConditionItem(id: string): ConditionItem;
+
+        export let propertyView: PropertyView;
     }
 }

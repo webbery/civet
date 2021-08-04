@@ -13,10 +13,3 @@ export enum ViewType {
   DetailView = 4,
   Search = 5
 }
-
-export enum ConditionStyle {
-  MultipleSelect = 1,
-  SingleSelect = 2,
-  RangeSelect = 3,
-  ColorSelect = 4
-}
