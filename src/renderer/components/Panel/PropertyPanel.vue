@@ -2,13 +2,13 @@
   <div class="property">
       <div :body-style="{ padding: '0px' }">
         <div style="padding: 4px;" class="image-name">
-          <InputLabel>{{filename}}</InputLabel>
+          <InputLabel v-on:changed="onNameChaged">{{filename}}</InputLabel>
         </div>
         <!-- <div v-if="picture.id !== null"> -->
           <Preview :src="thumbnail"></Preview>
           <!-- <JImage :src="imagepath" :interact="false"></JImage> -->
           <div class="color-container">
-            <span v-if="picture.colors.length!==0" ><span class="main-color" v-for="color of picture.colors" :key="color" :style="{'background-color': color}" ></span></span>
+            <span v-if="colors.length!==0" ><span class="main-color" v-for="color of colors" :key="color" :style="{'background-color': color}" ></span></span>
             <span v-else icon="el-icon-loading"></span>
           </div>
         <!-- </div> -->
@@ -18,7 +18,7 @@
       <legend class="title">标签</legend>
       <el-tag
         :key="tag"
-        v-for="tag in dynamicTags"
+        v-for="tag in tags"
         size="mini" closable
         :disable-transitions="false"
         @close="onDeleteTag(tag)"
@@ -37,7 +37,7 @@
     <fieldset>
       <legend class="title">分类</legend>
       <div>
-        <el-tag v-for="clz of dynamicClass" :key="clz" size="mini" @close="onDeleteClass(clz)" closable>{{clz}}</el-tag>
+        <el-tag v-for="clz of classes" :key="clz" size="mini" @close="onDeleteClass(clz)" closable>{{clz}}</el-tag>
         <el-popover
           placement="left"
           width="160"
@@ -62,36 +62,36 @@
       </el-col>
     </el-row>
     </fieldset>
-    <div v-html="propertyHtml"></div>
   </div>
 </template>
 
 <script>
 import bus from '../utils/Bus'
 import IconTag from '@/components/IconTag'
-import Preview from '../Control/Preview'
+import Preview from '../Control/CVPreview'
 import { i18n, formatOutput } from '@/../public/String'
-// import JImage from '../JImage'
-// import ImgTool from '../utils/ImgTool'
-import InputLabel from '../Control/InputLabel'
+import InputLabel from '../Control/CVInputLabel'
 import { config } from '@/../public/CivetConfig'
 import { mapState } from 'vuex'
+import { Service } from '../utils/Service'
+import { logger } from '@/../public/Logger'
+import { resetArray, thumbnail2Base64 } from '@/../public/Utility'
 
 export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, width: 0, height: 0, size: 0, colors: [] },
+      picture: { id: null, width: 0, height: 0, size: 0 },
       thumbnail: '',
-      dynamicTags: [],
-      dynamicClass: [],
+      tags: [],
+      classes: [],
       inputVisible: false,
       inputValue: '',
       checkValue: [],
       filename: '',
       metaNames: [],
       metaValues: [],
-      propertyHtml: ''
+      colors: []
     }
   },
   components: {
@@ -102,35 +102,71 @@ export default {
   }),
   mounted() {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
+    this.$ipcRenderer.onViewUpdate('Property', this.onViewUpdate)
   },
   methods: {
-    displayProperty(filesid) {
-      if (Array.isArray(filesid)) {
-        if (filesid.length === 1) {
-          this.displayFileProperty(filesid[0])
-        } else {
-          this.displayMultiFileProperty(filesid)
-        }
-      } else {
-        if (filesid === 'all') {
-        } else if (filesid === 'none') {
-        }
+    onViewUpdate(id, classname, propname, value) {
+      logger.debug(`onViewUpdate id: ${id}, class: ${classname}, value:`, value)
+      switch (propname) {
+        case 'name':
+          this.filename = value
+          break
+        case 'tags':
+          resetArray(this, this.tags, value)
+          break
+        case 'classes':
+          resetArray(this, this.classes, value)
+          break
+        case 'properties':
+          this.metaNames.push(i18n(value.name))
+          // if (value.type === )
+          if (value.name === 'size') {
+            this.metaValues.push(this.getSize(parseInt(value.value)))
+          } else {
+            this.metaValues.push(value.value)
+          }
+          break
+        case 'preview':
+          this.thumbnail = thumbnail2Base64(value)
+          break
+        case 'color':
+          this.colors.push(value)
+          break
+        default:
+          break
       }
     },
+    displayProperty(filesid) {
+      this.metaNames.splice(0, this.metaNames.length)
+      this.metaValues.splice(0, this.metaValues.length)
+      this.colors.splice(0, this.colors.length)
+      // if (Array.isArray(filesid)) {
+      //   if (filesid.length === 1) {
+      //     this.displayFileProperty(filesid[0])
+      //   } else {
+      //     this.displayMultiFileProperty(filesid)
+      //   }
+      // } else {
+      //   if (filesid === 'all') {
+      //   } else if (filesid === 'none') {
+      //   }
+      // }
+    },
+    onNameChaged(id, name) {},
     displayMultiFileProperty(filesid) {
       this.picture.id = null
       this.filename = filesid.length + '个文件'
     },
-    displayFileProperty(imageID) {
-      let getSize = (sz) => {
-        let v = sz / 1024
-        let unit = 'Kb'
-        if (v / 1024 > 1) {
-          unit = 'Mb'
-          v = v / 1024
-        }
-        return v.toFixed(1) + unit
+    getSize: (sz) => {
+      let v = sz / 1024
+      let unit = 'Kb'
+      if (v / 1024 > 1) {
+        unit = 'Mb'
+        v = v / 1024
       }
+      return v.toFixed(1) + unit
+    },
+    displayFileProperty(imageID) {
       // const images = this.$kernel.getFilesInfo([imageID])
       // console.info(this.$store)
       const files = this.$store.getters.getFiles([imageID])
@@ -175,7 +211,7 @@ export default {
               }
             } else {
               if (item.name === 'size') {
-                values.push(getSize(parseInt(file.size)))
+                values.push(this.getSize(parseInt(file.size)))
               } else {
                 if (item.type === 'date') {
                   // console.info('time', Utility.convert2ValidDate(meta.value))
@@ -202,8 +238,8 @@ export default {
           }
         }
         this.thumbnail = (file.thumbnail === undefined ? file.path : file.thumbnail)
-        this.dynamicTags = file.tag ? file.tag.slice(0) : []
-        this.dynamicClass = file.category
+        this.tags = file.tag ? file.tag.slice(0) : []
+        this.classes = file.category
         const isClassExist = function (clsName, dynamicClass) {
           for (let name of dynamicClass) {
             if (name === clsName) return true
@@ -213,7 +249,7 @@ export default {
         for (let idx = 0; idx < this.candidateClasses.length; ++idx) {
           const candidate = this.candidateClasses[idx]
           // console.info('candicate:', candidate)
-          if (isClassExist(candidate, this.dynamicClass)) {
+          if (isClassExist(candidate, this.classes)) {
             this.$set(this.checkValue, idx, true)
           } else {
             this.$set(this.checkValue, idx, false)
@@ -223,7 +259,7 @@ export default {
       }
     },
     onDeleteTag(tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
+      this.tags.splice(this.tags.indexOf(tag), 1)
       // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
       this.$store.dispatch('removeTags', {id: this.picture.id, tag: tag})
     },
@@ -241,7 +277,7 @@ export default {
       if (!this.picture.id) return
       let inputValue = this.inputValue
       if (inputValue) {
-        this.dynamicTags.push(inputValue)
+        this.tags.push(inputValue)
         // this.$ipcRenderer.send(Service.SET_TAG, {id: [this.picture.id], tag: this.dynamicTags})
         this.$store.dispatch('addTag', {fileID: this.picture.id, tag: inputValue})
       }
@@ -281,24 +317,20 @@ export default {
       }
       // this.$store.dispatch('addClass', {id: [this.picture.id], class: selectItem})
       // find file that remove from class
-      for (let idx = this.dynamicClass.length - 1; idx >= 0; --idx) {
-        if (!isInClass(this.dynamicClass[idx], selectItem, true)) {
+      for (let idx = this.classes.length - 1; idx >= 0; --idx) {
+        if (!isInClass(this.classes[idx], selectItem, true)) {
           // this.dynamicClass.splice(idx, 1)
-          await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: this.dynamicClass[idx]})
+          await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: this.classes[idx]})
         }
       }
       // add not exist
       for (let idx = selectItem.length - 1; idx >= 0; --idx) {
-        if (!isInClass(selectItem[idx], this.dynamicClass)) {
+        if (!isInClass(selectItem[idx], this.classes)) {
           console.info(selectItem[idx], idx)
           await this.$store.dispatch('addClassOfFile', {id: this.picture.id, path: selectItem[idx]})
           // this.dynamicClass.push(selectItem[idx])
         }
       }
-    },
-    getSrc(image) {
-      console.info('src:', image)
-      return image
     }
   }
 }

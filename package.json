@@ -119,7 +119,6 @@
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
     "image-hash": "^4.0.1",
-    "import-html-entry": "^1.11.1",
     "lodash": "^4.17.21",
     "log4js": "^6.3.0",
     "log4js-extend": "^0.2.1",

@@ -1,7 +1,8 @@
 import { MessagePipeline } from '../MessageTransfer'
 import { joinPath } from '../../public/String'
 import { ReplyType, Message } from '../Message'
-import { Resource, readThumbnail, SerializeAccessor } from '../../public/Resource'
+import { Resource, SerializeAccessor } from '../../public/Resource'
+import { thumbnail2Base64 } from '../../public/Utility'
 import { CivetDatabase } from '../Kernel'
 import { ResourcePath } from '../common/ResourcePath'
 import { config } from '../../public/CivetConfig'
@@ -86,7 +87,7 @@ export class ResourceService{
     const images = []
     for (const img of imgs) {
       let resource = new Resource(img)
-      const thumbnail = readThumbnail(resource.thumbnail)
+      const thumbnail = thumbnail2Base64(resource.thumbnail)
       resource.putProperty({name: 'thumbnail', value: thumbnail, type: PropertyType.Binary, query: false, store: true})
       images.push(resource)
     }

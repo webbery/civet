@@ -1,5 +1,6 @@
 import 'reflect-metadata'
-import { logger } from 'public/Logger';
+import { logger } from 'public/Logger'
+import { EventEmitter } from 'events'
 
 const registClasses = new Array<any>();
 const serviceIds = new Map<string, any>();
@@ -72,4 +73,22 @@ export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T },
   console.info(`new singlecton: ${id}`)
   serviceIds[id] = instance
   return instance
+}
+
+const hostEvents = new Map<string, any>();
+
+export function registHostEvent<T>(event: string, listener: { (...args: Array<any>): T }) {
+  const cb = hostEvents[event]
+  if (cb !== undefined) {
+    return
+  }
+  let e = new EventEmitter()
+  e.on(event, listener)
+  hostEvents[event] = e
+}
+
+export function emitEvent(event: string, ...args: any): boolean {
+  const e = hostEvents[event]
+  if (e === undefined) return false
+  return true
 }

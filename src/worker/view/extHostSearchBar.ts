@@ -2,23 +2,21 @@ import { ViewType } from '@/../public/ExtensionHostType'
 import type * as civet from 'civet';
 import { RPCProtocal } from '../common/RpcProtocal'
 import { injectable } from '../Singleton'
-import { ExtHostView } from './extHostView'
+import { ExtHostWebView } from './extHostWebView'
 
 @injectable
-export class ExtConditionItem extends ExtHostView implements civet.ConditionItem {
+export class ExtConditionItem extends ExtHostWebView implements civet.ConditionItem {
   conditions: Array<string|Date>;
 
   private _html: string;
-  private id: string;
   constructor(id: string, rpcProxy: RPCProtocal) {
-    super(rpcProxy)
-    this.id = id
+    super(id, rpcProxy)
     this.conditions = new Array()
   }
 
   set html(value: string) {
     this._html = value
-    this.update(this.id, ViewType.Search, this._html)
+    this.update(ViewType.Search, this._html)
   }
   get html(): string {
     return this._html

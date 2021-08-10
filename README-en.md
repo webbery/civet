@@ -36,10 +36,6 @@ Or [**Trello**](https://trello.com/b/M4hmAF2h/civet)
 #### Requirements
 C++ compiler that support C++17.  
 Node >= 12.0  
-
-#### Thanks 
-lmdb, a shared memory database.    
-PEGTL, a grammar parser to construct a dblanguage for civet  
   
 
 ---

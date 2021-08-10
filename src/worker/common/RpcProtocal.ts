@@ -1,12 +1,12 @@
 import { MessagePipeline } from '../MessageTransfer'
 import { ViewType } from '@/../public/ExtensionHostType'
-import { injectable } from '../Singleton'
+import { injectable, registSingletonObject } from '../Singleton'
 
 @injectable
 export class RPCProtocal {
   private pipeline: MessagePipeline;
   private first: boolean = true;
-  // private _instances: Map<string, any> = new Map<string, any>();
+  private _instances: Map<string, any> = new Map<string, any>();
   private cache: Array<any> = new Array()
 
   constructor(pipeline: MessagePipeline) {
@@ -22,44 +22,24 @@ export class RPCProtocal {
       }
     }
   }
-  // set<T>(proxyId: string, instance: T): any {
-  //   const handler = {
-  //     set(target: any, key: any, value: any) {
-  //       // pipeline.post()
-  //       console.info('protocal: ', key, value)
-  //       return Reflect.set(target, key, value)
-  //     }
-  //   }
-  //   const proxy = new Proxy(instance, handler)
-  //   this._instances.set(proxyId, proxy)
-  //   return proxy
-  // }
+  set<T>(id: string, ctor: { new (...args: Array<any>): T}): any {
+    let paramsTypes = Reflect.getMetadata('design:paramtypes', ctor)
+    if (paramsTypes === undefined) return undefined
+    const params = paramsTypes.map((v: any, i: any) => {
+      if (i === 0) return id
+      return registSingletonObject(v)
+    })
+    const proxy = new ctor(...params)
+    this._instances[id] = proxy
+    return proxy
+  }
 
-  // get(proxyId: string): any {
-  //   return this._instances.get(proxyId)
-  // }
+  get(id: string): any {
+    return this._instances.get(id)
+  }
 
   post(id: string, viewType: ViewType, classname: string, msg: string) {
-    let sViewType
-    switch(viewType) {
-      case ViewType.Search:
-        sViewType = 'Search'
-        break
-      case ViewType.Property:
-        sViewType = 'Property'
-        break
-      case ViewType.Overview:
-        sViewType = 'Overview'
-        break
-      case ViewType.Navigation:
-        sViewType = 'Navigation'
-        break
-      case ViewType.DetailView:
-        sViewType = 'DetailView'
-        break
-      default:
-        break
-    }
+    const sViewType = this.viewType2String(viewType)
     if (this.first) {
       this.cache.push({id: `${sViewType}.${classname}.${id}`, msg: msg})
     } else {
@@ -67,4 +47,34 @@ export class RPCProtocal {
     }
   }
 
+  post2property(id: string, viewType: ViewType, className: string, propName: string, value: any) {
+    const sViewType = this.viewType2String(viewType)
+    this.pipeline.post(`${sViewType}.${className}.${id}.${propName}`, value)
+  }
+
+  regist<Event>(event: string, listener: (e: Event) => void, thisArg?: any) {
+    const process = function (msgid: number, data: any) {
+      console.info(`injectEvent callback: ${msgid}, ${data}`)
+      const e = <Event>data;
+      listener(e)
+    };
+    this.pipeline.regist(event, process)
+  }
+
+  private viewType2String(viewType: ViewType): string {
+    switch(viewType) {
+      case ViewType.Search:
+        return 'Search'
+      case ViewType.Property:
+        return 'Property'
+      case ViewType.Overview:
+        return 'Overview'
+      case ViewType.Navigation:
+        return 'Navigation'
+      case ViewType.DetailView:
+        return 'DetailView'
+      default:
+        return ''
+    }
+  }
 }

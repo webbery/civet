@@ -1,5 +1,6 @@
-import { Resource, readThumbnail, SerializeAccessor } from '@/../public/Resource'
+import { Resource, SerializeAccessor } from '@/../public/Resource'
 import { MessagePipeline } from './MessageTransfer'
+import { thumbnail2Base64 } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { ReplyType } from './Message'
 
@@ -27,7 +28,7 @@ export class APIFactory {
           case 'thumbnail':
             // console.info('type:', typeof value, value)
             // CivetDatabase.addMeta([target.id], {name: key, value: value, type: 'bin'})
-            const thumbnail = readThumbnail(value)
+            const thumbnail = thumbnail2Base64(value)
             // console.info('thumbnail', target)
             // let property:IProperty;
             // target.addMeta('thumbnail', thumbnail, 'undefined')

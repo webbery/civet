@@ -6,7 +6,7 @@
 </template>
 <script>
 export default {
-  name: 'input-label',
+  name: 'cv-inputlabel',
   data() {
     return {
       editable: false,
@@ -20,6 +20,7 @@ export default {
   methods: {
     onDbClick() {
       this.editable = true
+      console.info('editable')
       this.text = this.$slots.default[0].text
       this.$nextTick(() => {
         const $input = this.$refs.contextInput

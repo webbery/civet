@@ -82,7 +82,14 @@ const getServiceInstance = (function() {
         const callbacks = callbackCache[msg.type]
         if (callbacks === undefined) {
           const msgType = msg.type.split('.')
-          if (msgType.length >= 2) {
+          if (msgType.length === 4) {
+            const viewFunc = viewCallback[msgType[0]]
+            if (viewFunc !== undefined) {
+              for (const f of viewFunc) {
+                f(msgType[2], msgType[1], msgType[3], msg.data.msg[0])
+              }
+            }
+          } else if (msgType.length === 3) {
             //
             const viewFunc = viewCallback[msgType[0]]
             if (viewFunc !== undefined) {
@@ -109,6 +116,7 @@ export default {
   getServiceInstance: getServiceInstance,
   IS_DIRECTORY_EXIST: 'hasDirectory',
   GET_IMAGE_INFO: 'getImageInfo',
+  GET_SELECT_CONTENT_ITEM_INFO: 'getSelectContentItemInfo',
   GET_IMAGES_INFO: 'getImagesInfo',
   GET_IMAGES_INDEXES: 'getImagesIndex',
   GET_IMAGES_DIRECTORY: 'getImagesWithDirectoryFormat',

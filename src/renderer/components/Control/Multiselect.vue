@@ -159,7 +159,7 @@ import multiselectMixin from './multiselectMixin'
 import pointerMixin from './pointerMixin'
 
 export default {
-  name: 'vue-multiselect',
+  name: 'cv-multiselect',
   mixins: [multiselectMixin, pointerMixin],
   props: {
     /**

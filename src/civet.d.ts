@@ -6,11 +6,12 @@ declare module 'civet' {
     export enum PropertyType {
         String = 1,
         Number = 2,
-        Color = 3,
-        Binary = 4
+        Binary = 4,
+        Score = 5,           // a kind of score, which looks like ☆ and range is [0, 5] 
+        Datetime = 6
     }
 
-    export interface IProperty {
+    export interface ResourceProperty {
         name: string;
         type: PropertyType;
         query: boolean;
@@ -18,29 +19,33 @@ declare module 'civet' {
         value: any;
     }
 
+    export interface Category {
+
+    }
+
     export interface IResource {
         id: number;
         type: string;
         name: string;
-        path: string ;
-        remote: string|null;
+        path?: string ;
+        remote?: string|null;
         tag: string[];
         category: string[];
         thumnail: ArrayBuffer;
         anno?: string[];
         keyword: string[];
-        [propName: string]: any;
+        meta: ResourceProperty[];
 
         /**
          * @brief add a new property. If property exist, it will be changed.
          * @param prop property
          */
-        putProperty(prop: IProperty): void;
+        putProperty(prop: ResourceProperty): void;
         /**
          * @brief get property by name. If property is not exist, return null.
          * @param name property name
          */
-        getProperty(name: string): IProperty|null;
+        getProperty(name: string): ResourceProperty|null;
         /**
          * @brief remove an exist property
          * @param name property name
@@ -52,10 +57,6 @@ declare module 'civet' {
         // pipeline?: IMessagePipeline;
     // }
 
-    export interface Thenable<T> {
-        then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => TResult | Thenable<TResult>): Thenable<TResult>;
-        then<TResult>(onfulfilled?: (value: T) => TResult | Thenable<TResult>, onrejected?: (reason: any) => void): Thenable<TResult>;
-    }
     /**
      * extension context
      */
@@ -67,18 +68,6 @@ declare module 'civet' {
     export let activate: ((context: ExtensionContext) => any) | null;
     export let unactivate: (() => any) | null;
 
-    export interface IWebview {
-        html: string;
-    }
-
-    export interface IPropertyPage extends IWebview {
-
-    }
-
-    export interface INavigationPage extends IWebview {}
-
-    export interface IOverviewPage extends IWebview {}
-    export interface IDetailviewPage extends IWebview {}
 
     export enum ViewType {
         Property = 1,
@@ -100,16 +89,60 @@ declare module 'civet' {
         items: ConditionItem[];
     }
 
+    /**
+     * a control of editable label
+     */
+    export interface EditableLabel {
+        value: string
+    }
+
+    export interface PreviewPanel {
+        image: ArrayBuffer;
+    }
+
+    export interface ColorPropertyPanel {
+        color: string[];            // it's value looks like #ffaabb01
+
+        onDidColorClick(): void;
+    }
+
+    export interface CategoryPanel {}
+
     export interface PropertyView {
         name: string;
-        html: string;
+        preview?: ArrayBuffer;
+        colorPanel?: ColorPropertyPanel;
+        tags: string[];
+        category?: string[];
+        property: ResourceProperty[];
+    }
+
+    export interface ContentItemSelectedEvent {
+        readonly items: IResource[];
     }
 
     export namespace window {
         export let searchBar: SearchBar;
-    //     export function createWebviewPanel(viewtype: ViewType): IWebview;
+
         export function createConditionItem(id: string): ConditionItem;
 
         export let propertyView: PropertyView;
+        /**
+         * @description after an item is selected, this event is envoked and item's property will be passed
+         * @param listener a callback function after item is selected
+         */
+        export function onDidSelectContentItem(listener: (e: ContentItemSelectedEvent) => void, thisArg?: any): void;
+    }
+
+    export namespace utility {
+        export const extensionPath: string;
+        /**
+         * @description get all classes, which likes /a/b/c
+         */
+        export function getClasses(): string[];
+        /**
+         * @description get all tags
+         */
+        export function getTags(): string[];
     }
 }

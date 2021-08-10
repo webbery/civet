@@ -1,30 +1,31 @@
-import { window, ConditionItem } from 'civet'
+import { window, ContentItemSelectedEvent, ResourceProperty } from 'civet'
 
-function raw(a: TemplateStringsArray, ...values: any[]): string
-{
-  let len = a.length - 1
-  let outstr = a[0]
-  for(var i=0;i<len;i++)
-  {
-    outstr += values[i] + a[i+1];
+function shouldDisplay(prop: ResourceProperty): boolean {
+  switch(prop.name) {
+    case 'filename':
+    case 'color':
+    case 'thumbnail':
+      return false
+    default:
+      return true
   }
-  return outstr;
 }
 
-function html(a: TemplateStringsArray, ...values: any[]):HTMLDivElement
-{
-  let div =document.createElement("div");
-  div.innerHTML =raw(a,values);
-  return div;
-}
-
-// const conditionItem = window.createConditionItem('test')
-// conditionItem.html = '<select>\
-//   <option value ="volvo">Volvo</option>\
-//   <option value ="saab">Saab</option>\
-//   <option value="opel">Opel</option>\
-//   <option value="audi">Audi</option>\
-//   </select>'
-
-// console.info('extension info:', window.searchBar)
-// window.searchBar.items.push(conditionItem)
+window.onDidSelectContentItem(async (e: ContentItemSelectedEvent) => {
+  console.info('onDidSelectContentItem', e)
+  let propertyView = window.propertyView
+  if (e.items.length === 1) {
+    const resource = e.items[0]
+    propertyView.name = resource.name
+    propertyView.preview = resource.thumbnail
+    window.propertyView.colorPanel.color = resource.color
+    propertyView.tags = resource.tags
+    propertyView.category = resource.category
+    propertyView.property.splice(0, propertyView.property.length)
+    for (let prop of resource.meta) {
+      if (shouldDisplay(prop)) {
+        propertyView.property.push(prop);
+      }
+    }
+  }
+})

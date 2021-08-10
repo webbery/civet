@@ -44,7 +44,12 @@ export class MessagePipeline implements IMessagePipeline {
         console.info('arg', arg)
         console.info('==================')
         const [func, self] = this.processor.get(arg.type)
-        const reply = await func.call(self, arg.id, arg.data)
+        let reply 
+        if (self !== undefined) {
+          reply = await func.call(self, arg.id, arg.data)
+        } else {
+          reply = await func(arg.id, arg.data)
+        }
         console.info('reply', reply)
         if (reply === undefined) return
         let msg = new Message()
@@ -116,7 +121,7 @@ export class MessagePipeline implements IMessagePipeline {
     error(msg: string|null) {
       ipcRenderer.send('message-from-worker', { type: ReplyType.INFOM_ERROR_MESSAGE, data: msg })
     }
-    regist(msgType: string, msgFunc: IMessageCallback, pointer: any) {
+    regist(msgType: string, msgFunc: IMessageCallback, pointer?: any) {
       this.processor.set(msgType, [msgFunc, pointer]);
     }
 

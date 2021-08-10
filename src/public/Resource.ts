@@ -1,9 +1,5 @@
-import { IResource, ExtensionContext, IProperty } from 'civet'
+import { IResource, ExtensionContext, ResourceProperty } from 'civet'
 import { PropertyType } from './ExtensionHostType'
-
-export function readThumbnail(thumbnail: any) {
-  return 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
-}
 
 export class DisplayProperty{
   name: string;
@@ -14,7 +10,7 @@ export class DisplayProperty{
 
 export class SerializeAccessor {
   constructor() {}
-  access(property: IProperty): DisplayProperty|null {
+  access(property: ResourceProperty): DisplayProperty|null {
     switch (property.name) {
       case 'thumbnail': return null;
       case 'filename': return null;
@@ -29,7 +25,7 @@ export class SerializeAccessor {
 
 export class StorageAccessor {
   constructor() {}
-  access(property: IProperty): DisplayProperty|null {
+  access(property: ResourceProperty): DisplayProperty|null {
     switch (property.name) {
       case 'filename': return {name: 'filename', type: property.type, value: property.value, query: false};
       case 'path': return {name: 'path', type: property.type, value: property.value, query: false};
@@ -50,7 +46,7 @@ export class Resource implements IResource {
   name: string = '';
   private _path: string = '';
   private _remote: string|null = '';
-  private meta: IProperty[] = [];
+  meta: ResourceProperty[] = [];
   tag: string[] = [];
   category: string[] = [];
   thumnail: ArrayBuffer;
@@ -97,7 +93,7 @@ export class Resource implements IResource {
     this._remote = val
   }
 
-  public putProperty(prop: IProperty): void {
+  public putProperty(prop: ResourceProperty): void {
     const name = prop.name
     let property = this.getProperty(name)
     if (property === null) {
@@ -107,7 +103,7 @@ export class Resource implements IResource {
     property.value = prop.value
   }
   
-  public getProperty(name: string): IProperty|null {
+  public getProperty(name: string): ResourceProperty|null {
     for (let item of this.meta) {
       if (item.name === name) {
         return item

@@ -3,8 +3,6 @@ import {ResourceService} from './service/ResourceService'
 import { MessagePipeline } from './MessageTransfer'
 import { ExtensionManager } from './ExtensionManager'
 import { ResourceObserver } from './service/ResourceObserver'
-import { WorkbenchService } from './service/WorkbenchService'
-import { WorkbenchObserver } from './service/WorkbenchObserver'
 import { registSingletonObject } from './Singleton'
 
 class ServiceHub {
@@ -12,8 +10,6 @@ class ServiceHub {
     registSingletonObject(MessagePipeline, 200)
     registSingletonObject(ExtensionManager)
     registSingletonObject(ResourceObserver, this.mocks)
-    registSingletonObject(WorkbenchObserver)
-    registSingletonObject(WorkbenchService)
     registSingletonObject(ResourceService)
     // this.resourceObserver = new ResourceObserver(this.extensionManager, this.mocks);
     // this.workbenchObserver = new WorkbenchObserver(pipeline, this.extensionManager);

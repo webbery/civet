@@ -89,3 +89,17 @@ export function getExtensionPath(): string {
   }
   return path.resolve('.') + '/' + extensionLocation
 }
+
+export function resetArray<T>(vue: any, array: T[], newVal: T[]) {
+  array.splice(0, array.length)
+  if (newVal === undefined) {
+    return
+  }
+  for (let idx = 0, len = newVal.length; idx < len; ++idx) {
+    vue.$set(array, idx, newVal[idx])
+  }
+}
+
+export function thumbnail2Base64(thumbnail: any) {
+  return 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
+}

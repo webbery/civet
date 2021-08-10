@@ -7,7 +7,7 @@
 </template>
 <script>
 export default {
-  name: 'preview',
+  name: 'cv-preview',
   props: {
     src: null
   },

@@ -29,8 +29,8 @@
               <Preview :src="getImage(item)"
                 @dblclick.native="onImageDbClick(item)"
                 @keydown.ctrl.67.native="onFileCopyOut(props)"
-                @contextmenu.native="onImageClick($event, $root, item)"
-                @mousedown.native="onImageClick($event, $root, item)"
+                @contextmenu.native="onContentItemClick($event, $root, item)"
+                @mousedown.native="onContentItemClick($event, $root, item)"
               >
               </Preview>
               <div style="padding: 2px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;text-align: center; font-size: 12px;">
@@ -50,14 +50,15 @@
 <script>
 import bus from '../utils/Bus'
 import Service from '../utils/Service'
-import Preview from '../Control/Preview'
+import Preview from '../Control/CVPreview'
 import ImgTool from '../utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
 import Global from '../utils/Global'
 import { mapState } from 'vuex'
 import Waterfall from '../Layout/waterfall'
 import WaterfallSlot from '../Layout/waterfall-slot'
-import InputLabel from '../Control/InputLabel'
+import InputLabel from '../Control/CVInputLabel'
+import {ExtContentItem, ExtContentItemSelectedEvent} from '@/../public/ExtensionHostType'
 // import { Shortcut } from '../../shortcut/Shortcut'
 
 export default {
@@ -84,7 +85,6 @@ export default {
     }
   },
   mounted() {
-    console.info('mounted')
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
     // this.width = document.getElementById('main-content').offsetWidth
     // this.height = document.getElementById('main-content').offsetHeight
@@ -143,7 +143,7 @@ export default {
     }
   },
   methods: {
-    onRequestNewData(item, itemIndex, groupIndex) {
+    onRequestNewData(item) {
       console.info('onRequestNewData', item)
       // item['x'] = (itemIndex % 2) * 110
       // item['y'] = parseInt(itemIndex / 2) * 160
@@ -151,7 +151,7 @@ export default {
       // return sizeAndPosition
       return this.imageList
     },
-    onPanelClick(event) {
+    onPanelClick() {
       console.info('onPanelClick')
       if (this.imageSelected) this.imageSelected = false
       else {
@@ -160,8 +160,8 @@ export default {
       this.$set(this.folderSelected, this.lastSelectFolder, false)
       this.lastSelectFolder = -1
     },
-    onImageClick(e, root, image) {
-      console.info('onImageClick', e, image)
+    onContentItemClick(e, root, image) {
+      console.info('onContentItemClick', image)
       this.imageSelected = true
       if (!Global.ctrlPressed) {
         bus.emit(bus.EVENT_SELECT_IMAGE, [image.id])
@@ -179,6 +179,7 @@ export default {
           this.clearSelections()
           this.lastSelections[image.id] = e.target.parentNode
           e.target.parentNode.style.border = '1px solid red'
+          this.$ipcRenderer.send(Service.GET_SELECT_CONTENT_ITEM_INFO, {id: [image.id]})
         }
       } else { // 多选
         this.lastSelections[image.id] = e.target.parentNode
