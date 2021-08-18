@@ -69,7 +69,10 @@ new Vue({
   template: '<App/>'
 }).$mount('#app')
 
-/* exported fetchData */
-function fetchData() {
+/* exported civet API */
+function acquireCivetApi() {
   let service = Service.getServiceInstance()
+  return {
+    postMessage: service
+  }
 }

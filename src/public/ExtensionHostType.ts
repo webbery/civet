@@ -1,4 +1,4 @@
-import { ContentItemSelectedEvent, ResourceProperty, IResource } from 'civet'
+import * as civet from 'civet'
 
 export enum PropertyType {
   String = 1,
@@ -16,7 +16,20 @@ export enum ViewType {
   Search = 5
 }
 
-export class ExtResourceProperty implements ResourceProperty {
+export enum OverviewItemLayout {
+  WaterFall = 0,
+  Grid = 1,
+  Row = 2,
+  Custom = 3
+}
+
+export enum ScrollType {
+  None = 0,
+  Horizon = 1,
+  Vertical = 2
+}
+
+export class ExtResourceProperty implements civet.ResourceProperty {
   name: string;
   type: PropertyType;
   query: boolean;
@@ -24,6 +37,16 @@ export class ExtResourceProperty implements ResourceProperty {
   value: any;
 }
 
-export class ExtContentItemSelectedEvent implements ContentItemSelectedEvent {
-  items: IResource[] = [];
+export class ExtContentItemSelectedEvent implements civet.ContentItemSelectedEvent {
+  items: civet.IResource[] = [];
+}
+
+export class ExtOverviewItemLoadEvent implements civet.OverviewItemLoadEvent {
+  resources: civet.IResource[];
+}
+
+export class ExtOverviewVisibleRangesChangeEvent implements civet.OverviewVisibleRangesChangeEvent {
+  view: civet.OverView;
+  scroll: ScrollType;
+  percent: number;
 }

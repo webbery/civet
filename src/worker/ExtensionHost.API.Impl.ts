@@ -1,14 +1,15 @@
 import type * as civet from 'civet';
-import { PropertyType, ViewType, ExtContentItemSelectedEvent } from '../public/ExtensionHostType'
+import * as ExtensionHostType from '../public/ExtensionHostType'
 import { RPCProtocal } from './common/RpcProtocal'
 import { MessagePipeline } from './MessageTransfer'
 import { registSingletonObject, getSingleton } from './Singleton'
 import { logger } from '@/../public/Logger'
-import { ExtSearchBar } from './view/extHostSearchBar'
-import { ExtPropertyView, PropertyView } from './view/extHostPropertyView'
 import { CivetDatabase } from './Kernel'
 import { getExtensionPath} from '@/../public/Utility'
 import { Resource } from '@/../public/Resource'
+import { ExtSearchBar } from './view/extHostSearchBar'
+import { ExtPropertyView } from './view/extHostPropertyView'
+import { ExtOverview } from './view/extHostOverview'
 
 export interface IExtensionApiFactory {
 	(extension: any, registry: any, configProvider: any): typeof civet;
@@ -18,6 +19,7 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline): IE
   const rpcProtocal = registSingletonObject(RPCProtocal)
   const extSearchBar = registSingletonObject(ExtSearchBar)
   const extPropertyView = rpcProtocal.set(ExtPropertyView.name, ExtPropertyView)
+  const extOverView = rpcProtocal.set(ExtOverview.name, ExtOverview)
 
   const window: typeof civet.window = {
     get searchBar() { return extSearchBar.searchBar },
@@ -33,11 +35,16 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline): IE
       const getResourcesWrapper = function (msg: {id: number[]}): void {
         const item = CivetDatabase.getFilesInfo(msg.id)
         let resource = new Resource(item[0])
-        let e = new ExtContentItemSelectedEvent()
+        let e = new ExtensionHostType.ExtContentItemSelectedEvent()
         e.items.push(resource)
-        listener(e)
+        listener.call(thisArg, e)
       }
       rpcProtocal.regist('getSelectContentItemInfo', getResourcesWrapper, thisArg)
+    },
+
+    get overView() { return extOverView },
+    onDidChangeOverviewVisibleRanges(listener: (e: civet.OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void {
+      
     }
   }
 
@@ -60,8 +67,10 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline): IE
       window,
       utility,
       // enum
-      PropertyType: PropertyType,
-      ViewType: ViewType,
+      PropertyType: ExtensionHostType.PropertyType,
+      ViewType: ExtensionHostType.ViewType,
+      OverviewItemLayout: ExtensionHostType.OverviewItemLayout,
+      ScrollType: ExtensionHostType.ScrollType,
       // function
       activate: null,
       unactivate: null

@@ -121,6 +121,47 @@ declare module 'civet' {
         readonly items: IResource[];
     }
 
+    export enum OverviewItemLayout {
+        WaterFall = 0,
+        Grid = 1,
+        Row = 2,
+        Custom = 3
+    }
+
+    export interface OverviewItemLoadEvent {
+        resources: IResource[];
+    }
+
+    export enum ScrollType {
+        None = 0,
+        Horizon = 1,
+        Vertical = 2
+    }
+
+    export interface OverviewVisibleRangesChangeEvent {
+        view: OverView;
+        scroll: ScrollType;
+        percent: number;
+    }
+    /**
+     * @brief an overview is to display all items in the center  
+     */
+    export interface OverView {
+        html?: string;
+        /**
+         * if use custom layout, html is enable
+         */
+        layout: OverviewItemLayout;
+        /**
+         * @brief before loading items, dicide which item should be display
+         * @param listener 
+         * @param thisArg 
+         */
+        onResourcesLoading(listener: (e: OverviewItemLoadEvent) => void, thisArg?: any): void;
+
+        onDidReceiveMessage(listener: (message: boolean) => void, thisArg?: any): void;
+    }
+
     export namespace window {
         export let searchBar: SearchBar;
 
@@ -132,6 +173,9 @@ declare module 'civet' {
          * @param listener a callback function after item is selected
          */
         export function onDidSelectContentItem(listener: (e: ContentItemSelectedEvent) => void, thisArg?: any): void;
+
+        export let overView: OverView;
+        export function onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
     }
 
     export namespace utility {

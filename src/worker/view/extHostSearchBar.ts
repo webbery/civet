@@ -8,18 +8,17 @@ import { ExtHostWebView } from './extHostWebView'
 export class ExtConditionItem extends ExtHostWebView implements civet.ConditionItem {
   conditions: Array<string|Date>;
 
-  private _html: string;
   constructor(id: string, rpcProxy: RPCProtocal) {
     super(id, rpcProxy)
     this.conditions = new Array()
   }
 
   set html(value: string) {
-    this._html = value
-    this.update(ViewType.Search, this._html)
+    super.html = value
+    this.update(ViewType.Search, super.html)
   }
   get html(): string {
-    return this._html
+    return super.html
   }
 }
 
