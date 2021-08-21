@@ -49,7 +49,6 @@
 
 <script>
 import bus from '../utils/Bus'
-import Service from '../utils/Service'
 import Preview from '../Control/CVPreview'
 import ImgTool from '../utils/ImgTool'
 import PopMenu from '@/components/Menu/PopMenu'
@@ -59,7 +58,8 @@ import Waterfall from '../Layout/waterfall'
 import WaterfallSlot from '../Layout/waterfall-slot'
 import InputLabel from '../Control/CVInputLabel'
 import {ExtContentItem, ExtContentItemSelectedEvent} from '@/../public/ExtensionHostType'
-// import { Shortcut } from '../../shortcut/Shortcut'
+import { IPCNormalMessage } from '@/../public/IPCMessage'
+// import { Shortcut } from '../../shortcut/Shortcut'IPCNormalMessage
 
 export default {
   name: 'view-panel',
@@ -179,7 +179,7 @@ export default {
           this.clearSelections()
           this.lastSelections[image.id] = e.target.parentNode
           e.target.parentNode.style.border = '1px solid red'
-          this.$ipcRenderer.send(Service.GET_SELECT_CONTENT_ITEM_INFO, {id: [image.id]})
+          this.$ipcRenderer.send(IPCNormalMessage.GET_SELECT_CONTENT_ITEM_INFO, {id: [image.id]})
         }
       } else { // 多选
         this.lastSelections[image.id] = e.target.parentNode
@@ -188,7 +188,7 @@ export default {
     },
     async onImageDbClick(image) {
       console.info('onImageDbClick')
-      let imageInfo = await this.$ipcRenderer.get(Service.GET_IMAGE_INFO, image.id)
+      let imageInfo = await this.$ipcRenderer.get(IPCNormalMessage.GET_IMAGE_INFO, image.id)
       if (imageInfo !== null) {
         imageInfo['id'] = image.id
         console.info('debug:', imageInfo)
@@ -232,7 +232,7 @@ export default {
         paths.push(item.path)
       }
       if (paths.length > 0) {
-        this.$ipcRenderer.send(Service.ADD_IMAGES_BY_PATHS, paths)
+        this.$ipcRenderer.send(IPCNormalMessage.ADD_IMAGES_BY_PATHS, paths)
       }
     },
     dragStart(event) {

@@ -45,7 +45,8 @@
 import RangeInput from './Control/RangeInput'
 import MutiSelect from './Control/Multiselect'
 import { debounce } from 'lodash'
-import Service from '@/components/utils/Service'
+import { IPCRendererResponse } from '@/../public/IPCMessage'
+// import Service from '@/components/utils/Service'
 import bus from './utils/Bus'
 
 export default {
@@ -84,16 +85,11 @@ export default {
     }
   },
   beforeMount() {
-    this.$ipcRenderer.onViewUpdate('Search', this.onViewUpdate)
+    this.$ipcRenderer.on('Search', this.onViewUpdate)
+    // this.$ipcRenderer.onViewUpdate('Search', this.onViewUpdate)
   },
   mounted() {
     bus.on(bus.EVENT_UPDATE_QUERY_EXTERNAL_CONDITION, this.onQueryConditionChanged)
-    // const workbench = await this.$ipcRenderer.get(Service.GET_INIT_WORKBENCH_VIEW)
-    // console.info('workbench', workbench)
-    // for (let idx = 0, len = workbench.length; idx < len; ++idx) {
-    //   this.$set(this.extensions, idx, workbench[idx])
-    // }
-    // console.info('extension:', this.extensions)
   },
   methods: {
     onViewUpdate(id, classname, html) {

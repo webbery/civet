@@ -35,7 +35,7 @@
   </div>
 </template>
 <script>
-import Service from '../utils/Service'
+import { IPCNormalMessage } from '@/../public/IPCMessage'
 import {logger} from '@/../public/Logger'
 
 const INSTALL_STATUS = [
@@ -56,7 +56,7 @@ export default {
     }
   },
   async mounted() {
-    const result = await this.$ipcRenderer.get(Service.LIST_EXTENSION)
+    const result = await this.$ipcRenderer.get(IPCNormalMessage.LIST_EXTENSION)
     for (let item of result) {
       item.state = INSTALL_STATUS[2]
       this.$set(this.installed, item.name, item)
@@ -72,7 +72,7 @@ export default {
       const extInfo = {name: extension.name, version: extension.version}
       // logger.debug(`install extension: ${extInfo}`)
       extension['state'] = INSTALL_STATUS[1]
-      const result = await this.$ipcRenderer.get(Service.INSTALL_EXTENSION, extInfo)
+      const result = await this.$ipcRenderer.get(IPCNormalMessage.INSTALL_EXTENSION, extInfo)
       logger.debug(`install result: ${JSON.stringify(result)}`)
       if (result.data === true) {
         this.updateExtensionState(extInfo.name, INSTALL_STATUS[0])
@@ -84,7 +84,7 @@ export default {
     },
     async onUninstall(extension) {
       extension['state'] = INSTALL_STATUS[1]
-      const result = await this.$ipcRenderer.get(Service.UNINSTALL_EXTENSION, extension.name)
+      const result = await this.$ipcRenderer.get(IPCNormalMessage.UNINSTALL_EXTENSION, extension.name)
       console.info(`uninstall result: ${result}(${typeof result})`)
       if (result.data === true) {
         this.updateExtensionState(extension.name, INSTALL_STATUS[2])

@@ -14,7 +14,7 @@ import LandingPage from '@/components/LandingPage'
 import Guider from '@/components/Dialog/Guider'
 // import CV from '@/../public/ImageProcess'
 import { config } from '@/../public/CivetConfig'
-import Service from '@/components/utils/Service'
+import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 
 export default {
   name: 'civet',
@@ -24,8 +24,8 @@ export default {
   },
   beforeMount() {
     // regist ipc message process function
-    this.$ipcRenderer.on(Service.ON_FILE_UPDATE, this.onUpdateImages)
-    this.$ipcRenderer.on(Service.ON_ERROR_MESSAGE, this.onErrorTips)
+    this.$ipcRenderer.on(IPCRendererResponse.ON_FILE_UPDATE, this.onUpdateImages)
+    this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
   },
   mounted() {
     if (config.isFirstTime() || config.getCurrentDB() === undefined) {
@@ -39,7 +39,7 @@ export default {
       this.$store.dispatch('init')
     })
     // send this message to worker, and recieve workbench extension view for initial.
-    this.$ipcRenderer.send(Service.MOUNTED)
+    this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },
   methods: {
     onUpdateImages(error, updateImages) {

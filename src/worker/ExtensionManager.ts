@@ -69,8 +69,9 @@ export class ExtensionManager {
     } else {
       let visited = {}
       for (let name of this._extensionsOfConfig) {
-        this._initService(root, name, pipeline)
-        visited[name] = name
+        if (this._initService(root, name, pipeline)) {
+          visited[name] = name
+        }
       }
       // clean service that is not in the config
       for (let idx = this._extensions.length; idx >= 0; ++idx) {
@@ -94,12 +95,16 @@ export class ExtensionManager {
    */
   private _initService(root: string, extensionName: string, pipeline: MessagePipeline): boolean {
     let service = this._getService(extensionName)
-    if (!service) {
-      const packPath = root + '/' + extensionName
-      service = new ExtensionService(packPath, pipeline)
-      this._extensions.push(service)
-      console.info('extension name:', extensionName)
-      return true
+    try {
+      if (!service) {
+        const packPath = root + '/' + extensionName
+        service = new ExtensionService(packPath, pipeline)
+        this._extensions.push(service)
+        console.info('extension name:', extensionName)
+        return true
+      }
+    } catch (err) {
+      console.error(`init extension ${extensionName} fail: ${err}`)
     }
     return false
   }

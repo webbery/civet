@@ -72,13 +72,12 @@
 </template>
 
 <script>
-import bus from './utils/Bus'
+import bus from '../utils/Bus'
 import { remote } from 'electron'
-import Service from './utils/Service'
-import Folder from './utils/Folder'
+import Folder from '../utils/Folder'
 import fs from 'fs'
-// import Plugins from '@/../public/Plugin'
 import { config } from '@/../public/CivetConfig'
+import { IPCNormalMessage } from '@/../public/IPCMessage'
 
 export default {
   name: 'config-page',
@@ -146,7 +145,7 @@ export default {
         // 目标文件夹是否存在
         // 复制数据库
         Folder.copyFolder(this.oldConfig.db.path, this.config.db.path)
-        const status = await this.$ipcRenderer.get(Service.REINIT_DB, this.config.db.path)
+        const status = await this.$ipcRenderer.get(IPCNormalMessage.REINIT_DB, this.config.db.path)
         if (status) {
           this.tansferMessage = '迁移完成'
           // 保存配置

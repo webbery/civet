@@ -73,7 +73,6 @@ import { i18n, formatOutput } from '@/../public/String'
 import InputLabel from '../Control/CVInputLabel'
 import { config } from '@/../public/CivetConfig'
 import { mapState } from 'vuex'
-import { Service } from '../utils/Service'
 import { logger } from '@/../public/Logger'
 import { resetArray, thumbnail2Base64 } from '@/../public/Utility'
 
@@ -82,6 +81,7 @@ export default {
   data() {
     return {
       picture: { id: null, width: 0, height: 0, size: 0 },
+      id: null,
       thumbnail: '',
       tags: [],
       classes: [],
@@ -102,7 +102,8 @@ export default {
   }),
   mounted() {
     bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
-    this.$ipcRenderer.onViewUpdate('Property', this.onViewUpdate)
+    this.$ipcRenderer.on('Property', this.onViewUpdate)
+    // this.$ipcRenderer.onViewUpdate('Property', this.onViewUpdate)
   },
   methods: {
     onViewUpdate(id, classname, propname, value) {
@@ -140,6 +141,7 @@ export default {
       this.metaNames.splice(0, this.metaNames.length)
       this.metaValues.splice(0, this.metaValues.length)
       this.colors.splice(0, this.colors.length)
+      this.id = filesid
       // if (Array.isArray(filesid)) {
       //   if (filesid.length === 1) {
       //     this.displayFileProperty(filesid[0])
@@ -152,7 +154,11 @@ export default {
       //   }
       // }
     },
-    onNameChaged(id, name) {},
+    onNameChaged(id, name) {
+      if (this.id) {
+        this.$store.dispatch('changeFileName', {id: this.id, filename: name})
+      }
+    },
     displayMultiFileProperty(filesid) {
       this.picture.id = null
       this.filename = filesid.length + '个文件'

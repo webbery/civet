@@ -1,6 +1,8 @@
 import { Resource } from '@/../public/Resource'
-import Service from '@/components/utils/Service'
+// import Service from '@/components/utils/Service'
 import { TreeNode } from '@/components/Control/Tree'
+import { IPCNormalMessage } from '@/../public/IPCMessage'
+import { service } from '@/common/RendererService'
 import { isEmpty } from '@/../public/Utility'
 import Vue from 'vue'
 import { Cache } from './CacheInstance'
@@ -66,13 +68,13 @@ const getters = {
 
 const remote = {
   async recieveCounts() {
-    const uncalsses = await Service.getServiceInstance().get(Service.GET_UNCATEGORY_IMAGES)
-    const untags = await Service.getServiceInstance().get(Service.GET_UNTAG_IMAGES)
+    const uncalsses = await service.get(IPCNormalMessage.GET_UNCATEGORY_RESOURCES)
+    const untags = await service.get(IPCNormalMessage.GET_UNTAG_RESOURCES)
     console.info('untag is', untags, 'unclasses:', uncalsses)
     return { unclasses: uncalsses, untags: untags }
   },
   async recieveTags() {
-    return Service.getServiceInstance().get(Service.GET_ALL_TAGS)
+    return service.get(IPCNormalMessage.GET_ALL_TAGS)
   }
 }
 
@@ -225,11 +227,11 @@ const mutations = {
   addClassName(state, names) {
     if (!names.length) {
       state.classesName.push(names)
-      Service.getServiceInstance().send(Service.ADD_CATEGORY, names)
+      service.send(IPCNormalMessage.ADD_CATEGORY, names)
     } else {
       state.classesName.push(names)
       console.info('classPath:', names)
-      Service.getServiceInstance().send(Service.ADD_CATEGORY, names)
+      service.send(IPCNormalMessage.ADD_CATEGORY, names)
     }
   },
   addClassOfFile(state, mutation) {
@@ -241,7 +243,7 @@ const mutations = {
     if (!file.category) file.category = []
     file.category.push(classpath)
     state.classes.increaseChildrenCount(classpath, 1)
-    Service.getServiceInstance().send(Service.ADD_CATEGORY, { id: [fileid], class: [classpath] })
+    service.send(IPCNormalMessage.ADD_CATEGORY, { id: [fileid], class: [classpath] })
   },
   removeClass(state, mutation) {
     console.info('remove class', mutation, state.classesName)
@@ -260,7 +262,7 @@ const mutations = {
       console.info('delete class path:', classPath, 'node', mutation)
       mutation.remove()
       state.classesName.splice(state.classesName.indexOf(classPath), 1)
-      Service.getServiceInstance().send(Service.REMOVE_CLASSES, [classPath])
+      service.send(IPCNormalMessage.REMOVE_CLASSES, [classPath])
     }
   },
   removeClassOfFile(state, mutation) {
@@ -271,7 +273,7 @@ const mutations = {
     for (let idx = 0; idx < file.category.length; ++idx) {
       if (file.category[idx] === classpath) {
         file.category.splice(idx, 1)
-        Service.getServiceInstance().send(Service.REMOVE_CLASSES, { id: [fileid], class: [classpath] })
+        service.send(IPCNormalMessage.REMOVE_CLASSES, { id: [fileid], class: [classpath] })
         break
       }
     }
@@ -281,13 +283,13 @@ const mutations = {
     console.info('changeClassName', mutation, state.classesName)
     const indx = state.classesName.indexOf(mutation.old)
     state.classesName[indx] = mutation.new
-    Service.getServiceInstance().send(Service.UPDATE_CATEGORY_NAME, { oldName: mutation.old, newName: mutation.new })
+    service.send(IPCNormalMessage.UPDATE_CATEGORY_NAME, { oldName: mutation.old, newName: mutation.new })
   },
   changeFileName(state, mutation) {
     console.info('changeFileName', mutation)
     const fileid = mutation.id
     Cache.files[fileid].filename = mutation.filename
-    Service.getServiceInstance().send(Service.UPDATE_FILE_NAME, mutation)
+    service.send(IPCNormalMessage.UPDATE_FILE_NAME, mutation)
   },
   removeFiles(state, filesid) {
     for (let idx = 0; idx < filesid.length; ++idx) {
@@ -307,10 +309,10 @@ const mutations = {
     }
     state.allCount -= removeCnt
     // remove from db
-    Service.getServiceInstance().send(Service.REMOVE_FILES, filesid)
+    service.send(IPCNormalMessage.REMOVE_FILES, filesid)
   },
   removeTags(state, mutation) {
-    Service.getServiceInstance().send(Service.REMOVE_TAG, { tag: [mutation.tag], filesID: [mutation.id] })
+    service.send(IPCNormalMessage.REMOVE_TAG, { tag: [mutation.tag], filesID: [mutation.id] })
     const file = Cache.files[mutation.id]
     file.tag.splice(file.tag.indexOf(mutation.tag), 1)
   },
@@ -372,16 +374,16 @@ const mutations = {
 const actions = {
   async init({ commit }, flag) {
     const { unclasses, untags } = await remote.recieveCounts()
-    const allClasses = await Service.getServiceInstance().get(Service.GET_ALL_CATEGORY, '/')
+    const allClasses = await service.get(IPCNormalMessage.GET_ALL_CLASSES, '/')
     console.info('all classes:', allClasses)
-    const filesSnap = await Service.getServiceInstance().get(Service.GET_FILES_SNAP)
+    const filesSnap = await service.get(IPCNormalMessage.GET_RESOURCES_SNAP)
     const imagesID = []
     for (const snap of filesSnap) {
       imagesID.push(snap.id)
       // if (imagesID.length > maxCacheSize) break
     }
-    const allImages = await Service.getServiceInstance().get(Service.GET_IMAGES_INFO, imagesID)
-    const allTags = await Service.getServiceInstance().get(Service.GET_ALL_TAGS)
+    const allImages = await service.get(IPCNormalMessage.RENDERER_GET_RESOURCES_INFO, imagesID)
+    const allTags = await service.get(IPCNormalMessage.GET_ALL_TAGS)
     console.info('recieveCounts:', unclasses, 'tags:', allTags)
     commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
   },
@@ -396,7 +398,7 @@ const actions = {
       console.info('query add key', k, Cache.query)
     }
     console.info('query:', Cache.query)
-    const result = await Service.getServiceInstance().get(Service.QUERY_FILES, Cache.query)
+    const result = await service.get(IPCNormalMessage.QUERY_RESOURCES, Cache.query)
     console.info('result: ', result)
     commit('query', result)
   },
@@ -420,7 +422,7 @@ const actions = {
       return
     }
     file.tag.push(tag)
-    Service.getServiceInstance().send(Service.SET_TAG, { id: [fileID], tag: file.tag })
+    service.send(IPCNormalMessage.SET_TAG, { id: [fileID], tag: file.tag })
     const tags = await remote.recieveTags()
     const { ...counts } = await remote.recieveCounts()
     commit('updateTag', {tags, untags: counts.untags})
@@ -451,7 +453,7 @@ const actions = {
     commit('changeClassName', mutation)
   },
   async getClassesAndFiles({ commit }, query) {
-    const allClasses = await Service.getServiceInstance().get(Service.GET_CATEGORY_DETAIL, query)
+    const allClasses = await service.get(IPCNormalMessage.GET_CLASSES_DETAIL, query)
     commit('getClassesAndFiles', allClasses)
   },
   clear({ commit }, data) {

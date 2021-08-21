@@ -1,0 +1,19 @@
+{
+  "name": "map_view",
+  "displayName": "地图主视图",
+  "description": "以地图的方式展示",
+  "version": "0.0.1",
+  "engines": {
+    "civet": "^0.2.0"
+  },
+  "main": "./index.js",
+  "civet": {
+    "activeEvents": [
+      "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png",
+      "onView:Overview",
+      "onSave:"
+    ]
+  },
+  "dependencies": {
+  }
+}

@@ -31,7 +31,7 @@
 <script>
 import Guider from '@/components/Dialog/Guider'
 // import { config } from '@/../public/CivetConfig'
-// import Service from '../utils/Service'
+import { IPCNormalMessage } from '@/../public/IPCMessage'
 
 export default {
   name: 'page-menu',
@@ -77,7 +77,7 @@ export default {
       this.currentPage = 2
     },
     onDelete(resource) {
-      this.$ipcRenderer.send('removeDB', resource)
+      this.$ipcRenderer.send(IPCNormalMessage.REMOVE_DB, resource)
       this.$emit('ondelete', resource)
     },
     createResource() {

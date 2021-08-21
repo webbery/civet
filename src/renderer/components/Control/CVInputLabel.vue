@@ -31,6 +31,7 @@ export default {
     onBlur() {
       this.editable = false
       this.$emit('changed', this.fileid, this.text)
+      this.$slots.default[0].text = this.text
     }
   }
 }

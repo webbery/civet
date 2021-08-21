@@ -7,7 +7,8 @@ import store from './store'
 import ElementUI from 'element-ui'
 // import 'element-ui/lib/theme-chalk/index.css'
 import 'element-theme-dark'
-import Service from './components/utils/Service'
+// import Service from './components/utils/Service'
+import { service } from './common/RendererService'
 import VueLazyload from 'vue-lazyload'
 import VueHotkey from 'v-hotkey'
 import upperFirst from 'lodash/upperFirst'
@@ -22,7 +23,8 @@ Vue.use(VueLazyload, {
   // dispatchEvent: true
 })
 
-Vue.prototype.$ipcRenderer = Service.getServiceInstance()
+Vue.prototype.$ipcRenderer = service
+// Vue.prototype.$ipcRenderer = Service.getServiceInstance()
 
 router.afterEach((to, from) => {
   console.info('afterEach, from', from.fullPath, ', to', to.fullPath)
@@ -71,8 +73,7 @@ new Vue({
 
 /* exported civet API */
 function acquireCivetApi() {
-  let service = Service.getServiceInstance()
   return {
-    postMessage: service
+    postMessage: service.send
   }
 }

@@ -35,9 +35,8 @@ import ExtensionPanel from '@/components/Panel/ExtensionPanel'
 import ViewPanel from '@/components/Panel/ViewPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/Panel/TagPanel'
-import ConfigPanel from '@/components/ConfigPanel'
+import ConfigPanel from '@/components/Panel/ConfigPanel'
 import Global from '@/components/utils/Global'
-import Service from './utils/Service'
 
 export default {
   name: 'landing-page',
@@ -60,7 +59,7 @@ export default {
     // 挂载全局初始化事件
     const os = require('os')
     const platform = os.platform()
-    Service.getServiceInstance().on('replyFilesLoadCount', this.onFileLoadStatus)
+    this.$ipcRenderer.on('replyFilesLoadCount', this.onFileLoadStatus)
     document.addEventListener('keydown', function(e) {
       if (platform === 'win32') {
         if (e.ctrlKey && !Global.ctrlPressed) {

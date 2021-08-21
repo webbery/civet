@@ -2,7 +2,7 @@ import { injectable } from '../Singleton'
 import { ExtHostWebView } from './extHostWebView'
 import { RPCProtocal } from '../common/RpcProtocal'
 import { CivetDatabase } from '../Kernel'
-import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewScrollEvent } from '@/../public/ExtensionHostType'
+import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewVisibleRangesChangeEvent } from '@/../public/ExtensionHostType'
 
 @injectable
 export class ExtOverview extends ExtHostWebView {

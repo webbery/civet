@@ -25,7 +25,7 @@ export class ResourceService{
     this.pipeline = pipeline
     pipeline.regist('addImagesByDirectory', this.addFilesByDir, this)
     pipeline.regist('addImagesByPaths', this.addImagesByPaths, this)
-    pipeline.regist('getImagesInfo', this.getImagesInfo, this)
+    pipeline.regist('getImagesInfo', this.getImagesInfo, this)  // deprect
     pipeline.regist('getFilesSnap', this.getFilesSnap, this)
     pipeline.regist('getImageInfo', this.getImageInfo, this)
     pipeline.regist('setTag', this.setTag, this)
@@ -195,7 +195,11 @@ export class ResourceService{
   updateFileName(msgid: number, data: any) {
     console.info('updateFileName id:', data.id, 'new:', data.filename)
     // {id: [fileids[0]], filename: '测试'}
-    CivetDatabase.updateFile({ id: [data.id], filename: data.filename })
+    if (Array.isArray(data.id)) {
+      CivetDatabase.updateFile({ id: data.id, filename: data.filename })
+    } else {
+      CivetDatabase.updateFile({ id: [data.id], filename: data.filename })
+    }
   }
   async reInitDB(msgid: number, data: any) {
     console.info('init db', data)

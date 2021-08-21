@@ -17,7 +17,7 @@ export default new Router({
     {
       path: '/config',
       name: 'config-page',
-      component: require('@/components/ConfigPanel').default
+      component: require('@/components/Panel/ConfigPanel').default
     },
     {
       path: '/viewImage',
