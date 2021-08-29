@@ -38,7 +38,7 @@ export class RPCProtocal {
     return this._instances.get(id)
   }
 
-  post(id: string, viewType: ViewType, classname: string, msg: string) {
+  post(id: string, viewType: ViewType, classname: string, msg: any) {
     const sViewType = this.viewType2String(viewType)
     if (this.first) {
       this.cache.push({id: `${sViewType}.${classname}.${id}`, msg: msg})

@@ -24,10 +24,9 @@ class Timer {
   }
 }
 
-
-  interface IMessageCallback {
-    (id: number, data: any): void;
-  }
+interface IMessageCallback {
+  (id: number, data: any): void;
+}
 
 @injectable
 export class MessagePipeline implements IMessagePipeline {
@@ -37,9 +36,12 @@ export class MessagePipeline implements IMessagePipeline {
     messageQueue: Map<string, Message> = new Map<string, Message>();
     VIPQueue: any[] = [];
     processor: Map<string, any> = new Map<string, any>();
+    #isRendererStart: boolean = false;
+
     constructor(threshod: number) {
       this.threshod = threshod
       ipcRenderer.on('message-from-main', async (event: any, arg: any) => {
+        if (!this.#isRendererStart) this.#isRendererStart = true
         console.info('==================')
         console.info('arg', arg)
         console.info('==================')
@@ -110,6 +112,9 @@ export class MessagePipeline implements IMessagePipeline {
     }
     post(type: string, message: any) {
       this.VIPQueue.push({type: type, data: [message]})
+      if (!this.#isRendererStart) {
+        return
+      }
       this.viptimer.start(() => {
         if (this.VIPQueue.length === 0) {
           this.viptimer.stop();

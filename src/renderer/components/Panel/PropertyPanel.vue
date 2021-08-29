@@ -106,7 +106,7 @@ export default {
     // this.$ipcRenderer.onViewUpdate('Property', this.onViewUpdate)
   },
   methods: {
-    onViewUpdate(id, classname, propname, value) {
+    onViewUpdate(session, id, classname, propname, value) {
       logger.debug(`onViewUpdate id: ${id}, class: ${classname}, value:`, value)
       switch (propname) {
         case 'name':

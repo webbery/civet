@@ -43,7 +43,9 @@ export enum IPCNormalMessage {
   INSTALL_EXTENSION = 'install',
   UNINSTALL_EXTENSION = 'uninstall',
   UPDATE_EXTENSION = 'update',
-  LIST_EXTENSION = 'getExtensions'
+  LIST_EXTENSION = 'getExtensions',
+  // workbench
+  GET_SELECT_CONTENT_ITEM_INFO = 'getSelectContentItemInfo'
 }
 
 export enum IPCRendererResponse {
@@ -62,5 +64,7 @@ export enum IPCRendererResponse {
   getFilesSnap = 'replyFilesSnap',
   install = 'replyInstallResult',
   uninstall = 'replyUninstallResult',
-  getExtensions = 'replyAllExtensions'
+  getExtensions = 'replyAllExtensions',
+  ON_ERROR_MESSAGE = 'onEM',
+  ON_EXTENSION_ROUTER_UPDATE = 'Overview'
 }

@@ -14,11 +14,11 @@ export class ExtConditionItem extends ExtHostWebView implements civet.ConditionI
   }
 
   set html(value: string) {
-    super.html = value
-    this.update(ViewType.Search, super.html)
+    // super.setHtml(value)
+    // this.update(ViewType.Search, super.html)
   }
   get html(): string {
-    return super.html
+    return super.getHtml().html
   }
 }
 

@@ -24,8 +24,9 @@ export default {
   },
   beforeMount() {
     // regist ipc message process function
-    this.$ipcRenderer.on(IPCRendererResponse.ON_FILE_UPDATE, this.onUpdateImages)
+    // this.$ipcRenderer.on(IPCRendererResponse.ON_FILE_UPDATE, this.onUpdateImages)
     this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
+    // this.$ipcRenderer.on(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE, this.onPanelRouterInit)
   },
   mounted() {
     if (config.isFirstTime() || config.getCurrentDB() === undefined) {
@@ -61,7 +62,15 @@ export default {
       const cfg = document.getElementById('guider')
       cfg.close()
     },
-    onWorkbenchInit() {}
+    onPanelRouterInit(session, id, classname, value) {
+      const path = '/' + classname + '/' + id
+      console.info('onPanelRouterInit', session, id, classname, value, path)
+      // this.$router.addRoutes([{
+      //   path: path,
+      //   name: id,
+      //   component: value.html
+      // }])
+    }
   },
   destroyed: function() {
     // const Storage = require('../public/Kernel')

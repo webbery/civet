@@ -1,7 +1,8 @@
 import { injectable } from '../Singleton'
-import { ExtHostWebView } from './extHostWebView'
+import { ExtHostWebView, HostHTML } from './extHostWebView'
 import { RPCProtocal } from '../common/RpcProtocal'
 import { CivetDatabase } from '../Kernel'
+import importHTML from '../api/HtmlParser'
 import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewVisibleRangesChangeEvent } from '@/../public/ExtensionHostType'
 
 @injectable
@@ -11,11 +12,17 @@ export class ExtOverview extends ExtHostWebView {
   }
 
   set html(val: string) {
-    super.html = val
-    this.update(ViewType.Overview, super.html)
+    const result = importHTML(val)
+    let hhtml = new HostHTML()
+    hhtml.html = result.body
+    hhtml.script = result.scripts
+    hhtml.style = result.styles
+    console.info('html: ', hhtml)
+    super.setHtml(hhtml)
+    this.update(ViewType.Overview, super.getHtml())
   }
 
-  get html() { return super.html }
+  get html() { return super.getHtml().html }
 
   onResourcesLoading(listener: (e: ExtOverviewItemLoadEvent) => void, thisArg?: any): void {
     const onResourcesLoadingWrapper = function (msg: {id: number[]}): void {

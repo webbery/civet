@@ -29,10 +29,11 @@
 
 <script>
 import HeaderBar from '@/components/HeaderBar'
-import TabMenu from '@/components/Menu/TabMenu'
+import TabMenu from '@/components/Menu/NaviMenu'
 import NavigationPanel from '@/components/Panel/NavigationPanel'
 import ExtensionPanel from '@/components/Panel/ExtensionPanel'
 import ViewPanel from '@/components/Panel/ViewPanel'
+import WebPanel from '@/components/Panel/WebPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/Panel/TagPanel'
 import ConfigPanel from '@/components/Panel/ConfigPanel'
@@ -46,6 +47,7 @@ export default {
     NavigationPanel,
     ExtensionPanel,
     ViewPanel,
+    WebPanel,
     PropertyPanel,
     TagPanel,
     ConfigPanel
@@ -105,10 +107,14 @@ export default {
   /* border: 1px rgb(200, 240, 247);
   border-style: none dashed;
   border-radius: 5px; */
+  height: 100%;
   margin: 0 10px 0 10px;
 }
 .nav-light {
   background: #2b3440;
+}
+.custom {
+  height: 100%;
 }
 /* #loading-progress {
   position: relative;

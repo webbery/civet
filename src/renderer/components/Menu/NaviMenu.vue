@@ -4,7 +4,7 @@
     <div class="sidenav">
       <span class="el-icon-document" :class="{'nav-active': tab === 0, 'nav-deactive': tab !== 0}" @click="onClickTab(0)"></span>
       <span class="el-icon-menu" :class="{'nav-active': tab === 1, 'nav-deactive': tab !== 1}"  @click="onClickTab(1)"></span>
-      <span class="el-icon-setting dock-bottom" @click="onClickSetting()"></span>
+      <span ref="setting" class="el-icon-setting dock-bottom" @click="onClickSetting()"></span>
     </div>
   </el-col>
   <el-col :span="20">
@@ -18,15 +18,21 @@
         <slot name="extension"></slot>
       </div>
   </el-col>
+  <SettingMenu :show="displayMenu" :location="location"></SettingMenu>
 </el-row>
 </template>
 <script>
+import SettingMenu from './SettingMenu'
+
 export default {
   name: 'tab-menu',
+  components: { SettingMenu },
   data() {
     return {
       tabs: [],
-      tab: 0
+      tab: 0,
+      displayMenu: false,
+      location: {x: 100, y: 200}
     }
   },
   methods: {
@@ -34,7 +40,11 @@ export default {
       this.tab = tabIndx
     },
     onClickSetting() {
-      this.$router.push({path: '/config', query: {name: '配置'}})
+      const rect = this.$refs.setting.getBoundingClientRect()
+      this.location.x = rect.left + (rect.right - rect.left) / 2
+      this.location.y = rect.top - 2 * 40
+      console.info('bottom', this.location.y, rect.bottom, rect.top)
+      this.displayMenu = !this.displayMenu
     }
   }
 }

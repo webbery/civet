@@ -1,8 +1,8 @@
-import { ReplyType, IMessagePipeline, ErrorMessage } from './Message'
 import { MessagePipeline } from './MessageTransfer'
 import { createDecorator } from './ServiceDecorator'
 import { Result } from './common/Result'
 import { getAbsolutePath } from '@/../public/Utility'
+import { IPCRendererResponse } from '@/../public/IPCMessage'
 import { ViewType } from '@/../public/ExtensionHostType'
 import { ExtensionModule } from './api/ExtensionRequire'
 import { logger } from '@/../public/Logger'
@@ -104,8 +104,12 @@ export class ExtensionService {
   constructor(@decoratorTest packagePath: string, pipe: MessagePipeline) {
     this._package = new ExtensionPackage(packagePath)
     this._pipe = pipe
-    if (this.hasType(ExtensionActiveType.ExtView)) {
-      this._initialize()
+    const actives = this.activeType(ExtensionActiveType.ExtView)
+    if (actives !== undefined) {
+      const result = this._initialize()
+      if (result.isSuccess()) { // regist router to renderer
+        // this._registRendererRouter()
+      }
     }
   }
 
@@ -153,9 +157,17 @@ export class ExtensionService {
       return Result.success('ok')
     } catch (error) {
       const msg = `initialize ${this._package.name} fail: ${error}`
-      this._pipe!.post('onErrorMessage', {msg: msg})
+      this._pipe!.post(IPCRendererResponse.ON_ERROR_MESSAGE, {msg: msg})
       return Result.failure(msg)
     }
+  }
+
+  private _registRendererRouter() {
+    // this._pipe!.post(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE,
+    //   {
+    //     name: this.name,
+    //     html: ''
+    //   })
   }
 
   async run(command: string, ...args: any[]): Promise<Result<string, string>> {
@@ -180,7 +192,7 @@ export class ExtensionService {
       switch(command) {
         case 'read':
           console.error('read error:', err)
-          this._pipe!.post(`onCommandFail ${command}`, [{filname: args[0], path: args[0], msg: err.message}])
+          this._pipe!.post(IPCRendererResponse.ON_ERROR_MESSAGE, [{filname: args[0], path: args[0], msg: err.message}])
           break
         default:
           break

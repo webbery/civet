@@ -35,6 +35,7 @@ class MessageTree {
       this.cache[path.length - 1][type] = [callback]
     } else {
       this.cache[path.length - 1][type].push(callback)
+      console.info(`regist ${type} count: ${this.cache[path.length - 1][type].length}`)
     }
     return true
   }
@@ -65,17 +66,18 @@ class RendererService {
       switch(types.length) {
       case 1:
         callbacks.forEach((callback: any) => {
-            callback(null, msg.data.msg)
+            callback(msg.dataid, msg.data.msg)
         })
         break
       case 3:
+        console.info('+=+', msg)
         callbacks.forEach((callback: any) => {
-          callback(types[2], types[1], types[3], msg.data.msg[0])
+          callback(msg.data.id, types[2], types[1], msg.data.msg[0])
         })
         break
       case 4:
         callbacks.forEach((callback: any) => {
-          callback(types[2], types[1], types[3], msg.data.msg[0])
+          callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
         })
         break
       default:
@@ -118,5 +120,4 @@ class RendererService {
     return result
   }
 }
-const rendererService = new RendererService();
-export const service = rendererService
+export const service = new RendererService();

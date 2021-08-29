@@ -28,12 +28,16 @@
             right: 0;
             min-width: 0;
         }
+        #container {
+            height:100%;
+        }
     </style>
 </head>
 <body>
 <div id="container"></div>
 <script type="text/javascript"
         src="https://webapi.amap.com/maps?v=1.4.15&key=6918ecca2a3cbfafb6ab59369768ae21"></script>
+<script crossorigin="anonymous" id="amap_plus_js" src="https://webapi.amap.com/maps/modules?v=1.4.16&key=6918ecca2a3cbfafb6ab59369768ae21&vrs=1622082392611&m=mouse,vectorlayer,overlay,wgl,sync" type="text/javascript"></script>
 <script type="text/javascript">
     var map = new AMap.Map('container', {
         resizeEnable: true,

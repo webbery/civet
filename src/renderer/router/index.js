@@ -15,6 +15,11 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
+      path: '/ExtOverview/ExtOverview',
+      name: 'overview',
+      component: require('@/components/Panel/WebPanel').default
+    },
+    {
       path: '/config',
       name: 'config-page',
       component: require('@/components/Panel/ConfigPanel').default
@@ -43,7 +48,7 @@ export default new Router({
     },
     {
       path: '/',
-      component: require('@/components/Panel/ViewPanel').default
+      component: require('@/components/Panel/WebPanel').default
     },
     {
       path: '*',

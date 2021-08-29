@@ -1,4 +1,7 @@
 const _i18n = {
+  setting: '配置',
+  layout: '布局',
+  waterfall: '瀑布',
   path: '路径',
   filename: '文件名',
   size: '大小',
