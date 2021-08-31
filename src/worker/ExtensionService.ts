@@ -36,19 +36,22 @@ const ViewTypeTable = {
 }
 class ExtensionPackage {
   private _name: string = '';
+  private _displayName: string = '';
   private _version: string = '';
   private _engines: string = '';
   private _owner: string = '';
   private _main: string = './main.js';
   private _license?: string;
   private _description?: string;
-  private _activeEvents: Map<ExtensionActiveType, string[]> = new Map<ExtensionActiveType, string[]>();
+  private _activeEvents: string[] = [];
+  private _viewEvents: ViewType[] = [];
   private _dependency: string|undefined;
   // private _dependency: Map<string, string> = new Map<string, string>();
 
   constructor(dir: string) {
     const pack = JSON.parse(fs.readFileSync(dir + '/package.json', 'utf-8'))
     this._name = pack['name']
+    this._displayName = pack['displayName'] || ''
     this._owner = pack['owner']
     this._version = pack['version']
     this._engines = pack['engines']
@@ -58,21 +61,12 @@ class ExtensionPackage {
       const map = event.split(':')
       if (map.length !== 2) continue
       if (map[0] === 'onContentType') {
-        const contentTypes = map[1].split(',')
-        let array: string[] = []
-        let temp = this._activeEvents.get(ExtensionActiveType.ExtContentType);
-        if (temp !== undefined) {
-          array.push.apply(array, temp)
-        }
-        array.push.apply(array, contentTypes)
-        this._activeEvents.set(ExtensionActiveType.ExtContentType, array)
+        this._activeEvents = map[1].split(',')
       } else if (map[0] === 'onView') {
-        const vt = ViewTypeTable[map[1]]
-        if (vt !== undefined) {
-          this._activeEvents.set(ExtensionActiveType.ExtView, vt);
-        } else {
-          console.error(`[package.json]${dir}: ${map[1]} is not in ViewType`)
-        }
+        const views = map[1].split(',')
+        this._viewEvents = views.map((item: string) => {
+          return ViewTypeTable[item]
+        })
       } else if (map[0] === 'onSave') {
       }
     }
@@ -86,11 +80,13 @@ class ExtensionPackage {
   }
 
   get name() { return this._name; }
+  get displayName() { return this._displayName; }
   get version() { return this._version; }
   get main() { return this._main; }
   get owner() { return this._owner; }
   get activeTypes() { return this._activeEvents }
   get dependency() { return this._dependency }
+  get viewEvents() { return this._viewEvents }
 }
 
 const decoratorTest = createDecorator<ITest>('ITest');
@@ -104,8 +100,7 @@ export class ExtensionService {
   constructor(@decoratorTest packagePath: string, pipe: MessagePipeline) {
     this._package = new ExtensionPackage(packagePath)
     this._pipe = pipe
-    const actives = this.activeType(ExtensionActiveType.ExtView)
-    if (actives !== undefined) {
+    if (this.hasType(ExtensionActiveType.ExtView)) {
       const result = this._initialize()
       if (result.isSuccess()) { // regist router to renderer
         // this._registRendererRouter()
@@ -121,12 +116,20 @@ export class ExtensionService {
     return this._package.dependency
   }
 
+  get displayName() {
+    return this._package.displayName
+  }
+
   addDependency(service: ExtensionService) {
     this._nexts.push(service)
   }
 
-  activeType(activeType: ExtensionActiveType): string[]|undefined {
-    return this._package.activeTypes.get(activeType)
+  activeType(): string[] {
+    return this._package.activeTypes
+  }
+
+  viewType(): ViewType[] {
+    return this._package.viewEvents
   }
 
   type(): ExtensionActiveType[] {
@@ -139,14 +142,21 @@ export class ExtensionService {
   }
 
   hasType(type: ExtensionActiveType) {
-    return this._package.activeTypes.has(type)
+    switch(type) {
+      case ExtensionActiveType.ExtContentType:
+        return this._package.activeTypes.length > 0
+      case ExtensionActiveType.ExtView:
+        return this._package.viewEvents.length > 0
+      default:
+        return false
+    }
   }
 
   private _initialize(): Result<string, string> {
     const entryPath = this._package.main
     if (!fs.existsSync(entryPath)) return Result.failure(`file not exist: ${entryPath}`)
     const content = fs.readFileSync(entryPath, 'utf-8')
-    const m = new ExtensionModule('', module.parent, this._pipe)
+    const m = new ExtensionModule(this._package.name, module.parent, this._pipe)
     m._compile(content, this._package.name)
     logger.debug(`${m.exports}`)
     try {
@@ -160,14 +170,6 @@ export class ExtensionService {
       this._pipe!.post(IPCRendererResponse.ON_ERROR_MESSAGE, {msg: msg})
       return Result.failure(msg)
     }
-  }
-
-  private _registRendererRouter() {
-    // this._pipe!.post(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE,
-    //   {
-    //     name: this.name,
-    //     html: ''
-    //   })
   }
 
   async run(command: string, ...args: any[]): Promise<Result<string, string>> {
@@ -188,7 +190,7 @@ export class ExtensionService {
         await service.run(command, ...args)
       }
       return Result.success(`${command} success`)
-    } catch (err) {
+    } catch (err: any) {
       switch(command) {
         case 'read':
           console.error('read error:', err)

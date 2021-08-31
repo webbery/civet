@@ -3,6 +3,7 @@ import { RPCProtocal } from '../common/RpcProtocal'
 
 export class HostHTML {
   html: string;
+  body: string;
   script: string[];
   style: string[];
 }
@@ -23,7 +24,6 @@ export class ExtHostWebView {
   getHtml() {
     return this.#html
   }
-
 
   postMessage() {}
 

@@ -14,13 +14,16 @@ import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstall
 import { logger } from '@/../public/Logger'
 import fs from 'fs'
 import { injectable, registSingletonObject } from './Singleton'
+import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
+import { ViewType } from '@/../public/ExtensionHostType'
 
 @injectable
 export class ExtensionManager {
   private _pipeline: MessagePipeline;
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
-  private _actives: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // <event, service chain>
+  private _actives: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
+  private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
 
   constructor(pipeline: MessagePipeline) {
@@ -46,16 +49,7 @@ export class ExtensionManager {
     // npm extension
     this._initExternalExtension()
     this._initFrontEndEvent(pipeline)
-    // set extension node_modules path
-    // const Module = require('module');
-    // let originModulePath = Module._nodeModulePaths;
-    // console.info('222', Module.paths, ', ', originModulePath)
-    // Module._nodeModulePaths = function (from: string) {
-    //   let paths = originModulePath.call(this, from)
-    //   paths.unshift(...Module.paths)
-    //   console.info('node paths:', paths)
-    //   return paths
-    // }
+    this._installRouter()
   }
 
   private _isExtension(name: string) {
@@ -157,6 +151,20 @@ export class ExtensionManager {
       this._installManager = new ExtensionInstallManager(extensionPath)
     }
   }
+
+  private _installRouter() {
+    let routers = []
+    for (let idx = 0, len = this._extensions.length; idx < len; ++idx) {
+      const types = this._extensions[idx].viewType()
+      console.info('router', types)
+      if (types && types.indexOf(ViewType.Overview) >= 0) {
+        routers.push({name: this._extensions[idx].name, display: this._extensions[idx].displayName})
+      }
+    }
+    if (routers.length > 0) {
+      this._pipeline.post(IPCRendererResponse.ON_VIEW_ROUTER_INIT, routers)
+    }
+  }
   
   _initExternalExtension() {
     const extPath = getExtensionPath()
@@ -205,7 +213,7 @@ export class ExtensionManager {
   disable(msgid: number, extname: string) {}
   
   private _initContentTypeExtension(service: ExtensionService) {
-    let activeType = service.activeType(ExtensionActiveType.ExtContentType)
+    let activeType = service.activeType()
     if (!activeType) return
     for (let active of activeType) {
       active = active.toLowerCase()
@@ -219,18 +227,11 @@ export class ExtensionManager {
   }
 
   private _initViewExtension(service: ExtensionService) {
-    let activeType = service.activeType(ExtensionActiveType.ExtView)
+    let activeType = service.viewType()
     if (!activeType) return
-    // for (let active of activeType) {
-    //   active = active.toLowerCase()
-    //   let events = this._actives.get(active)
-    //   if (!events) {
-    //     events = []
-    //   }
-    //   events.push(service)
-    //   this._actives.set(active, events)
-    // }
+    this._viewServices.set(service.name, service)
   }
+
   private _initStorageExtension(service: ExtensionService) { }
 
   switchResourceDB(dbname: string) {
@@ -298,5 +299,11 @@ export class ExtensionManager {
     }
     return html
   }
+
+  // private onRequestOverview(msgid: number, name: string): any {
+  //   const service = this._viewServices.get(name)
+  //   if (!service) return undefined;
+  //   service.
+  // }
 
 }

@@ -7,7 +7,7 @@ import path from 'path'
 export class ResourceLoader {
   constructor() {}
 
-  async download(data: any, dbname: string|undefined = ''): Promise<Result<string, string>>  {
+  async download(data: any, dbname: string|undefined = ''): Promise<Result<string, any>>  {
     let downloadDir = 'download'
     if (dbname === '') {
       dbname = config.getCurrentDB()
@@ -29,7 +29,7 @@ export class ResourceLoader {
         // download from network
         fullpath = await this.downloadByHttp(data['url'], downloadDir);
       }
-    } catch (err) {
+    } catch (err: any) {
       return Result.failure(err);
       // throw new Error(`download ${data} error`)
     }

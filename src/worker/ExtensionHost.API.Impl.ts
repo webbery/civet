@@ -9,17 +9,17 @@ import { getExtensionPath} from '@/../public/Utility'
 import { Resource } from '@/../public/Resource'
 import { ExtSearchBar } from './view/extHostSearchBar'
 import { ExtPropertyView } from './view/extHostPropertyView'
-import { ExtOverview } from './view/extHostOverview'
+import { ExtOverview, ExtOverviewEntry } from './view/extHostOverview'
 
 export interface IExtensionApiFactory {
 	(extension: any, registry: any, configProvider: any): typeof civet;
 }
 
-export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline): IExtensionApiFactory {
+export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, extensionName: string): IExtensionApiFactory {
   const rpcProtocal = registSingletonObject(RPCProtocal)
   const extSearchBar = registSingletonObject(ExtSearchBar)
   const extPropertyView = rpcProtocal.set(ExtPropertyView.name, ExtPropertyView)
-  const extOverView = rpcProtocal.set(ExtOverview.name, ExtOverview)
+  const extOverViewEntry = registSingletonObject(ExtOverviewEntry)
 
   const window: typeof civet.window = {
     get searchBar() { return extSearchBar.searchBar },
@@ -42,9 +42,8 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline): IE
       rpcProtocal.regist('getSelectContentItemInfo', getResourcesWrapper, thisArg)
     },
 
-    get overView() { return extOverView },
-    onDidChangeOverviewVisibleRanges(listener: (e: civet.OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void {
-      
+    createOverview(id: string, router: string, name: string): civet.OverView {
+      return extOverViewEntry.createOverviewEntry(id, router, name)
     }
   }
 

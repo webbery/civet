@@ -12,9 +12,11 @@ export class ExtensionModule extends Module {
   private _extensionRequirePaths: string[] = [];
   private _r: any;
   private _pipeline: MessagePipeline;
+  private _extensionName: string;
 
   constructor(id: string, parent: NodeModule|null|undefined, pipeline: MessagePipeline) {
     super(id, parent)
+    this._extensionName = id
     this._vm = require('vm')
     this._pipeline = pipeline
     this._initSearchPath()
@@ -36,7 +38,7 @@ export class ExtensionModule extends Module {
   require(path: string) {
     if (path === 'civet') {
       // inject civet to extension
-      const apiFactory = createApiFactoryAndRegisterActors(this._pipeline)
+      const apiFactory = createApiFactoryAndRegisterActors(this._pipeline, this._extensionName)
       logger.debug(`createApiFactoryAndRegisterActors finish`)
       return apiFactory(null, null, null)
     }

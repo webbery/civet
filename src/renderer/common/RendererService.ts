@@ -66,7 +66,8 @@ class RendererService {
       switch(types.length) {
       case 1:
         callbacks.forEach((callback: any) => {
-            callback(msg.dataid, msg.data.msg)
+          console.info('message:', msg.data.msg)
+          callback(msg.dataid, msg.data.msg[0])
         })
         break
       case 3:

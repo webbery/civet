@@ -1,4 +1,30 @@
 const fs = require('fs')
+/**
+ * cfg.json describe as follows:
+ * app: {
+      first: true,      // is civet application first open?
+      version: version, // the version of current civet
+      default: dbname,  // last used database/resources library name
+    },
+    resources: [
+      {
+        name: name,     // avaliable database/resources name
+        db: {
+          path: path    // database file path
+        },
+        extensions: [
+          // avaliable extensions in this database/resources library. Default is all
+          // if we create a database/resources library, an support content type should be selected.
+          // after that, relational extension will be added to here for recording.
+          // if we don't select content type, can all extension be automatic enable?
+          // for example, which overview should be display? it seems that it's not important, because user know what they want.
+          extension
+        ],
+        meta: schema
+      }
+    ]
+  }
+ */
 class CivetConfig {
   configPath: string;
   config: any;

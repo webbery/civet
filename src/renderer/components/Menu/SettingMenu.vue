@@ -6,7 +6,7 @@
         <div>{{layout}}<span class="el-icon-arrow-right"></span></div>
       </li> -->
       <li v-for="(layout, index) in layouts" :key="index">
-        <div @click="onLayoutClicked(index)">{{layout}}</div>
+        <div @click="onLayoutClicked(layout.name)">{{layout.display}}</div>
       </li>
     </ul>
     <ul class="sm-ul sm-underline"></ul>
@@ -20,6 +20,7 @@
 </template>
 <script>
 import {i18n} from '@/../public/String'
+import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 
 export default {
   name: 'setting-menu',
@@ -33,8 +34,11 @@ export default {
     return {
       setting: i18n('setting'),
       layout: i18n('layout'),
-      layouts: [i18n('waterfall')]
+      layouts: []
     }
+  },
+  created() {
+    this.$ipcRenderer.on(IPCRendererResponse.ON_VIEW_ROUTER_INIT, this.onViewRouterInit)
   },
   computed: {
     locationComputed() {
@@ -48,10 +52,16 @@ export default {
     onSettingClicked() {
       this.$router.push({path: '/config', query: {name: '配置'}})
     },
-    onLayoutClicked(index) {
-      console.info(index)
-      this.$router.push({path: '/ExtOverview/ExtOverview', query: {name: ''}})
+    onLayoutClicked(name) {
+      console.info('select layout', name)
       this.show = !this.show
+      this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, name)
+    },
+    onViewRouterInit(session, routers) {
+      console.info('created init:', session, routers)
+      for (let route of routers) {
+        this.layouts.push(route)
+      }
     }
   }
 }

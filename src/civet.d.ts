@@ -149,17 +149,14 @@ declare module 'civet' {
     export interface OverView {
         html?: string;
         /**
-         * if use custom layout, html is enable
-         */
-        layout: OverviewItemLayout;
-        /**
          * @brief before loading items, dicide which item should be display
          * @param listener 
          * @param thisArg 
          */
         onResourcesLoading(listener: (e: OverviewItemLoadEvent) => void, thisArg?: any): void;
 
-        onDidReceiveMessage(listener: (message: boolean) => void, thisArg?: any): void;
+        onDidReceiveMessage(listener: (message: any) => void, thisArg?: any): void;
+        onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
     }
 
     export namespace window {
@@ -174,8 +171,8 @@ declare module 'civet' {
          */
         export function onDidSelectContentItem(listener: (e: ContentItemSelectedEvent) => void, thisArg?: any): void;
 
-        export let overView: OverView;
-        export function onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
+        export function createOverview(id: string, router: string, name: string): OverView;
+
     }
 
     export namespace utility {
