@@ -111,7 +111,7 @@ export class MessagePipeline implements IMessagePipeline {
       }, 200);
     }
     post(type: string, message: any) {
-      this.VIPQueue.push({type: type, data: [message]})
+      this.VIPQueue.push({type: type, data: message})
       if (!this.#isRendererStart) {
         return
       }
@@ -128,6 +128,17 @@ export class MessagePipeline implements IMessagePipeline {
     }
     regist(msgType: string, msgFunc: IMessageCallback, pointer?: any) {
       this.processor.set(msgType, [msgFunc, pointer]);
+    }
+
+    tryRun(msgType: string): boolean {
+      const func = this.processor.get(msgType)
+      if (!func) return false
+      if (!func[1]) {
+        func[0](0)
+      } else {
+        func[0].call(func[1], 0)
+      }
+      return true
     }
 
     private sendVIP(count: number) {

@@ -62,28 +62,22 @@ class RendererService {
     this.ipc.on('message-to-renderer', (sender, msg) => {
       const types = msg.type.split('.')
       const callbacks = self.response.get(types[0])
+      console.info('callbacks:', callbacks)
       if (callbacks === undefined) return
-      switch(types.length) {
-      case 1:
-        callbacks.forEach((callback: any) => {
-          console.info('message:', msg.data.msg)
-          callback(msg.dataid, msg.data.msg[0])
-        })
-        break
-      case 3:
-        console.info('+=+', msg)
-        callbacks.forEach((callback: any) => {
-          callback(msg.data.id, types[2], types[1], msg.data.msg[0])
-        })
-        break
-      case 4:
-        callbacks.forEach((callback: any) => {
-          callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
-        })
-        break
-      default:
-        break;
-      }
+      callbacks.forEach((callback: any) => {
+        switch(callback.length) {
+          case 2:
+            callback(msg.data.id, msg.data.msg)
+            break
+          case 3:
+            callback(msg.data.id, types[2], types[1], msg.data.msg[0])
+            break
+          case 5:
+            callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
+            break
+          default: break
+        }
+      })
     })
   }
 
@@ -111,14 +105,27 @@ class RendererService {
     this.response.regist(type, callback)
   }
 
+  private stdOn<Reply>(type: IPCType, callback: (err: any, resp: {session: number, reply: Reply}) => void) {
+    const func = (session: number, reply: Reply) => {
+      // console.info('reply:', 0, reply)
+      return callback(0, {session, reply})
+    }
+    this.response.regist(type, func)
+  }
+
   async get(type: IPCType, params: any): Promise<any> {
     this.send(type, params)
     if (IPCRendererResponse[type] === undefined) {
       console.error(`reply[${type}] is not defined, params: ${params}`)
     }
-    const promiseOn = util.promisify(this.on)
+    // this.stdOn(IPCRendererResponse[type], (err, reply) => {
+    //   console.info('reply:', err, reply)
+    // })
+    const promiseOn = util.promisify(this.stdOn)
+    // const result = await promiseOn(IPCRendererResponse[type])
     const result = await promiseOn.call(this, IPCRendererResponse[type])
-    return result
+    // console.info('promise on', result)
+    return result.reply
   }
 }
 export const service = new RendererService();

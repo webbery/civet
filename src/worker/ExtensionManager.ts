@@ -49,7 +49,7 @@ export class ExtensionManager {
     // npm extension
     this._initExternalExtension()
     this._initFrontEndEvent(pipeline)
-    this._installRouter()
+    // this._installRouter()
   }
 
   private _isExtension(name: string) {
@@ -149,20 +149,6 @@ export class ExtensionManager {
   private _initInstaller(extensionPath: string) {
     if (this._installManager === null) {
       this._installManager = new ExtensionInstallManager(extensionPath)
-    }
-  }
-
-  private _installRouter() {
-    let routers = []
-    for (let idx = 0, len = this._extensions.length; idx < len; ++idx) {
-      const types = this._extensions[idx].viewType()
-      console.info('router', types)
-      if (types && types.indexOf(ViewType.Overview) >= 0) {
-        routers.push({name: this._extensions[idx].name, display: this._extensions[idx].displayName})
-      }
-    }
-    if (routers.length > 0) {
-      this._pipeline.post(IPCRendererResponse.ON_VIEW_ROUTER_INIT, routers)
     }
   }
   

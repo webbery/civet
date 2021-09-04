@@ -155,6 +155,8 @@ declare module 'civet' {
          */
         onResourcesLoading(listener: (e: OverviewItemLoadEvent) => void, thisArg?: any): void;
 
+        onDragResources(listener: (e: OverviewItemLoadEvent) => void, thisArg?: any): void;
+        
         onDidReceiveMessage(listener: (message: any) => void, thisArg?: any): void;
         onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
     }
@@ -171,7 +173,7 @@ declare module 'civet' {
          */
         export function onDidSelectContentItem(listener: (e: ContentItemSelectedEvent) => void, thisArg?: any): void;
 
-        export function createOverview(id: string, router: string, name: string): OverView;
+        export function createOverview(id: string, router: string): OverView;
 
     }
 

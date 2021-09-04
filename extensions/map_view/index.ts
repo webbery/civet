@@ -1,9 +1,6 @@
 import { window, OverviewItemLoadEvent, IResource, utility } from 'civet'
-class MapView {
-  constructor() {}
-}
 
-let mapView = new MapView();
+let mapView = window.createOverview('mapview', 'map layout');
 
 const fs = require('fs')
 let frame = ''
@@ -13,9 +10,10 @@ fs.readFile(utility.extensionPath + '/map_view/view.html', (err, data)=> {
     return;
   }
   frame = data.toString();
-  window.overView.html = frame
 })
 
-window.overView.onResourcesLoading((e: OverviewItemLoadEvent) => {
-  window.overView.html = frame
+mapView.onResourcesLoading((e: OverviewItemLoadEvent) => {
+  // mapView.html = frame
+  console.info('onResourcesLoading', e.resources.length)
+  mapView.html = frame.replace('{{resources}}', JSON.stringify(e.resources))
 }, mapView);

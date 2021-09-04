@@ -29,7 +29,6 @@ export class RPCProtocal {
       if (i === 0) return id
       return registSingletonObject(v)
     })
-    params
     const proxy = new ctor(...params, ...args)
     this._instances[id] = proxy
     return proxy
@@ -57,7 +56,7 @@ export class RPCProtocal {
 
   regist<Event>(event: string, listener: (e: Event) => void, thisArg?: any) {
     const process = function (msgid: number, data: any) {
-      console.info(`injectEvent callback: ${msgid}, ${data}`)
+      console.info(`injectEvent(${event}) callback: ${msgid}, ${data}`)
       const e = <Event>data;
       listener(e)
     };

@@ -46,6 +46,7 @@ export enum IPCNormalMessage {
   LIST_EXTENSION = 'getExtensions',
   // workbench
   GET_SELECT_CONTENT_ITEM_INFO = 'getSelectContentItemInfo',
+  REQUEST_UPDATE_RESOURCES = 'onResourcesLoading',
   RETRIEVE_OVERVIEW = 'rtvOverview'
 }
 
@@ -67,6 +68,8 @@ export enum IPCRendererResponse {
   uninstall = 'replyUninstallResult',
   getExtensions = 'replyAllExtensions',
   ON_ERROR_MESSAGE = 'onEM',
-  ON_VIEW_ROUTER_INIT = 'onVRI',
-  ON_EXTENSION_ROUTER_UPDATE = 'Overview'
+  ON_VIEW_ROUTER_ADD = 'onVRI',
+  ON_VIEW_ROUTER_CLEAR = 'onVRC',
+  ON_EXTENSION_ROUTER_UPDATE = 'Overview',
+  ON_RESOURCE_UPDATED = 'onRU'
 }

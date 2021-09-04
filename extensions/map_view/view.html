@@ -5,7 +5,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <title>设置点标注的文本标签</title>
-    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
     <style>
         html, body, #container {
             height: 100%;
@@ -36,33 +35,129 @@
 <body>
 <div id="container"></div>
 <script type="text/javascript"
-        src="https://webapi.amap.com/maps?v=1.4.15&key=6918ecca2a3cbfafb6ab59369768ae21"></script>
+        src="https://webapi.amap.com/maps?v=1.4.15&key=6918ecca2a3cbfafb6ab59369768ae21&plugin=AMap.MarkerClusterer"></script>
 <script crossorigin="anonymous" id="amap_plus_js" src="https://webapi.amap.com/maps/modules?v=1.4.16&key=6918ecca2a3cbfafb6ab59369768ae21&vrs=1622082392611&m=mouse,vectorlayer,overlay,wgl,sync" type="text/javascript"></script>
+<script src="https://a.amap.com/jsapi_demos/static/china.js"></script>
 <script type="text/javascript">
-    var map = new AMap.Map('container', {
-        resizeEnable: true,
-        center: [116.397428, 39.90923],
-        zoom: 13
-    });
+var cluster, markers = [];
+var map = new AMap.Map('container', {
+    resizeEnable: true,
+    center: [116.397428, 39.90923],
+    zoom: 10
+});
 
-    var marker = new AMap.Marker({
-        position: map.getCenter(),
-        icon: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
-        offset: new AMap.Pixel(-13, -30)
-    });
+function loadResources(resources) {
+    if (!resources) return
+    console.info(resources)
+    for (let idx = 0, len = resources.length; idx < len; ++idx) {
+        console.info('1112')
+        var icon = new AMap.Icon({
+            size: new AMap.Size(40, 50),    // 图标尺寸
+            image: '//webapi.amap.com/theme/v1.3/images/newpc/way_btn2.png',  // Icon的图像
+            imageOffset: new AMap.Pixel(0, -60),  // 图像相对展示区域的偏移量，适于雪碧图等
+            imageSize: new AMap.Size(40, 50)   // 根据所设置的大小拉伸或压缩图片
+        });
+        let longitude = resources[idx].lon || 116.405467;
+        let latitude = resources[idx].lat || 39.907761;
+        // let icon = new AMap.Icon({
+        //     size: new AMap.Size(40, 50),    // 图标尺寸
+        //     image: '//webapi.amap.com/theme/v1.3/images/newpc/way_btn2.png',  // Icon的图像
+        //     imageOffset: new AMap.Pixel(0, -60),  // 图像相对展示区域的偏移量，适于雪碧图等
+        //     imageSize: new AMap.Size(40, 50)   // 根据所设置的大小拉伸或压缩图片
+        // });
+        var marker = new AMap.CircleMarker({
+            title: resources[idx].name,
+            center: new AMap.LngLat(longitude, latitude),
+            radius: 12,
+            strokeColor: 'white',
+            strokeOpacity: 0.5,
+            fillColor: 'rgba(0,0,255,1)',
+            fillOpacity: 0.5,
+            zIndex: 10,
+            cursor: 'pointer',
+            clickable: true
+        });
+        console.info('111')
+        // amap.add(marker)
+        marker.setMap(amap)
+    }
+}
 
-    marker.setMap(map);
+// loadResources({{resources}})
 
-    // 设置鼠标划过点标记显示的文字提示
-    marker.setTitle('我是marker的title');
+for (var i = 0; i < points.length; i += 1) {
+    markers.push(new AMap.Marker({
+        position: points[i]['lnglat'],
+        content: '<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"></div>',
+        offset: new AMap.Pixel(-15, -15)
+    }))
+}
 
-    // 设置label标签
-    // label默认蓝框白底左上角显示，样式className为：amap-marker-label
-    marker.setLabel({
-        offset: new AMap.Pixel(20, 20),  //设置文本标注偏移量
-        content: "<div class='info'>我是 marker 的 label 标签</div>", //设置文本标注内容
-        direction: 'right' //设置文本标注方位
-    });
+var count = markers.length;
+var _renderClusterMarker = function (context) {
+    var factor = Math.pow(context.count / count, 1 / 18);
+    var div = document.createElement('div');
+    var Hue = 180 - factor * 180;
+    var bgColor = 'hsla(' + Hue + ',100%,50%,0.7)';
+    var fontColor = 'hsla(' + Hue + ',100%,20%,1)';
+    var borderColor = 'hsla(' + Hue + ',100%,40%,1)';
+    var shadowColor = 'hsla(' + Hue + ',100%,50%,1)';
+    div.style.backgroundColor = bgColor;
+    var size = Math.round(30 + Math.pow(context.count / count, 1 / 5) * 20);
+    div.style.width = div.style.height = size + 'px';
+    div.style.border = 'solid 1px ' + borderColor;
+    div.style.borderRadius = size / 2 + 'px';
+    div.style.boxShadow = '0 0 1px ' + shadowColor;
+    div.innerHTML = context.count;
+    div.style.lineHeight = size + 'px';
+    div.style.color = fontColor;
+    div.style.fontSize = '14px';
+    div.style.textAlign = 'center';
+    context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
+    context.marker.setContent(div)
+};
+
+addCluster(2);
+
+function addCluster(tag) {
+    if (cluster) {
+        cluster.setMap(null);
+    }
+    if (tag == 2) {//完全自定义
+        cluster = new AMap.MarkerClusterer(map, markers, {
+            gridSize: 80,
+            renderClusterMarker: _renderClusterMarker
+        });
+    } else if (tag == 1) {//自定义图标
+        var sts = [{
+            url: "https://a.amap.com/jsapi_demos/static/images/blue.png",
+            size: new AMap.Size(32, 32),
+            offset: new AMap.Pixel(-16, -16)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/green.png",
+            size: new AMap.Size(32, 32),
+            offset: new AMap.Pixel(-16, -16)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/orange.png",
+            size: new AMap.Size(36, 36),
+            offset: new AMap.Pixel(-18, -18)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/red.png",
+            size: new AMap.Size(48, 48),
+            offset: new AMap.Pixel(-24, -24)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/darkRed.png",
+            size: new AMap.Size(48, 48),
+            offset: new AMap.Pixel(-24, -24)
+        }];
+        cluster = new AMap.MarkerClusterer(map, markers, {
+            styles: sts,
+            gridSize: 80
+        });
+    } else {//默认样式
+        cluster = new AMap.MarkerClusterer(map, markers, { gridSize: 80 });
+    }
+}
 </script>
 </body>
 </html>

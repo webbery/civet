@@ -7,14 +7,14 @@ export default (function() {
 
   let loadFinished = function() {
     currentGroupFinished++
-    if (currentGroupFinished === groupQueue.length) {
+    if (currentGroupFinished < groupQueue.length) {
       nextGroup()
       loadGroup()
     }
   }
 
   let nextGroup = function() {
-    currentGroupFinished = 0
+    // currentGroupFinished = 0
     groupCursor++
   }
 
@@ -50,11 +50,8 @@ export default (function() {
   }
 
   let loadGroup = function() {
-    if (groupCursor >= groupQueue.length) return
-    currentGroupFinished = 0
-    for (var idx = 0; idx < groupQueue.length; idx++) {
-      loadScript(groupQueue[groupCursor])
-    }
+    // if (groupCursor >= 1) return
+    loadScript(groupQueue[groupCursor])
   }
 
   let loadMultiGroup = function(scripts) {

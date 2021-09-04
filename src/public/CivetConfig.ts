@@ -4,7 +4,10 @@ const fs = require('fs')
  * app: {
       first: true,      // is civet application first open?
       version: version, // the version of current civet
-      default: dbname,  // last used database/resources library name
+      default: {
+        dbname: dbname,  // last used database/resources library name
+        layout: mapview,  // default layout of overview
+      }
     },
     resources: [
       {
@@ -40,7 +43,10 @@ class CivetConfig {
     let cfg = {
       app: {
         first: true,
-        version: version
+        version: version,
+        default: {
+          layout: 'mapview'
+        }
       },
       resources: []
     }
@@ -55,6 +61,10 @@ class CivetConfig {
         console.info(`software should be upgrade, old version: ${config.app.version}, current version: ${version}`)
         this.oldVersion = true;
         config.app.version = version
+        if (typeof config.app.default === 'string') { // 0.1.2 -> 0.2.0
+          const dbname = config.app.default
+          config.app.default = {layout: 'mapview', dbname: dbname}
+        }
       }
       cfg = config
     }
@@ -69,12 +79,12 @@ class CivetConfig {
   }
 
   getCurrentDB(): string|undefined {
-    return this.config.app.default
+    return this.config.app.default['dbname']
   }
 
   getDBPath(name: string|undefined): string | null {
     if (!name) {
-      name = this.config.app.default
+      name = this.config.app.default['dbname']
     }
     for (const resource of this.config.resources) {
       if (name === resource.name) {
@@ -84,9 +94,17 @@ class CivetConfig {
     return null
   }
 
+  get defaultView() {
+    return this.config.app.default.layout
+  }
+
+  set defaultView(val: string) {
+    this.config.app.default.layout = val
+  }
+
   meta() {
     for (const resource of this.config.resources) {
-      if (this.config.app.default === resource.name) {
+      if (this.config.app.default['dbname'] === resource.name) {
         return resource.meta
       }
     }
@@ -109,7 +127,7 @@ class CivetConfig {
   }
 
   switchResource(name: string) {
-    this.config.app.default = name
+    this.config.app.default['dbname'] = name
   }
 
   getResourcesName(): string[] {
@@ -137,7 +155,7 @@ class CivetConfig {
       }
     }
     this.config.app.first = false
-    this.config.app.default = name
+    this.config.app.default['dbname'] = name
     this.config.resources.push({
       name: name,
       db: { path: path + '/' + name },
@@ -176,8 +194,8 @@ class CivetConfig {
         break
       }
     }
-    if (this.config.app.default === name) {
-      this.config.app.default = resources[0]
+    if (this.config.app.default['dbname'] === name) {
+      this.config.app.default['dbname'] = resources[0]
     }
     this.save()
   }

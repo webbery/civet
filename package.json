@@ -114,7 +114,7 @@
     ]
   },
   "dependencies": {
-    "civetkern": "^0.3.2",
+    "civetkern": "^0.3.3",
     "download": "^8.0.0",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",

@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-import { IPCRendererResponse } from '@/../public/IPCMessage'
+import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
 
@@ -19,11 +19,13 @@ export default {
     this.$ipcRenderer.on(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE, this.onPanelRouterInit)
   },
   mounted() {
+    this.$ipcRenderer.send(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)
   },
   methods: {
-    onPanelRouterInit(session, id, classname, value) {
+    onPanelRouterInit(session, value) {
+      console.info('init overview', value)
       StyleLoader.load(value.style)
-      this.html = value.html
+      this.html = value.body
       this.$nextTick(() => {
         ScriptLoader.load(value.script)
       })

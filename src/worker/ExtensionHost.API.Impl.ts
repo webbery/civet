@@ -42,8 +42,8 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
       rpcProtocal.regist('getSelectContentItemInfo', getResourcesWrapper, thisArg)
     },
 
-    createOverview(id: string, router: string, name: string): civet.OverView {
-      return extOverViewEntry.createOverviewEntry(id, router, name)
+    createOverview(id: string, router: string): civet.OverView {
+      return extOverViewEntry.createOverviewEntry(id, router)
     }
   }
 

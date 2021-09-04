@@ -27,6 +27,8 @@ export class ExtHostWebView {
 
   postMessage() {}
 
+  get id() { return this._id }
+  
   update(type: ViewType, html: HostHTML) {
     this.proxy.post(this._id, type, this.constructor.name, html)
     // console.info(`update [${this.constructor.name}]${this._id}`)

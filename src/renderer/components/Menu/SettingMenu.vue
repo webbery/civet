@@ -38,7 +38,7 @@ export default {
     }
   },
   created() {
-    this.$ipcRenderer.on(IPCRendererResponse.ON_VIEW_ROUTER_INIT, this.onViewRouterInit)
+    this.$ipcRenderer.on(IPCRendererResponse.ON_VIEW_ROUTER_ADD, this.onViewRouterInit)
   },
   computed: {
     locationComputed() {

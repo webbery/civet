@@ -95,5 +95,12 @@ export function i18n(en: string) {
   // const locale = this.locale()
   en = en.toLowerCase()
   if (Object.prototype.hasOwnProperty.call(_i18n, en)) return _i18n[en]
-  return en
+  const words = en.split(' ')
+  let str = ''
+  console.info('words:', words)
+  for (let word of words) {
+    if (Object.prototype.hasOwnProperty.call(_i18n, word)) str += _i18n[word]
+  }
+  if (str.length === 0) return en
+  return str
 }
