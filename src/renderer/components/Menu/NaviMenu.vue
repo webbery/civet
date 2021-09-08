@@ -18,7 +18,7 @@
         <slot name="extension"></slot>
       </div>
   </el-col>
-  <SettingMenu :show="displayMenu" :location="location"></SettingMenu>
+  <SettingMenu :show="displayMenu" :location="location" :onDisplayChanged="onDisplayChanged"></SettingMenu>
 </el-row>
 </template>
 <script>
@@ -45,6 +45,9 @@ export default {
       this.location.y = rect.top - 2 * 40
       console.info('bottom', this.location.y, rect.bottom, rect.top)
       this.displayMenu = !this.displayMenu
+    },
+    onDisplayChanged(value) {
+      this.displayMenu = value
     }
   }
 }

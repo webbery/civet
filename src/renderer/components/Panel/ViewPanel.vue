@@ -41,7 +41,6 @@
           </div>
         </WaterfallSlot>
       </Waterfall>
-      <div v-html="viewHtml"></div>
       </el-scrollbar>
     </div>
   </div>
@@ -69,7 +68,6 @@ export default {
   data() {
     return {
       firstLoad: true,
-      viewHtml: '',
       lastSelections: {},
       imageSelected: false,
       menus: [

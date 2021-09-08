@@ -12,6 +12,10 @@ class Node<T> {
   }
 }
 
+// export interface Iterator<E> {
+//   next(){}
+// }
+
 export class LinkedList<T> {
   #start: Node<T> = Node.Undefined;
   #last: Node<T> = Node.Undefined;
@@ -29,7 +33,7 @@ export class LinkedList<T> {
   }
 
   pop(): T|undefined {
-    if (this.size === 0) return undefined
+    if (this.#size === 0) return undefined
     this.#size -= 1
     return this.#start.item;
   }
@@ -45,9 +49,24 @@ export class LinkedList<T> {
       this.#last = node
       node.prev = last
       last.next = node
+    } else {
+      const first = this.#start
+      this.#start = node
+      node.next = first
+      first.prev = node
     }
+    this.#size += 1
   }
 
   private _remove(isLast: boolean): void {
+    
+  }
+
+  *[Symbol.iterator]() {
+    let node = this.#start;
+		while (node !== Node.Undefined) {
+			yield node.item;
+			node = node.next;
+		}
   }
 }

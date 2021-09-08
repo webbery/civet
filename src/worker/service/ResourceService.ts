@@ -1,6 +1,7 @@
 import { MessagePipeline } from '../MessageTransfer'
 import { joinPath } from '../../public/String'
-import { ReplyType, Message } from '../Message'
+import { ReplyType } from '../Message'
+import { CivetProtocol } from '../../public/Event'
 import { Resource, SerializeAccessor } from '../../public/Resource'
 import { thumbnail2Base64 } from '../../public/Utility'
 import { CivetDatabase } from '../Kernel'
@@ -231,7 +232,7 @@ export class ResourceService{
       console.info(result)
       if (result.isSuccess()) {
         let resource = <Resource>result.value
-        let msg = new Message()
+        let msg = new CivetProtocol()
         msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
         const accessor = new SerializeAccessor()
         msg.msg = [resource.toJson(accessor)]

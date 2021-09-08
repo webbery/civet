@@ -10,7 +10,7 @@ class ServiceHub {
     registSingletonObject(MessagePipeline, 200)
     registSingletonObject(ExtensionManager)
     registSingletonObject(ResourceObserver, this.mocks)
-    registSingletonObject(ResourceService)
+    this.resourceService = registSingletonObject(ResourceService)
     // this.resourceObserver = new ResourceObserver(this.extensionManager, this.mocks);
     // this.workbenchObserver = new WorkbenchObserver(pipeline, this.extensionManager);
     // this.workbechService = new WorkbenchService(pipeline, this.workbenchObserver);

@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const ejs = require('ejs')
 const dirs = fs.readdirSync('./extensions')
 const { execSync } = require('child_process');
 let compiler = 'node_modules/.bin/tsc'
@@ -31,6 +32,7 @@ function isInArray(name, arr) {
   }
   return false;
 }
+
 function copyDir(src, dist, excludes, callback) {
   fs.access(dist, function(err){
     if(err){
@@ -116,6 +118,8 @@ function installDependencies() {
   }
 }
 
+function ejsInfomations() {}
+
 function buildExtension() {
   for (let extension of extensions) {
     // copyCivet(extension)
@@ -126,6 +130,15 @@ function buildExtension() {
       inputFiles += ' '
     }
     const cmd = compiler + ' ' + inputFiles + ' --outDir "' + outputDir + '/' + extension + '"'
+    const ejsfile = 'view.ejs'
+    const view = inputDir + '/' + extension + '/' + ejsfile
+    const info = ejsInfomations()
+    if (fs.existsSync(view)) {
+      const content = fs.readFileSync(view)
+      const template = ejs.compile(content)
+      const html = template(info)
+      fs.writeFileSync(inputDir + '/' + extension + '/view.html')
+    }
     // process.chdir('extensions/imagedata')
     // runCommand('node_modules\\.bin\\tsc extensions/imagedata/index.ts')
     // runCommand('"node_modules/.bin/tsc" index.ts')

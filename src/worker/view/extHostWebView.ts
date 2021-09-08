@@ -1,5 +1,6 @@
 import { ViewType } from '@/../public/ExtensionHostType'
 import { RPCProtocal } from '../common/RpcProtocal'
+import { Emitter } from 'public/Emitter'
 
 export class HostHTML {
   html: string;
@@ -10,12 +11,14 @@ export class HostHTML {
 
 export class ExtHostWebView {
   #html: HostHTML;
+  #event: Emitter;
   public proxy: RPCProtocal;
   private _id: string;
 
   constructor(id: string, rpcProxy: RPCProtocal) {
     this.proxy = rpcProxy;
     this._id = id;
+    this.#event = new Emitter()
   }
   setHtml(val: HostHTML) {
     this.#html = val
@@ -25,7 +28,9 @@ export class ExtHostWebView {
     return this.#html
   }
 
-  postMessage() {}
+  get event() {
+    return this.#event
+  }
 
   get id() { return this._id }
   

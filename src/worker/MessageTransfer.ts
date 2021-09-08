@@ -1,5 +1,8 @@
-import { ReplyType, Message, MessageState, IMessagePipeline } from './Message'
+import { ReplyType } from './Message'
 import { injectable, registSingletonObject } from './Singleton'
+import { Event, Listener, CivetProtocol, MessageState } from '@/../public/Event'
+import { LinkedList } from 'public/LinkedList'
+import { Emitter } from 'public/Emitter'
 const { ipcRenderer } = require('electron')
 
 class Timer {
@@ -29,32 +32,35 @@ interface IMessageCallback {
 }
 
 @injectable
-export class MessagePipeline implements IMessagePipeline {
+export class MessagePipeline {
     timer: Timer = new Timer();
     viptimer: Timer = new Timer();
     threshod: number = 200;
-    messageQueue: Map<string, Message> = new Map<string, Message>();
+    messageQueue: Map<string, CivetProtocol> = new Map<string, CivetProtocol>();
     VIPQueue: any[] = [];
+    #emitters: Map<string, LinkedList<Emitter>>;
     processor: Map<string, any> = new Map<string, any>();
     #isRendererStart: boolean = false;
 
     constructor(threshod: number) {
       this.threshod = threshod
+      this.#emitters = new Map<string, LinkedList<Emitter>>();
       ipcRenderer.on('message-from-main', async (event: any, arg: any) => {
         if (!this.#isRendererStart) this.#isRendererStart = true
         console.info('==================')
         console.info('arg', arg)
         console.info('==================')
+        let reply
         const [func, self] = this.processor.get(arg.type)
-        let reply 
         if (self !== undefined) {
           reply = await func.call(self, arg.id, arg.data)
         } else {
           reply = await func(arg.id, arg.data)
         }
+        
         console.info('reply', reply)
         if (reply === undefined) return
-        let msg = new Message()
+        let msg = new CivetProtocol()
         msg.id = arg.id
         msg.type = reply.type
         msg.msg = reply.data
@@ -63,7 +69,7 @@ export class MessagePipeline implements IMessagePipeline {
       })
       console.info('pipeline init finish')
     }
-    reply(msg: Message) {
+    reply(msg: CivetProtocol) {
       // if same type exist but id is different, remove smaller id message.
       for (let k of this.messageQueue.keys()) {
         const [mid, type] = this.unzip(k)
@@ -129,6 +135,23 @@ export class MessagePipeline implements IMessagePipeline {
     regist(msgType: string, msgFunc: IMessageCallback, pointer?: any) {
       this.processor.set(msgType, [msgFunc, pointer]);
     }
+    regist_event(msgType: string, event: Emitter) {
+      if (this.#emitters[msgType] === undefined) {
+        this.#emitters[msgType] = new LinkedList<Emitter>()
+      }
+      this.#emitters[msgType].push(event)
+    }
+
+    fire(msg: CivetProtocol): boolean {
+      const emitters: LinkedList<Emitter> = this.#emitters[msg.type]
+      if (!emitters) return false
+      for (let emitter of emitters) {
+        if (!emitter.emit(msg.type, msg)) {
+          console.error(`messsage ${msg.type} emit fail`)
+        }
+      }
+      return true
+    }
 
     tryRun(msgType: string): boolean {
       const func = this.processor.get(msgType)
@@ -143,7 +166,7 @@ export class MessagePipeline implements IMessagePipeline {
 
     private sendVIP(count: number) {
       let len = Math.min(this.VIPQueue.length, count)
-      let msg = new Message()
+      let msg = new CivetProtocol()
       msg.id = 0
       msg.tick = 0
       for (let idx = 0; idx < len; ++idx) {

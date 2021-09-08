@@ -164,6 +164,7 @@ export class ExtensionService {
       if (m.exports.activate) {
         this._instance = m.exports.activate()
       }
+      if (!this._instance) return Result.failure(`${this._package.name}'s activate is not defined.`)
       return Result.success('ok')
     } catch (error) {
       const msg = `initialize ${this._package.name} fail: ${error}`

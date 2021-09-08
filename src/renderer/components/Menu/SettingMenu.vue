@@ -55,6 +55,7 @@ export default {
     onLayoutClicked(name) {
       console.info('select layout', name)
       this.show = !this.show
+      this.$emit('onDisplayChanged', this.show)
       this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, name)
     },
     onViewRouterInit(session, routers) {

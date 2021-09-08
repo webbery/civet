@@ -6,6 +6,7 @@ import { CivetDatabase } from '../Kernel'
 import importHTML from '../api/HtmlParser'
 import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewVisibleRangesChangeEvent } from '@/../public/ExtensionHostType'
 import { IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
+import { CivetProtocol } from '@/../public/Event'
 import crypto from 'crypto'
 import { config } from '@/../public/CivetConfig'
 
@@ -63,15 +64,16 @@ export class ExtOverview extends ExtHostWebView {
   }
 
   onResourcesLoading(listener: (e: ExtOverviewItemLoadEvent) => void, thisArg?: any): void {
-    const onResourcesLoadingWrapper = function (msg: {id: number[]}): void {
+    const onResourcesLoadingWrapper = function (): void {
       let event = generateResourcesLoadingEvent()
       listener.call(thisArg, event)
     }
-    this.proxy.regist(IPCNormalMessage.REQUEST_UPDATE_RESOURCES, onResourcesLoadingWrapper, thisArg)
+    this.proxy.pipeline.regist(IPCNormalMessage.REQUEST_UPDATE_RESOURCES, onResourcesLoadingWrapper)
+    this.event.on(IPCNormalMessage.REQUEST_UPDATE_RESOURCES, onResourcesLoadingWrapper);
   }
 
   onDragResources(listener: (e: civet.OverviewItemLoadEvent) => void, thisArg?: any): void {
-
+    // this.event.on()
   }
 
   onDidReceiveMessage(listener: (message: any) => void, thisArg?: any): void {}
@@ -100,15 +102,17 @@ export class ExtOverviewEntry {
     return overview
   }
 
-  onRequestOverview(id: number, extname: string): any {
+  async onRequestOverview(id: number, extname: string) {
+    console.info(`onRequestOverview: ${extname}, ${this.#activeView}`)
     if (extname === this.#activeView) return
     const overview = this.#overviews.get(extname)
     if (!overview) {
       console.error(`overview extension ${extname} not exist`)
       return
     }
-    if (!this.#proxy.pipeline.tryRun(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)) return
-
+    const event = overview.event
+    if (!await event.emitAsync(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)) return
+    this.#activeView = extname
     config.defaultView = extname
     const html = overview.getStructHTML()
     if (!html) {

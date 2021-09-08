@@ -1,9 +1,11 @@
 import vm from 'vm'
+import crypto from 'crypto'
 
 export default (function() {
   let groupQueue
   let groupCursor = 0
   let currentGroupFinished = 0
+  let scripts = {}
 
   let loadFinished = function() {
     currentGroupFinished++
@@ -22,11 +24,29 @@ export default (function() {
     console.error('The script ' + oError.target.src + ' is not accessible.')
   }
 
+  let removeScript = function (hash) {
+    const node = scripts[hash]
+    if (node === undefined) return
+    document.body.removeChild(node)
+  }
+
+  let clearScript = function() {
+    for (let hash in scripts) {
+      removeScript(hash)
+    }
+  }
   let loadScript = function(script) {
-    const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|")text\/ng-template\3).)*?>(.*?)<\/\1>/is
+    const md5 = crypto.createHash('md5')
+    const hash = md5.update(script).digest('base64')
+    if (scripts[hash] !== undefined) return
+    const SCRIPT_TAG_REGEX = /<(script)\b[^>]*>([\s\S]*?)<\/\1>/is
     const matchs = script.match(SCRIPT_TAG_REGEX)
     if (matchs) {
-      vm.runInThisContext(matchs[4])
+      try {
+        vm.runInThisContext(matchs[2])
+      } catch (err) {
+        console.error(err)
+      }
       loadFinished()
     } else {
       let s = document.createElement('script')
@@ -46,6 +66,7 @@ export default (function() {
       s.onerror = loadError
       s.src = script
       document.body.appendChild(s)
+      scripts[hash] = s
     }
   }
 
@@ -55,8 +76,10 @@ export default (function() {
   }
 
   let loadMultiGroup = function(scripts) {
+    if (scripts.length === 0) return
     groupCursor = 0
     groupQueue = scripts
+    clearScript()
     loadGroup()
   }
 

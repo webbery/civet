@@ -22,24 +22,10 @@ export const ReplyType = {
   REPLY_EXTENSION_LIST_INFO: 'replyAllExtensions'
 }
 
-export enum MessageState{
-  UNINIT = 0,
-  PENDING = 1,
-  FINISH = 2
-}
-
-export class Message {
-  id: number = 0;
-  type: string = '';
-  state: number = MessageState.UNINIT;
-  tick: number = 0;   // waitting time, unit second
-  msg: any;
-}
-
-export interface IMessagePipeline {
-  reply: any;
-  post: any;
-}
+// export interface IMessagePipeline {
+//   reply: any;
+//   post: any;
+// }
 
 export class ErrorMessage {
   constructor(command: string, args: any) {}
