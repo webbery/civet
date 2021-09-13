@@ -30,7 +30,7 @@ export default {
         paths.push(item.path)
       }
       if (paths.length > 0) {
-        this.$ipcRenderer.send(IPCNormalMessage.ADD_IMAGES_BY_PATHS, paths)
+        this.$ipcRenderer.send(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, paths)
       }
     },
     dragStart(event) {

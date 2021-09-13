@@ -261,6 +261,7 @@ el-tab-pane {
   -webkit-user-select: none;
 }
 .item {
+  color: white;
   font-size: 14px;
 }
 table {

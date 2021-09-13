@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { logger } from 'public/Logger'
-import { EventEmitter } from 'events'
+import { Emitter } from 'public/Emitter'
 
 const registClasses = new Array<any>();
 const serviceIds = new Map<string, any>();
@@ -75,20 +75,33 @@ export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T },
   return instance
 }
 
-const hostEvents = new Map<string, any>();
+const hostEvents = new Map<string, Emitter>();
 
-export function registHostEvent<T>(event: string, listener: { (...args: Array<any>): T }) {
-  const cb = hostEvents[event]
+export function getIdentity(event: string, obj?: any): string {
+  if (!obj) return event
+  return event + '.' + typeof obj
+}
+
+export function registHostEvent<T>(event: string, listener: { (...args: Array<any>): T }, thisArg?: any) {
+  const id = getIdentity(event, thisArg)
+  const cb = hostEvents[id]
   if (cb !== undefined) {
     return
   }
-  let e = new EventEmitter()
-  e.on(event, listener)
-  hostEvents[event] = e
+  let e = new Emitter()
+  if (!thisArg) {
+    e.on(event, listener)
+  } else {
+    const f = function(...args: Array<any>) {
+      listener.apply(thisArg, args)
+    }
+    e.on(event, f)
+  }
+  hostEvents[id] = e
 }
 
-export function emitEvent(event: string, ...args: any): boolean {
-  const e = hostEvents[event]
+export function emitEvent(id: string, event: string, ...args: any): boolean {
+  const e: Emitter = hostEvents[id]
   if (e === undefined) return false
-  return true
+  return e.emit(event, args)
 }

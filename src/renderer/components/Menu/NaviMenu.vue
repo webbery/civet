@@ -11,10 +11,10 @@
       <!-- <div v-for="(tab, indx) in tabs" :key="indx">
         <slot :name="tab.name"></slot>
       </div> -->
-      <div class="panel" v-if="tab === 0">
+      <div class="_cv_panel" v-if="tab === 0">
         <slot name="navigation"></slot>
       </div>
-      <div class="panel" v-if="tab === 1">
+      <div class="_cv_panel" v-if="tab === 1">
         <slot name="extension"></slot>
       </div>
   </el-col>

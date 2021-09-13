@@ -88,7 +88,7 @@
       "target": "nsis"
     },
     "linux": {
-      "icon": "src/main/asset/icon/icon.png",
+      "icon": "src/main/asset/icon/icon",
       "target": "AppImage"
     },
     "nsis": {

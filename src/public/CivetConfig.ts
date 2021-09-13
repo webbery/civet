@@ -155,6 +155,10 @@ class CivetConfig {
       }
     }
     this.config.app.first = false
+    if (typeof this.config.app.default === 'string') { // update
+      const dbname = this.config.app.default
+      this.config.app.default = {layout: 'mapview', dbname: dbname}
+    }
     this.config.app.default['dbname'] = name
     this.config.resources.push({
       name: name,

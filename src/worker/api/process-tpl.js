@@ -98,8 +98,8 @@ export default function processTpl(tpl, baseURI) {
           if (styleIgnore) {
             return genIgnoreAssetReplaceSymbol(newHref)
           }
-
-          // styles.push(newHref)
+          // console.info('link: ', newHref)
+          styles.push(newHref)
           return genLinkReplaceSymbol(newHref)
         }
       }

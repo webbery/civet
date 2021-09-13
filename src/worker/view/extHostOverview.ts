@@ -6,6 +6,7 @@ import { CivetDatabase } from '../Kernel'
 import importHTML from '../api/HtmlParser'
 import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewVisibleRangesChangeEvent } from '@/../public/ExtensionHostType'
 import { IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
+import { registHostEvent } from '../Singleton'
 import { CivetProtocol } from '@/../public/Event'
 import crypto from 'crypto'
 import { config } from '@/../public/CivetConfig'
@@ -91,6 +92,7 @@ export class ExtOverviewEntry {
     this.#proxy = rpcProxy;
     this.#overviews = new Map<string, ExtOverview>();
     this.#activeView = config.defaultView;
+    registHostEvent(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, this.onResourcesAdd, this)
     rpcProxy.on(IPCNormalMessage.RETRIEVE_OVERVIEW, this.onRequestOverview, this)
   }
 
@@ -120,5 +122,9 @@ export class ExtOverviewEntry {
     }
     console.info('request extension html:', html)
     overview.update()
+  }
+
+  onResourcesAdd(id: number, paths: string[]) {
+    console.info('onResourcesAdd', paths)
   }
 }

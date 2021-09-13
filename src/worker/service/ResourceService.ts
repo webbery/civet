@@ -4,12 +4,14 @@ import { ReplyType } from '../Message'
 import { CivetProtocol } from '../../public/Event'
 import { Resource, SerializeAccessor } from '../../public/Resource'
 import { thumbnail2Base64 } from '../../public/Utility'
+import { IPCNormalMessage, IPCRendererResponse } from 'public/IPCMessage'
 import { CivetDatabase } from '../Kernel'
 import { ResourcePath } from '../common/ResourcePath'
 import { config } from '../../public/CivetConfig'
 import { ResourceObserver } from './ResourceObserver'
 import { PropertyType } from '../../public/ExtensionHostType'
-import { injectable } from '../Singleton'
+import { injectable, emitEvent, getIdentity } from '../Singleton'
+import { ExtOverviewEntry } from 'worker/view/extHostOverview'
 const fs = require('fs')
 
 let isStart: boolean = false;
@@ -25,7 +27,7 @@ export class ResourceService{
     this.observer = observer
     this.pipeline = pipeline
     pipeline.regist('addImagesByDirectory', this.addFilesByDir, this)
-    pipeline.regist('addImagesByPaths', this.addImagesByPaths, this)
+    pipeline.regist(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, this.addImagesByPaths, this)
     pipeline.regist('getImagesInfo', this.getImagesInfo, this)  // deprect
     pipeline.regist('getFilesSnap', this.getFilesSnap, this)
     pipeline.regist('getImageInfo', this.getImageInfo, this)
@@ -43,7 +45,7 @@ export class ResourceService{
     pipeline.regist('getUntagImages', this.getUntagImages, this)
     pipeline.regist('updateCategoryName', this.updateCategoryName, this)
     pipeline.regist('updateFileName', this.updateFileName, this)
-    pipeline.regist('reInitDB', this.reInitDB, this)
+    pipeline.regist(IPCNormalMessage.REINIT_DB, this.reInitDB, this)
     pipeline.regist('removeDB', this.removeDB, this)
   }
 
@@ -69,6 +71,8 @@ export class ResourceService{
     for (const fullpath of data) {
       this.readImages.call(this, msgid, new ResourcePath(fullpath))
     }
+    const id = getIdentity(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, ExtOverviewEntry)
+    emitEvent(id, IPCNormalMessage.ADD_RESOURCES_BY_PATHS)
   }
 
   getImagesInfo(msgid: number, data: any) {
@@ -206,8 +210,7 @@ export class ResourceService{
     console.info('init db', data)
     CivetDatabase.reload()
     this.observer.switchResourceDB(data)
-    // reply2Renderer(ReplyType.REPLY_RELOAD_DB_STATUS, true)
-    return {type: ReplyType.REPLY_RELOAD_DB_STATUS, data: true}
+    return {type: IPCRendererResponse.reInitDB, data: true}
   }
 
   removeDB(msgid: number, data: any) {

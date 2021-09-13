@@ -15,7 +15,7 @@
       </div>
       <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
     <fieldset>
-      <legend class="title">标签</legend>
+      <legend class="_cv_title">标签</legend>
       <el-tag
         :key="tag"
         v-for="tag in tags"
@@ -35,7 +35,7 @@
       <el-button v-else class="button-new-tag" size="mini" @click="showInput">添加标签</el-button>
     </fieldset>
     <fieldset>
-      <legend class="title">分类</legend>
+      <legend class="_cv_title">分类</legend>
       <div>
         <el-tag v-for="clz of classes" :key="clz" size="mini" @close="onDeleteClass(clz)" closable>{{clz}}</el-tag>
         <el-popover
@@ -52,13 +52,13 @@
       </div>
     </fieldset>
     <fieldset>
-      <legend class="title">基本信息</legend>
-    <el-row class="desc">
+      <legend class="_cv_title">基本信息</legend>
+    <el-row class="_cv_desc">
       <el-col :span="12">
-        <div class="name" v-for="name of metaNames">{{name}}:</div>
+        <div class="_cv_name" v-for="name of metaNames">{{name}}:</div>
       </el-col>
       <el-col :span="12">
-        <div class="value" v-for="value of metaValues">{{value}}</div>
+        <div class="_cv_value" v-for="value of metaValues">{{value}}</div>
       </el-col>
     </el-row>
     </fieldset>
@@ -365,13 +365,13 @@ img{
 .image-name{
   text-align: center;
 }
-.title {
+._cv_title {
   font-weight: bold;
   font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
     "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   font-size: 14px;
 }
-.desc {
+._cv_desc {
   font-family: "lucida grande", "lucida sans unicode", lucida, helvetica,
     "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   font-size: 13px;

@@ -42,12 +42,18 @@ export default (function() {
     const SCRIPT_TAG_REGEX = /<(script)\b[^>]*>([\s\S]*?)<\/\1>/is
     const matchs = script.match(SCRIPT_TAG_REGEX)
     if (matchs) {
-      try {
-        vm.runInThisContext(matchs[2])
-      } catch (err) {
-        console.error(err)
-      }
+      const promise = new Promise((resolve, reject) => {
+        try {
+          vm.runInThisContext(matchs[2])
+        } catch (err) {
+          console.error(err)
+          reject(err)
+          return
+        }
+        resolve()
+      })
       loadFinished()
+      return promise
     } else {
       let s = document.createElement('script')
       s.type = 'text/javascript'
