@@ -68,11 +68,13 @@ export class ResourceService{
   }
 
   private addImagesByPaths(msgid: number, data: string[]) {
-    for (const fullpath of data) {
-      this.readImages.call(this, msgid, new ResourcePath(fullpath))
-    }
     const id = getIdentity(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, ExtOverviewEntry)
-    emitEvent(id, IPCNormalMessage.ADD_RESOURCES_BY_PATHS)
+    for (const fullpath of data) {
+      this.readImages(msgid, new ResourcePath(fullpath), (resource: Resource) => {
+        console.info('emit add event', id)
+        emitEvent(id, IPCNormalMessage.ADD_RESOURCES_BY_PATHS, resource)
+      })
+    }
   }
 
   getImagesInfo(msgid: number, data: any) {
@@ -226,10 +228,10 @@ export class ResourceService{
     this.pipeline.error(msg)
   }
 
-  async readImages(msgid: number, resourcePath: ResourcePath) {
+  async readImages(msgid: number, resourcePath: ResourcePath, cb?: (r: Resource) => void) {
     const info = fs.statSync(resourcePath.local())
     if (info.isDirectory()) {
-      this.readDir.call(this, msgid, resourcePath)
+      this.readDir.call(this, msgid, resourcePath, cb)
     } else {
       const result = await this.observer.read(resourcePath)
       console.info(result)
@@ -243,18 +245,21 @@ export class ResourceService{
         msg.id = msgid
         console.info('reply file')
         this.pipeline.reply(msg)
+        if (cb) {
+          cb(resource)
+        }
       }
     }
   }
 
-  private readDir(msgid: number, path: ResourcePath) {
+  private readDir(msgid: number, path: ResourcePath, cb?: (r: Resource) => void) {
     let self = this;
     fs.readdir(path.local(), async function(err: any, menu: any) {
       if (err) return
       // console.info(menu)
       self.totalFiles += menu.length
       for (const item of menu) {
-        await self.readImages(msgid, new ResourcePath(joinPath(path.local(), item), path.remote()))
+        self.readImages(msgid, new ResourcePath(joinPath(path.local(), item), path.remote()), cb)
       }
       // reply2Renderer(ReplyType.REPLY_FILES_LOAD_COUNT, { count: menu.length, total: totalFiles })
       self.progressLoad += menu.length

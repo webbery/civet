@@ -8,6 +8,7 @@ import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewVisibleRangesChangeEvent
 import { IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
 import { registHostEvent } from '../Singleton'
 import { CivetProtocol } from '@/../public/Event'
+import { Resource, SerializeAccessor } from '../../public/Resource'
 import crypto from 'crypto'
 import { config } from '@/../public/CivetConfig'
 
@@ -74,7 +75,10 @@ export class ExtOverview extends ExtHostWebView {
   }
 
   onDragResources(listener: (e: civet.OverviewItemLoadEvent) => void, thisArg?: any): void {
-    // this.event.on()
+    const onDragResourcesWrapper = function (args: civet.OverviewItemLoadEvent) {
+      listener.call(thisArg, args)
+    }
+    this.event.on(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, onDragResourcesWrapper)
   }
 
   onDidReceiveMessage(listener: (message: any) => void, thisArg?: any): void {}
@@ -124,7 +128,13 @@ export class ExtOverviewEntry {
     overview.update()
   }
 
-  onResourcesAdd(id: number, paths: string[]) {
-    console.info('onResourcesAdd', paths)
+  onResourcesAdd(resource: Resource) {
+    console.info('onResourcesAdd', resource)
+    const overview = this.#overviews.get(this.#activeView)
+    if (!overview) {
+      console.error(`overview extension ${this.#activeView} not exist`)
+      return
+    }
+    overview.event.emit(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, resource)
   }
 }

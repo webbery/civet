@@ -13,7 +13,7 @@ import { PropertyType } from '../public/ExtensionHostType'
 import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstallManager'
 import { logger } from '@/../public/Logger'
 import fs from 'fs'
-import { injectable, registSingletonObject } from './Singleton'
+import { injectable, showErrorInfo } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { ViewType } from '@/../public/ExtensionHostType'
 
@@ -241,7 +241,9 @@ export class ExtensionManager {
     const extname = f.ext.substr(1).toLowerCase()
     const extensions = this._actives.get(extname)
     if (!extensions || extensions.length === 0) {
-      return Result.failure('empty extensions')
+      const msg = `No extensions can read ${extname} file`
+      showErrorInfo({msg: msg})
+      return Result.failure(msg)
     }
     let resource: Resource = APIFactory.createResource(this._pipeline);
     resource.filename = f.base

@@ -1,6 +1,8 @@
 import 'reflect-metadata'
 import { logger } from 'public/Logger'
 import { Emitter } from 'public/Emitter'
+import { MessagePipeline } from './MessageTransfer'
+import { IPCRendererResponse } from 'public/IPCMessage'
 
 const registClasses = new Array<any>();
 const serviceIds = new Map<string, any>();
@@ -79,7 +81,11 @@ const hostEvents = new Map<string, Emitter>();
 
 export function getIdentity(event: string, obj?: any): string {
   if (!obj) return event
-  return event + '.' + typeof obj
+  if (typeof obj === 'object') {
+    return event + '.' + obj.constructor.name
+  } else {
+    return event + '.' + obj.name
+  }
 }
 
 export function registHostEvent<T>(event: string, listener: { (...args: Array<any>): T }, thisArg?: any) {
@@ -88,6 +94,7 @@ export function registHostEvent<T>(event: string, listener: { (...args: Array<an
   if (cb !== undefined) {
     return
   }
+  console.info('registHostEvent', id, event)
   let e = new Emitter()
   if (!thisArg) {
     e.on(event, listener)
@@ -104,4 +111,17 @@ export function emitEvent(id: string, event: string, ...args: any): boolean {
   const e: Emitter = hostEvents[id]
   if (e === undefined) return false
   return e.emit(event, args)
+}
+
+export function  emitEventAsync(id: string, event: string, ...args: any): Promise<boolean>| boolean {
+  const e: Emitter = hostEvents[id]
+  if (e === undefined) return false
+  return e.emitAsync(event, args)
+}
+
+export function showErrorInfo(msg: any) {
+  const pipe = getSingleton(MessagePipeline)
+  if (!pipe) return
+  console.error(msg)
+  pipe.post(IPCRendererResponse.ON_ERROR_MESSAGE, [msg])
 }
