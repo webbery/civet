@@ -53,10 +53,6 @@ declare module 'civet' {
         removePropery(name: string): boolean;
     }
 
-    // export class IParser {
-        // pipeline?: IMessagePipeline;
-    // }
-
     /**
      * extension context
      */
@@ -142,6 +138,16 @@ declare module 'civet' {
         view: OverView;
         scroll: ScrollType;
         percent: number;
+    }
+
+    export enum OverviewItemType {
+        Resource = 0,
+        Class = 1
+    }
+
+    export interface OverviewItem {
+        id: number;
+        type: OverviewItemType
     }
     /**
      * @brief an overview is to display all items in the center  

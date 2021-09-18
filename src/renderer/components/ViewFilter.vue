@@ -1,6 +1,5 @@
 <template>
   <div>
-    <el-color-picker v-model="color" size="mini" style="" @active-change="onColorChanged" @change="onColorChanged"></el-color-picker>
     <span class="custom">
       <el-select v-model="query.type" @change="onFileTypeChanged" clearable placeholder=" 类型" size="mini" multiple>
         <el-option
@@ -38,6 +37,7 @@
         <span v-html="item.html"></span>
       </span>
     </span>
+    <el-color-picker v-model="color" size="mini" style="" @active-change="onColorChanged" @change="onColorChanged"></el-color-picker>
   </div>
 </template>
 

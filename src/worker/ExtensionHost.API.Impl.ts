@@ -70,6 +70,7 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
       ViewType: ExtensionHostType.ViewType,
       OverviewItemLayout: ExtensionHostType.OverviewItemLayout,
       ScrollType: ExtensionHostType.ScrollType,
+      OverviewItemType: ExtensionHostType.OverviewItemType,
       // function
       activate: null,
       unactivate: null

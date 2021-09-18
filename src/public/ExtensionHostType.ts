@@ -29,6 +29,11 @@ export enum ScrollType {
   Vertical = 2
 }
 
+export enum OverviewItemType {
+  Resource = 0,
+  Class = 1
+}
+
 export class ExtResourceProperty implements civet.ResourceProperty {
   name: string;
   type: PropertyType;

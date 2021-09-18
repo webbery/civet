@@ -167,8 +167,13 @@ export class ExtensionManager {
   install(msgid: number, extinfo: any) {
     const extPath = getExtensionPath()
     this._initInstaller(extPath)
-    const reult = this._installManager!.install(extinfo.name, extinfo.version)
-    return {type: ReplyType.REPLY_INSTALL_RESULT, data: reult}
+    const result = this._installManager!.install(extinfo.name, extinfo.version)
+    if (result) {
+      // load extension
+      const root = getExtensionPath()
+      this._initService(root, extinfo.name, this._pipeline)
+    }
+    return {type: ReplyType.REPLY_INSTALL_RESULT, data: result}
   }
 
   uninstall(msgid: number, extname: string) {
