@@ -27,8 +27,12 @@ export default (function() {
   let removeScript = function (hash) {
     const node = scripts[hash]
     if (node === undefined) return
-    document.body.removeChild(node)
-    document.head.removeChild(node)
+    if (document.body.contains(node)) {
+      document.body.removeChild(node)
+    }
+    if (document.head.contains(node)) {
+      document.head.removeChild(node)
+    }
   }
 
   let clearScript = function() {

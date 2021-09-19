@@ -6,6 +6,10 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <title></title>
     <style>
+        ._cv_waterfall {
+            /* display: inline-block; */
+            position: absolute;
+        }
     </style>
 </head>
 <body>
@@ -13,81 +17,126 @@
         <div class="el-scrollbar" style="height: 96vh;">
             <div class="el-scrollbar__wrap" style="overflow-x: hidden; margin-bottom: -17px; margin-right: -17px;">
                 <div class="el-scrollbar__view">
-                    <div id="items" class="vue-waterfall" scrollreachbottom="function () { [native code] }"
-                        style="height: 183.667px; overflow: hidden;">
+                    <div id="items" style="overflow: hidden;">
                     </div>
                 </div>
-            </div>
-            <div class="el-scrollbar__bar is-horizontal">
-                <div class="el-scrollbar__thumb" style="transform: translateX(0%);"></div>
             </div>
             <div class="el-scrollbar__bar is-vertical">
                 <div class="el-scrollbar__thumb" style="transform: translateY(0%);"></div>
             </div>
         </div>
     </div>
-    <script>{{juqery}}</script>
-    <script>{{waterfall}}</script>
     <script>
-        const ROW_COUNT = 5
-        const Layout = (function () {
-            let layouts = []
-            const update = function(index) {
-                const divWidth = document.getElementById('items').offsetWidth
+        const Layout = (function(rootID){
+            const minGap = 5;  // px
+            const MIN_WIDTH = 200;   //px
+            const TITLE_HEIGHT = 21.5;    //px
+            const TITLE_GAP = 2;
+            let HORIZON_COUNT = 4;
+            let curWidth = 0;
+            let minCol = 0;
+            let minVertical = [];
+            for (let idx = 0; idx < HORIZON_COUNT; ++idx) {
+                minVertical.push(Infinity)
             }
-            const add = function(width, height) {
-                const lastIndx = layouts.length - 1
-
-                layouts.push({})
+            function getMinColumn(index, height) {
+                const result = minVertical.reduce((left, right, index, arr) => {
+                    if (right < left.val) {
+                        left.val = right
+                        left.index = index
+                    }
+                    return left
+                }, {val: minVertical[0], index: 0})
+                return result.index
             }
-            const getTop = function(index) {}
-            const getLeft = function(index) {}
-            const getWidth = function(index) {}
-            const getHeight = function(index) {}
-            return {
-                add: add,
-                getTop: getTop,
-                getLeft: getLeft
+            function updateMinColumn(index, height) {
+                minVertical[index] += height
+                minCol = getMinColumn(index, height)
             }
-        })()
-        function createItem(item) {
-            let thumbnail, src, name, width, height
-            for (let meta of item.meta) {
-                if (meta['name'] === 'filename') name = meta.value
-                else if (meta['name'] === 'path') src = meta.value
-                else if (meta['name'] === 'thumbnail') thumbnail = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value.data))
-                else if (meta['name'] === 'height') height = meta.value
-                else if (meta['name'] === 'width') width = meta.width
+            function getItemWidth() {
+                const root = document.getElementById(rootID)
+                console.info('root.offsetWidth', root.offsetWidth)
+                return root.offsetWidth / HORIZON_COUNT
             }
-            if (!src) return ''
-            if (src.indexOf(':') < 0 && src[0] !== '/') return ''
-            src = 'file://' + src
-            console.info('VIEW: ', name, src, item)
-            const index = Layout.add(width, height)
-            return `<div class="vue-waterfall-slot" style="top: ${Layout.getTop(index)}px; left: ${Layout.getLeft(index)}px; width: ${width}px; height: ${height}px;">
-                        <div draggable="true" class="image">
-                            <div class="el-card is-never-shadow" style="border: 0px;">
-                                <div class="el-card__body" style="padding: 1px;">
-                                    <div class="frame"><img src="${thumbnail?thumbnail:src}" width="100%" class="mini-cover"></div>
-                                    <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
-                                        <span class="context">${name}</span>
+            function generateFromTemplate(item) {
+                let div = document.createElement('div')
+                div.setAttribute('class', '_cv_waterfall')
+                div.style.left = `${item.left}px`
+                div.style.top = `${item.top}px`
+                div.style.width = `${item.width}px`
+                div.style.height = `${item.height}px`
+                div.innerHTML = `<div draggable="true" class="image">
+                                    <div class="el-card is-never-shadow" style="border: 0px;">
+                                        <div class="el-card__body" style="padding: 1px;">
+                                            <div class="frame"><img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover"></div>
+                                            <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
+                                                <span class="context">${item.name}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`
-        }
+                                </div>`
+                return div
+            }
+            function update(items) {
+
+            }
+            function addElement(item) {
+                const items = document.querySelectorAll('._cv_waterfall')
+                const root = document.getElementById(rootID)
+                const height = parseInt(item['height']) + TITLE_HEIGHT + 2 * TITLE_GAP
+                console.info('addElement', height, items.length, minVertical[items.length] > height)
+                if (items.length < HORIZON_COUNT) {
+                    item['left'] = items.length * curWidth
+                    item['top'] = 0
+                    if (minVertical[items.length] > height) {
+                        minVertical[items.length] = height
+                    }
+                    minCol = getMinColumn(items.length, height)
+                    root.appendChild(generateFromTemplate(item))
+                    return
+                }
+                item['left'] = minCol * curWidth
+                item['top'] = minVertical[minCol]
+                root.appendChild(generateFromTemplate(item))
+                console.info('grid element', minCol, minVertical, item)
+                updateMinColumn(minCol, height)
+            }
+            return {
+                add: function(item) {
+                    let block = {}, src
+                    // console.info('item', item)
+                    for (let meta of item['meta']) {
+                        if (meta['name'] === 'filename') block['name'] = meta.value
+                        else if (meta['name'] === 'path') src = meta.value
+                        else if (meta['name'] === 'thumbnail') block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value.data))
+                        else if (meta['name'] === 'height') block['height'] = meta.value
+                        else if (meta['name'] === 'width') block['width'] = meta.value
+                    }
+                    if (!src) return ''
+                    if (src.indexOf(':') < 0 && src[0] !== '/') return ''
+                    block['src'] = 'file://' + src
+                    curWidth = getItemWidth()
+                    if (curWidth < MIN_WIDTH) {
+
+                    }
+                    const scale = parseInt(block['width']) / curWidth
+                    // console.info('scale', scale, block)
+                    block['height'] = parseInt(block['height']) / scale
+                    block['width'] = curWidth
+                    addElement(block)
+                },
+                erase: function(item) {}
+            }
+        })('items')
 
         function loadResources(resources) {
-            const itemsElm = document.getElementById('items')
+            console.info('load:', resources)
             for (let resource of resources) {
-                let div = document.createElement('div')
-                div.innerHTML = createItem(resource)
-                itemsElm.appendChild(div)
+                Layout.add(resource)
             }
         }
 
-        // loadResources({{resources}})
+        loadResources({{resources}})
     </script>
 </body>
 
