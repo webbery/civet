@@ -227,11 +227,11 @@ const mutations = {
   addClassName(state, names) {
     if (!names.length) {
       state.classesName.push(names)
-      service.send(IPCNormalMessage.ADD_CATEGORY, names)
+      service.send(IPCNormalMessage.ADD_CLASSES, names)
     } else {
       state.classesName.push(names)
       console.info('classPath:', names)
-      service.send(IPCNormalMessage.ADD_CATEGORY, names)
+      service.send(IPCNormalMessage.ADD_CLASSES, names)
     }
   },
   addClassOfFile(state, mutation) {
@@ -243,7 +243,7 @@ const mutations = {
     if (!file.category) file.category = []
     file.category.push(classpath)
     state.classes.increaseChildrenCount(classpath, 1)
-    service.send(IPCNormalMessage.ADD_CATEGORY, { id: [fileid], class: [classpath] })
+    service.send(IPCNormalMessage.ADD_CLASSES, { id: [fileid], class: [classpath] })
   },
   removeClass(state, mutation) {
     console.info('remove class', mutation, state.classesName)
@@ -454,6 +454,7 @@ const actions = {
   },
   async getClassesAndFiles({ commit }, query) {
     const allClasses = await service.get(IPCNormalMessage.GET_CLASSES_DETAIL, query)
+    console.info('all classes', allClasses)
     commit('getClassesAndFiles', allClasses)
   },
   clear({ commit }, data) {

@@ -11,6 +11,47 @@
     <% } %>
   </head>
   <body style="overflow:hidden">
+    <script>
+      let _cv_message_id_ = 0
+      const _cv_events = (function() {
+        const { EventEmitter } = require('events')
+        let events = new Map()
+        return {
+          get: function(id) {
+            if (events[id] === undefined) {
+              events[id] = new EventEmitter()
+            }
+            return events[id]
+          },
+          emit: function(id, event, value) {
+            return events[id].emit(event, value)
+          },
+        }
+      })()
+      const _cv_messageSender_ = (function() {
+        const { ipcRenderer } = window.require('electron')
+        return {
+          send: function(type, msg) {
+            ipcRenderer.send('message-from-renderer', {
+              id: _cv_message_id_++,
+              type: type,
+              data: msg
+            })
+          }
+        }
+      })()
+      const Overview = (function() {
+        return {
+          click: function(id) {
+            _cv_events.emit('PropertyView', 'click', id)
+            _cv_messageSender_.send('getSelectContentItemInfo', {id: [id]})
+          },
+          once: function(event, listener) {
+            console.info('Overview Once:', listener)
+          }
+        }
+      })()
+    </script>
     <div id="app"></div>
     <!-- Set `__static` path to static files in production -->
     <% if (!process.browser) { %>
@@ -18,7 +59,6 @@
         if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
       </script>
     <% } %>
-
     <!-- webpack builds are automatically injected -->
     <style>
       .selected {

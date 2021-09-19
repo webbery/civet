@@ -4,7 +4,6 @@
         <div style="padding: 4px;" class="image-name">
           <InputLabel v-on:changed="onNameChaged">{{filename}}</InputLabel>
         </div>
-        <!-- <div v-if="picture.id !== null"> -->
           <Preview :src="thumbnail"></Preview>
           <!-- <JImage :src="imagepath" :interact="false"></JImage> -->
           <div class="color-container">
@@ -13,7 +12,6 @@
           </div>
         <!-- </div> -->
       </div>
-      <!-- <div class="image" v-bind:style="{backgroundImage:`url(${picture.realpath})`}"></div> -->
     <fieldset>
       <legend class="_cv_title">标签</legend>
       <el-tag
@@ -80,8 +78,8 @@ export default {
   name: 'property-panel',
   data() {
     return {
-      picture: { id: null, width: 0, height: 0, size: 0 },
-      id: null,
+      event: null,
+      id: -1,
       thumbnail: '',
       tags: [],
       classes: [],
@@ -101,7 +99,9 @@ export default {
     candidateClasses: state => state.Cache.classesName
   }),
   mounted() {
-    bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
+    // bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
+    this.event = this.$events.get('PropertyView')
+    this.event.on('click', this.cleanProperty, this)
     this.$ipcRenderer.on('Property', this.onViewUpdate)
     // this.$ipcRenderer.onViewUpdate('Property', this.onViewUpdate)
   },
@@ -137,7 +137,7 @@ export default {
           break
       }
     },
-    displayProperty(filesid) {
+    cleanProperty(filesid) {
       this.metaNames.splice(0, this.metaNames.length)
       this.metaValues.splice(0, this.metaValues.length)
       this.colors.splice(0, this.colors.length)
@@ -160,7 +160,7 @@ export default {
       }
     },
     displayMultiFileProperty(filesid) {
-      this.picture.id = null
+      this.id = -1
       this.filename = filesid.length + '个文件'
     },
     getSize: (sz) => {
@@ -173,7 +173,6 @@ export default {
       return v.toFixed(1) + unit
     },
     displayFileProperty(imageID) {
-      // const images = this.$kernel.getFilesInfo([imageID])
       // console.info(this.$store)
       const files = this.$store.getters.getFiles([imageID])
       if (!files) return
@@ -235,14 +234,6 @@ export default {
         }
         this.metaNames = names
         this.metaValues = values
-        this.picture.id = file.id
-        if (file.color) {
-          for (let idx = 0; idx < 6; ++idx) {
-            let color = file.color[idx]
-            if (!color) break
-            this.$set(this.picture.colors, idx, color)
-          }
-        }
         this.thumbnail = (file.thumbnail === undefined ? file.path : file.thumbnail)
         this.tags = file.tag ? file.tag.slice(0) : []
         this.classes = file.category
@@ -267,25 +258,25 @@ export default {
     onDeleteTag(tag) {
       this.tags.splice(this.tags.indexOf(tag), 1)
       // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
-      this.$store.dispatch('removeTags', {id: this.picture.id, tag: tag})
+      // this.$store.dispatch('removeTags', {id: this.picture.id, tag: tag})
     },
-    async onDeleteClass(clazz) {
-      await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: clazz})
+    onDeleteClass(clazz) {
+      // await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: clazz})
     },
     showInput() {
-      if (!this.picture.id) return
+      if (!this.id) return
       this.inputVisible = true
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
     onTagConfirm() {
-      if (!this.picture.id) return
+      if (!this.id) return
       let inputValue = this.inputValue
       if (inputValue) {
         this.tags.push(inputValue)
         // this.$ipcRenderer.send(Service.SET_TAG, {id: [this.picture.id], tag: this.dynamicTags})
-        this.$store.dispatch('addTag', {fileID: this.picture.id, tag: inputValue})
+        this.$store.dispatch('addTag', {fileID: this.id, tag: inputValue})
       }
       this.inputVisible = false
       this.inputValue = ''
@@ -326,14 +317,14 @@ export default {
       for (let idx = this.classes.length - 1; idx >= 0; --idx) {
         if (!isInClass(this.classes[idx], selectItem, true)) {
           // this.dynamicClass.splice(idx, 1)
-          await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: this.classes[idx]})
+          await this.$store.dispatch('removeClassOfFile', {id: this.id, path: this.classes[idx]})
         }
       }
       // add not exist
       for (let idx = selectItem.length - 1; idx >= 0; --idx) {
         if (!isInClass(selectItem[idx], this.classes)) {
           console.info(selectItem[idx], idx)
-          await this.$store.dispatch('addClassOfFile', {id: this.picture.id, path: selectItem[idx]})
+          await this.$store.dispatch('addClassOfFile', {id: this.id, path: selectItem[idx]})
           // this.dynamicClass.push(selectItem[idx])
         }
       }

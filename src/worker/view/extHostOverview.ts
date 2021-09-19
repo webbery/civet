@@ -23,6 +23,15 @@ function generateResourcesLoadingEvent(): ExtOverviewItemLoadEvent {
     const resources = CivetDatabase.getFilesInfo(resourcesIndx)
     event.resources = resources
   }
+  const category = CivetDatabase.getClasses('/')
+  // console.info('all category', category)
+  if (category) {
+    let names = []
+    for (let c of category) {
+      names.push(c.name)
+    }
+    event.classes = names
+  }
   return event
 }
 
@@ -55,6 +64,10 @@ export class ExtOverview extends ExtHostWebView {
   }
 
   get html() { return super.getHtml().html }
+
+  forceUpdate() {
+    this.#updated = false
+  }
 
   getStructHTML() { return super.getHtml() }
 
@@ -91,11 +104,20 @@ export class ExtOverviewEntry {
   #proxy: RPCProtocal;
   #overviews: Map<string, ExtOverview>;
   #activeView: string;
+  #h: any;
+  #patch: any;
 
   constructor(rpcProxy: RPCProtocal) {
     this.#proxy = rpcProxy;
     this.#overviews = new Map<string, ExtOverview>();
     this.#activeView = config.defaultView;
+    // let snabbdom = require('snabbdom')
+    // this.#patch = snabbdom.init([
+    //   require('snabbdom/modules/class').default,
+    //   require('snabbdom/modules/props').default,
+    //   require('snabbdom/modules/style').default,
+    //   require('snabbdom/modules/eventlisteners').default
+    // ])
     registHostEvent(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, this.onResourcesAdd, this)
     rpcProxy.on(IPCNormalMessage.RETRIEVE_OVERVIEW, this.onRequestOverview, this)
   }
@@ -124,6 +146,7 @@ export class ExtOverviewEntry {
     if (!html) {
 
     }
+    overview.forceUpdate()
     console.info('request extension html:', html)
     overview.update()
   }

@@ -10,6 +10,80 @@
             /* display: inline-block; */
             position: absolute;
         }
+        #items {
+            position: relative;
+        }
+        .hr-divider {
+            line-height: 1em;
+            position: relative;
+            outline: 0;
+            border: 0;
+            text-align: center;
+            height: 1.5em;
+            opacity: 0.5;
+        }
+        .hr-divider:before {
+            content: '';
+            background: -webkit-linear-gradient(left, transparent, white, transparent);
+            background: linear-gradient(to right, transparent, white, transparent);
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+        }
+        .hr-divider:after {
+            content: attr(data-content);
+            position: relative;
+            display: inline-block;
+            padding: 0 0.5em;
+            line-height: 1.5em;
+            color: white;
+            background-color: #222933;
+        }
+        .b-icon {
+            font-size: 32px;
+        }
+        .b-icon_type_folder {
+            display: inline-block;
+            margin: 0em 1em 0 1em;
+            background-color: transparent;
+            overflow: hidden;
+        }
+        .b-icon_type_folder:before {
+            content: '';
+            float: left;
+            background-color: #7b88ad;
+            width: 1.5em;
+            height: 0.45em;
+            margin-left: 0.07em;
+            margin-bottom: -0.07em;
+            border-top-left-radius: 0.1em;
+            border-top-right-radius: 0.1em;
+            box-shadow: 1.25em 0.25em 0 0em #7ba1ad;
+        }
+        .b-icon_type_folder:after {
+            content: '';
+            float: left;
+            clear: left;
+            background-color: #a0d4e4;
+            width: 3em;
+            height: 2.25em;
+            border-radius: 0.1em;
+        }
+        .folder {
+            display: inline-block;
+            text-align: center;
+            font-size: 14px;
+        }
+        .folder-selected {
+            display: inline-block;
+            background-color: rgb(27, 128, 230);
+            /* margin: 0em 1em 0 1em; */
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -17,7 +91,9 @@
         <div class="el-scrollbar" style="height: 96vh;">
             <div class="el-scrollbar__wrap" style="overflow-x: hidden; margin-bottom: -17px; margin-right: -17px;">
                 <div class="el-scrollbar__view">
-                    <div id="items" style="overflow: hidden;">
+                    <div id="_cv_classes">
+                    </div>
+                    <div id="items">
                     </div>
                 </div>
             </div>
@@ -27,7 +103,7 @@
         </div>
     </div>
     <script>
-        const Layout = (function(rootID){
+        WaterfallLayout = (function(rootID){
             const minGap = 5;  // px
             const MIN_WIDTH = 200;   //px
             const TITLE_HEIGHT = 21.5;    //px
@@ -68,7 +144,7 @@
                 div.innerHTML = `<div draggable="true" class="image">
                                     <div class="el-card is-never-shadow" style="border: 0px;">
                                         <div class="el-card__body" style="padding: 1px;">
-                                            <div class="frame"><img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover"></div>
+                                            <div class="frame" onclick="Overview.click(${item.id})"><img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover"></div>
                                             <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
                                                 <span class="context">${item.name}</span>
                                             </div>
@@ -84,7 +160,7 @@
                 const items = document.querySelectorAll('._cv_waterfall')
                 const root = document.getElementById(rootID)
                 const height = parseInt(item['height']) + TITLE_HEIGHT + 2 * TITLE_GAP
-                console.info('addElement', height, items.length, minVertical[items.length] > height)
+                // console.info('addElement', height, items.length, minVertical[items.length] > height)
                 if (items.length < HORIZON_COUNT) {
                     item['left'] = items.length * curWidth
                     item['top'] = 0
@@ -98,7 +174,7 @@
                 item['left'] = minCol * curWidth
                 item['top'] = minVertical[minCol]
                 root.appendChild(generateFromTemplate(item))
-                console.info('grid element', minCol, minVertical, item)
+                // console.info('grid element', minCol, minVertical, item)
                 updateMinColumn(minCol, height)
             }
             return {
@@ -114,6 +190,7 @@
                     }
                     if (!src) return ''
                     if (src.indexOf(':') < 0 && src[0] !== '/') return ''
+                    block['id'] = item.id
                     block['src'] = 'file://' + src
                     curWidth = getItemWidth()
                     if (curWidth < MIN_WIDTH) {
@@ -128,15 +205,35 @@
                 erase: function(item) {}
             }
         })('items')
-
         function loadResources(resources) {
+            if (!resources || resources.length === 0) return
             console.info('load:', resources)
+            console.info('WaterfallLayout 3', WaterfallLayout)
             for (let resource of resources) {
-                Layout.add(resource)
+                WaterfallLayout.add(resource)
             }
         }
 
+        function classTemplate(classesName) {
+            const folderDeliver = '<div data-content="分类" class="hr-divider"></div>'
+            const fileDeliver = '<div data-content="文件" class="hr-divider"></div>'
+            let folders = ''
+            for (let name of classesName) {
+                folders += `<div class="folder">
+                                <div class="b-icon b-icon_type_folder"></div>
+                                <div >${name}</div>
+                            </div>`
+            }
+            return folderDeliver + folders + fileDeliver
+        }
+        function loadClasses(classes) {
+            if (!classes || classes.length === 0) return
+            let div = document.getElementById('_cv_classes')
+            div.innerHTML = classTemplate(classes)
+        }
+
         loadResources({{resources}})
+        loadClasses({{classes}})
     </script>
 </body>
 

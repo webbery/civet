@@ -8,7 +8,7 @@ import ElementUI from 'element-ui'
 // import 'element-ui/lib/theme-chalk/index.css'
 import 'element-theme-dark'
 // import Service from './components/utils/Service'
-import { service } from './common/RendererService'
+import { service, events } from './common/RendererService'
 import VueLazyload from 'vue-lazyload'
 import VueHotkey from 'v-hotkey'
 import upperFirst from 'lodash/upperFirst'
@@ -24,6 +24,7 @@ Vue.use(VueLazyload, {
 })
 
 Vue.prototype.$ipcRenderer = service
+Vue.prototype.$events = events
 // Vue.prototype.$ipcRenderer = Service.getServiceInstance()
 
 router.afterEach((to, from) => {
@@ -76,4 +77,8 @@ function acquireCivetApi() {
   return {
     postMessage: service.send
   }
+}
+
+function OverviewClick(id) {
+  console.info('OverviewClick', id)
 }

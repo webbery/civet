@@ -7,6 +7,7 @@ type NormalMessageCallback = (session: number, reply: any) => void;
 type WorkbenchExtensionMessageCallback = (session: number, id: string, classname: string, html: string) => void;
 type MessageCallback = NormalMessageCallback|WorkbenchExtensionMessageCallback;
 
+declare let _cv_message_id_: number;
 /**
  * when a message is recieved from worker, its id will split to node path in order to find response callback. 
  */
@@ -49,7 +50,7 @@ class MessageTree {
 }
 
 class RendererService {
-  private session: number;
+  // private session: number;
   private ipc: Electron.IpcRenderer;
   // private response: Map<IPCType, any>;
   private response: MessageTree = new MessageTree();
@@ -57,7 +58,7 @@ class RendererService {
   constructor() {
     const { ipcRenderer } = require('electron')
     this.ipc = ipcRenderer
-    this.session = 0
+    // this.session = 0
     const self = this
     this.ipc.on('message-to-renderer', (sender, msg) => {
       const types = msg.type.split('.')
@@ -73,7 +74,11 @@ class RendererService {
             callback(msg.data.id, types[2], types[1], msg.data.msg[0])
             break
           case 5:
-            callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
+            if (Array.isArray(msg.data.msg)) {
+              callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
+            } else {
+              callback(msg.data.id, types[2], types[1], types[3], msg.data.msg)
+            }
             break
           default: break
         }
@@ -82,14 +87,14 @@ class RendererService {
   }
 
   send(type: string, message: any) {
-    this.session += 1
+    _cv_message_id_ += 1
     console.info('message-from-renderer: type=' + type + ', data', message)
     this.ipc.send('message-from-renderer', {
-      id: this.session,
+      id: _cv_message_id_,
       type: type,
       data: message
     })
-    return this.session
+    return _cv_message_id_
   }
 
   /**
@@ -128,4 +133,8 @@ class RendererService {
     return result.reply
   }
 }
+
+declare const _cv_events: any;
+export const events = _cv_events;
 export const service = new RendererService();
+

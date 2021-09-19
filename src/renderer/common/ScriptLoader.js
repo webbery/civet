@@ -9,6 +9,7 @@ export default (function() {
 
   let loadFinished = function() {
     currentGroupFinished++
+    console.info('script load finish', currentGroupFinished, groupQueue.length)
     if (currentGroupFinished < groupQueue.length) {
       nextGroup()
       loadGroup()
@@ -33,6 +34,7 @@ export default (function() {
     if (document.head.contains(node)) {
       document.head.removeChild(node)
     }
+    scripts[hash] = undefined
   }
 
   let clearScript = function() {
@@ -43,6 +45,7 @@ export default (function() {
   let loadScript = function(script) {
     const md5 = crypto.createHash('md5')
     const hash = md5.update(script).digest('base64')
+    console.info('scripts:', hash, scripts[hash])
     if (scripts[hash] !== undefined) return
     const SCRIPT_TAG_REGEX = /<(script)\b[^>]*>([\s\S]*?)<\/\1>/is
     const matchs = script.match(SCRIPT_TAG_REGEX)
@@ -61,6 +64,8 @@ export default (function() {
         loadFinished()
       }
     }
+    // if some script bug is encounter, this link may be help:
+    // https://stackoverflow.com/questions/50955566/remove-script-tag-from-html-and-from-the-dom-with-js
     if (matchs) {
       s.innerHTML = matchs[2]
       document.body.appendChild(s)
@@ -79,6 +84,7 @@ export default (function() {
   let loadMultiGroup = function(scripts) {
     if (scripts.length === 0) return
     groupCursor = 0
+    currentGroupFinished = 0
     groupQueue = scripts
     clearScript()
     loadGroup()

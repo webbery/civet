@@ -12,9 +12,9 @@
 <script>
 import LandingPage from '@/components/LandingPage'
 import Guider from '@/components/Dialog/Guider'
-// import CV from '@/../public/ImageProcess'
 import { config } from '@/../public/CivetConfig'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
+// import ScriptLoader from '@/../public/ScriptLoader'
 
 export default {
   name: 'civet',
@@ -38,6 +38,13 @@ export default {
     this.$nextTick(() => {
       this.$store.dispatch('init')
     })
+    // fs.readFile('src/renderer/common/RendererEvent.ts', (err, data) => {
+    //   if (err) {
+    //     console.error(err)
+    //     return
+    //   }
+    //   console.info('DATA:', data.toString())
+    // })
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },

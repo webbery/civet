@@ -97,7 +97,7 @@ export default {
           this.$set(this.folderSelected, idx, false)
         }
       }
-      return state.Cache.viewClass
+      return [{count: 1, name: '第三方三十', type: 'clz'}]
     },
     keymap() {
       console.info('keymap')
@@ -350,77 +350,7 @@ export default {
 .detail{
   display: none;
 }
-.b-icon {
-    font-size: 32px;
-}
-.b-icon_type_folder {
-    display: inline-block;
-    margin: 0em 1em 0 1em;
-    background-color: transparent;
-    overflow: hidden;
-}
-.b-icon_type_folder:before {
-    content: '';
-    float: left;
-    background-color: #7b88ad;
-    width: 1.5em;
-    height: 0.45em;
-    margin-left: 0.07em;
-    margin-bottom: -0.07em;
-    border-top-left-radius: 0.1em;
-    border-top-right-radius: 0.1em;
-    box-shadow: 1.25em 0.25em 0 0em #7ba1ad;
-}
-.b-icon_type_folder:after {
-    content: '';
-    float: left;
-    clear: left;
-    background-color: #a0d4e4;
-    width: 3em;
-    height: 2.25em;
-    border-radius: 0.1em;
-}
-.folder {
-  display: inline-block;
-  text-align: center;
-  font-size: 14px;
-}
-.folder-selected {
-  display: inline-block;
-  background-color: rgb(27, 128, 230);
-  /* margin: 0em 1em 0 1em; */
-  border-radius: 4px;
-  text-align: center;
-  font-size: 14px;
-}
-.hr-divider {
-    line-height: 1em;
-    position: relative;
-    outline: 0;
-    border: 0;
-    text-align: center;
-    height: 1.5em;
-    opacity: 0.5;
-}
-.hr-divider:before {
-    content: '';
-    background: -webkit-linear-gradient(left, transparent, white, transparent);
-    background: linear-gradient(to right, transparent, white, transparent);
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 100%;
-    height: 1px;
-}
-.hr-divider:after {
-    content: attr(data-content);
-    position: relative;
-    display: inline-block;
-    padding: 0 0.5em;
-    line-height: 1.5em;
-    color: white;
-    background-color: #222933;
-}
+
 .initial {
   width:350px;
 	height:150px;

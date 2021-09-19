@@ -4,8 +4,6 @@ let gridview = window.createOverview('gridview', 'waterfall layout');
 
 const fs = require('fs')
 let frame = ''
-let jquery = ''
-let waterfall = ''
 fs.readFile(utility.extensionPath + '/grid_view/view.html', 'utf-8', (err, data)=> {
   if (err) {
     console.error(err)
@@ -14,25 +12,18 @@ fs.readFile(utility.extensionPath + '/grid_view/view.html', 'utf-8', (err, data)
   frame = data.toString();
 })
 
-fs.readFile(utility.extensionPath + '/grid_view/jquery.min.js',  (err, data)=> {
-  if (err) {
-    console.error(err)
-    return;
-  }
-  jquery = data.toString();
-})
-
-fs.readFile(utility.extensionPath + '/grid_view/waterfall.min.js',  (err, data)=> {
-  if (err) {
-    console.error(err)
-    return;
-  }
-  waterfall = data.toString();
-})
-
 gridview.onResourcesLoading((e: OverviewItemLoadEvent) => {
   console.info('grid view onResourcesLoading', e.resources.length)
-  frame = frame.replace('{{resources}}', JSON.stringify(e.resources))
+  if (e.classes && e.classes.length) {
+    frame = frame.replace('{{classes}}', JSON.stringify(e.classes))
+  } else {
+    frame = frame.replace('{{classes}}', '')
+  }
+  if (e.resources && e.resources.length) {
+    frame = frame.replace('{{resources}}', JSON.stringify(e.resources))
+  } else {
+    frame = frame.replace('{{resources}}', '')
+  }
   // console.info('GRID:', frame)
   gridview.html = frame
 }, gridview);

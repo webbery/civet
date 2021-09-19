@@ -125,7 +125,11 @@ declare module 'civet' {
     }
 
     export interface OverviewItemLoadEvent {
-        resources: IResource[];
+        resources?: IResource[];
+        /*
+         * @brief a class that contains resources
+         */
+        classes?: string[];
     }
 
     export enum ScrollType {
