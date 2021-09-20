@@ -26,6 +26,13 @@
           emit: function(id, event, value) {
             return events[id].emit(event, value)
           },
+          on: function(id, event, listener) {
+            if (events[id] === undefined) {
+              events[id] = new EventEmitter()
+            }
+            console.info(id, 'EventEmitter On', event)
+            events[id].on(event, listener)
+          }
         }
       })()
       const _cv_messageSender_ = (function() {
@@ -46,8 +53,12 @@
             _cv_events.emit('PropertyView', 'click', id)
             _cv_messageSender_.send('getSelectContentItemInfo', {id: [id]})
           },
-          once: function(event, listener) {
-            console.info('Overview Once:', listener)
+          rclick: function(x, y, id) {},
+          remove: function(id) {
+            console.info('remove item:', id)
+          },
+          on: function(event, listener) {
+            _cv_events.on('Overview', event, listener)
           }
         }
       })()

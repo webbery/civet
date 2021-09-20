@@ -238,12 +238,12 @@ export class ResourceService{
       if (result.isSuccess()) {
         let resource = <Resource>result.value
         let msg = new CivetProtocol()
-        msg.type = ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY
+        msg.type = IPCRendererResponse.ON_RESOURCE_UPDATED //ReplyType.WORKER_UPDATE_RESOURCES
         const accessor = new SerializeAccessor()
         msg.msg = [resource.toJson(accessor)]
+        console.info('Reply', msg.msg)
         msg.tick = 0
         msg.id = msgid
-        console.info('reply file')
         this.pipeline.reply(msg)
         if (cb) {
           cb(resource)

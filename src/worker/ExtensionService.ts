@@ -34,6 +34,11 @@ const ViewTypeTable = {
   Property: ViewType.Property,
   Search: ViewType.Search
 }
+export class MenuDetail {
+  command: string;
+  group: string;
+  name: string;
+}
 class ExtensionPackage {
   private _name: string = '';
   private _displayName: string = '';
@@ -46,6 +51,7 @@ class ExtensionPackage {
   private _activeEvents: string[] = [];
   private _viewEvents: ViewType[] = [];
   private _dependency: string|undefined;
+  private _menus: Map<string, MenuDetail[]> = new Map<string, MenuDetail[]>();  // 
   // private _dependency: Map<string, string> = new Map<string, string>();
 
   constructor(dir: string) {
@@ -70,6 +76,13 @@ class ExtensionPackage {
       } else if (map[0] === 'onSave') {
       }
     }
+    // contrib
+    const contrib = pack['civet']['contributes']
+    if (contrib) {
+      // menu
+      this._initMenus(contrib['menus'])
+    }
+    // dependency
     const dependency = pack['civet']['dependency']
     if (dependency !== undefined) {
       for (let name in dependency) {
@@ -77,6 +90,23 @@ class ExtensionPackage {
         this._dependency = name
       }
     }
+  }
+
+  private _initMenus(menus: any) {
+    if (!menus) return
+    for (let context in menus) {
+      // const ids = context.split('/')
+      const m = menus[context]
+      for (let menu of m) {
+        let item = new MenuDetail()
+        item.command = menu['command']
+        item.group = menu['group']
+        item.name = menu['name']
+        if (!this._menus[context]) this._menus[context] = [item]
+        else this._menus[context].push(item)
+      }
+    }
+    console.info(this._name, 'init menus', this._menus)
   }
 
   get name() { return this._name; }
@@ -87,6 +117,7 @@ class ExtensionPackage {
   get activeTypes() { return this._activeEvents }
   get dependency() { return this._dependency }
   get viewEvents() { return this._viewEvents }
+  get menus() { return this._menus }
 }
 
 const decoratorTest = createDecorator<ITest>('ITest');
@@ -118,6 +149,10 @@ export class ExtensionService {
 
   get displayName() {
     return this._package.displayName
+  }
+
+  get menus() {
+    return this._package.menus
   }
 
   addDependency(service: ExtensionService) {
@@ -182,7 +217,7 @@ export class ExtensionService {
     if (!cmd) return Result.failure(`${command} function not exist`)
     try {
       const result = await cmd(...args)
-      // this._pipe.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [file])
+      // this._pipe.post(ReplyType.WORKER_UPDATE_RESOURCES, [file])
       if (result === undefined) {
         return Result.failure(`extension[${this.name}] command[${command}] return ${result}`)
       }

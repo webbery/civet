@@ -1,5 +1,5 @@
 import path from 'path'
-import { ExtensionActiveType, ExtensionService } from './ExtensionService'
+import { ExtensionActiveType, ExtensionService, MenuDetail } from './ExtensionService'
 import { MessagePipeline } from './MessageTransfer'
 import { Resource, StorageAccessor } from '@/../public/Resource'
 import { ResourcePath } from './common/ResourcePath'
@@ -8,14 +8,12 @@ import { config } from '@/../public/CivetConfig'
 import { APIFactory } from './ExtensionAPI'
 import { isFileExist, getExtensionPath} from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
-import { ReplyType, ErrorMessage } from './Message'
 import { PropertyType } from '../public/ExtensionHostType'
 import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstallManager'
 import { logger } from '@/../public/Logger'
 import fs from 'fs'
 import { injectable, showErrorInfo } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-import { ViewType } from '@/../public/ExtensionHostType'
 
 @injectable
 export class ExtensionManager {
@@ -25,6 +23,7 @@ export class ExtensionManager {
   private _actives: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
+  private _menus: Map<string, MenuDetail[]> = new Map<string, MenuDetail[]>();
 
   constructor(pipeline: MessagePipeline) {
     this._pipeline = pipeline
@@ -93,6 +92,7 @@ export class ExtensionManager {
       if (!service) {
         const packPath = root + '/' + extensionName
         service = new ExtensionService(packPath, pipeline)
+        this._mergeMenu(service)
         this._extensions.push(service)
         console.info('extension name:', extensionName)
         return true
@@ -101,6 +101,18 @@ export class ExtensionManager {
       console.error(`init extension ${extensionName} fail: ${err}`)
     }
     return false
+  }
+
+  private _mergeMenu(service: ExtensionService) {
+    const m = service.menus
+    for (let context in m) {
+      const items = m[context]
+      if (items) {
+        const menus = this._menus[context]
+        if (!menus) this._menus[context] = items
+        else this._menus[context] = menus.concat(items)
+      }
+    }
   }
 
   private _buildGraph() {
@@ -140,10 +152,11 @@ export class ExtensionManager {
   }
 
   private _initFrontEndEvent(pipeline: MessagePipeline) {
-    pipeline.regist('install', this.install, this)
-    pipeline.regist('uninstall', this.uninstall, this)
-    pipeline.regist('update', this.update, this)
-    pipeline.regist('getExtensions', this.installedList, this)
+    pipeline.regist(IPCNormalMessage.INSTALL_EXTENSION, this.install, this)
+    pipeline.regist(IPCNormalMessage.UNINSTALL_EXTENSION, this.uninstall, this)
+    pipeline.regist(IPCNormalMessage.UPDATE_EXTENSION, this.update, this)
+    pipeline.regist(IPCNormalMessage.LIST_EXTENSION, this.installedList, this)
+    pipeline.regist(IPCNormalMessage.GET_OVERVIEW_MENUS, this.replyMenus, this)
   }
 
   private _initInstaller(extensionPath: string) {
@@ -173,14 +186,14 @@ export class ExtensionManager {
       const root = getExtensionPath()
       this._initService(root, extinfo.name, this._pipeline)
     }
-    return {type: ReplyType.REPLY_INSTALL_RESULT, data: result}
+    return {type: IPCRendererResponse.install, data: result}
   }
 
   uninstall(msgid: number, extname: string) {
     const extPath = getExtensionPath()
     this._initInstaller(extPath)
     const result = this._installManager!.uninstall(extname)
-    return {type: ReplyType.REPLY_UNINSTALL_RESULT, data: result}
+    return {type: IPCRendererResponse.uninstall, data: result}
   }
 
   update(msgid: number, extname: string) {
@@ -195,13 +208,19 @@ export class ExtensionManager {
     const extPath = getExtensionPath()
     this._initInstaller(extPath)
     const list = this._installManager!.installList()
-    return {type: ReplyType.REPLY_EXTENSION_LIST_INFO, data: list}
+    return {type: IPCRendererResponse.getExtensions, data: list}
   }
 
   enable(msgid: number, extname: string) {
   }
 
   disable(msgid: number, extname: string) {}
+
+  replyMenus(msgid: number, context: string) {
+    const menus = this._menus[context]
+    console.info('reply menus', context, this._menus)
+    return {type: IPCRendererResponse.getOverviewMenus, data: menus}
+  }
   
   private _initContentTypeExtension(service: ExtensionService) {
     let activeType = service.activeType()
@@ -262,7 +281,7 @@ export class ExtensionManager {
     resource.putProperty({ name: 'path', value: uri.local(), type: PropertyType.String, query: false, store: true })
     for (const extension of extensions) {
       await extension.run('read', uri.local(), resource)
-      // this._pipeline.post(ReplyType.WORKER_UPDATE_IMAGE_DIRECTORY, [resource.toJson()])
+      // this._pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, [resource.toJson()])
     }
     console.info('add files:', resource)
     const accessor = new StorageAccessor()
@@ -293,10 +312,5 @@ export class ExtensionManager {
     return html
   }
 
-  // private onRequestOverview(msgid: number, name: string): any {
-  //   const service = this._viewServices.get(name)
-  //   if (!service) return undefined;
-  //   service.
-  // }
 
 }

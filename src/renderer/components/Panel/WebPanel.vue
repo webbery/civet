@@ -1,18 +1,28 @@
 <template>
   <div class="webview" @drop="dropFiles($event)" @dragover.prevent>
-    <div style="height: 100%" v-html="html" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true"></div>
+    <PopMenu :list="extensionMenus" :underline="false" @ecmcb="onRightMenu" tag="overview"></PopMenu>
+    <div style="height: 100%" @contextmenu.prevent @mousedown.right="onRightClick($event, $root)">
+      <div style="height: 100%" v-html="html" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true"></div>
+    </div>
   </div>
 </template>
 <script>
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
+import PopMenu from '@/components/Menu/PopMenu'
 
 export default {
   name: 'web-container',
+  components: { PopMenu },
   data() {
     return {
-      html: ''
+      html: '',
+      menus: [
+        // {text: '重命名', cb: this.onChangeName},
+        // {text: '删除', cb: this.onDeleteItem}
+      ],
+      extensionMenus: []
     }
   },
   beforeMount() {
@@ -25,7 +35,6 @@ export default {
     dropFiles(event) {
       let files = event.dataTransfer.files
       let paths = []
-      // const String = require('../../../public/String').default
       for (let item of files) {
         paths.push(item.path)
       }
@@ -53,9 +62,31 @@ export default {
       console.info('init overview', value)
       StyleLoader.load(value.style)
       this.html = value.body
-      this.$nextTick(() => {
+      this.$nextTick(async () => {
         ScriptLoader.load(value.script)
+        this.extensionMenus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + value.id)
+        console.info('reply view menus', this.extensionMenus)
       })
+    },
+    onRightMenu: function (indexList, args1) {
+      console.info('onRightMenu', indexList, args1)
+    },
+    onDeleteItem(name, parent, fileid) {
+      // this.$ipcRenderer.send(Service.REMOVE_FILES, [fileid])
+      this.$store.dispatch('removeFiles', [fileid])
+    },
+    onRightClick(event, root) {
+      console.info('event', root)
+      if (event.button === 2) { // 选择多个后右键
+        // right click
+        // this.imageSelected = false
+        root.$emit('easyAxis', {
+          tag: 'overview',
+          index: 0,
+          x: event.clientX,
+          y: event.clientY
+        })
+      }
     }
   }
 }

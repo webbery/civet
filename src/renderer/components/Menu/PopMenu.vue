@@ -8,7 +8,7 @@
         <div @click.stop="callback([index])"
              :class="firstLeft?'cm-left':''">
           <i :class="item.icon"></i>
-          <span>{{item.text}}</span>
+          <span>{{item.name}}</span>
           <svg class="icon" aria-hidden="true"
                v-if="arrow && item.children && item.children.length > 0">
               <use xlink:href="#icon-youjiantou"></use>
@@ -24,7 +24,7 @@
             <div @click.stop="callback([index,si])"
                  :class="secondLeft?'cm-left':''">
               <i :class="second.icon"></i>
-              <span>{{second.text}}</span>
+              <span>{{second.name}}</span>
               <svg class="icon" aria-hidden="true"
                    v-if="arrow && second.children && second.children.length > 0">
                   <use xlink:href="#icon-youjiantou"></use>
@@ -39,7 +39,7 @@
                   :style="liStyle">
                 <div @click.stop="callback([index,si,ti])">
                   <i :class="third.icon"></i>
-                  <span>{{third.text}}</span>
+                  <span>{{third.name}}</span>
                 </div>
               </li>
             </ul>
@@ -180,7 +180,11 @@
         // this.$emit('ecmcb', indexList)
         const idx = indexList[0]
         const item = this.list[idx]
-        item.cb(item.text, this.axis.parent, this.axis.index)
+        if (item.cb) {
+          item.cb(item, this.axis.parent, this.axis.index)
+        } else {
+          // send item command
+        }
       }
     }
   }

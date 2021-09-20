@@ -180,7 +180,7 @@
             return {
                 add: function(item) {
                     let block = {}, src
-                    // console.info('item', item)
+                    console.info('item', item)
                     for (let meta of item['meta']) {
                         if (meta['name'] === 'filename') block['name'] = meta.value
                         else if (meta['name'] === 'path') src = meta.value
@@ -188,6 +188,7 @@
                         else if (meta['name'] === 'height') block['height'] = meta.value
                         else if (meta['name'] === 'width') block['width'] = meta.value
                     }
+                    if (!src) src = item.path
                     if (!src) return ''
                     if (src.indexOf(':') < 0 && src[0] !== '/') return ''
                     block['id'] = item.id
@@ -205,10 +206,15 @@
                 erase: function(item) {}
             }
         })('items')
+        Overview.on('add', (resources) => {
+            // console.info('add resource in document', resources)
+            for (let resource of resources) {
+                WaterfallLayout.add(resource)
+            }
+        })
         function loadResources(resources) {
             if (!resources || resources.length === 0) return
             console.info('load:', resources)
-            console.info('WaterfallLayout 3', WaterfallLayout)
             for (let resource of resources) {
                 WaterfallLayout.add(resource)
             }

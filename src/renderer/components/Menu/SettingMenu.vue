@@ -6,7 +6,7 @@
         <div>{{layout}}<span class="el-icon-arrow-right"></span></div>
       </li> -->
       <li v-for="(layout, index) in layouts" :key="index">
-        <div @click="onLayoutClicked(layout.name)">{{layout.display}}</div>
+        <div @click="onLayoutClicked(layout.name)"><span class="el-icon-check" v-if="activate===layout.name"></span>{{layout.display}}</div>
       </li>
     </ul>
     <ul class="sm-ul sm-underline"></ul>
@@ -21,6 +21,7 @@
 <script>
 import {i18n} from '@/../public/String'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
+import { config } from '@/../public/CivetConfig'
 
 export default {
   name: 'setting-menu',
@@ -34,11 +35,18 @@ export default {
     return {
       setting: i18n('setting'),
       layout: i18n('layout'),
-      layouts: []
+      layouts: [],
+      activate: ''
     }
   },
   created() {
     this.$ipcRenderer.on(IPCRendererResponse.ON_VIEW_ROUTER_ADD, this.onViewRouterInit)
+  },
+  mounted() {
+    document.addEventListener('click', () => {
+      // console.info('click', this.show)
+      this.show = false
+    }, true)
   },
   computed: {
     locationComputed() {
@@ -54,15 +62,17 @@ export default {
     },
     onLayoutClicked(name) {
       console.info('select layout', name)
-      this.show = !this.show
+      this.show = false
+      this.activate = name
       this.$emit('onDisplayChanged', this.show)
       this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, name)
     },
     onViewRouterInit(session, routers) {
-      console.info('created init:', session, routers)
+      console.info('created init:', routers, config.defaultView)
       for (let route of routers) {
         this.layouts.push(route)
       }
+      this.activate = config.defaultView
     }
   }
 }

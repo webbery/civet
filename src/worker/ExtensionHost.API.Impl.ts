@@ -10,6 +10,8 @@ import { Resource } from '@/../public/Resource'
 import { ExtSearchBar } from './view/extHostSearchBar'
 import { ExtPropertyView } from './view/extHostPropertyView'
 import { ExtOverview, ExtOverviewEntry } from './view/extHostOverview'
+import { ExtMenusEntry } from './contrib/extHostMenus'
+import { ExtCommandsEntry } from './contrib/extCommand'
 
 export interface IExtensionApiFactory {
 	(extension: any, registry: any, configProvider: any): typeof civet;
@@ -20,6 +22,7 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
   const extSearchBar = registSingletonObject(ExtSearchBar)
   const extPropertyView = rpcProtocal.set(ExtPropertyView.name, ExtPropertyView)
   const extOverViewEntry = registSingletonObject(ExtOverviewEntry)
+  const extCommandsEntry = registSingletonObject(ExtCommandsEntry)
 
   const window: typeof civet.window = {
     get searchBar() { return extSearchBar.searchBar },
@@ -47,6 +50,12 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
     }
   }
 
+  const commands: typeof civet.commands = {
+    registerCommand(command: string, listener: <T>(...args: any[]) => T) {
+      extCommandsEntry.regist(command)
+    }
+  }
+
   const utility: typeof civet.utility = {
     extensionPath: getExtensionPath(),
     getClasses(): string[] {
@@ -64,6 +73,7 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
       version: '0.0.1',
       // namespace
       window,
+      commands,
       utility,
       // enum
       PropertyType: ExtensionHostType.PropertyType,

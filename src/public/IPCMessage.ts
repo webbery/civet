@@ -47,7 +47,10 @@ export enum IPCNormalMessage {
   // workbench
   GET_SELECT_CONTENT_ITEM_INFO = 'getSelectContentItemInfo',
   REQUEST_UPDATE_RESOURCES = 'onResourcesLoading',
-  RETRIEVE_OVERVIEW = 'rtvOverview'
+  RETRIEVE_OVERVIEW = 'rtvOverview',
+  GET_OVERVIEW_MENUS = 'getOverviewMenus',
+  // commands
+  POST_COMMAND = 'pstCmd'
 }
 
 export enum IPCRendererResponse {
@@ -64,6 +67,7 @@ export enum IPCRendererResponse {
   getUntagImages = 'replyUntagImages',
   reInitDB = 'replyReloadDBStatus',
   getFilesSnap = 'replyFilesSnap',
+  getOverviewMenus = 'replyOverviewMenus',
   install = 'replyInstallResult',
   uninstall = 'replyUninstallResult',
   getExtensions = 'replyAllExtensions',

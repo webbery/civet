@@ -1,6 +1,6 @@
 
 export const ReplyType = {
-  WORKER_UPDATE_IMAGE_DIRECTORY: 'updateImageList',
+  WORKER_UPDATE_RESOURCES: 'updateImageList',
   INFOM_ERROR_MESSAGE: 'onErrorMessage',
   REPLY_WORKBENCH_VIEW: 'replyWorkbenchView',
   REPLY_FILES_LOAD_COUNT: 'replyFilesLoadCount',

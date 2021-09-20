@@ -187,6 +187,10 @@ declare module 'civet' {
 
     }
 
+    export namespace commands {
+        export function registerCommand(command: string, listener: <T>(...args: any[]) => T): void;
+    }
+
     export namespace utility {
         export const extensionPath: string;
         /**

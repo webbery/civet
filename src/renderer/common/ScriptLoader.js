@@ -9,7 +9,7 @@ export default (function() {
 
   let loadFinished = function() {
     currentGroupFinished++
-    console.info('script load finish', currentGroupFinished, groupQueue.length)
+    // console.info('script load finish', currentGroupFinished, groupQueue.length)
     if (currentGroupFinished < groupQueue.length) {
       nextGroup()
       loadGroup()
@@ -45,7 +45,7 @@ export default (function() {
   let loadScript = function(script) {
     const md5 = crypto.createHash('md5')
     const hash = md5.update(script).digest('base64')
-    console.info('scripts:', hash, scripts[hash])
+    // console.info('scripts:', hash, scripts[hash])
     if (scripts[hash] !== undefined) return
     const SCRIPT_TAG_REGEX = /<(script)\b[^>]*>([\s\S]*?)<\/\1>/is
     const matchs = script.match(SCRIPT_TAG_REGEX)

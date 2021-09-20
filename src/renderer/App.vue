@@ -14,7 +14,6 @@ import LandingPage from '@/components/LandingPage'
 import Guider from '@/components/Dialog/Guider'
 import { config } from '@/../public/CivetConfig'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-// import ScriptLoader from '@/../public/ScriptLoader'
 
 export default {
   name: 'civet',
@@ -24,7 +23,7 @@ export default {
   },
   beforeMount() {
     // regist ipc message process function
-    // this.$ipcRenderer.on(IPCRendererResponse.ON_FILE_UPDATE, this.onUpdateImages)
+    this.$ipcRenderer.on(IPCRendererResponse.ON_RESOURCE_UPDATED, this.onUpdateImages)
     this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
   },
   mounted() {
@@ -38,20 +37,15 @@ export default {
     this.$nextTick(() => {
       this.$store.dispatch('init')
     })
-    // fs.readFile('src/renderer/common/RendererEvent.ts', (err, data) => {
-    //   if (err) {
-    //     console.error(err)
-    //     return
-    //   }
-    //   console.info('DATA:', data.toString())
-    // })
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },
   methods: {
-    onUpdateImages(error, updateImages) {
+    onUpdateImages(error, updateResources) {
       if (error) console.log(error)
-      this.$store.dispatch('addFiles', updateImages)
+      this.$store.dispatch('addFiles', updateResources)
+      // console.info('add resources', updateResources)
+      this.$events.emit('Overview', 'add', updateResources)
     },
     onErrorTips(info) {
       console.error(info)

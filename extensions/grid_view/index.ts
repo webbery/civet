@@ -12,6 +12,10 @@ fs.readFile(utility.extensionPath + '/grid_view/view.html', 'utf-8', (err, data)
   frame = data.toString();
 })
 
+function a() {
+  console.info('aaaaaaa')
+}
+
 gridview.onResourcesLoading((e: OverviewItemLoadEvent) => {
   console.info('grid view onResourcesLoading', e.resources.length)
   if (e.classes && e.classes.length) {
@@ -24,6 +28,6 @@ gridview.onResourcesLoading((e: OverviewItemLoadEvent) => {
   } else {
     frame = frame.replace('{{resources}}', '')
   }
-  // console.info('GRID:', frame)
+  console.info('GRID:', a.toString())
   gridview.html = frame
 }, gridview);

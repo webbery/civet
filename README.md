@@ -28,7 +28,7 @@
 
 ### 下载
 
-[Release](https://github.com/webbery/civet/releases)  
+[Development Version](https://github.com/webbery/civet/releases)  
 
 ### 相关资源
 
@@ -62,6 +62,7 @@ C++编译器要求支持C++17, Node版本建议>14
 #### 技术细节
 开发过程踩过许多坑，在填坑的同时记录下这些过程，并编写成文，以便其他开发者在做类似功能的时候能避免踩坑：  
 [如何实现vscode的require劫持](https://zhuanlan.zhihu.com/p/382381432)  
+[civet的图像主色彩抽取算法](https://zhuanlan.zhihu.com/p/355278737)  
 
 ---
 

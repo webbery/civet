@@ -84,10 +84,10 @@ export default {
       newCategoryName: '',
       // index: 0,
       menus: [
-        {text: '导出到计算机', cb: this.onExportClasses},
-        {text: '重命名', cb: this.onMenuChangeName},
-        {text: '添加', cb: this.onAddClass},
-        {text: '删除', cb: this.onDeleteClass}
+        {name: '导出到计算机', cb: this.onExportClasses},
+        {name: '重命名', cb: this.onMenuChangeName},
+        {name: '添加', cb: this.onAddClass},
+        {name: '删除', cb: this.onDeleteClass}
       ]
     }
   },

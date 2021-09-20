@@ -382,10 +382,10 @@ img{
   margin-left: 10px;
   vertical-align: bottom;
 }
-.name{
+._cv_name{
   text-align: left;
 }
-.value{
+._cv_value{
   max-width: 100px;
   text-overflow:ellipsis;
   white-space:nowrap;

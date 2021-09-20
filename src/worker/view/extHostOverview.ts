@@ -74,7 +74,9 @@ export class ExtOverview extends ExtHostWebView {
   update() {
     if (this.id === config.defaultView && !this.#updated) {
       this.#updated = true
-      this.proxy.pipeline.post(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE, super.getHtml())
+      let response = super.getHtml()
+      response['id'] = this.id
+      this.proxy.pipeline.post(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE, response)
     }
   }
 
