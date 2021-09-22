@@ -15,5 +15,7 @@ fs.readFile(utility.extensionPath + '/map_view/view.html', (err, data)=> {
 mapView.onResourcesLoading((e: OverviewItemLoadEvent) => {
   // mapView.html = frame
   console.info('onResourcesLoading', e.resources.length)
-  mapView.html = frame.replace('{{resources}}', JSON.stringify(e.resources))
+  if (e.resources && e.resources.length !== 0) {
+    mapView.html = frame.replace('{{resources}}', JSON.stringify(e.resources))
+  }
 }, mapView);

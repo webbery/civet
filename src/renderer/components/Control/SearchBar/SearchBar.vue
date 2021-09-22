@@ -81,7 +81,6 @@ export default {
   display: inline-block;
   vertical-align: top;
   width: 100%;
-  background-color: #222933;
   /* padding: 7.5px 7.5px 3.75px; */
   border: 1px solid black;
   border-top-left-radius: 2.5px;
@@ -91,5 +90,8 @@ export default {
 .search-input {
   display: inline;
   width: 180px;
+  background-color: #222933;
+  color: white;
+  outline: none;
 }
 </style>
