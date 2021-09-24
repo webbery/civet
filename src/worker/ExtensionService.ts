@@ -8,15 +8,11 @@ import { ExtensionModule } from './api/ExtensionRequire'
 import { logger } from '@/../public/Logger'
 const fs = require('fs')
 
-// const Module = require('module');
-// const original = Module.prototype.require;
+export interface ExtensionAccessor {
+  visit(extension: ExtensionService): void;
+  result(): any;
+}
 
-// Module.prototype.require = function(request: string) {
-//   if (request !== 'civet') {
-//     return original.apply(this, arguments);
-//   }
-//   return require('./ExtensionAPI');
-// }
 
 export enum ExtensionActiveType {
   ExtContentType = 0, //
@@ -185,6 +181,10 @@ export class ExtensionService {
       default:
         return false
     }
+  }
+
+  accept(accessor: ExtensionAccessor) {
+    accessor.visit(this)
   }
 
   private _initialize(): Result<string, string> {

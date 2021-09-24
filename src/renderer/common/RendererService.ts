@@ -63,7 +63,7 @@ class RendererService {
     this.ipc.on('message-to-renderer', (sender, msg) => {
       const types = msg.type.split('.')
       const callbacks = self.response.get(types[0])
-      console.info('callbacks:', callbacks)
+      console.info('callbacks:', callbacks, msg)
       if (callbacks === undefined) return
       callbacks.forEach((callback: any) => {
         switch(callback.length) {
@@ -86,7 +86,7 @@ class RendererService {
     })
   }
 
-  send(type: string, message: any) {
+  send(type: string, message?: any) {
     _cv_message_id_ += 1
     console.info('message-from-renderer: type=' + type + ', data', message)
     this.ipc.send('message-from-renderer', {
@@ -110,16 +110,19 @@ class RendererService {
     this.response.regist(type, callback)
   }
 
-  private stdOn<Reply>(type: IPCType, callback: (err: any, resp: {session: number, reply: Reply}) => void) {
+  private stdOn<Reply>(msgid: number, type: IPCType, callback: (err: any, resp: {session: number, reply: Reply}) => void) {
     const func = (session: number, reply: Reply) => {
-      // console.info('reply:', 0, reply)
+      if (session !== msgid) {
+        console.info('skip msg', type, msgid, session)
+        return
+      }
       return callback(0, {session, reply})
     }
     this.response.regist(type, func)
   }
 
-  async get(type: IPCType, params: any): Promise<any> {
-    this.send(type, params)
+  async get(type: IPCType, params?: any): Promise<any> {
+    const msgid = this.send(type, params)
     if (IPCRendererResponse[type] === undefined) {
       console.error(`reply[${type}] is not defined, params: ${params}`)
     }
@@ -128,13 +131,20 @@ class RendererService {
     // })
     const promiseOn = util.promisify(this.stdOn)
     // const result = await promiseOn(IPCRendererResponse[type])
-    const result = await promiseOn.call(this, IPCRendererResponse[type])
+    const result = await promiseOn.call(this, msgid, IPCRendererResponse[type])
     // console.info('promise on', result)
     return result.reply
   }
 }
 
 declare const _cv_events: any;
+declare let _cv_command_args: any;
 export const events = _cv_events;
+export let commandArgs = _cv_command_args;
+export function clearArgs() {
+  _cv_command_args = {}
+}
+export function getCommandArgs(command: string) {
+  return _cv_command_args[command]
+}
 export const service = new RendererService();
-

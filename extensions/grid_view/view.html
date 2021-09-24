@@ -141,10 +141,11 @@
                 div.style.top = `${item.top}px`
                 div.style.width = `${item.width}px`
                 div.style.height = `${item.height}px`
+                // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
                 div.innerHTML = `<div draggable="true" class="image">
                                     <div class="el-card is-never-shadow" style="border: 0px;">
                                         <div class="el-card__body" style="padding: 1px;">
-                                            <div class="frame" onclick="Overview.click(${item.id})"><img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover"></div>
+                                            <div class="frame" onclick="onGridClick(${item.id})" oncontextmenu="onGridClick(${item.id})"><img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover"></div>
                                             <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
                                                 <span class="context">${item.name}</span>
                                             </div>
@@ -153,9 +154,7 @@
                                 </div>`
                 return div
             }
-            function update(items) {
 
-            }
             function addElement(item) {
                 const items = document.querySelectorAll('._cv_waterfall')
                 const root = document.getElementById(rootID)
@@ -212,6 +211,30 @@
                 WaterfallLayout.add(resource)
             }
         })
+        GridViewCache = (function() {
+            let selections = []
+            return {
+                addSelection: function (itemid) {
+                    selections.push(itemid)
+                },
+                resetSelection: function () { selections = [] },
+                getSelection: function() { return selections }
+            }
+        })()
+        function onGridClick(itemid) {
+            console.info('grid click', event, itemid)
+            Overview.click(itemid)
+            if (event.which === 3) {
+                if (!itemid) {
+                    GridViewCache.resetSelection()
+                    return
+                }
+                GridViewCache.addSelection(itemid)
+                const selections = GridViewCache.getSelection()
+                injectCommandParams('exportResources', selections)
+                injectCommandParams('deleteResources', selections)
+            }
+        }
         function loadResources(resources) {
             if (!resources || resources.length === 0) return
             console.info('load:', resources)

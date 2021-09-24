@@ -36,6 +36,7 @@ export default {
     }
     this.$nextTick(() => {
       this.$store.dispatch('init')
+      // this.$commands.init()
     })
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)

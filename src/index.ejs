@@ -12,6 +12,7 @@
   </head>
   <body style="overflow:hidden">
     <script>
+      let _cv_command_args = {}
       let _cv_message_id_ = 0
       const _cv_events = (function() {
         const { EventEmitter } = require('events')
@@ -47,6 +48,17 @@
           }
         }
       })()
+      function postMessage(/*command, args*/) {
+        if (arguments.length === 0) return false;
+        // const command = arguments[0]
+        console.info('post message', arguments)
+      }
+
+      function injectCommandParams(command, args) {
+        console.info('inject command[', command, '] args ', args)
+        _cv_command_args[command] = args
+      }
+
       const Overview = (function() {
         return {
           click: function(id) {

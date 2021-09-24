@@ -1,5 +1,5 @@
 import path from 'path'
-import { ExtensionActiveType, ExtensionService, MenuDetail } from './ExtensionService'
+import { ExtensionActiveType, ExtensionService, MenuDetail, ExtensionAccessor } from './ExtensionService'
 import { MessagePipeline } from './MessageTransfer'
 import { Resource, StorageAccessor } from '@/../public/Resource'
 import { ResourcePath } from './common/ResourcePath'
@@ -15,15 +15,90 @@ import fs from 'fs'
 import { injectable, showErrorInfo } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 
+class ExtensionCommandAccessor implements ExtensionAccessor {
+  #commands: Set<string>;
+  #overview: string;
+  constructor(overview: string) {
+    this.#overview = overview
+    this.#commands = new Set<string>()
+  }
+
+  visit(service: ExtensionService) {
+    this.menu(service)
+  }
+
+  result() {
+    return this.#commands
+  }
+
+  private menu(service: ExtensionService) {
+    const m = service.menus
+    const items: MenuDetail[] = m[this.#overview]
+    if (items) {
+      for (let item of items) {
+        this.#commands.add(item.command)
+      }
+    }
+  }
+}
+
+class ExtensionMenuAccessor implements ExtensionAccessor {
+  #menus: MenuDetail[] = [];
+  #context: string;
+
+  constructor(context: string) {
+    this.#context = context
+  }
+
+  visit(service: ExtensionService) {
+    const m = service.menus
+    const items: MenuDetail[] = m[this.#context]
+    if (items) {
+      this.#menus = this.#menus.concat(items)
+    }
+  }
+
+  result(){
+    return this.#menus
+  }
+}
+
+class MenuCommand {
+  group: string;
+  command: string;
+  name: string;
+  id: string;
+}
+class ExtensionAllMenuAccessor implements ExtensionAccessor {
+  #menus: any[] = [];
+
+  visit(service: ExtensionService) {
+    const m = service.menus
+    for (let context in m) {
+      const items: MenuDetail[] = m[context]
+      console.info('context:', context, items)
+      for (let item of items) {
+        this.#menus.push({
+          id: context,
+          name: item.name,
+          group: item.group,
+          command: item.command
+        })
+      }
+    }
+  }
+
+  result() { return this.#menus }
+}
+
 @injectable
 export class ExtensionManager {
   private _pipeline: MessagePipeline;
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
-  private _actives: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
+  private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
-  private _menus: Map<string, MenuDetail[]> = new Map<string, MenuDetail[]>();
 
   constructor(pipeline: MessagePipeline) {
     this._pipeline = pipeline
@@ -92,7 +167,6 @@ export class ExtensionManager {
       if (!service) {
         const packPath = root + '/' + extensionName
         service = new ExtensionService(packPath, pipeline)
-        this._mergeMenu(service)
         this._extensions.push(service)
         console.info('extension name:', extensionName)
         return true
@@ -103,20 +177,8 @@ export class ExtensionManager {
     return false
   }
 
-  private _mergeMenu(service: ExtensionService) {
-    const m = service.menus
-    for (let context in m) {
-      const items = m[context]
-      if (items) {
-        const menus = this._menus[context]
-        if (!menus) this._menus[context] = items
-        else this._menus[context] = menus.concat(items)
-      }
-    }
-  }
-
   private _buildGraph() {
-    this._actives.clear()
+    this._activableExtensions.clear()
     console.info('service:', this._extensions)
     let extServs: ExtensionService[] = this._extensions
     console.info('service:', extServs)
@@ -157,6 +219,7 @@ export class ExtensionManager {
     pipeline.regist(IPCNormalMessage.UPDATE_EXTENSION, this.update, this)
     pipeline.regist(IPCNormalMessage.LIST_EXTENSION, this.installedList, this)
     pipeline.regist(IPCNormalMessage.GET_OVERVIEW_MENUS, this.replyMenus, this)
+    pipeline.regist(IPCNormalMessage.POST_COMMAND, this.onRecieveCommand, this)
   }
 
   private _initInstaller(extensionPath: string) {
@@ -216,10 +279,36 @@ export class ExtensionManager {
 
   disable(msgid: number, extname: string) {}
 
-  replyMenus(msgid: number, context: string) {
-    const menus = this._menus[context]
-    console.info('reply menus', context, this._menus)
+  accessMenu(menuAccessor: ExtensionAccessor) {
+    this._extensions.forEach((service: ExtensionService) => {
+      menuAccessor.visit(service)
+    })
+    const menus = menuAccessor.result()
     return {type: IPCRendererResponse.getOverviewMenus, data: menus}
+  }
+
+  replyMenus(msgid: number, context: string|undefined) {
+    if (context) {
+      let menuAccessor: ExtensionMenuAccessor = new ExtensionMenuAccessor(context);
+      return this.accessMenu(menuAccessor)
+    }
+    let menuAccessor: ExtensionAllMenuAccessor = new ExtensionAllMenuAccessor()
+    return this.accessMenu(menuAccessor)
+  }
+
+  replyAllCommand(msgid: number) {
+    let cmdAccessor: ExtensionCommandAccessor = new ExtensionCommandAccessor(config.defaultView)
+    this._extensions.forEach((service: ExtensionService) => {
+      cmdAccessor.visit(service)
+    })
+    return {type: IPCRendererResponse.getActiveCmd, data: Array.from(cmdAccessor.result())}
+  }
+
+  onRecieveCommand(msgid: number, data: any) {
+    const command = data.command
+    const target = data.target
+    const args = data.args
+    this.onExecuteCommand(target, command, args)
   }
   
   private _initContentTypeExtension(service: ExtensionService) {
@@ -227,12 +316,12 @@ export class ExtensionManager {
     if (!activeType) return
     for (let active of activeType) {
       active = active.toLowerCase()
-      let events = this._actives.get(active)
+      let events = this._activableExtensions.get(active)
       if (!events) {
         events = []
       }
       events.push(service)
-      this._actives.set(active, events)
+      this._activableExtensions.set(active, events)
     }
   }
 
@@ -263,7 +352,7 @@ export class ExtensionManager {
   async read(uri: ResourcePath): Promise<Result<Resource, string>> {
     const f = path.parse(uri.local())
     const extname = f.ext.substr(1).toLowerCase()
-    const extensions = this._actives.get(extname)
+    const extensions = this._activableExtensions.get(extname)
     if (!extensions || extensions.length === 0) {
       const msg = `No extensions can read ${extname} file`
       showErrorInfo({msg: msg})
@@ -292,25 +381,22 @@ export class ExtensionManager {
     return Result.success(resource)
   }
 
-  onPropertyView(resource: Resource): string[] | Result<string, string> {
-    const extensions = this._actives.get('property')
-    if (!extensions || extensions.length === 0) return Result.failure('empty extensions')
-    let html: string[] = [];
-    for (const extension of extensions) {
-      extension.run('onview', 'property', resource)
+  async onExecuteCommand(id: string, command: string, ...args: any) {
+    console.info(`Execute command ${command} on ${id}, params is ${args}`)
+    const extensions = this._activableExtensions[id]
+    if (!extensions || extensions.length === 0) {
+      const msg = `No extensions can read ${id} file`
+      showErrorInfo({msg: msg})
+      return Result.failure(msg)
     }
-    return html
-  }
-
-  onSearchBar(): string[] | Result<string, string> {
-    const extensions = this._actives.get('search')
-    if (!extensions || extensions.length === 0) return Result.failure('empty extensions')
-    let html: string[] = [];
-    for (const extension of extensions) {
-      extension.run('onview', 'search')
+    const [kind, cmd] = command.split(':')
+    if (kind === 'ext') {
+      for (const extension of extensions) {
+        await extension.run(cmd, args)
+      }
+    } else {
+      console.error('unknow command', command)
     }
-    return html
+    return Result.success(true)
   }
-
-
 }

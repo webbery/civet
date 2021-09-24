@@ -12,6 +12,7 @@ if (platform === 'win32') {
 const options = ''
 const inputDir = 'extensions'
 const outputDir = 'extensions'
+const logfile = 'build.log'
 let installPackages = {}
 let extensions = []
 let excludeNames = ['shared.tsconfig.json', 'build.js', '.DS_Store', 'node_modules', 'package-lock.json', 'package.json']
@@ -84,23 +85,47 @@ function isExclude(extension) {
   return false
 }
 
+function getBuildLog() {
+  if (fs.existsSync(logfile)) {
+    return JSON.parse(fs.readFileSync(logfile))
+  }
+  fs.writeFileSync(logfile, '{}')
+  return {}
+}
+
+function shouldUpdate(package, lasttime) {
+  let buildHistory = getBuildLog()
+  if (!buildHistory[package]) {
+    buildHistory[package] = lasttime
+    fs.writeFileSync(logfile, JSON.stringify(buildHistory))
+    return true
+  }
+  if (buildHistory[package] === lasttime) return false
+  buildHistory[package] = lasttime
+  fs.writeFileSync(logfile, JSON.stringify(buildHistory))
+  return true
+}
+
 function parseExtensions() {
   for (let extension of dirs) {
     const extPath = path.join(__dirname, './extensions/' + extension)
     const stat = fs.statSync(extPath)
     if (isExclude(extension) || !stat || stat.isFile()) continue
     const packagePath = path.join(__dirname, './extensions/'  + extension + '/package.json')
-    const pack = fs.readFileSync(packagePath, 'utf-8')
-    const jsn = JSON.parse(pack)
-    for (let name in jsn['dependencies']) {
-      try {
-        let child = execSync(`npm ls ${name}`)
-        // console.info(child.toString())
-        if (child.toString() === 'false') {
+    const stime = stat.mtime / 1000
+    if (shouldUpdate(packagePath, stime)) {
+      const pack = fs.readFileSync(packagePath, 'utf-8')
+      const jsn = JSON.parse(pack)
+      for (let name in jsn['dependencies']) {
+        try {
+          let child = execSync(`npm ls ${name}`)
+          // console.info(child.toString())
+          if (child.toString() === 'false') {
+            installPackages[name] = jsn['dependencies'][name]
+          }
+        } catch (err) {
           installPackages[name] = jsn['dependencies'][name]
         }
-      } catch (err) {
-        installPackages[name] = jsn['dependencies'][name]
       }
     }
     extensions.push(extension)

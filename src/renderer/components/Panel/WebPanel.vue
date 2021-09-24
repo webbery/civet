@@ -1,7 +1,7 @@
 <template>
   <div class="webview" @drop="dropFiles($event)" @dragover.prevent>
     <PopMenu :list="extensionMenus" :underline="false" @ecmcb="onRightMenu" tag="overview"></PopMenu>
-    <div style="height: 100%" @contextmenu.prevent @mousedown.right="onRightClick($event, $root)">
+    <div style="height: 100%" @mousedown.right="onRightClick($event, $root)">
       <div style="height: 100%" v-html="html" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true"></div>
     </div>
   </div>
@@ -11,6 +11,7 @@ import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
 import PopMenu from '@/components/Menu/PopMenu'
+import { clearArgs, events } from '../../common/RendererService'
 
 export default {
   name: 'web-container',
@@ -62,10 +63,25 @@ export default {
       console.info('init overview', value)
       StyleLoader.load(value.style)
       this.html = value.body
+      const self = this
       this.$nextTick(async () => {
         ScriptLoader.load(value.script)
-        this.extensionMenus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + value.id)
-        console.info('reply view menus', this.extensionMenus)
+        // const menus = this.$commands.get(CommandType.CTMenu)
+        // console.info(value, 'menu is', menus)
+        const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + value.id)
+        this.extensionMenus = []
+        for (let menu of menus) {
+          this.extensionMenus.push({
+            id: value.id,
+            name: menu.name,
+            command: menu.command
+          })
+          events.on(value.id, menu.command, function(args) {
+            console.info('on event', menu.command)
+            self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: value.id, command: 'ext:' + menu.command, args: args})
+          })
+        }
+        console.info('reply view menus', this.extensionMenus, menus)
       })
     },
     onRightMenu: function (indexList, args1) {
@@ -80,6 +96,7 @@ export default {
       if (event.button === 2) { // 选择多个后右键
         // right click
         // this.imageSelected = false
+        clearArgs()
         root.$emit('easyAxis', {
           tag: 'overview',
           index: 0,

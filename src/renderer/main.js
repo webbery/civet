@@ -9,6 +9,7 @@ import ElementUI from 'element-ui'
 import 'element-theme-dark'
 // import Service from './components/utils/Service'
 import { service, events } from './common/RendererService'
+import commands from './common/CommandService'
 import VueLazyload from 'vue-lazyload'
 import VueHotkey from 'v-hotkey'
 import upperFirst from 'lodash/upperFirst'
@@ -25,6 +26,7 @@ Vue.use(VueLazyload, {
 
 Vue.prototype.$ipcRenderer = service
 Vue.prototype.$events = events
+Vue.prototype.$commands = commands
 // Vue.prototype.$ipcRenderer = Service.getServiceInstance()
 
 router.afterEach((to, from) => {

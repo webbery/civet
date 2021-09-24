@@ -86,6 +86,7 @@ export default {
   border-top-left-radius: 2.5px;
   border-bottom-left-radius: 2.5px;
   overflow: hidden;
+  background-color: #222933;
 }
 .search-input {
   display: inline;
@@ -93,5 +94,7 @@ export default {
   background-color: #222933;
   color: white;
   outline: none;
+  border: none;
+  height: 24px;
 }
 </style>

@@ -51,143 +51,147 @@
 </template>
 
 <script>
-  export default {
-    name: 'PopMenu',
-    data() {
-      return {
-        // 是否显示
-        show: false,
-        // 触发点坐标
-        axis: {
-          x: 0,
-          y: 0
-        }
+import { events, getCommandArgs } from '../../common/RendererService'
+
+export default {
+  name: 'PopMenu',
+  data() {
+    return {
+      // 是否显示
+      show: false,
+      // 触发点坐标
+      axis: {
+        x: 0,
+        y: 0
       }
+    }
+  },
+  props: {
+    tag: {},
+    list: {
+      required: true
     },
-    props: {
-      tag: {},
-      list: {
-        required: true
-      },
-      // 是否开启下划线
-      underline: {
-        default: false
-      },
-      // 是否开启箭头
-      arrow: {
-        default: false
-      },
-      // 是否开启边界检测
-      border: {
-        default: true
-      },
-      // 列表项宽度
-      itemWidth: {
-        default: 120
-      },
-      // 列表项高度
-      itemHeight: {
-        default: 26
-      },
-      // 列表项字体
-      itemSize: {
-        default: 12
-      },
-      // 显示点偏移量
-      offset: {
-        default: () => {
-          return {
-            x: 6, y: 2
-          }
-        }
-      },
-      // 边界距离
-      borderWidth: {
-        default: 2
-      }
+    // 是否开启下划线
+    underline: {
+      default: false
     },
-    mounted() {
-      this.$root.$on('easyAxis', (axis) => {
-        console.info('easyAxis', axis.tag, this.tag)
-        if (axis.tag === this.tag) {
-          this.show = true
-          this.axis = axis
-        }
-      })
-      document.addEventListener('click', () => {
-        console.info('click', this.show)
-        this.show = false
-      }, true)
+    // 是否开启箭头
+    arrow: {
+      default: false
     },
-    watch: {
-      axis() {
-        if (this.border) {
-          let bw = document.body.offsetWidth
-          let bh = document.body.offsetHeight
-          if (this.axis.x + this.offset.x + this.itemWidth >= bw) {
-            this.axis.x = bw - this.itemWidth - this.borderWidth - this.offset.x
-          }
-          if (this.axis.y + this.offset.y + this.itemHeight * this.list.length >= bh) {
-            this.axis.y = bh - this.itemHeight * this.list.length - this.borderWidth - this.offset.y
-          }
-        }
-      }
+    // 是否开启边界检测
+    border: {
+      default: true
     },
-    computed: {
-      axisComputed() {
+    // 列表项宽度
+    itemWidth: {
+      default: 120
+    },
+    // 列表项高度
+    itemHeight: {
+      default: 26
+    },
+    // 列表项字体
+    itemSize: {
+      default: 12
+    },
+    // 显示点偏移量
+    offset: {
+      default: () => {
         return {
-          top: this.axis.y + this.offset.y + 'px',
-          left: this.axis.x + this.offset.x + 'px'
+          x: 6, y: 2
         }
-      },
-      liStyle() {
-        return {
-          width: this.itemWidth + 'px',
-          height: this.itemHeight + 'px',
-          lineHeight: this.itemHeight + 'px',
-          fontSize: this.itemSize + 'px'
-        }
-      },
-      firstLeft() {
-        let bw = document.body.offsetWidth
-        return this.axis.x + this.itemWidth * 2 >= bw
-      },
-      secondLeft() {
-        let bw = document.body.offsetWidth
-        return this.axis.x + this.itemWidth * 3 >= bw
       }
     },
-    methods: {
-      secondBorderCheck(i) {
+    // 边界距离
+    borderWidth: {
+      default: 2
+    }
+  },
+  mounted() {
+    this.$root.$on('easyAxis', (axis) => {
+      console.info('easyAxis', axis.tag, this.tag)
+      if (axis.tag === this.tag) {
+        this.show = true
+        this.axis = axis
+      }
+    })
+    document.addEventListener('click', () => {
+      console.info('click', this.show)
+      this.show = false
+    }, true)
+  },
+  watch: {
+    axis() {
+      if (this.border) {
         let bw = document.body.offsetWidth
         let bh = document.body.offsetHeight
-        let cy = this.axis.y + (i + this.list[i].children.length) * this.itemHeight
-        return {
-          left: this.axis.x + this.itemWidth * 2 >= bw ? '-100%' : '100%',
-          top: bh >= cy ? 0 : -(this.list[i].children.length - 1) * this.itemHeight + 'px'
+        if (this.axis.x + this.offset.x + this.itemWidth >= bw) {
+          this.axis.x = bw - this.itemWidth - this.borderWidth - this.offset.x
         }
-      },
-      thirdBorderCheck(i, si) {
-        let bw = document.body.offsetWidth
-        let bh = document.body.offsetHeight
-        let cy = this.axis.y + this.list[i].children[si].children.length * this.itemHeight + (i + si) * this.itemHeight + parseInt(this.secondBorderCheck(i).top)
-        return {
-          left: this.axis.x + this.itemWidth * 3 >= bw ? '-100%' : '100%',
-          top: cy > bh ? -(this.list[i].children[si].children.length - 1) * this.itemHeight + 'px' : 0
-        }
-      },
-      callback (indexList) {
-        // this.$emit('ecmcb', indexList)
-        const idx = indexList[0]
-        const item = this.list[idx]
-        if (item.cb) {
-          item.cb(item, this.axis.parent, this.axis.index)
-        } else {
-          // send item command
+        if (this.axis.y + this.offset.y + this.itemHeight * this.list.length >= bh) {
+          this.axis.y = bh - this.itemHeight * this.list.length - this.borderWidth - this.offset.y
         }
       }
     }
+  },
+  computed: {
+    axisComputed() {
+      return {
+        top: this.axis.y + this.offset.y + 'px',
+        left: this.axis.x + this.offset.x + 'px'
+      }
+    },
+    liStyle() {
+      return {
+        width: this.itemWidth + 'px',
+        height: this.itemHeight + 'px',
+        lineHeight: this.itemHeight + 'px',
+        fontSize: this.itemSize + 'px'
+      }
+    },
+    firstLeft() {
+      let bw = document.body.offsetWidth
+      return this.axis.x + this.itemWidth * 2 >= bw
+    },
+    secondLeft() {
+      let bw = document.body.offsetWidth
+      return this.axis.x + this.itemWidth * 3 >= bw
+    }
+  },
+  methods: {
+    secondBorderCheck(i) {
+      let bw = document.body.offsetWidth
+      let bh = document.body.offsetHeight
+      let cy = this.axis.y + (i + this.list[i].children.length) * this.itemHeight
+      return {
+        left: this.axis.x + this.itemWidth * 2 >= bw ? '-100%' : '100%',
+        top: bh >= cy ? 0 : -(this.list[i].children.length - 1) * this.itemHeight + 'px'
+      }
+    },
+    thirdBorderCheck(i, si) {
+      let bw = document.body.offsetWidth
+      let bh = document.body.offsetHeight
+      let cy = this.axis.y + this.list[i].children[si].children.length * this.itemHeight + (i + si) * this.itemHeight + parseInt(this.secondBorderCheck(i).top)
+      return {
+        left: this.axis.x + this.itemWidth * 3 >= bw ? '-100%' : '100%',
+        top: cy > bh ? -(this.list[i].children[si].children.length - 1) * this.itemHeight + 'px' : 0
+      }
+    },
+    callback (indexList) {
+      // this.$emit('ecmcb', indexList)
+      const idx = indexList[0]
+      const item = this.list[idx]
+      if (item.cb) {
+        item.cb(item, this.axis.parent, this.axis.index)
+      } else {
+        // send item command
+        console.info(`emit command ${item.command} to ${item.id}, args ${getCommandArgs(item.command)}`)
+        events.emit(item.id, item.command, getCommandArgs(item.command))
+      }
+    }
   }
+}
 </script>
 
 <style scoped>

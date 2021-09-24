@@ -50,7 +50,8 @@ export enum IPCNormalMessage {
   RETRIEVE_OVERVIEW = 'rtvOverview',
   GET_OVERVIEW_MENUS = 'getOverviewMenus',
   // commands
-  POST_COMMAND = 'pstCmd'
+  POST_COMMAND = 'pstCmd',
+  GET_ACTIVATE_COMMANDS = 'getActiveCmd'
 }
 
 export enum IPCRendererResponse {
@@ -70,6 +71,7 @@ export enum IPCRendererResponse {
   getOverviewMenus = 'replyOverviewMenus',
   install = 'replyInstallResult',
   uninstall = 'replyUninstallResult',
+  getActiveCmd = 'replyActiveCommands',
   getExtensions = 'replyAllExtensions',
   ON_ERROR_MESSAGE = 'onEM',
   ON_VIEW_ROUTER_ADD = 'onVRI',

@@ -86,10 +86,10 @@ describe('verify browser extension', function (resolve, reject) {
   //   await mainWindowPage.waitFor(2000)
   //   await testLocalExtension.install(mainWindowPage)
   // })
-  // it('browser extension: add files', function(done) {
-  //   // create process and use websocket as a browser extension to add resource
-  //   testBrowserExtension.run(done, mainWindowPage)
-  // })
+  it('browser extension: add files', function(done) {
+    // create process and use websocket as a browser extension to add resource
+    testBrowserExtension.run(done, mainWindowPage)
+  })
   // it('file property', async function() {
   //   const files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(files).not.to.be.null
