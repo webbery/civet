@@ -17,8 +17,8 @@ export class PropertyView extends ExtHostView{
   #name: string;
   #preview: ArrayBuffer|null|undefined;
   #colorPanel?: ExtHostColorPanel;
-  #tags: string[];
-  category?: string[];
+  #tag: string[];
+  #category?: string[];
   property: any;
 
   constructor(id: string, rpcProxy: RPCProtocal) {
@@ -61,13 +61,18 @@ export class PropertyView extends ExtHostView{
     return this.#preview
   }
 
-  get tags() {
-    return this.#tags
+  get tag() {
+    return this.#tag
   }
 
-  set tags(val: string[]) {
-    this.#tags = val
-    this.update(ViewType.Property, 'tags', val)
+  set tag(val: string[]) {
+    this.#tag = val
+    this.update(ViewType.Property, 'tag', val)
+  }
+
+  set category(val: string[]) {
+    this.#category = val
+    this.update(ViewType.Property, 'classes', val)
   }
 
   get colorPanel() {

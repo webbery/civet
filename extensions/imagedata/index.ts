@@ -1,4 +1,4 @@
-import { IResource, IProperty, PropertyType } from 'civet'
+import { IResource, PropertyType } from 'civet'
 class DataParser{
   constructor() {
   }

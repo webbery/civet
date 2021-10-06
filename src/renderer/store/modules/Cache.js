@@ -204,6 +204,14 @@ const mutations = {
     // update tags
     state.tags = info.tags
   },
+  // addTag(state, info) {
+  //   const { fileID, tag } = info
+  //   const file = state.files[fileID]
+  //   if (!file) {
+  //     return
+  //   }
+  //   file.tag.push(tag)
+  // },
   addClass(state, mutation) {
     if (Array.isArray(mutation)) {
       if (!state.classes.children) state.classes.children = []
@@ -417,10 +425,12 @@ const actions = {
   async addTag({ commit }, mutation) {
     const { fileID, tag } = mutation
     console.info('cache add tag:', fileID, tag)
+    // await commit('addTag', mutation)
     const file = Cache.files[fileID]
     if (!file) {
       return
     }
+    console.info('file:', file)
     file.tag.push(tag)
     service.send(IPCNormalMessage.SET_TAG, { id: [fileID], tag: file.tag })
     const tags = await remote.recieveTags()

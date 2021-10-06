@@ -36,7 +36,8 @@ export default {
     }
     this.$nextTick(() => {
       this.$store.dispatch('init')
-      // this.$commands.init()
+      this.$events.on('civet', 'showResourceDetail', this.onResourceShow)
+      this.$events.on('civet', 'openClassFolder', this.onClassOpen)
     })
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
@@ -47,6 +48,22 @@ export default {
       this.$store.dispatch('addFiles', updateResources)
       // console.info('add resources', updateResources)
       this.$events.emit('Overview', 'add', updateResources)
+    },
+    async onResourceShow(resource) {
+      const resourceID = resource['id']
+      if (!resourceID) {
+        console.error(`show resource ${resource} fail`)
+        return
+      }
+      let imageInfo = await this.$ipcRenderer.get(IPCNormalMessage.RENDERER_GET_RESOURCE_INFO, resourceID)
+      if (imageInfo !== null) {
+        imageInfo['id'] = resourceID
+        console.info('onResourceShow:', imageInfo)
+        this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.filename, cmd: 'display'}})
+      }
+    },
+    onClassOpen(classpath) {
+      console.info('open class', classpath)
     },
     onErrorTips(info) {
       console.error(info)

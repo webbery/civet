@@ -48,19 +48,9 @@
           }
         }
       })()
-      function postMessage(/*command, args*/) {
-        if (arguments.length === 0) return false;
-        // const command = arguments[0]
-        console.info('post message', arguments)
-      }
-
-      function injectCommandParams(command, args) {
-        console.info('inject command[', command, '] args ', args)
-        _cv_command_args[command] = args
-      }
-
-      const Overview = (function() {
-        return {
+      
+      const acquireCivetApi = (function() {
+        const Overview = {
           click: function(id) {
             _cv_events.emit('PropertyView', 'click', id)
             _cv_messageSender_.send('getSelectContentItemInfo', {id: [id]})
@@ -71,6 +61,21 @@
           },
           on: function(event, listener) {
             _cv_events.on('Overview', event, listener)
+          }
+        }
+        return function() {
+          return {
+            postMessage: function(args) {
+              if (args['command']) {
+                const command = args['command']
+                delete args['command']
+                console.info('emit', command, args)
+                _cv_events.emit('civet', command, args)
+              }
+            },
+            injectCommandParams: function (command, args) { _cv_command_args[command] = args },
+            events: _cv_events,
+            Overview: Overview
           }
         }
       })()

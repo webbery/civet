@@ -1,4 +1,4 @@
-import { IResource, IProperty, PropertyType } from 'civet'
+import { IResource, ResourceProperty, PropertyType } from 'civet'
 
 function convert2ValidDate(str: string): string {
   if (str.match(/[0-9]{4}:[0-9]{2}:[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/g)) {
@@ -24,7 +24,7 @@ class MetaParser {
     // datetime
     if (meta.DateTime !== undefined && meta.DateTime.value) {
       console.info(meta.DateTime.value)
-      const prop :IProperty = {
+      const prop :ResourceProperty = {
         name: 'datetime',
         value: convert2ValidDate(meta.DateTime.value[0]),
         type: PropertyType.String,
@@ -36,7 +36,7 @@ class MetaParser {
     }
     // orient
     if (meta.Orientation !== undefined) {
-      const prop :IProperty = {
+      const prop :ResourceProperty = {
         name: 'orient',
         value: meta.Orientation.value,
         type: PropertyType.Number,

@@ -103,7 +103,6 @@ export default {
     this.event = this.$events.get('PropertyView')
     this.event.on('click', this.cleanProperty, this)
     this.$ipcRenderer.on('Property', this.onViewUpdate)
-    // this.$ipcRenderer.onViewUpdate('Property', this.onViewUpdate)
   },
   methods: {
     onViewUpdate(session, id, classname, propname, value) {
@@ -112,7 +111,7 @@ export default {
         case 'name':
           this.filename = value
           break
-        case 'tags':
+        case 'tag':
           resetArray(this, this.tags, value)
           break
         case 'classes':
@@ -172,89 +171,90 @@ export default {
       }
       return v.toFixed(1) + unit
     },
-    displayFileProperty(imageID) {
-      // console.info(this.$store)
-      const files = this.$store.getters.getFiles([imageID])
-      if (!files) return
-      // console.info('PropertyPanel', files)
-      const localize = new Intl.DateTimeFormat('zh-cn')
-      if (files.length === 1) {
-        let file = files[0]
-        const schema = config.meta()
-        let names = []
-        let values = []
-        console.info(schema)
-        let displayTable = {}
-        for (let item of schema) {
-          displayTable[item.name] = item.display
-        }
-        const getItem = function (k, meta) {
-          for (let item of meta) {
-            if (item.name === k) return item
-          }
-          return null
-        }
-        this.filename = file.filename
-        for (let item of file.meta) {
-          if (item.name === 'filename') {
-            // const meta = getItem(item.name, file.meta)
-            // this.filename = meta.value
-            continue
-          }
-          if (item.name === 'color' || item.type === 'bin') {
-            continue
-          }
-          if (displayTable[item.name] !== false) {
-            console.info('propterty name:', item.name, 'type:', item.type)
-            names.push(i18n(item.name))
-            const meta = getItem(item.name, file.meta)
-            if (!meta) {
-              if (!file[item.name]) {
-                values.push('-')
-              } else {
-                values.push(file[item.name])
-              }
-            } else {
-              if (item.name === 'size') {
-                values.push(this.getSize(parseInt(file.size)))
-              } else {
-                if (item.type === 'date') {
-                  // console.info('time', Utility.convert2ValidDate(meta.value))
-                  const t = new Date(meta.value)
-                  // console.info('time 2', t)
-                  const dt = localize.format(t)
-                  console.info('date: ', dt, meta.value)
-                  values.push(dt)
-                } else {
-                  values.push(formatOutput(meta.value))
-                }
-              }
-            }
-          }
-        }
-        this.metaNames = names
-        this.metaValues = values
-        this.thumbnail = (file.thumbnail === undefined ? file.path : file.thumbnail)
-        this.tags = file.tag ? file.tag.slice(0) : []
-        this.classes = file.category
-        const isClassExist = function (clsName, dynamicClass) {
-          for (let name of dynamicClass) {
-            if (name === clsName) return true
-          }
-          return false
-        }
-        for (let idx = 0; idx < this.candidateClasses.length; ++idx) {
-          const candidate = this.candidateClasses[idx]
-          // console.info('candicate:', candidate)
-          if (isClassExist(candidate, this.classes)) {
-            this.$set(this.checkValue, idx, true)
-          } else {
-            this.$set(this.checkValue, idx, false)
-          }
-        }
-        // console.info('check state:', this.checkValue)
-      }
-    },
+    // displayFileProperty(imageID) {
+    //   // console.info(this.$store)
+    //   const files = this.$store.getters.getFiles([imageID])
+    //   if (!files) return
+    //   // console.info('PropertyPanel', files)
+    //   const localize = new Intl.DateTimeFormat('zh-cn')
+    //   if (files.length === 1) {
+    //     let file = files[0]
+    //     const schema = config.meta()
+    //     let names = []
+    //     let values = []
+    //     console.info(schema)
+    //     let displayTable = {}
+    //     for (let item of schema) {
+    //       displayTable[item.name] = item.display
+    //     }
+    //     const getItem = function (k, meta) {
+    //       for (let item of meta) {
+    //         if (item.name === k) return item
+    //       }
+    //       return null
+    //     }
+    //     this.filename = file.filename
+    //     for (let item of file.meta) {
+    //       if (item.name === 'filename') {
+    //         // const meta = getItem(item.name, file.meta)
+    //         // this.filename = meta.value
+    //         continue
+    //       }
+    //       if (item.name === 'color' || item.type === 'bin') {
+    //         continue
+    //       }
+    //       if (displayTable[item.name] !== false) {
+    //         console.info('propterty name:', item.name, 'type:', item.type)
+    //         names.push(i18n(item.name))
+    //         const meta = getItem(item.name, file.meta)
+    //         if (!meta) {
+    //           if (!file[item.name]) {
+    //             values.push('-')
+    //           } else {
+    //             values.push(file[item.name])
+    //           }
+    //         } else {
+    //           if (item.name === 'size') {
+    //             values.push(this.getSize(parseInt(file.size)))
+    //           } else {
+    //             if (item.type === 'date') {
+    //               // console.info('time', Utility.convert2ValidDate(meta.value))
+    //               const t = new Date(meta.value)
+    //               // console.info('time 2', t)
+    //               const dt = localize.format(t)
+    //               console.info('date: ', dt, meta.value)
+    //               values.push(dt)
+    //             } else {
+    //               values.push(formatOutput(meta.value))
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //     this.metaNames = names
+    //     this.metaValues = values
+    //     this.thumbnail = (file.thumbnail === undefined ? file.path : file.thumbnail)
+    //     this.tags = file.tag ? file.tag.slice(0) : []
+    //     console.info('show tags', file, this.tags)
+    //     this.classes = file.category
+    //     const isClassExist = function (clsName, dynamicClass) {
+    //       for (let name of dynamicClass) {
+    //         if (name === clsName) return true
+    //       }
+    //       return false
+    //     }
+    //     for (let idx = 0; idx < this.candidateClasses.length; ++idx) {
+    //       const candidate = this.candidateClasses[idx]
+    //       // console.info('candicate:', candidate)
+    //       if (isClassExist(candidate, this.classes)) {
+    //         this.$set(this.checkValue, idx, true)
+    //       } else {
+    //         this.$set(this.checkValue, idx, false)
+    //       }
+    //     }
+    //     // console.info('check state:', this.checkValue)
+    //   }
+    // },
     onDeleteTag(tag) {
       this.tags.splice(this.tags.indexOf(tag), 1)
       // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})

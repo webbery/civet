@@ -38,7 +38,11 @@ function copyDir(src, dist, excludes, callback) {
   fs.access(dist, function(err){
     if(err){
       // 目录不存在时创建目录
-      fs.mkdirSync(dist);
+      try{
+        fs.mkdirSync(dist);
+      } catch (errs) {
+        console.error(errs)
+      }
     }
     _copy(null, src, dist);
   });

@@ -1,4 +1,4 @@
-import { IResource, IProperty, PropertyType } from 'civet'
+import { IResource, PropertyType } from 'civet'
 const util = require('util')
 const Kmeans = require('node-kmeans')
 const kmeans = util.promisify(Kmeans.clusterize)
