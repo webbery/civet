@@ -12,8 +12,9 @@ class CommandMenu {
   name: string;
 }
 
-export enum CommandType {
-  CTMenu = 0
+export enum InternalCommand {
+  DeleteResources = 'deleteResources',
+  ExportResources = 'exportResources'
 }
 
 class CommandService {
@@ -24,6 +25,23 @@ class CommandService {
     _cv_events.on(target, command, listener)
   }
 
+  registInternalCommand(target: string, command: string, vue: any) {
+    switch(command) {
+      case InternalCommand.DeleteResources:
+        _cv_events.on(target, command, (fileid: Array<number>) => {
+          vue.$store.dispatch('removeFiles', fileid)
+        })
+        break
+      case InternalCommand.ExportResources:
+        _cv_events.on(target, command, (filespath: Array<string>) => {
+          const ipcRenderer = require('electron').ipcRenderer
+          ipcRenderer.send('export2Diectory', filespath)
+        })
+        break
+      default:
+        break
+    }
+  }
 }
 
-export default new CommandService()
+export const commandService = new CommandService()

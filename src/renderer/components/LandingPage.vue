@@ -32,7 +32,7 @@ import HeaderBar from '@/components/HeaderBar'
 import TabMenu from '@/components/Menu/NaviMenu'
 import NavigationPanel from '@/components/Panel/NavigationPanel'
 import ExtensionPanel from '@/components/Panel/ExtensionPanel'
-import ViewPanel from '@/components/Panel/ViewPanel'
+// import ViewPanel from '@/components/Panel/ViewPanel'
 import WebPanel from '@/components/Panel/WebPanel'
 import PropertyPanel from '@/components/Panel/PropertyPanel'
 import TagPanel from '@/components/Panel/TagPanel'
@@ -46,7 +46,7 @@ export default {
     TabMenu,
     NavigationPanel,
     ExtensionPanel,
-    ViewPanel,
+    // ViewPanel,
     WebPanel,
     PropertyPanel,
     TagPanel,

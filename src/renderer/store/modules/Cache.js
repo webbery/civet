@@ -309,7 +309,7 @@ const mutations = {
     }
     state.allCount -= removeCnt
     // remove from db
-    service.send(IPCNormalMessage.REMOVE_FILES, filesid)
+    service.send(IPCNormalMessage.REMOVE_RESOURCES, filesid)
   },
   removeTags(state, mutation) {
     service.send(IPCNormalMessage.REMOVE_TAG, { tag: [mutation.tag], filesID: [mutation.id] })

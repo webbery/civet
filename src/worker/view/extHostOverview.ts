@@ -112,7 +112,6 @@ export class ExtOverviewEntry {
   constructor(rpcProxy: RPCProtocal) {
     this.#proxy = rpcProxy;
     this.#overviews = new Map<string, ExtOverview>();
-    this.#activeView = config.defaultView;
     // let snabbdom = require('snabbdom')
     // this.#patch = snabbdom.init([
     //   require('snabbdom/modules/class').default,
@@ -134,7 +133,7 @@ export class ExtOverviewEntry {
 
   async onRequestOverview(id: number, extname: string) {
     console.info(`onRequestOverview: ${extname}, ${this.#activeView}`)
-    if (extname === this.#activeView) return
+    // if (extname === this.#activeView) return
     const overview = this.#overviews.get(extname)
     if (!overview) {
       console.error(`overview extension ${extname} not exist`)

@@ -4,9 +4,14 @@ const extensionSelector = '.sidenav .el-icon-menu'
 
 function installExtension(page) {
   return page.$(extensionSelector).then((extensionBtn) => {
+    console.info('extension Button', extensionBtn)
     return extensionBtn.click()
   }).then((result) => {
+    return page.waitFor(1000)
+  }).then(() => {
     return page.$('.panel input')
+  }).then((result) => {
+    return page.waitFor(1000)
   }).then((inputElm) => {
     inputElm.type('helloworld')
     return inputElm.press('Enter')

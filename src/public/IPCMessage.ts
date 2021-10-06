@@ -24,12 +24,12 @@ export enum IPCNormalMessage {
   ON_RESOURCE_UPDATE = 'updateImageList',
   UPDATE_RESOURCE_CLASS = 'updateImageCategory',
   UPDATE_RESOURCE_NAME = 'updateFileName',
+  REMOVE_RESOURCES = 'removeFiles',
   // tag
   GET_ALL_TAGS_WITH_RESOURCES = 'getAllTagsWithImages',
   GET_ALL_TAGS = 'getAllTags',
   SET_TAG = 'setTag',
   REMOVE_TAG = 'removeTag',
-  REMOVE_RESOURCES = 'removeFiles',
   // classes
   GET_CLASSES_DETAIL = 'getCategoryDetail',
   GET_ALL_CLASSES = 'getAllCategory',

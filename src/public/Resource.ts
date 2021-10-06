@@ -125,6 +125,10 @@ export class Resource implements IResource {
     return false
   }
 
+  public erase(): boolean {
+    return true
+  }
+  
   public update(resource: Resource) {
     console.info('update', resource)
     const props = Object.getOwnPropertyNames(resource)

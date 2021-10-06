@@ -19,6 +19,9 @@ declare module 'civet' {
         value: any;
     }
 
+    export interface Item {
+        selected: boolean;
+    }
     export interface Category {
 
     }
@@ -51,6 +54,10 @@ declare module 'civet' {
          * @param name property name
          */
         removePropery(name: string): boolean;
+        /**
+         * @brief earse resource from database
+         */
+        // erase(): boolean;
     }
 
     /**

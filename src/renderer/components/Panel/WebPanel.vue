@@ -11,7 +11,10 @@ import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
 import PopMenu from '@/components/Menu/PopMenu'
+import bus from '../utils/Bus'
 import { clearArgs, events } from '../../common/RendererService'
+import { InternalCommand, commandService } from '@/common/CommandService'
+import { config } from '@/../public/CivetConfig'
 
 export default {
   name: 'web-container',
@@ -21,6 +24,7 @@ export default {
       html: '',
       menus: [
         // {text: '重命名', cb: this.onChangeName},
+        // {text: '导出到计算机', cb: this.onExportFiles},
         // {text: '删除', cb: this.onDeleteItem}
       ],
       extensionMenus: []
@@ -30,7 +34,49 @@ export default {
     this.$ipcRenderer.on(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE, this.onPanelRouterInit)
   },
   mounted() {
-    this.$ipcRenderer.send(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)
+    console.info('web panel mounted', config.defaultView)
+    // this.$ipcRenderer.send(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)
+    this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, config.defaultView)
+  },
+  watch: {
+    $route: function(to, from) {
+      console.info('to: ', to, 'from:', from.path)
+      let name = to.query.name
+      if (name === undefined) {
+        name = '全部'
+      }
+      switch (to.path) {
+        case '/':
+          // this.$store.dispatch('display')
+          // console.info('Overview update', this.$store)
+          this.$events.emit('Overview', 'update', {
+            'class': this.$store.state.Cache.viewClass,
+            'resource': this.$store.state.Cache.viewItems
+          })
+          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
+          break
+        case '/uncategory':
+          this.$events.emit('Overview', 'update', {resource: this.$store.state.Cache.viewItems})
+          break
+        case '/untag':
+          this.$events.emit('Overview', 'update', {resource: this.$store.state.Cache.viewItems})
+          break
+        case '/query':
+          switch (to.query.type) {
+            case 'tag':
+              bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-tag'})
+              break
+            case 'keyword':
+              bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-keyword'})
+              break
+            default:
+              break
+          }
+          break
+        default:
+          break
+      }
+    }
   },
   methods: {
     dropFiles(event) {
@@ -66,7 +112,6 @@ export default {
       const self = this
       this.$nextTick(async () => {
         ScriptLoader.load(value.script)
-        // const menus = this.$commands.get(CommandType.CTMenu)
         // console.info(value, 'menu is', menus)
         const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + value.id)
         this.extensionMenus = []
@@ -76,19 +121,31 @@ export default {
             name: menu.name,
             command: menu.command
           })
-          events.on(value.id, menu.command, function(args) {
-            console.info('on event', menu.command)
-            self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: value.id, command: 'ext:' + menu.command, args: args})
-          })
+          if (this.isInternalCommand(menu.command)) {
+            commandService.registInternalCommand(value.id, menu.command, self)
+          } else {
+            events.on(value.id, menu.command, function(args) {
+              console.info('on event', menu.command)
+              self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: value.id, command: 'ext:' + menu.command, args: args})
+            })
+          }
         }
         console.info('reply view menus', this.extensionMenus, menus)
       })
+    },
+    isInternalCommand(command) {
+      switch (command) {
+        case InternalCommand.DeleteResources:
+        case InternalCommand.ExportResources:
+          return true
+        default:
+          return false
+      }
     },
     onRightMenu: function (indexList, args1) {
       console.info('onRightMenu', indexList, args1)
     },
     onDeleteItem(name, parent, fileid) {
-      // this.$ipcRenderer.send(Service.REMOVE_FILES, [fileid])
       this.$store.dispatch('removeFiles', [fileid])
     },
     onRightClick(event, root) {

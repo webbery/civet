@@ -31,15 +31,15 @@ export default new Router({
     },
     {
       path: '/query',
-      component: require('@/components/Panel/ViewPanel').default
+      component: require('@/components/Panel/WebPanel').default
     },
     {
       path: '/uncategory',
-      component: require('@/components/Panel/ViewPanel').default
+      component: require('@/components/Panel/WebPanel').default
     },
     {
       path: '/untag',
-      component: require('@/components/Panel/TaglessPanel').default
+      component: require('@/components/Panel/WebPanel').default
     },
     {
       path: '/',

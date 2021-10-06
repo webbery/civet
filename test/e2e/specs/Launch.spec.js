@@ -51,8 +51,8 @@ function createResourceDB(name) {
   // create cfg.json to add db
   const fs = require('fs')
   fs.writeFileSync('cfg.json',
-    '{"app":{"first":false,"version":"0.2.0","default":"' + name + 
-    '"},"resources":[{"name":"' + name + 
+    '{"app":{"first":false,"version":"0.2.0","default":{"dbname":"' + name + 
+    '", "layout": "mapview"}},"resources":[{"name":"' + name + 
     '","db":{"path":"testdb"},"extensions":[],"meta":[{"name":"color","value":"主色","type":"val/array","query":true,"size":3,"display":true},{"name":"size","value":"大小","type":"str","query":true,"display":true},{"name":"path","value":"路径","type":"str","display":true},{"name":"filename","value":"文件名","type":"str","display":true},{"name":"type","value":"类型","type":"str","query":true,"display":true},{"name":"datetime","value":"创建时间","type":"date","query":true,"display":true},{"name":"addtime","value":"添加时间","type":"date","query":true,"display":true},{"name":"width","value":"宽","type":"str","display":true},{"name":"height","value":"高","type":"str","display":true}]}]}')
 }
 
@@ -83,13 +83,13 @@ describe('verify browser extension', function (resolve, reject) {
   //   await editClass.press('Enter')
   // })
   // it('install local extensions', async function() {
-  //   await mainWindowPage.waitFor(2000)
+  //   await mainWindowPage.waitFor(5000)
   //   await testLocalExtension.install(mainWindowPage)
   // })
-  it('browser extension: add files', function(done) {
-    // create process and use websocket as a browser extension to add resource
-    testBrowserExtension.run(done, mainWindowPage)
-  })
+  // it('browser extension: add files', function(done) {
+  //   // create process and use websocket as a browser extension to add resource
+  //   testBrowserExtension.run(done, mainWindowPage)
+  // })
   // it('file property', async function() {
   //   const files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(files).not.to.be.null
