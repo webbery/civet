@@ -84,7 +84,7 @@ export default {
   }),
   mounted() {
     bus.on(bus.EVENT_UPDATE_NAV_DESCRIBTION, this.onUpdateHeadNav)
-    bus.on(bus.EVENT_INIT_RESOURCE_DB, this.onInitResourceDB)
+    // bus.on(bus.EVENT_INIT_RESOURCE_DB, this.onInitResourceDB)
     // this.recentResources.push(resource.name)
   },
   methods: {
@@ -110,9 +110,10 @@ export default {
     onResourceDelete(resource) {
       this.$store.dispatch('delResource', resource)
     },
-    onInitResourceDB(dbname) {
-      // this.resource = dbname
-    },
+    // onInitResourceDB(dbname) {
+    //   console.info('onInitResourceDB', dbname)
+    //   this.currentResource = dbname
+    // },
     onQueryKindChange(cmd) {
       switch (cmd) {
         case 'all':

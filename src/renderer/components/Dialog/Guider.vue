@@ -15,7 +15,7 @@
 <script>
 import { remote } from 'electron'
 import { config } from '../../../public/CivetConfig'
-import { IPCRendererResponse } from '@/../public/IPCMessage'
+import { IPCNormalMessage } from '@/../public/IPCMessage'
 import bus from '../utils/Bus'
 
 export default {
@@ -61,10 +61,9 @@ export default {
       config.addResource(this.resourceName, this.resourceDBPath)
       console.info('config:', config)
       config.save()
-      bus.emit(bus.EVENT_INIT_RESOURCE_DB, this.resourceName)
-      await this.$ipcRenderer.get(IPCRendererResponse.REINIT_DB, this.resourceName)
-      // await this.$ipcRenderer.get(Service.REINIT_DB, this.resourceName)
-      // this.$ipcRenderer.send(Service.REINIT_DB)
+      // bus.emit(bus.EVENT_INIT_RESOURCE_DB, this.resourceName)
+      this.$store.dispatch('switchResource', this.resourceName)
+      await this.$ipcRenderer.get(IPCNormalMessage.REINIT_DB, this.resourceName)
       this.$emit('onsuccess', this.resourceName)
     },
     onSelectDBPath() {

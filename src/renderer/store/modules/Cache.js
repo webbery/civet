@@ -375,6 +375,7 @@ const mutations = {
   switchResource(state, name) {
     config.switchResource(name)
     config.save()
+    console.info('switchResource', name)
     state.currentResource = name
   }
 }

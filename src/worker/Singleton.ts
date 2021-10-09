@@ -53,13 +53,15 @@ export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T },
     //   return registSingletonObject(v)
     // }
     if (registClasses.indexOf(v) === -1) {
-      if (args.length === 0) {
-        if (checkBasicType(v)) {
-          return v
+      for (let idx = 0; idx < args.length; ++idx) {
+        // console.info('reflection', typeof args[idx], vid.toLowerCase(), Object.getPrototypeOf(args[idx]).constructor.name)
+        if (Object.getPrototypeOf(args[idx]).constructor.name === vid) {
+          const ret = args[idx]
+          args.splice(idx, 1)
+          return ret
         }
-        throw new Error(`params[${i}]: class ${(v as any).name} is not injected`)
       }
-      return args
+      throw new Error(`params[${i}]: class ${(v as any).name} is not injected`)
     } else if (v.length) {
       return registSingletonObject(v)
     } else {
@@ -68,11 +70,12 @@ export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T },
         vi = new (v as any)()
         serviceIds[(v as any).name] = vi
       }
+      console.info('args3', vi)
       return vi
     }
   })
   const instance = new ctor(...paramInstances)
-  console.info(`new singlecton: ${id}`)
+  console.info(`new singlecton: ${id}, ${JSON.stringify(paramInstances)}`)
   serviceIds[id] = instance
   return instance
 }
