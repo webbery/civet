@@ -70,12 +70,11 @@ export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T },
         vi = new (v as any)()
         serviceIds[(v as any).name] = vi
       }
-      console.info('args3', vi)
       return vi
     }
   })
   const instance = new ctor(...paramInstances)
-  console.info(`new singlecton: ${id}, ${JSON.stringify(paramInstances)}`)
+  // console.info(`new singlecton: ${id}, ${JSON.stringify(paramInstances)}`)
   serviceIds[id] = instance
   return instance
 }

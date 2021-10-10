@@ -24,15 +24,16 @@
         </el-dropdown-menu>
       </el-dropdown>
     </el-col> -->
-    <el-col :span="14">
+    <el-col :span="14" class="custom">
+      <component :is="comName"></component>
+    </el-col>
+    <el-col :span="4">
       <SearchBar></SearchBar>
       <!-- <el-input placeholder="请输入搜索内容" v-model="keyword" class="input-with-select" size="mini" @keyup.enter.native="onSearch()">
         <el-button slot="append" icon="el-icon-search" size="mini" round @click="onSearch()"></el-button>
       </el-input> -->
     </el-col>
-    <el-col :span="4" class="custom">
-      <component :is="comName"></component>
-    </el-col>
+    
   </el-row>
 </template>
 

@@ -28,7 +28,7 @@ function generateResourcesLoadingEvent(): ExtOverviewItemLoadEvent {
   if (category) {
     let names = []
     for (let c of category) {
-      names.push(c.name)
+      names.push({name: c.name})
     }
     event.classes = names
   }

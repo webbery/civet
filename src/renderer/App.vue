@@ -37,7 +37,7 @@ export default {
     this.$nextTick(() => {
       this.$store.dispatch('init')
       this.$events.on('civet', 'showResourceDetail', this.onResourceShow)
-      this.$events.on('civet', 'openClassFolder', this.onClassOpen)
+      this.$events.on('civet', 'openClass', this.onClassOpen)
     })
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
@@ -64,6 +64,7 @@ export default {
     },
     onClassOpen(classpath) {
       console.info('open class', classpath)
+      this.$store.dispatch('getClassesAndFiles', classpath.params)
     },
     onErrorTips(info) {
       console.error(info)

@@ -36,11 +36,11 @@ export class ResourceService{
     pipeline.regist('removeTag', this.removeTag, this)
     pipeline.regist('removeClasses', this.removeClasses, this)
     pipeline.regist('getAllTags', this.getAllTags, this)
-    pipeline.regist('getAllCategory', this.getAllCategory, this)
+    pipeline.regist(IPCNormalMessage.GET_ALL_CLASSES, this.getAllCategory, this)
     pipeline.regist('getAllTagsWithImages', this.getAllTagsWithImages, this)
     pipeline.regist('queryFiles', this.queryFiles, this)
     pipeline.regist('addCategory', this.addCategory, this)
-    pipeline.regist('getCategoryDetail', this.getCategoryDetail, this)
+    pipeline.regist(IPCNormalMessage.GET_CLASSES_DETAIL, this.getCategoryDetail, this)
     pipeline.regist('getUncategoryImages', this.getUncategoryImages, this)
     pipeline.regist('getUntagImages', this.getUntagImages, this)
     pipeline.regist('updateCategoryName', this.updateCategoryName, this)
@@ -168,21 +168,19 @@ export class ResourceService{
     // let category = await CategoryArray.loadFromDB()
     console.info('getAllCategory', category)
     // reply2Renderer(ReplyType.REPLAY_ALL_CATEGORY, category)
-    return {type: ReplyType.REPLAY_ALL_CATEGORY, data: category}
+    return {type: IPCRendererResponse.getAllCategory, data: category}
   }
   getCategoryDetail(msgid: number, parent: any) {
     const category = CivetDatabase.getClassDetail(parent)
     // let category = await CategoryArray.loadFromDB()
-    console.info('getCategoryDetail', category)
-    // reply2Renderer(ReplyType.REPLY_CLASSES_INFO, category)
-    return {type: ReplyType.REPLY_CLASSES_INFO, data: category}
+    console.info('getCategoryDetail', parent, category)
+    return {type: IPCRendererResponse.getCategoryDetail, data: category}
   }
   async getUncategoryImages(msgid: number, data: any) {
     updateStatus('reading unclassify info')
     const uncateimgs = CivetDatabase.getUnClassifyFiles()
-    console.info('ppopopo', data)
     // reply2Renderer(ReplyType.REPLY_UNCATEGORY_IMAGES, uncateimgs)
-    console.info('unclasses', uncateimgs)
+    console.info('unclasses', uncateimgs, data)
     return {type: ReplyType.REPLY_UNCATEGORY_IMAGES, data: uncateimgs}
   }
   getUntagImages() {

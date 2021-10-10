@@ -283,12 +283,10 @@
             }
         }
         function onDbResourceClick(itemid) {
-            console.info('onDbClick')
             acquireCivetApi().postMessage({
                 command: 'showResourceDetail',
                 id: itemid
             })
-            // this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.filename, cmd: 'display'}})
         }
         function loadResources(resources) {
             if (!resources || resources.length === 0) return
@@ -298,22 +296,21 @@
             }
         }
 
-        function classTemplate(classesName) {
+        function classTemplate(classItems) {
             const folderDeliver = '<div data-content="分类" class="hr-divider"></div>'
             const fileDeliver = '<div data-content="文件" class="hr-divider"></div>'
             let folders = ''
-            for (let name of classesName) {
+            for (let item of classItems) {
                 folders += `<div class="folder">
-                                <div class="b-icon b-icon_type_folder" ondblclick="onDbFolderClick(${name})"></div>
-                                <div >${name}</div>
+                                <div class="b-icon b-icon_type_folder" ondblclick="onDbFolderClick('${item.name}')"></div>
+                                <div >${item.name}</div>
                             </div>`
             }
             return folderDeliver + folders + fileDeliver
         }
 
         function onDbFolderClick(classname) {
-            // this.$store.dispatch('getClassesAndFiles', item.path)
-            postMessage({
+            acquireCivetApi().postMessage({
                 command: 'openClass',
                 params: GridViewCache.classPath + classname
             })

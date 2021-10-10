@@ -131,12 +131,17 @@ declare module 'civet' {
         Custom = 3
     }
 
+    export interface ClassItem {
+        name: string;
+        path?: string;
+    }
+    
     export interface OverviewItemLoadEvent {
         resources?: IResource[];
         /*
          * @brief a class that contains resources
          */
-        classes?: string[];
+        classes?: ClassItem[];
     }
 
     export enum ScrollType {

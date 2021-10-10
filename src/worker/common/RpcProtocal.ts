@@ -27,6 +27,8 @@ export class RPCProtocal {
     if (paramsTypes === undefined) return undefined
     const params = paramsTypes.map((v: any, i: any) => {
       if (i === 0) return id
+      // if (this.constructor.name === v.constructor.name) return this
+      // console.info('registSingletonObject', v)
       return registSingletonObject(v)
     })
     const proxy = new ctor(...params, ...args)

@@ -46,9 +46,14 @@ export class ExtContentItemSelectedEvent implements civet.ContentItemSelectedEve
   items: civet.IResource[] = [];
 }
 
+export class ExtClassItem implements civet.ClassItem {
+  name: string;
+  path?: string;
+}
+
 export class ExtOverviewItemLoadEvent implements civet.OverviewItemLoadEvent {
   resources: civet.IResource[];
-  classes: string[];
+  classes: civet.ClassItem[];
 }
 
 export class ExtOverviewVisibleRangesChangeEvent implements civet.OverviewVisibleRangesChangeEvent {

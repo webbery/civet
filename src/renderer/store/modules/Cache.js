@@ -1,8 +1,7 @@
 import { Resource } from '@/../public/Resource'
-// import Service from '@/components/utils/Service'
 import { TreeNode } from '@/components/Control/Tree'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
-import { service } from '@/common/RendererService'
+import { service, events } from '@/common/RendererService'
 import { isEmpty } from '@/../public/Utility'
 import Vue from 'vue'
 import { Cache } from './CacheInstance'
@@ -126,6 +125,7 @@ const mutations = {
           addChildren(clazz.children, root)
         }
         state.classes.addChildren(root)
+        state.viewClass.push({name: clazz.name})
       }
       console.info('class result', state.classes)
     }
@@ -315,6 +315,10 @@ const mutations = {
         }
       }
     }
+    events.emit('Overview', 'update', {
+      'class': state.viewClass,
+      'resource': state.viewItems
+    })
     state.allCount -= removeCnt
     // remove from db
     service.send(IPCNormalMessage.REMOVE_RESOURCES, filesid)
@@ -351,6 +355,10 @@ const mutations = {
         Vue.set(state.viewItems, fileIdx++, Cache.files[classesFiles[idx].id])
       }
     }
+    events.emit('Overview', 'update', {
+      'class': state.viewClass,
+      'resource': state.viewItems
+    })
     console.info('display classes', state.viewClass)
   },
   clear(state, data) {

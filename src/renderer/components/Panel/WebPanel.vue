@@ -11,6 +11,7 @@ import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
 import PopMenu from '@/components/Menu/PopMenu'
+import { mapState } from 'vuex'
 import bus from '../utils/Bus'
 import { clearArgs, events } from '../../common/RendererService'
 import { InternalCommand, commandService } from '@/common/CommandService'
@@ -48,11 +49,12 @@ export default {
       switch (to.path) {
         case '/':
           // this.$store.dispatch('display')
-          // console.info('Overview update', this.$store)
-          this.$events.emit('Overview', 'update', {
-            'class': this.$store.state.Cache.viewClass,
-            'resource': this.$store.state.Cache.viewItems
-          })
+          console.info('Overview update', this.$store.state.Cache.viewClass)
+          // this.$events.emit('Overview', 'update', {
+          //   'class': this.$store.state.Cache.viewClass,
+          //   'resource': this.$store.state.Cache.viewItems
+          // })
+          this.$store.dispatch('getClassesAndFiles', '/')
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break
         case '/uncategory':
@@ -78,6 +80,8 @@ export default {
       }
     }
   },
+  computed: mapState({
+  }),
   methods: {
     dropFiles(event) {
       let files = event.dataTransfer.files
