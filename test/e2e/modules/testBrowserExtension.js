@@ -47,5 +47,5 @@ module.exports = {
     const msgAddBufferResource = {id: 'load', db: dbs[0], data: {name: 'from_browser.jpg', bin: buffer}}
     sock.send(JSON.stringify(msgAddBufferResource))
   },
-  close: () => {sock.close()}
+  close: () => { if(sock) sock.close()}
 }

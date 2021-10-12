@@ -40,6 +40,8 @@ const run = async () => {
   const pages = await app.pages();
   // console.info(pages)
   const title = await pages[0].title()
+  const title1 = await pages[1].title()
+  console.info(`title: 0 ${title}, 1 ${title1}`)
   if (title === 'civet') {
     mainWindowPage = pages[0]
   } else {
@@ -61,7 +63,7 @@ createResourceDB('testdb')
 //     console.info('0000000000')
 // })
 
-describe('verify browser extension', function (resolve, reject) {
+describe('****************Start Functional Test*************', function (resolve, reject) {
   this.timeout(60 * 1000);
   const testBrowserExtension = require('../modules/testBrowserExtension')
   const testLocalExtension = require('../modules/testExtension')
@@ -71,21 +73,24 @@ describe('verify browser extension', function (resolve, reject) {
       done()
     })
   })
-  // it('add operation in classify panel ', async function() {
-  //   await mainWindowPage.waitFor(6000)
-  //   let btnAddClass = await mainWindowPage.$('.icon-add-class')
-  //   expect(btnAddClass).not.to.be.null
-  //   await btnAddClass.click()
-  //   await mainWindowPage.waitFor(1000)
-  //   const editClass = await mainWindowPage.$('.vtl-input')
-  //   editClass.type('helloworld')
-  //   await mainWindowPage.waitFor(1000)
-  //   await editClass.press('Enter')
-  // })
-  // it('install local extensions', async function() {
-  //   await mainWindowPage.waitFor(5000)
-  //   await testLocalExtension.install(mainWindowPage)
-  // })
+  it('add operation in classify panel ', async function() {
+    const t = await mainWindowPage.title()
+    console.info('mainWindowPage', t)
+    await mainWindowPage.waitForSelector('.icon-add-class')
+    let btnAddClass = await mainWindowPage.$('.icon-add-class')
+    await btnAddClass.click()
+    await mainWindowPage.waitForSelector('.vtl-input')
+    const editClass = await mainWindowPage.$('.vtl-input')
+    editClass.type('helloworld')
+    await mainWindowPage.waitFor(1000)
+    await editClass.press('Enter')
+    await mainWindowPage.waitForSelector('.vtl-node-content')
+    const clazz = await mainWindowPage.$$('.vtl-node-content')
+    assert(clazz.length >= 1)
+  })
+  it('install local extensions', async function() {
+    await testLocalExtension.install(mainWindowPage)
+  })
   // it('browser extension: add files', function(done) {
   //   // create process and use websocket as a browser extension to add resource
   //   testBrowserExtension.run(done, mainWindowPage)
@@ -138,19 +143,19 @@ describe('verify browser extension', function (resolve, reject) {
   //   await testLocalExtension.uninstall(mainWindowPage)
   // })
   after((done) => {
-    try {
-      setTimeout(() => {
-        testBrowserExtension.close()
+    setTimeout(() => {
+      if (testBrowserExtension) testBrowserExtension.close()
+      try {
         app.close().then(() => {
           done()
         })
-      }, 10*1000)
-    } catch(err) {
-      console.error('test error:', err)
-      app.close().then(() => {
-        done()
-      })
-    }
+      } catch (err) {
+        console.error('test error:', err)
+        app.close().then(() => {
+          done()
+        })
+      }
+    }, 10*1000)
   })
 })
 

@@ -2,27 +2,19 @@ const {expect, assert} = require('chai')
 
 const extensionSelector = '.sidenav .el-icon-menu'
 
-function installExtension(page) {
-  return page.$(extensionSelector).then((extensionBtn) => {
-    console.info('extension Button', extensionBtn)
-    return extensionBtn.click()
-  }).then((result) => {
-    return page.waitFor(1000)
-  }).then(() => {
-    return page.$('.panel input')
-  }).then((result) => {
-    return page.waitFor(1000)
-  }).then((inputElm) => {
-    inputElm.type('helloworld')
-    return inputElm.press('Enter')
-  }).then(() => {
-    return page.waitFor(10000)
-  }).then(() =>{
-    return page.$$('.extension')
-  }).then((extensions) => {
-    assert(extensions.length >= 1)
-    return extensions[0].click()
-  })
+async function installExtension(page) {
+  await page.waitForSelector(extensionSelector)
+  const extensionBtn = await page.$(extensionSelector)
+  await extensionBtn.click()
+  const ExtensionInput = '._cv_panel input'
+  await page.waitForSelector(ExtensionInput)
+  const inputElm = await page.$(ExtensionInput)
+  inputElm.type('helloworld')
+  await inputElm.press('Enter')
+  await page.waitForSelector('.extension')
+  const extensions = await page.$$('.extension')
+  assert(extensions.length >= 1)
+  await extensions[0].click()
 }
 
 function uninstallExtension(page) {
