@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="display: flex; justify-content: center">
     <el-color-picker v-model="color" size="mini" style="" @active-change="onColorChanged" @change="onColorChanged"></el-color-picker>
     <span class="custom">
       <el-select v-model="query.type" @change="onFileTypeChanged" clearable placeholder=" 类型" size="mini" multiple>
@@ -93,7 +93,7 @@ export default {
   },
   methods: {
     onViewUpdate(id, classname, html) {
-      // console.info('onViewUpdate', id, html)
+      console.info('onViewUpdate', id, html)
       this.$set(this.extensions, id, {html: html})
       // this.extensions[id] = {html: html}
     },

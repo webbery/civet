@@ -8,7 +8,7 @@
     aria-selected="true"
     data-deletable
   >
-    {{item["text"]}}
+    {{item.keyword}}
     <button
       type="button"
       class="search-button el-icon-close"

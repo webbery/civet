@@ -24,7 +24,7 @@
         </el-dropdown-menu>
       </el-dropdown>
     </el-col> -->
-    <el-col :span="14" class="custom">
+    <el-col :span="16" class="custom">
       <component :is="comName"></component>
     </el-col>
     <el-col :span="4">

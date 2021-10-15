@@ -1,4 +1,6 @@
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+};
 
 module.exports = {
   wait: wait

@@ -4,11 +4,15 @@ const { spawn } = require('child_process')
 const {describe, it} = require('mocha')
 const {expect, assert} = require('chai')
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 let spawnedProcess
 let app
 let mainWindowPage
 
-const run = async () => {
+const run = async (done) => {
   const port = 9200 // Debugging port
   const startTime = Date.now()
   const timeout = 20000 // Timeout in miliseconds
@@ -28,7 +32,7 @@ const run = async () => {
     try {
       app = await puppeteer.connect({
         browserURL: `http://localhost:${port}`,
-        defaultViewport: { width: 1280, height: 768 }
+        defaultViewport: { width: 1860, height: 768 }
       })
     } catch (error) {
       if (Date.now() > startTime + timeout) {
@@ -39,13 +43,13 @@ const run = async () => {
 
   const pages = await app.pages();
   // console.info(pages)
-  const title = await pages[0].title()
-  const title1 = await pages[1].title()
-  console.info(`title: 0 ${title}, 1 ${title1}`)
-  if (title === 'civet') {
-    mainWindowPage = pages[0]
-  } else {
-    mainWindowPage = pages[1]
+  for (let page of pages) {
+    const t = await page.title()
+    console.info('title: ', t)
+    if (t === 'civet') {
+      mainWindowPage = page
+      break
+    }
   }
 }
 
@@ -59,42 +63,36 @@ function createResourceDB(name) {
 }
 
 createResourceDB('testdb')
-// before(function(resolve, reject) {
-//     console.info('0000000000')
-// })
 
 describe('****************Start Functional Test*************', function (resolve, reject) {
   this.timeout(60 * 1000);
   const testBrowserExtension = require('../modules/testBrowserExtension')
   const testLocalExtension = require('../modules/testExtension')
-  const testFileOperation = require('../modules/testFileOperation')
+  const testClassPanel = require('../modules/testClassifyPanel')
+  const testClassicalView = require('../modules/testClassicalView')
+  const property = require('../modules/testResourceProperty')
   before((done) => {
-    run().then((result) => {
+    run().then(result => {
       done()
     })
   })
+  mainWindowPage.waitForTimeout(1000)
   it('add operation in classify panel ', async function() {
-    const t = await mainWindowPage.title()
-    console.info('mainWindowPage', t)
-    await mainWindowPage.waitForSelector('.icon-add-class')
-    let btnAddClass = await mainWindowPage.$('.icon-add-class')
-    await btnAddClass.click()
-    await mainWindowPage.waitForSelector('.vtl-input')
-    const editClass = await mainWindowPage.$('.vtl-input')
-    editClass.type('helloworld')
-    await mainWindowPage.waitFor(1000)
-    await editClass.press('Enter')
-    await mainWindowPage.waitForSelector('.vtl-node-content')
-    const clazz = await mainWindowPage.$$('.vtl-node-content')
-    assert(clazz.length >= 1)
+    await testClassPanel.addClass(mainWindowPage)
   })
   it('install local extensions', async function() {
     await testLocalExtension.install(mainWindowPage)
   })
-  // it('browser extension: add files', function(done) {
-  //   // create process and use websocket as a browser extension to add resource
-  //   testBrowserExtension.run(done, mainWindowPage)
-  // })
+  it('browser extension: add files', function(done) {
+    // create process and use websocket as a browser extension to add resource
+    testBrowserExtension.run(done, mainWindowPage)
+  })
+  it('waterfall layout view', async function() {
+    await testClassicalView.selectResource(mainWindowPage)
+    // await property.updateName(mainWindowPage, 'Image0')
+    await mainWindowPage.waitForTimeout(10000)
+    await testClassicalView.removeResource(mainWindowPage)
+  })
   // it('file property', async function() {
   //   const files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(files).not.to.be.null
@@ -129,19 +127,12 @@ describe('****************Start Functional Test*************', function (resolve
   //   files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(beforeLength).to.be.above(files.length)
   // })
-  // it('clean operation in classify panel ', async function() {
-  //   let itemClasses = await mainWindowPage.$$('.vtl-node-content')
-  //   const beforeLength = itemClasses.length
-  //   expect(beforeLength).to.be.above(0)
-  //   await itemClasses[0].click({button: 'right'})
-  //   const menus = await mainWindowPage.$$('.cm-ul li')
-  //   await menus[3].click()
-  //   itemClasses = await mainWindowPage.$$('.vtl-node-content')
-  //   expect(beforeLength).to.be.above(itemClasses.length)
-  // })
-  // it('uninstall local extension', async function() {
-  //   await testLocalExtension.uninstall(mainWindowPage)
-  // })
+  it('uninstall local extension', async function() {
+    await testLocalExtension.uninstall(mainWindowPage)
+  })
+  it('clean operation in classify panel ', async function() {
+    await testClassPanel.removeClass(mainWindowPage)
+  })
   after((done) => {
     setTimeout(() => {
       if (testBrowserExtension) testBrowserExtension.close()

@@ -1,6 +1,6 @@
 <template>
   <span @dblclick="onDbClick">
-      <el-input size="mini" v-model="text" v-if="editable" @blur="onBlur" ref="contextInput"/>
+      <el-input size="mini" v-model="text" v-if="editable" @blur="onBlur" ref="contextInput" @keypress.native.enter="onBlur"/>
       <span v-if="!editable" class="context"><slot></slot></span>
   </span>
 </template>

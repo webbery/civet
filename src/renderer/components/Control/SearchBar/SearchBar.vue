@@ -20,6 +20,7 @@ import SearchInput from './SearchInput'
 import { mapState } from 'vuex'
 import bus from '../../utils/Bus'
 import {logger} from '@/../public/Logger'
+import { SearchCondition, ConditionType, ConditionOperation } from '@/common/SearchManager'
 
 export default {
   name: 'search-bar',
@@ -36,9 +37,14 @@ export default {
   methods: {
     onAddSearchText(value) {
       if (typeof value === 'string') {
-        this.conditions.push({type: 'str', text: value})
+        let condition = new SearchCondition()
+        condition.type = ConditionType.String
+        condition.keyword = value
+        condition.operation = ConditionOperation.Add
+        this.conditions.push(condition)
       } else {
         let keys = Object.keys(value)
+        console.info('keys:', keys)
         for (let k of keys) {
           // clean this type of keywords
           for (let idx = this.conditions.length - 1; idx >= 0; --idx) {
@@ -50,6 +56,11 @@ export default {
         for (let k of keys) {
           for (let item of value[k]) {
             if (item === '*') continue
+            let condition = new SearchCondition()
+            condition.type = ConditionType.String
+            condition.keyword = item
+            condition.operation = ConditionOperation.Add
+            console.info('add condition', condition)
             this.conditions.push({type: k, text: item})
           }
         }
@@ -68,7 +79,23 @@ export default {
         }
       }
     },
-    onSearch() {}
+    onSearch() {
+      console.info('start search', this.conditions)
+      // switch (this.queryIdx) {
+      //   case 0:
+      //     this.$store.dispatch('query', {keyword: keywords})
+      //     break
+      //   case 1:
+      //     this.$store.dispatch('query', {tag: keywords})
+      //     break
+      //   case 2:
+      //     this.$store.dispatch('query', {class: keywords})
+      //     break
+      //   default: break
+      // }
+      this.$store.dispatch('query', this.conditions)
+      this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})
+    }
   }
 }
 </script>
