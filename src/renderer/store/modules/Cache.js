@@ -9,6 +9,7 @@ import * as Assist from './CacheAssist'
 import { config } from '@/../public/CivetConfig'
 import { logger } from '@/../public/Logger'
 import { Search } from '@/common/SearchManager'
+import { ViewManager } from './ViewItemManager'
 
 // const maxCacheSize = 40 + 20 + 10
 // console.info(civet.PropertyType.String)
@@ -196,9 +197,10 @@ const mutations = {
     if (!result) return
     for (let idx = 0; idx < result.length; ++idx) {
       state.viewItems.unshift(Cache.files[result[idx].id])
-      // Vue.set(state.viewItems, idx, Cache.files[result[idx].id])
     }
-    // console.info(state.viewItems, result)
+    events.emit('Overview', 'update', {
+      'resource': state.viewItems
+    })
   },
   updateTag(state, info) {
     // const {unclasses, untags} = await remote.recieveCounts()
@@ -407,18 +409,7 @@ const actions = {
     commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
   },
   async query({ commit }, query) {
-    logger.debug(`query value: ${JSON.stringify(query)}`)
     const result = await Search.update(query)
-    // for (const k in query) {
-    //   if (Array.isArray(query[k]) && query[k].length === 0) {
-    //     delete Cache.query[k]
-    //     continue
-    //   }
-    //   Cache.query[k] = query[k]
-    //   console.info('query add key', k, Cache.query)
-    // }
-    // console.info('query:', Cache.query)
-    // const result = await service.get(IPCNormalMessage.QUERY_RESOURCES, query)
     console.info('result: ', result)
     commit('query', result)
   },

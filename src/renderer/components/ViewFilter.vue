@@ -45,9 +45,15 @@
 import RangeInput from './Control/RangeInput'
 import MutiSelect from './Control/Multiselect'
 import { debounce } from 'lodash'
-import { IPCRendererResponse } from '@/../public/IPCMessage'
-// import Service from '@/components/utils/Service'
 import bus from './utils/Bus'
+import { Search,
+  SearchCondition,
+  ConditionOperation,
+  DatetimeOperator,
+  ColorOperator,
+  ConditionType,
+  DefaultQueryName
+} from '@/common/SearchManager'
 
 export default {
   name: 'view-filter',
@@ -59,6 +65,7 @@ export default {
     // current datetime
     return {
       color: null,
+      queryTypes: [],
       tags: [],
       timeRange: '',
       timeRanges: [
@@ -108,43 +115,56 @@ export default {
     onTimeSelectChanged(keys) {
       let today = new Date(new Date().toLocaleDateString())
       // let yesterdy = new Date(today.getTime() - 24 * 60 * 60 * 1000)
-      let query
+      let condition = new SearchCondition()
+      condition.name = DefaultQueryName.AddedTime
+      condition.comparation = DatetimeOperator.Greater
+      condition.operation = ConditionOperation.Keep
       switch (keys) {
         case 'today':
-          query = {addtime: {$gt: today}}
+          condition.keyword = today
+          // query = {addtime: {$gt: today}}
           break
         case 'near7':
           let near7 = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
           near7.setHours(0, 0, 0, 0)
-          query = {addtime: {$gt: near7}}
+          condition.keyword = near7
+          // query = {addtime: {$gt: near7}}
           break
         case 'near30':
           let near30 = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
           near30.setHours(0, 0, 0, 0)
-          query = {addtime: {$gt: near30}}
+          condition.keyword = near30
+          // query = {addtime: {$gt: near30}}
           break
         case 'near90':
           let near90 = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000)
           near90.setHours(0, 0, 0, 0)
-          query = {addtime: {$gt: near90}}
+          condition.keyword = near90
+          // query = {addtime: {$gt: near90}}
           break
         case 'near365':
           let near365 = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000)
           near365.setHours(0, 0, 0, 0)
-          query = {addtime: {$gt: near365}}
+          condition.keyword = near365
+          // query = {addtime: {$gt: near365}}
           break
         default:
-          query = {addtime: '*'}
+          // query = {addtime: '*'}
           break
       }
-      this.$store.dispatch('query', query)
+      this.$store.dispatch('query', [condition])
     },
     onFileTypeChanged(keys) {
-      console.info('onFileTypeChanged', keys)
-      if (keys.length === 0) {
-        keys = ['*']
+      let query = []
+      for (let key of keys) {
+        let condition = new SearchCondition()
+        condition.operation = ConditionOperation.Keep
+        condition.keyword = key
+        condition.name = DefaultQueryName.Type
+        condition.type = ConditionType.ContentType
+        query.push(condition)
       }
-      this.$store.dispatch('query', {type: keys})
+      this.$store.dispatch('query', query)
       bus.emit(bus.EVENT_UPDATE_QUERY_BAR, {type: keys})
     },
     onQueryConditionChanged(value) {
@@ -158,14 +178,21 @@ export default {
         }
       }
     },
-    onColorChanged: debounce(function (color) {
-      this.color = color
+    onColorChanged: debounce(async function (color) {
+      let condition = new SearchCondition()
+      condition.name = DefaultQueryName.Color
       if (!color) {
-        this.$store.dispatch('query', {color: '*'})
+        condition.operation = ConditionOperation.Remove
+        condition.keyword = this.color
+        this.$store.dispatch('query', [condition])
       } else {
         const tinyColor = require('tinycolor2')
         const hex = tinyColor(color).toHexString()
-        this.$store.dispatch('query', {color: {$near: hex}})
+        condition.keyword = hex
+        condition.operation = ConditionOperation.Add
+        condition.type = ConditionType.Color
+        this.$store.dispatch('query', [condition])
+        this.color = color
       }
     }, 100)
   }

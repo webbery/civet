@@ -20,7 +20,7 @@ import SearchInput from './SearchInput'
 import { mapState } from 'vuex'
 import bus from '../../utils/Bus'
 import {logger} from '@/../public/Logger'
-import { SearchCondition, ConditionType, ConditionOperation } from '@/common/SearchManager'
+import { SearchCondition, ConditionType, ConditionOperation, DefaultQueryName } from '@/common/SearchManager'
 
 export default {
   name: 'search-bar',
@@ -40,6 +40,7 @@ export default {
         let condition = new SearchCondition()
         condition.type = ConditionType.String
         condition.keyword = value
+        condition.name = DefaultQueryName.Keyword
         condition.operation = ConditionOperation.Add
         this.conditions.push(condition)
       } else {
@@ -58,6 +59,7 @@ export default {
             if (item === '*') continue
             let condition = new SearchCondition()
             condition.type = ConditionType.String
+            condition.name = DefaultQueryName.Keyword
             condition.keyword = item
             condition.operation = ConditionOperation.Add
             console.info('add condition', condition)
@@ -81,18 +83,6 @@ export default {
     },
     onSearch() {
       console.info('start search', this.conditions)
-      // switch (this.queryIdx) {
-      //   case 0:
-      //     this.$store.dispatch('query', {keyword: keywords})
-      //     break
-      //   case 1:
-      //     this.$store.dispatch('query', {tag: keywords})
-      //     break
-      //   case 2:
-      //     this.$store.dispatch('query', {class: keywords})
-      //     break
-      //   default: break
-      // }
       this.$store.dispatch('query', this.conditions)
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})
     }

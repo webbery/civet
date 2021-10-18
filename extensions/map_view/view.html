@@ -1,39 +1,62 @@
 <!doctype html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title></title>
-    <style>
-        html, body, #container {
-            height: 100%;
-            width: 100%;
-        }
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+<title></title>
+<style>
+    html, body {
+        height: 100%;
+        width: 100%;
+    }
 
-        .amap-icon img {
-            width: 25px;
-            height: 34px;
-        }
-
-        .amap-marker-label{
-            border: 0;
-            background-color: transparent;
-        }
-
-        .info{
-            position: relative;
-            top: 0;
-            right: 0;
-            min-width: 0;
-        }
-        #container {
-            height:100%;
-        }
-    </style>
+    .amap-icon img {
+        width: 25px;
+        height: 34px;
+    }
+    .amap-marker-label{
+        border: 0;
+        background-color: transparent;
+    }
+    .info{
+        position: relative;
+        top: 0;
+        right: 0;
+        min-width: 0;
+    }
+    ._cv_horizon-image {
+        transform: rotate(90deg);
+    }
+    /* ::-webkit-scrollbar{
+        width:4px;
+        height:2px;
+    }
+    ::-webkit-scrollbar-button{
+        width:4px;
+        height:2px;
+    } */
+    #resources {
+        height:20%;
+        /* background-color: #222933; */
+        /* width: 15%; */
+        /* white-space: nowrap; */
+        /* transform: rotate(-90deg); */
+        transform-origin: left top;
+        overflow-y: auto;
+        /* overflow-x: auto; */
+        direction: rtl;
+        display: inline-flex;
+        flex-direction: column;
+    }
+    #container {
+        height:50%;
+    }
+</style>
 </head>
 <body>
 <div id="container"></div>
+<div id="resources"></div>
 <script type="text/javascript"
         src="https://webapi.amap.com/maps?v=1.4.15&key=6918ecca2a3cbfafb6ab59369768ae21&plugin=AMap.MarkerClusterer"></script>
 <script type="text/javascript">
@@ -75,15 +98,63 @@ MapLayout = (function() {
     //     gridSize: 80,
     //     renderClusterMarker: _renderClusterMarker
     // });
+    function generateFromTemplate(item) {
+        let div = document.createElement('div')
+        div.setAttribute('class', '_cv_horizon-image')
+        div.style.left = `0px`
+        // div.style.top = `${item.top}px`
+        div.style.width = `${item.height}px`
+        div.style.height = `${item.width}px`
+        // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
+        div.innerHTML = `<div draggable="true" class="image">
+                            <div class="el-card is-never-shadow" style="border: 0px;">
+                                <div class="el-card__body" style="padding: 1px;">
+                                    <div class="frame" onclick="onGridClick(${item.id})" oncontextmenu="onGridClick(${item.id})" ondblclick="onDbResourceClick(${item.id})">
+                                        <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover">
+                                    </div>
+                                    <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
+                                        <span class="context">${item.name}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`
+        return div
+    }
+    function addHorizonItem(item) {
+        // const items = document.querySelectorAll('#resources')
+        const root = document.getElementById('resources')
+        let block = {}
+        for (let meta of item['meta']) {
+            if (meta['name'] === 'filename') block['name'] = meta.value
+            else if (meta['name'] === 'path') src = meta.value
+            else if (meta['name'] === 'thumbnail') {
+                if (!meta.value.data) {
+                    block['thumbnail'] = meta.value
+                } else {
+                    block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value.data))
+                }
+            }
+            else if (meta['name'] === 'height') block['height'] = meta.value
+            else if (meta['name'] === 'width') block['width'] = meta.value
+        }
+        if (!src) src = item.path
+        if (!src) return ''
+        if (src.indexOf(':') < 0 && src[0] !== '/') return ''
+        root.appendChild(generateFromTemplate(block))
+    }
+    function clean() {}
     return {
         add: function(resources) {
             for (var i = 0; i < resources.length; i += 1) {
-                markers.push(new AMap.Marker({
-                    position: resources[i]['lnglat'],
-                    content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
-                        onclick="Overview.click(${resources[i].id})"></div>`,
-                    offset: new AMap.Pixel(-15, -15)
-                }))
+                if (resources[i]['lnglat']) {
+                    markers.push(new AMap.Marker({
+                        position: resources[i]['lnglat'],
+                        content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
+                            onclick="Overview.click(${resources[i].id})"></div>`,
+                        offset: new AMap.Pixel(-15, -15)
+                    }))
+                }
+                addHorizonItem(resources[i])
             }
             count = markers.length
             console.info('add map resource', resources)
@@ -100,11 +171,11 @@ MapLayout = (function() {
 })()
 
 
-let points = [{"lnglat":["113.864691","22.942327"], id: 121},{"lnglat":["113.370643","22.938827"], id: 121},{"lnglat":["112.985037","23.15046"], id: 121}]
+// let points = [{"lnglat":["113.864691","22.942327"], id: 121},{"lnglat":["113.370643","22.938827"], id: 121},{"lnglat":["112.985037","23.15046"], id: 121}]
 function loadResources(resources) {
     if (!resources) return
     console.info('loadResources', resources)
-    MapLayout.add(points)
+    MapLayout.add(resources)
 }
 
 loadResources({{resources}})
