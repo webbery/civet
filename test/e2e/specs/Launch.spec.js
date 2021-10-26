@@ -76,7 +76,6 @@ describe('****************Start Functional Test*************', function (resolve
       done()
     })
   })
-  mainWindowPage.waitForTimeout(1000)
   it('add operation in classify panel ', async function() {
     await testClassPanel.addClass(mainWindowPage)
   })
@@ -90,6 +89,7 @@ describe('****************Start Functional Test*************', function (resolve
   it('waterfall layout view', async function() {
     await testClassicalView.selectResource(mainWindowPage)
     // await property.updateName(mainWindowPage, 'Image0')
+    // await mainWindowPage.waitFor(10000)
     await mainWindowPage.waitForTimeout(10000)
     await testClassicalView.removeResource(mainWindowPage)
   })

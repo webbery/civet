@@ -34,10 +34,12 @@ declare module 'civet' {
         remote?: string|null;
         tag: string[];
         category: string[];
-        thumnail: ArrayBuffer;
-        anno?: string[];
+        thumbnail: ArrayBuffer;
         keyword: string[];
         meta: ResourceProperty[];
+        raw?: any;
+        anno?: string[];
+        color?: any;
 
         /**
          * @brief add a new property. If property exist, it will be changed.

@@ -18,6 +18,7 @@ module.exports = {
     await page.waitForSelector(CSSClassInput)
     const editClass = await page.$(CSSClassInput)
     editClass.type('helloworld')
+    // await page.waitFor(1000)
     await page.waitForTimeout(1000)
     await editClass.press('Enter')
     await page.waitForSelector(CSSClassContent)

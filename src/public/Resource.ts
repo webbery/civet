@@ -49,7 +49,7 @@ export class Resource implements IResource {
   meta: ResourceProperty[] = [];
   tag: string[] = [];
   category: string[] = [];
-  thumnail: ArrayBuffer;
+  thumbnail: ArrayBuffer;
   anno?: string[];
   keyword: string[] = [];
   [propName: string]: any;
@@ -153,7 +153,7 @@ export class Resource implements IResource {
       id: this.id,
       filename: this.name,
       path: this._path,
-      thumbnail: this.thumnail,
+      thumbnail: this.thumbnail,
       filetype: this.filetype,
       keyword: this.keyword,
       tag: this.tag,

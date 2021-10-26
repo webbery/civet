@@ -21,9 +21,14 @@ function runCommand(cmd) {
   // console.info(process.cwd(), __dirname)
   try {
     execSync(cmd)
-    // console.info(child.toLocaleString())
+    return true
   } catch (err) {
-    console.info(err)
+    if (err.stdout) {
+      console.error(err.stdout.toString())
+    } else {
+      console.error(err)
+    }
+    return false
   }
 }
 
@@ -171,8 +176,9 @@ function buildExtension() {
     // process.chdir('extensions/imagedata')
     // runCommand('node_modules\\.bin\\tsc extensions/imagedata/index.ts')
     // runCommand('"node_modules/.bin/tsc" index.ts')
-    console.info('build extensions', extension)
-    runCommand(cmd)
+    if (!runCommand(cmd)) {
+      console.error(`build extensions[${extension}] fail: ${cmd}`)
+    }
     // process.chdir('../..')
   }
 }

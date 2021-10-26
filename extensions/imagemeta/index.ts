@@ -89,7 +89,23 @@ class MetaParser {
       query: true,
       store: true
     })
-    // file.addMeta('size', stat.size, 'val')
+    // GPS
+    if (meta.GPSLatitude && meta.GPSLongitude) {
+      file.putProperty({
+        name: 'lng',
+        value: parseFloat(meta.GPSLongitude['description']) * 100000,
+        type: PropertyType.Number,
+        query: false,
+        store: true
+      })
+      file.putProperty({
+        name: 'lat',
+        value: parseFloat(meta.GPSLatitude['description']) * 100000,
+        type: PropertyType.Number,
+        query: false,
+        store: true
+      })
+    }
   }
 
   getImageWidth(meta: any): number {

@@ -20,6 +20,7 @@ async function installExtension(page) {
   const extensions = await page.$$(ExtensionItems)
   assert(extensions.length >= 1)
   await extensions[0].click()
+  // await page.waitFor(10000)
   await page.waitForTimeout(10000)
 }
 
@@ -29,6 +30,7 @@ async function uninstallExtension(page) {
   const extensions = await page.$$(ExtensionItems)
   assert(extensions.length >= 2)
   await extensions[1].click()
+  // await page.waitFor(10000)
   await page.waitForTimeout(10000)
 }
 module.exports = {

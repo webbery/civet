@@ -19,15 +19,9 @@
         border: 0;
         background-color: transparent;
     }
-    .info{
-        position: relative;
-        top: 0;
-        right: 0;
-        min-width: 0;
-    }
-    ._cv_horizon-image {
+    /* ._cv_horizon-image {
         transform: rotate(90deg);
-    }
+    } */
     /* ::-webkit-scrollbar{
         width:4px;
         height:2px;
@@ -39,18 +33,14 @@
     #resources {
         height:20%;
         /* background-color: #222933; */
-        /* width: 15%; */
-        /* white-space: nowrap; */
-        /* transform: rotate(-90deg); */
-        transform-origin: left top;
-        overflow-y: auto;
-        /* overflow-x: auto; */
-        direction: rtl;
-        display: inline-flex;
-        flex-direction: column;
+        width: 100%;
+        white-space: nowrap;
+        overflow-y: hidden;
+        overflow-x: auto;
+        display: flex;
     }
     #container {
-        height:50%;
+        height:75%;
     }
 </style>
 </head>
@@ -100,16 +90,16 @@ MapLayout = (function() {
     // });
     function generateFromTemplate(item) {
         let div = document.createElement('div')
-        div.setAttribute('class', '_cv_horizon-image')
-        div.style.left = `0px`
+        // div.setAttribute('class', '_cv_horizon-image')
+        // div.style.left = `0px`
         // div.style.top = `${item.top}px`
-        div.style.width = `${item.height}px`
-        div.style.height = `${item.width}px`
+        div.style.width = `${item.width}px`
+        div.style.height = `${item.height}px`
         // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
         div.innerHTML = `<div draggable="true" class="image">
                             <div class="el-card is-never-shadow" style="border: 0px;">
                                 <div class="el-card__body" style="padding: 1px;">
-                                    <div class="frame" onclick="onGridClick(${item.id})" oncontextmenu="onGridClick(${item.id})" ondblclick="onDbResourceClick(${item.id})">
+                                    <div class="frame" onclick="onResourceClick(${item.id})" oncontextmenu="onResourceClick(${item.id})" ondblclick="onDbResourceClick(${item.id})">
                                         <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover">
                                     </div>
                                     <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
@@ -123,6 +113,8 @@ MapLayout = (function() {
     function addHorizonItem(item) {
         // const items = document.querySelectorAll('#resources')
         const root = document.getElementById('resources')
+        const defaultHeight = root.offsetHeight
+        console.info('Item Height', defaultHeight)
         let block = {}
         for (let meta of item['meta']) {
             if (meta['name'] === 'filename') block['name'] = meta.value
@@ -140,21 +132,43 @@ MapLayout = (function() {
         if (!src) src = item.path
         if (!src) return ''
         if (src.indexOf(':') < 0 && src[0] !== '/') return ''
+        block['id'] = item.id
+        block['src'] = 'file://' + src
+        let scale = defaultHeight / block.height
+        block.width = block.width * scale
+        block.height = defaultHeight
         root.appendChild(generateFromTemplate(block))
     }
     function clean() {}
+    const root = document.getElementById('resources')
+    root.onwheel = (event) => {
+        event.preventDefault();
+        console.info('scroll event', event.deltaY)
+        root.scrollLeft += event.deltaY
+    }
     return {
         add: function(resources) {
             for (var i = 0; i < resources.length; i += 1) {
-                if (resources[i]['lnglat']) {
+                const item = resources[i]
+                let longitude, latitude
+                for (let meta of item['meta']) {
+                    if (meta['name'] === 'lng') {
+                        longitude = meta.value
+                    } else if (meta['name'] === 'lat') {
+                        latitude = meta.value
+                    }
+                }
+                if (longitude && latitude) {
+                    const pos = [longitude/100000, latitude/100000]
+                    console.info(`add GPS point: ${pos}`)
                     markers.push(new AMap.Marker({
-                        position: resources[i]['lnglat'],
+                        position: pos,
                         content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
-                            onclick="Overview.click(${resources[i].id})"></div>`,
+                            onclick="onResourceClick(${item.id})"></div>`,
                         offset: new AMap.Pixel(-15, -15)
                     }))
                 }
-                addHorizonItem(resources[i])
+                addHorizonItem(item)
             }
             count = markers.length
             console.info('add map resource', resources)
@@ -170,12 +184,52 @@ MapLayout = (function() {
     }
 })()
 
-
 // let points = [{"lnglat":["113.864691","22.942327"], id: 121},{"lnglat":["113.370643","22.938827"], id: 121},{"lnglat":["112.985037","23.15046"], id: 121}]
 function loadResources(resources) {
     if (!resources) return
     console.info('loadResources', resources)
     MapLayout.add(resources)
+}
+
+MapViewCache = (function() {
+    let clickTimer = undefined
+    let selections = []
+    let curClassPath = ''
+    return {
+        addSelection: function (itemid) {
+            selections.push(itemid)
+        },
+        classPath: curClassPath,
+        resetSelection: function () { selections = [] },
+        getSelection: function() { return selections },
+        updateTimer: function(val) { clickTimer = val },
+        getTimer: function() { return clickTimer }
+    }
+})()
+
+function onViewClick(itemid) {
+    acquireCivetApi().Overview.click(itemid)
+    if (event.which === 3) {
+        MapViewCache.resetSelection()
+        if (!itemid) {
+            return
+        }
+        MapViewCache.addSelection(itemid)
+        const selections = MapViewCache.getSelection()
+        acquireCivetApi().injectCommandParams('exportResources', selections)
+        acquireCivetApi().injectCommandParams('deleteResources', selections)
+    }
+}
+
+function onResourceClick(itemid) {
+    if (!MapViewCache.getTimer()) {
+        const id = window.setTimeout(() => {
+            clearTimeout(MapViewCache.getTimer())
+            MapViewCache.updateTimer(undefined)
+        }, 200)
+        MapViewCache.updateTimer(id)
+        onViewClick(itemid)
+    }
 }
 
 loadResources({{resources}})
