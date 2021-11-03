@@ -2,6 +2,10 @@ import { ViewType } from '@/../public/ExtensionHostType'
 import { IPCExtensionMessage, IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
 import util from 'util'
 
+declare const _cv_events: any;
+declare let _cv_command_args: any;
+export const events = _cv_events;
+
 type IPCType = IPCExtensionMessage|IPCNormalMessage;
 type NormalMessageCallback = (session: number, reply: any) => void;
 type WorkbenchExtensionMessageCallback = (session: number, id: string, classname: string, html: string) => void;
@@ -65,24 +69,30 @@ class RendererService {
       const callbacks = self.response.get(types[0])
       console.info('callbacks:', callbacks, msg)
       if (callbacks === undefined) return
-      callbacks.forEach((callback: any) => {
-        switch(callback.length) {
-          case 2:
-            callback(msg.data.id, msg.data.msg)
-            break
-          case 3:
-            callback(msg.data.id, types[2], types[1], msg.data.msg[0])
-            break
-          case 5:
-            if (Array.isArray(msg.data.msg) && Array.isArray(msg.data.msg[0])) {
-              callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
-            } else {
-              callback(msg.data.id, types[2], types[1], types[3], msg.data.msg)
-            }
-            break
-          default: break
-        }
-      })
+      try {
+        callbacks.forEach((callback: any) => {
+          switch(callback.length) {
+            case 2:
+              callback(msg.data.id, msg.data.msg)
+              break
+            case 3:
+              callback(msg.data.id, types[2], types[1], msg.data.msg[0])
+              break
+            case 5:
+              if (Array.isArray(msg.data.msg) && Array.isArray(msg.data.msg[0])) {
+                callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
+              } else {
+                callback(msg.data.id, types[2], types[1], types[3], msg.data.msg)
+              }
+              break
+            default: break
+          }
+        })
+      } catch(err: any) {
+        console.error(`RendererService error ${err}`)
+        events.emit('civet', 'onErrorMessage', {msg: err})
+      }
+      
     })
   }
 
@@ -137,9 +147,6 @@ class RendererService {
   }
 }
 
-declare const _cv_events: any;
-declare let _cv_command_args: any;
-export const events = _cv_events;
 export let commandArgs = _cv_command_args;
 export function clearArgs() {
   _cv_command_args = {}

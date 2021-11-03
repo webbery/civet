@@ -46,6 +46,7 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
     },
 
     createOverview(id: string, router: string): civet.OverView {
+      console.info('create overview:', id)
       return extOverViewEntry.createOverviewEntry(id, router)
     }
   }

@@ -25,20 +25,22 @@ export default {
     // regist ipc message process function
     this.$ipcRenderer.on(IPCRendererResponse.ON_RESOURCE_UPDATED, this.onUpdateImages)
     this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
+    this.$events.on('civet', 'onErrorMessage', this.onErrorTips)
   },
   mounted() {
     if (config.isFirstTime() || config.getCurrentDB() === undefined) {
       const guider = document.getElementById('guider')
       guider.showModal()
+    } else {
+      this.$nextTick(() => {
+        this.$store.dispatch('init')
+        this.$events.on('civet', 'showResourceDetail', this.onResourceShow)
+        this.$events.on('civet', 'openClass', this.onClassOpen)
+      })
     }
     if (config.shouldUpgrade()) {
       config.save()
     }
-    this.$nextTick(() => {
-      this.$store.dispatch('init')
-      this.$events.on('civet', 'showResourceDetail', this.onResourceShow)
-      this.$events.on('civet', 'openClass', this.onClassOpen)
-    })
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },

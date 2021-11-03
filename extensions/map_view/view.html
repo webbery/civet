@@ -180,16 +180,23 @@ MapLayout = (function() {
                 gridSize: 80,
                 renderClusterMarker: _renderClusterMarker
             });
+        },
+        clear: function() {
+            // if (cluster) {
+            //     cluster.setMap(null);
+            // }
+            // let root = document.getElementById('resources')
+            // root.innerHTML = ''
         }
     }
 })()
 
 // let points = [{"lnglat":["113.864691","22.942327"], id: 121},{"lnglat":["113.370643","22.938827"], id: 121},{"lnglat":["112.985037","23.15046"], id: 121}]
-function loadResources(resources) {
-    if (!resources) return
-    console.info('loadResources', resources)
-    MapLayout.add(resources)
-}
+// function loadResources(resources) {
+//     if (!resources) return
+//     console.info('loadResources', resources)
+//     MapLayout.add(resources)
+// }
 
 MapViewCache = (function() {
     let clickTimer = undefined
@@ -232,8 +239,14 @@ function onResourceClick(itemid) {
     }
 }
 
-loadResources({{resources}})
-
+acquireCivetApi().Overview.on('update', (data) => {
+    console.info('map view update')
+    MapViewCache.clear()
+    const resources = data.resource
+    for (let resource of resources) {
+        MapViewCache.add(resource)
+    }
+})
 </script>
 </body>
 </html>

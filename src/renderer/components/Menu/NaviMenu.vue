@@ -18,7 +18,7 @@
         <slot name="extension"></slot>
       </div>
   </el-col>
-  <SettingMenu :show="displayMenu" :location="location" :onDisplayChanged="onDisplayChanged"></SettingMenu>
+  <SettingMenu :show="displayMenu" :location="location" @onDisplayChanged="onDisplayChanged"></SettingMenu>
 </el-row>
 </template>
 <script>
@@ -43,7 +43,7 @@ export default {
       const rect = this.$refs.setting.getBoundingClientRect()
       this.location.x = rect.left + (rect.right - rect.left) / 2
       this.location.y = rect.top - 2 * 40
-      console.info('bottom', this.location.y, rect.bottom, rect.top)
+      console.info('bottom', this.location.y, rect.bottom, rect.top, this.displayMenu)
       this.displayMenu = !this.displayMenu
     },
     onDisplayChanged(value) {

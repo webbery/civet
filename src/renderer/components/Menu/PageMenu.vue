@@ -61,7 +61,6 @@ export default {
       this.currentPage = 1
     },
     onSwitch(resource) {
-      // config
       // console.info('resourcename:', resource)
       // config.switchResource(resource)
       // console.info('switch config:', config)

@@ -27,19 +27,17 @@ module.exports = {
   updateName: async function(page, name) {
     await page.waitForSelector(CSSName)
     let item = await page.$(CSSName)
-    await page.waitFor(1000)
+    await page.waitForTimeout(1000)
     // await page.waitForTimeout(1000)
     await item.click({ clickCount: 2, delay: 100 })
     await page.waitForSelector(CSSNameInput)
     const input = await page.$(CSSNameInput)
     input.type(name)
+    await page.waitForTimeout(1000)
     await input.press('Enter')
-    await page.waitFor(500)
-    // await page.waitForTimeout(500)
+    await page.waitForTimeout(500)
     await page.waitForSelector(CSSName)
-    item = await page.$(CSSName)
-    const value = await item.$eval(CSSName, el => el.innerHTML)
-    console.info('new value:', value)
+    const value = await page.evaluate(() => document.querySelector('.image-name .context').innerHTML)
     assert(value === name)
   }
 }

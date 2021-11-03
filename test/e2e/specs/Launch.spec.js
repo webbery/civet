@@ -32,7 +32,7 @@ const run = async (done) => {
     try {
       app = await puppeteer.connect({
         browserURL: `http://localhost:${port}`,
-        defaultViewport: { width: 1860, height: 768 }
+        defaultViewport: { width: 2060, height: 768 }
       })
     } catch (error) {
       if (Date.now() > startTime + timeout) {
@@ -70,7 +70,7 @@ describe('****************Start Functional Test*************', function (resolve
   const testLocalExtension = require('../modules/testExtension')
   const testClassPanel = require('../modules/testClassifyPanel')
   const testClassicalView = require('../modules/testClassicalView')
-  const property = require('../modules/testResourceProperty')
+  const testMapView = require('../modules/testMapView')
   before((done) => {
     run().then(result => {
       done()
@@ -87,11 +87,10 @@ describe('****************Start Functional Test*************', function (resolve
     testBrowserExtension.run(done, mainWindowPage)
   })
   it('waterfall layout view', async function() {
-    await testClassicalView.selectResource(mainWindowPage)
-    // await property.updateName(mainWindowPage, 'Image0')
-    // await mainWindowPage.waitFor(10000)
-    await mainWindowPage.waitForTimeout(10000)
-    await testClassicalView.removeResource(mainWindowPage)
+    // await testClassicalView.test(mainWindowPage)
+  })
+  it('mapview layout', async function() {
+    await testMapView.test(mainWindowPage)
   })
   // it('file property', async function() {
   //   const files = await mainWindowPage.$$('.vue-waterfall-slot')

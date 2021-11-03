@@ -19,6 +19,7 @@ function Initialze() {
     try{
       _instance.init(c, _flag, _enableLog)
     } catch(err) {
+      console.error('config is', c)
       console.error(err)
     }
   }

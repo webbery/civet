@@ -42,7 +42,7 @@ import { remote } from 'electron'
 import bus from './utils/Bus'
 import ViewFilter from '@/components/ViewFilter'
 import ImageOperator from '@/components/ImageOperator'
-import { IPCRendererResponse } from '@/../public/IPCMessage'
+import { IPCNormalMessage } from '@/../public/IPCMessage'
 // import Service from '@/components/utils/Service'
 import PageMenu from '@/components/Menu/PageMenu'
 import { mapState } from 'vuex'
@@ -101,7 +101,7 @@ export default {
     },
     async onResourceSwitch(resource) {
       this.$store.dispatch('switchResource', resource)
-      await this.$ipcRenderer.get(IPCRendererResponse.REINIT_DB, resource)
+      await this.$ipcRenderer.get(IPCNormalMessage.REINIT_DB, resource)
       this.$nextTick(() => {
         this.current = this.getCurrentIndex()
         this.$store.dispatch('clear')
@@ -130,23 +130,23 @@ export default {
           break
       }
     },
-    onClickImport() {
-      remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-        properties: ['openDirectory', 'openFile']
-      }).then(async (data) => {
-        if (data === undefined) return
-        // this.$store.commit('updateImportDirectory', dir)
-        if (data.canceled === true) return
-        // 检查本地数据库中是否已经读取完当前的所有文件
-        if (await this.$ipcRenderer.get(IPCRendererResponse.IS_DIRECTORY_EXIST, data.filePaths[0]) === false) {
-          // 如果没有就发送消息继续读取
-          this.$ipcRenderer.send(IPCRendererResponse.ADD_IMAGES_BY_DIRECORY, data.filePaths[0])
-        } else {
-          // 否则发送消息进行显示
-          // bus.emit(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
-        }
-      })
-    },
+    // onClickImport() {
+    //   remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+    //     properties: ['openDirectory', 'openFile']
+    //   }).then(async (data) => {
+    //     if (data === undefined) return
+    //     // this.$store.commit('updateImportDirectory', dir)
+    //     if (data.canceled === true) return
+    //     // 检查本地数据库中是否已经读取完当前的所有文件
+    //     if (await this.$ipcRenderer.get(IPCRendererResponse.IS_DIRECTORY_EXIST, data.filePaths[0]) === false) {
+    //       // 如果没有就发送消息继续读取
+    //       this.$ipcRenderer.send(IPCRendererResponse.ADD_IMAGES_BY_DIRECORY, data.filePaths[0])
+    //     } else {
+    //       // 否则发送消息进行显示
+    //       // bus.emit(bus.EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY, data.filePaths[0])
+    //     }
+    //   })
+    // },
     onUpdateHeadNav(query) {
       this.viewDesc = query.name
       console.info(query.cmd)

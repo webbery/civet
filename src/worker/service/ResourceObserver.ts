@@ -14,6 +14,7 @@ export class ResourceObserver {
   }
 
   switchResourceDB(newdb: string) {
+    // notify browser extension that resource db has changed
     for (let browser of this._browsers) {
       browser.switchResourceDB(newdb)
     }

@@ -149,7 +149,7 @@
                                                 <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover">
                                             </div>
                                             <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
-                                                <span class="context">${item.name}</span>
+                                                <span class="context" id="gv_${item.id}">${item.name}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -205,8 +205,8 @@
                     block['id'] = item.id
                     block['src'] = 'file://' + src
                     curWidth = getItemWidth()
+                    
                     if (curWidth < MIN_WIDTH) {
-
                     }
                     const scale = parseInt(block['width']) / curWidth
                     // console.info('scale', scale, block)
@@ -240,9 +240,14 @@
             const classes = data['class']
             loadClasses(classes)
         })
+        acquireCivetApi().Overview.on('property', (data) => {
+            const resourceID = data.id
+            const elm = document.getElementById('gv_' + resourceID)
+            if (!elm) return
+            console.info(data)
+            elm.innerHTML = data.name
+        })
         // Overview.on('all', () => {})
-        // Overview.on('unclass', () => {})
-        // Overview.on('untag', () => {})
         GridViewCache = (function() {
             let clickTimer = undefined
             let selections = []
@@ -288,13 +293,6 @@
                 id: itemid
             })
         }
-        function loadResources(resources) {
-            if (!resources || resources.length === 0) return
-            console.info('load:', resources)
-            for (let resource of resources) {
-                WaterfallLayout.add(resource)
-            }
-        }
 
         function classTemplate(classItems) {
             const folderDeliver = '<div data-content="分类" class="hr-divider"></div>'
@@ -321,9 +319,6 @@
             let div = document.getElementById('_cv_classes')
             div.innerHTML = classTemplate(classes)
         }
-
-        loadResources({{resources}})
-        loadClasses({{classes}})
     </script>
 </body>
 

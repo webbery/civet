@@ -1,7 +1,8 @@
 const fs = require('fs')
 /**
  * cfg.json describe as follows:
- * app: {
+ {
+   app: {
       first: true,      // is civet application first open?
       version: version, // the version of current civet
       default: {
@@ -32,6 +33,7 @@ class CivetConfig {
   configPath: string;
   config: any;
   oldVersion: boolean = false;
+  #lastModify: number = 0;
 
   constructor() {
     const app = require('./System').default.app()
@@ -68,14 +70,24 @@ class CivetConfig {
       }
       cfg = config
     }
+    this.#lastModify = this.getModifyTime()
     this.config = cfg
+  }
+
+  private getModifyTime(): number {
+    const stat = fs.statSync(this.configPath)
+    return stat.mtime.getTime()
   }
 
   getConfig(reload: boolean) {
     if (reload) {
-      this.config = JSON.parse(fs.readFileSync(this.configPath))
+      this.config = this.loadConfig()
     }
     return this.config
+  }
+
+  loadConfig() {
+    return JSON.parse(fs.readFileSync(this.configPath))
   }
 
   getCurrentDB(): string|undefined {
@@ -120,7 +132,7 @@ class CivetConfig {
     return this.config.app.first
   }
 
-  isDBExist(name: string) {
+  isDBFileExist(name: string) {
     const path = this.getDBPath(name)
     console.info('is db exist:', path)
     return fs.existsSync(path)
@@ -178,9 +190,34 @@ class CivetConfig {
 
   save() {
     console.info('save config', this.config)
+    const modifyTime = this.getModifyTime()
+    if (modifyTime > this.#lastModify) {
+      console.info('merge new config')
+      this.merge()
+    }
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }
 
+  private isValidDB(name: string, resources: any): number {
+    for (let idx = 0, len = resources.length; idx < len; ++idx) {
+      if (resources[idx].name === name) return idx
+    }
+    return -1
+  }
+
+  private merge() {
+    const latest = this.loadConfig()
+    if (latest['resources'].length != this.config['resources']) {
+      this.config['resources'] = latest['resources']
+      let defaultInfo = this.config['app'].default
+      const idx = this.isValidDB(defaultInfo.dbname, latest['resources'])
+      if (idx < 0) {
+        this.config['app'].default.name = latest['app'].default.name
+      }
+    }
+    this.config['app'].default.layout = latest['app'].default.layout
+  }
+  
   shouldUpgrade() {
     return this.oldVersion;
   }

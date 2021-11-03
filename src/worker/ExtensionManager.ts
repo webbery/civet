@@ -94,6 +94,7 @@ class ExtensionAllMenuAccessor implements ExtensionAccessor {
 @injectable
 export class ExtensionManager {
   private _pipeline: MessagePipeline;
+  // aviable extension of this
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
   private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
@@ -333,9 +334,11 @@ export class ExtensionManager {
 
   private _initStorageExtension(service: ExtensionService) { }
 
+  // enable resource's extensions
   switchResourceDB(dbname: string) {
     const resource = config.getResourceByName(dbname)
-    this._extensionsOfConfig = resource['extensions']
+    if (!resource) {}
+    // this._extensionsOfConfig = resource['extensions']
   }
 
   getExtensionsByType(extensionType: ExtensionActiveType): ExtensionService[] {

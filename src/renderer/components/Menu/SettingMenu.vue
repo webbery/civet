@@ -67,6 +67,7 @@ export default {
       this.$emit('onDisplayChanged', this.show)
       this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, name)
       config.defaultView = name
+      config.save()
     },
     onViewRouterInit(session, routers) {
       console.info('created init:', routers, config.defaultView)

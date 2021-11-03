@@ -2,10 +2,10 @@
   <div>
     <el-scrollbar style="height:99vh;">
       <table rules="none" cellspacing=0 >
-        <tr @click="handleResourceClick(headOptions[0], 0)" :class="{selected: headOptions[0].isSelected, item: !headOptions[0].isSelected}"><td><i :class="headOptions[0].icon"></i>全部</td><td>{{allcount}}</td></tr>
-        <tr @click="handleResourceClick(headOptions[1], 1)" :class="{selected: headOptions[1].isSelected, item: !headOptions[1].isSelected}"><td><i :class="headOptions[1].icon"></i>未分类</td><td>{{unclasses}}</td></tr>
-        <tr @click="handleResourceClick(headOptions[2], 2)" :class="{selected: headOptions[2].isSelected, item: !headOptions[2].isSelected}"><td><i :class="headOptions[2].icon"></i>未标签</td><td>{{untags}}</td></tr>
-        <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
+        <tr @click="handleResourceClick(headOptions[0], 0)" :class="{selected: headOptions[0].isSelected, _cv_item: !headOptions[0].isSelected}"><td><i :class="headOptions[0].icon"></i>全部</td><td>{{allcount}}</td></tr>
+        <tr @click="handleResourceClick(headOptions[1], 1)" :class="{selected: headOptions[1].isSelected, _cv_item: !headOptions[1].isSelected}"><td><i :class="headOptions[1].icon"></i>未分类</td><td>{{unclasses}}</td></tr>
+        <tr @click="handleResourceClick(headOptions[2], 2)" :class="{selected: headOptions[2].isSelected, _cv_item: !headOptions[2].isSelected}"><td><i :class="headOptions[2].icon"></i>未标签</td><td>{{untags}}</td></tr>
+        <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, _cv_item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
       </table>
       <TreePanel :isActive="true" @addRootClass="addRootClass">
         <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="classTree"></PopMenu>

@@ -94,10 +94,13 @@ const mutations = {
     //   imagesID.push(snap.id)
     //   // if (imagesID.length > 40) break
     // }
+    state.viewItems.splice(0, state.viewItems.length)
     const images = data.allImages
     for (const image of images) {
-      Cache.files[image.id] = new Resource(image)
+      const resource = new Resource(image)
+      Cache.files[image.id] = resource
       // if (Cache.files.length > maxCacheSize) break
+      state.viewItems.unshift(resource)
     }
     // const len = state.cache.length
     // setting view panel item
@@ -131,6 +134,10 @@ const mutations = {
       }
       console.info('class result', state.classes)
     }
+    events.emit('Overview', 'update', {
+      'class': state.viewClass,
+      'resource': state.viewItems
+    })
     // init classes name
     const generateClassPath = (item, index, array) => {
       if (!array[index].parent) return
@@ -301,7 +308,11 @@ const mutations = {
     console.info('changeFileName', mutation)
     const fileid = mutation.id
     Cache.files[fileid].filename = mutation.filename
-    service.send(IPCNormalMessage.UPDATE_FILE_NAME, mutation)
+    service.send(IPCNormalMessage.UPDATE_RESOURCE_NAME, mutation)
+    events.emit('Overview', 'property', {
+      'id': mutation.id,
+      'name': mutation.filename
+    })
   },
   removeFiles(state, filesid) {
     for (let idx = 0; idx < filesid.length; ++idx) {
@@ -385,9 +396,9 @@ const mutations = {
     state.currentResource = config.getCurrentDB()
   },
   switchResource(state, name) {
+    console.info('switchResource', name)
     config.switchResource(name)
     config.save()
-    console.info('switchResource', name)
     state.currentResource = name
   }
 }
