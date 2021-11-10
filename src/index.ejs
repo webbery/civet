@@ -25,13 +25,14 @@
             return events[id]
           },
           emit: function(id, event, value) {
+            console.info('emit', event, 'to', id)
             return events[id].emit(event, value)
           },
           on: function(id, event, listener) {
-            if (events[id] === undefined) {
+            if (!events[id]) {
               events[id] = new EventEmitter()
+              console.info(id, 'EventEmitter On', event)
             }
-            console.info(id, 'EventEmitter On', event)
             events[id].on(event, listener)
           }
         }

@@ -36,7 +36,8 @@ export default {
       setting: i18n('setting'),
       layout: i18n('layout'),
       layouts: [],
-      activate: ''
+      activate: '',
+      history: []
     }
   },
   created() {
@@ -47,6 +48,7 @@ export default {
       // console.info('click', this.show)
       this.show = false
     }, true)
+    this.history.push(config.defaultView)
   },
   computed: {
     locationComputed() {
@@ -61,11 +63,17 @@ export default {
       this.$router.push({path: '/config', query: {name: '配置'}})
     },
     onLayoutClicked(name) {
+      if (name === this.activate) return
       console.info('select layout', name)
       this.show = false
       this.activate = name
       this.$emit('onDisplayChanged', this.show)
-      this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, name)
+      if (this.history.includes(name)) {
+        this.$events.emit('civet', 'onSwitchView', name)
+      } else {
+        this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, name)
+        this.history.push(name)
+      }
       config.defaultView = name
       config.save()
     },

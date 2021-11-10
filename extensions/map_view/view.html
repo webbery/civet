@@ -147,39 +147,36 @@ MapLayout = (function() {
         root.scrollLeft += event.deltaY
     }
     return {
-        add: function(resources) {
-            for (var i = 0; i < resources.length; i += 1) {
-                const item = resources[i]
-                let longitude, latitude
-                for (let meta of item['meta']) {
-                    if (meta['name'] === 'lng') {
-                        longitude = meta.value
-                    } else if (meta['name'] === 'lat') {
-                        latitude = meta.value
-                    }
+        add: function(item) {
+            let longitude, latitude
+            for (let meta of item['meta']) {
+                if (meta['name'] === 'lng') {
+                    longitude = meta.value
+                } else if (meta['name'] === 'lat') {
+                    latitude = meta.value
                 }
-                if (longitude && latitude) {
-                    const pos = [longitude/100000, latitude/100000]
-                    console.info(`add GPS point: ${pos}`)
-                    markers.push(new AMap.Marker({
-                        position: pos,
-                        content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
-                            onclick="onResourceClick(${item.id})"></div>`,
-                        offset: new AMap.Pixel(-15, -15)
-                    }))
-                }
-                addHorizonItem(item)
             }
+            if (longitude && latitude) {
+                const pos = [longitude/100000, latitude/100000]
+                console.info(`add GPS point: ${pos}`)
+                markers.push(new AMap.Marker({
+                    position: pos,
+                    content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
+                        onclick="onResourceClick(${item.id})"></div>`,
+                    offset: new AMap.Pixel(-15, -15)
+                }))
+            }
+            addHorizonItem(item)
             count = markers.length
-            console.info('add map resource', resources)
+            console.info('add map resource', item)
             // addCluster(2, map, markers)
-            if (cluster) {
-                cluster.setMap(null);
+            if (!cluster) {
+                cluster = new AMap.MarkerClusterer(map, markers, {
+                    gridSize: 80,
+                    renderClusterMarker: _renderClusterMarker
+                });
+                // cluster.setMap(null);
             }
-            cluster = new AMap.MarkerClusterer(map, markers, {
-                gridSize: 80,
-                renderClusterMarker: _renderClusterMarker
-            });
         },
         clear: function() {
             // if (cluster) {
@@ -240,11 +237,11 @@ function onResourceClick(itemid) {
 }
 
 acquireCivetApi().Overview.on('update', (data) => {
-    console.info('map view update')
-    MapViewCache.clear()
+    console.info('map view update', data)
+    MapLayout.clear()
     const resources = data.resource
     for (let resource of resources) {
-        MapViewCache.add(resource)
+        MapLayout.add(resource)
     }
 })
 </script>

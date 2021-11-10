@@ -103,8 +103,6 @@ const mutations = {
       state.viewItems.unshift(resource)
     }
     // const len = state.cache.length
-    // setting view panel item
-    mutations.display(state, data)
     // get classes
     const cls = data.allClasses
     console.info('allClasses', cls)
@@ -187,17 +185,11 @@ const mutations = {
     state.allCount += cnt
   },
   display(state, data) {
-    // let idx = 0
-    if (data) {
-      // for (let datum of data) {}
-    }
-    state.viewClass.splice(0, state.viewClass.length)
-    for (const k in Cache.files) {
-      state.viewItems.unshift(Cache.files[k])
-      // Vue.set(state.viewItems, idx, Cache.files[k])
-      // idx += 1
-      // if (idx > maxCacheSize) break
-    }
+    console.info('emit display')
+    events.emit('Overview', 'update', {
+      'class': state.viewClass,
+      'resource': state.viewItems
+    })
   },
   query(state, result) {
     state.viewItems.splice(0, state.viewItems.length)

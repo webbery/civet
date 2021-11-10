@@ -23,7 +23,7 @@ export default {
   },
   beforeMount() {
     // regist ipc message process function
-    this.$ipcRenderer.on(IPCRendererResponse.ON_RESOURCE_UPDATED, this.onUpdateImages)
+    this.$ipcRenderer.on(IPCRendererResponse.ON_RESOURCE_UPDATED, this.onUpdateResources)
     this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
     this.$events.on('civet', 'onErrorMessage', this.onErrorTips)
   },
@@ -45,7 +45,7 @@ export default {
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },
   methods: {
-    onUpdateImages(error, updateResources) {
+    onUpdateResources(error, updateResources) {
       if (error) console.log(error)
       this.$store.dispatch('addFiles', updateResources)
       // console.info('add resources', updateResources)

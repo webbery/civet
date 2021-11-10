@@ -2,7 +2,9 @@
   <div class="webview" @drop="dropFiles($event)" @dragover.prevent>
     <PopMenu :list="extensionMenus" :underline="false" @ecmcb="onRightMenu" tag="overview"></PopMenu>
     <div style="height: 100%" @mousedown.right="onRightClick($event, $root)">
-      <div style="height: 100%" v-html="html" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true"></div>
+      <div style="height: 100%" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true" v-for="(item, index) in htmls" :key="index" v-show="htmls[index].show">
+          <div style="height: 100%" v-html="item.html"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -16,13 +18,17 @@ import bus from '../utils/Bus'
 import { clearArgs, events } from '../../common/RendererService'
 import { InternalCommand, commandService } from '@/common/CommandService'
 import { config } from '@/../public/CivetConfig'
+import Vue from 'vue'
 
 export default {
   name: 'web-container',
   components: { PopMenu },
   data() {
     return {
-      html: '',
+      htmls: {},
+      activateView: null,
+      script: '',
+      isUpdated: false,
       menus: [
         // {text: '重命名', cb: this.onChangeName},
         // {text: '导出到计算机', cb: this.onExportFiles},
@@ -33,6 +39,7 @@ export default {
   },
   beforeMount() {
     this.$ipcRenderer.on(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE, this.onPanelRouterInit)
+    this.$events.on('civet', 'onSwitchView', this.onSwitchView)
   },
   mounted() {
     console.info('web panel mounted', config.defaultView)
@@ -82,6 +89,37 @@ export default {
   },
   computed: mapState({
   }),
+  async updated() {
+    if (this.isUpdated) return
+    console.info('updated', this.isUpdated)
+    await ScriptLoader.load(this.script)
+    // console.info(value, 'menu is', menus)
+    const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + this.activateView)
+    this.extensionMenus = []
+    for (let menu of menus) {
+      this.extensionMenus.push({
+        id: this.activateView,
+        name: menu.name,
+        command: menu.command
+      })
+      if (this.isInternalCommand(menu.command)) {
+        commandService.registInternalCommand(this.activateView, menu.command, self)
+      } else {
+        events.on(this.activateView, menu.command, function(args) {
+          console.info('on event', menu.command)
+          self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: this.activateView, command: 'ext:' + menu.command, args: args})
+        })
+      }
+    }
+    console.info('reply view menus', this.extensionMenus, menus)
+    // request update view resources
+    // self.$nextTick(() => {
+    //   console.info('**************' + 'display')
+    //   self.$store.dispatch('display')
+    // })
+    this.$store.dispatch('display')
+    this.isUpdated = true
+  },
   methods: {
     dropFiles(event) {
       let files = event.dataTransfer.files
@@ -110,32 +148,21 @@ export default {
       // console.info('copy URI:', url)
     },
     onPanelRouterInit(session, value) {
-      console.info('init overview', value)
-      StyleLoader.load(value.style)
-      this.html = value.body
-      const self = this
-      this.$nextTick(async () => {
-        ScriptLoader.load(value.script)
-        // console.info(value, 'menu is', menus)
-        const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + value.id)
-        this.extensionMenus = []
-        for (let menu of menus) {
-          this.extensionMenus.push({
-            id: value.id,
-            name: menu.name,
-            command: menu.command
-          })
-          if (this.isInternalCommand(menu.command)) {
-            commandService.registInternalCommand(value.id, menu.command, self)
-          } else {
-            events.on(value.id, menu.command, function(args) {
-              console.info('on event', menu.command)
-              self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: value.id, command: 'ext:' + menu.command, args: args})
-            })
-          }
-        }
-        console.info('reply view menus', this.extensionMenus, menus)
-      })
+      console.info('init overview', this.activateView)
+      if (this.activateView && this.activateView !== value.id) {
+        this.htmls[this.activateView].show = false
+      }
+      if (this.htmls[value.id]) {
+        this.htmls[value.id].show = true
+        console.info('switch to', value.id)
+      } else {
+        StyleLoader.load(value.style)
+        Vue.set(this.htmls, value.id, {html: value.body, show: true})
+        console.info('new to', value.id, value.body)
+      }
+      this.activateView = value.id
+      this.isUpdated = false
+      this.script = value.script
     },
     isInternalCommand(command) {
       switch (command) {
@@ -165,6 +192,14 @@ export default {
           y: event.clientY
         })
       }
+    },
+    onSwitchView(viewid) {
+      console.info('switch view to', viewid)
+      if (this.activateView && this.activateView !== viewid) {
+        this.htmls[this.activateView].show = false
+        this.htmls[viewid].show = true
+      }
+      this.activateView = viewid
     }
   }
 }

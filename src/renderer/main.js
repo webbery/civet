@@ -73,14 +73,3 @@ new Vue({
   store,
   template: '<App/>'
 }).$mount('#app')
-
-/* exported civet API */
-function acquireCivetApi() {
-  return {
-    postMessage: service.send
-  }
-}
-
-function OverviewClick(id) {
-  console.info('OverviewClick', id)
-}

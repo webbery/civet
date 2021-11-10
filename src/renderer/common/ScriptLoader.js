@@ -4,26 +4,7 @@ import crypto from 'crypto'
 export default (function() {
   let groupQueue
   let groupCursor = 0
-  let currentGroupFinished = 0
   let scripts = {}
-
-  let loadFinished = function() {
-    currentGroupFinished++
-    // console.info('script load finish', currentGroupFinished, groupQueue.length)
-    if (currentGroupFinished < groupQueue.length) {
-      nextGroup()
-      loadGroup()
-    }
-  }
-
-  let nextGroup = function() {
-    // currentGroupFinished = 0
-    groupCursor++
-  }
-
-  let loadError = function(oError) {
-    console.error('The script ' + oError.target.src + ' is not accessible.')
-  }
 
   let removeScript = function (hash) {
     const node = scripts[hash]
@@ -46,48 +27,51 @@ export default (function() {
     const md5 = crypto.createHash('md5')
     const hash = md5.update(script).digest('base64')
     // console.info('scripts:', hash, scripts[hash])
-    if (scripts[hash] !== undefined) return
-    const SCRIPT_TAG_REGEX = /<(script)\b[^>]*>([\s\S]*?)<\/\1>/is
-    const matchs = script.match(SCRIPT_TAG_REGEX)
-    let s = document.createElement('script')
-    s.type = 'text/javascript'
-    s.onerror = loadError
-    if (s.readyState) {
-      s.onreadystatechange = function() {
-        if (s.readyState === 'loaded' || s.readyState === 'complete') {
-          s.onreadystatechange = null
-          loadFinished()
+    if (scripts[hash] !== undefined) return null
+    return new Promise((resolve, reject) => {
+      const SCRIPT_TAG_REGEX = /<(script)\b[^>]*>([\s\S]*?)<\/\1>/is
+      const matchs = script.match(SCRIPT_TAG_REGEX)
+      let s = document.createElement('script')
+      scripts[hash] = s
+      s.type = 'text/javascript'
+      // if some script bug is encounter, this link may be help:
+      // https://stackoverflow.com/questions/50955566/remove-script-tag-from-html-and-from-the-dom-with-js
+      if (matchs) {
+        console.info('content script')
+        s.innerHTML = matchs[2]
+        document.body.appendChild(s)
+        resolve(true)
+      } else {
+        s.onload = function() {
+          console.info('complete')
+          resolve(true)
         }
+        s.onerror = function(oError) {
+          console.error('The script ' + oError.target.src + ' is not accessible.')
+          reject(oError)
+        }
+        console.info('src script')
+        s.async = true
+        s.src = script
+        document.head.appendChild(s)
       }
-    } else {
-      s.onload = function() {
-        loadFinished()
-      }
-    }
-    // if some script bug is encounter, this link may be help:
-    // https://stackoverflow.com/questions/50955566/remove-script-tag-from-html-and-from-the-dom-with-js
-    if (matchs) {
-      s.innerHTML = matchs[2]
-      document.body.appendChild(s)
-    } else {
-      s.src = script
-      document.head.appendChild(s)
-    }
-    scripts[hash] = s
+    })
   }
 
-  let loadGroup = function() {
+  let loadGroup = async function() {
     // if (groupCursor >= 1) return
-    loadScript(groupQueue[groupCursor])
+    for (;groupCursor < groupQueue.length; ++groupCursor) {
+      console.info('load group', groupCursor)
+      await loadScript(groupQueue[groupCursor])
+    }
   }
 
   let loadMultiGroup = function(scripts) {
-    if (scripts.length === 0) return
+    if (scripts.length === 0) return null
     groupCursor = 0
-    currentGroupFinished = 0
     groupQueue = scripts
     clearScript()
-    loadGroup()
+    return loadGroup()
   }
 
   return {
