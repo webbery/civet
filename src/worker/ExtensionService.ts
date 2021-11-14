@@ -210,6 +210,7 @@ export class ExtensionService {
 
   async run(command: string, ...args: any[]): Promise<Result<string, string>> {
     if (this._instance === null) {
+      if (this.hasType(ExtensionActiveType.ExtView)) return Result.success(`${command} not exist in ${this._package.name}`)
       const result = this._initialize()
       if(!result.isSuccess()) return result
     }

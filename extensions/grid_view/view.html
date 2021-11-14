@@ -240,7 +240,6 @@
             const classes = data['class']
             loadClasses(classes)
         })
-        console.info('event emitter update regist')
         acquireCivetApi().Overview.on('property', (data) => {
             const resourceID = data.id
             const elm = document.getElementById('gv_' + resourceID)

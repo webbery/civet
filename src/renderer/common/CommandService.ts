@@ -29,6 +29,7 @@ class CommandService {
     switch(command) {
       case InternalCommand.DeleteResources:
         _cv_events.on(target, command, (fileid: Array<number>) => {
+          console.info('InternalCommand.DeleteResources', fileid)
           vue.$store.dispatch('removeFiles', fileid)
         })
         break

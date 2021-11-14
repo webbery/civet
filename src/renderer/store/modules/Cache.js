@@ -318,7 +318,7 @@ const mutations = {
     let removeCnt = 0
     for (let idx = 0; idx < state.viewItems.length; ++idx) {
       if (removeCnt === filesid.length) break
-      for (let fidx = 0; fidx < filesid.length; ++fidx) {
+      for (let fidx = filesid.length - 1; fidx >= 0; --fidx) {
         if (state.viewItems[idx].id === filesid[fidx]) {
           Vue.delete(state.viewItems, idx)
           removeCnt += 1
@@ -326,6 +326,7 @@ const mutations = {
         }
       }
     }
+    console.info('remove files', filesid, state.viewItems.length)
     events.emit('Overview', 'update', {
       'class': state.viewClass,
       'resource': state.viewItems

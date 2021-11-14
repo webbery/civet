@@ -64,7 +64,6 @@ export default (function() {
   }
 
   let loadGroup = async function() {
-    // if (groupCursor >= 1) return
     for (;groupCursor < groupQueue.length; ++groupCursor) {
       console.info('load group', groupCursor)
       await loadScript(groupQueue[groupCursor])

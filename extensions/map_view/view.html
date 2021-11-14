@@ -99,7 +99,7 @@ MapLayout = (function() {
         div.innerHTML = `<div draggable="true" class="image">
                             <div class="el-card is-never-shadow" style="border: 0px;">
                                 <div class="el-card__body" style="padding: 1px;">
-                                    <div class="frame" onclick="onResourceClick(${item.id})" oncontextmenu="onResourceClick(${item.id})" ondblclick="onDbResourceClick(${item.id})">
+                                    <div class="frame" onclick="MapLayout.onResourceClick(${item.id})" oncontextmenu="MapLayout.onResourceClick(${item.id})" ondblclick="MapLayout.onDbResourceClick(${item.id})">
                                         <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover">
                                     </div>
                                     <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
@@ -115,7 +115,7 @@ MapLayout = (function() {
         const root = document.getElementById('resources')
         const defaultHeight = root.offsetHeight
         console.info('Item Height', defaultHeight)
-        let block = {}
+        let block = {}, src = undefined
         for (let meta of item['meta']) {
             if (meta['name'] === 'filename') block['name'] = meta.value
             else if (meta['name'] === 'path') src = meta.value
@@ -146,6 +146,57 @@ MapLayout = (function() {
         console.info('scroll event', event.deltaY)
         root.scrollLeft += event.deltaY
     }
+    
+    MapViewCache = (function() {
+        let clickTimer = undefined
+        let selections = []
+        let curClassPath = ''
+        return {
+            addSelection: function (itemid) {
+                selections.push(itemid)
+            },
+            classPath: curClassPath,
+            resetSelection: function () { selections = [] },
+            getSelection: function() { return selections },
+            updateTimer: function(val) { clickTimer = val },
+            getTimer: function() { return clickTimer }
+        }
+    })()
+
+    function onViewClick(itemid) {
+        acquireCivetApi().Overview.click(itemid)
+        if (event.which === 3) {
+            MapViewCache.resetSelection()
+            if (!itemid) {
+                return
+            }
+            console.info('map right click')
+            MapViewCache.addSelection(itemid)
+            const selections = MapViewCache.getSelection()
+            acquireCivetApi().injectCommandParams('exportResources', selections)
+            acquireCivetApi().injectCommandParams('deleteResources', selections)
+        }
+    }
+
+    function onResourceClick(itemid) {
+        if (!MapViewCache.getTimer()) {
+            const id = window.setTimeout(() => {
+                clearTimeout(MapViewCache.getTimer())
+                MapViewCache.updateTimer(undefined)
+            }, 200)
+            MapViewCache.updateTimer(id)
+            onViewClick(itemid)
+        }
+    }
+
+    acquireCivetApi().Overview.on('update', (data) => {
+        console.info('map view update', data)
+        MapLayout.clear()
+        const resources = data.resource
+        for (let resource of resources) {
+            MapLayout.add(resource)
+        }
+    })
     return {
         add: function(item) {
             let longitude, latitude
@@ -182,9 +233,10 @@ MapLayout = (function() {
             // if (cluster) {
             //     cluster.setMap(null);
             // }
-            // let root = document.getElementById('resources')
-            // root.innerHTML = ''
-        }
+            let root = document.getElementById('resources')
+            root.innerHTML = ''
+        },
+        onResourceClick: onResourceClick
     }
 })()
 
@@ -195,55 +247,6 @@ MapLayout = (function() {
 //     MapLayout.add(resources)
 // }
 
-MapViewCache = (function() {
-    let clickTimer = undefined
-    let selections = []
-    let curClassPath = ''
-    return {
-        addSelection: function (itemid) {
-            selections.push(itemid)
-        },
-        classPath: curClassPath,
-        resetSelection: function () { selections = [] },
-        getSelection: function() { return selections },
-        updateTimer: function(val) { clickTimer = val },
-        getTimer: function() { return clickTimer }
-    }
-})()
-
-function onViewClick(itemid) {
-    acquireCivetApi().Overview.click(itemid)
-    if (event.which === 3) {
-        MapViewCache.resetSelection()
-        if (!itemid) {
-            return
-        }
-        MapViewCache.addSelection(itemid)
-        const selections = MapViewCache.getSelection()
-        acquireCivetApi().injectCommandParams('exportResources', selections)
-        acquireCivetApi().injectCommandParams('deleteResources', selections)
-    }
-}
-
-function onResourceClick(itemid) {
-    if (!MapViewCache.getTimer()) {
-        const id = window.setTimeout(() => {
-            clearTimeout(MapViewCache.getTimer())
-            MapViewCache.updateTimer(undefined)
-        }, 200)
-        MapViewCache.updateTimer(id)
-        onViewClick(itemid)
-    }
-}
-
-acquireCivetApi().Overview.on('update', (data) => {
-    console.info('map view update', data)
-    MapLayout.clear()
-    const resources = data.resource
-    for (let resource of resources) {
-        MapLayout.add(resource)
-    }
-})
 </script>
 </body>
 </html>

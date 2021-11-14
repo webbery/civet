@@ -133,8 +133,8 @@ function createRendererWindow() {
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
-    // show: true,
-    show: process.env.NODE_ENV !== 'production',
+    show: true,
+    // show: process.env.NODE_ENV !== 'production',
     frame: false,
     webPreferences: {
       nodeIntegration: true,

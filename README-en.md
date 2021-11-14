@@ -8,7 +8,7 @@
 English | [简体中文](./README.md)  
 > :kissing_heart: A software to manage your files on multiple platform。  
 It is support image file currently. Hopes using extensions to import lots of file types likes vs code.  
-![Preview](https://raw.githubusercontent.com/webbery/civet/master/show.JPG)
+![Preview](https://raw.githubusercontent.com/webbery/civet/master/show.gif)
 
 ### Downlaod
 

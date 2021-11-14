@@ -91,10 +91,14 @@ export default {
   }),
   async updated() {
     if (this.isUpdated) return
-    console.info('updated', this.isUpdated)
-    await ScriptLoader.load(this.script)
+    try {
+      await ScriptLoader.load(this.script)
+    } catch (err) {
+      console.error(`load ${this.activateView} javascript exception: ${err}`)
+    }
     // console.info(value, 'menu is', menus)
     const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + this.activateView)
+    console.info('updated', this.activateView)
     this.extensionMenus = []
     for (let menu of menus) {
       this.extensionMenus.push({
@@ -103,7 +107,7 @@ export default {
         command: menu.command
       })
       if (this.isInternalCommand(menu.command)) {
-        commandService.registInternalCommand(this.activateView, menu.command, self)
+        commandService.registInternalCommand(this.activateView, menu.command, this)
       } else {
         events.on(this.activateView, menu.command, function(args) {
           console.info('on event', menu.command)
@@ -112,11 +116,6 @@ export default {
       }
     }
     console.info('reply view menus', this.extensionMenus, menus)
-    // request update view resources
-    // self.$nextTick(() => {
-    //   console.info('**************' + 'display')
-    //   self.$store.dispatch('display')
-    // })
     this.$store.dispatch('display')
     this.isUpdated = true
   },

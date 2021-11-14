@@ -12,7 +12,23 @@
       "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png",
       "onView:Overview",
       "onSave:"
-    ]
+    ],
+    "contributes": {
+      "menus": {
+        "overview/mapview": [
+          {
+            "command": "exportResources",
+            "group": "1",
+            "name": "导出文件"
+          },
+          {
+            "command": "deleteResources",
+            "group": "1",
+            "name": "删除"
+          }
+        ]
+      }
+    }
   },
   "dependencies": {
   }

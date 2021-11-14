@@ -78,9 +78,9 @@ module.exports = {
     const newName = 'Image0'
     await property.updateName(page, newName)
     await page.waitForTimeout(1000)
-    await validName(page, newName)
     // right menu
     await showMenu(page)
+    await validName(page, newName)
     await removeResource(page)
   }
 }

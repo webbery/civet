@@ -87,7 +87,7 @@ describe('****************Start Functional Test*************', function (resolve
     testBrowserExtension.run(done, mainWindowPage)
   })
   it('waterfall layout view', async function() {
-    // await testClassicalView.test(mainWindowPage)
+    await testClassicalView.test(mainWindowPage)
   })
   it('mapview layout', async function() {
     await testMapView.test(mainWindowPage)
