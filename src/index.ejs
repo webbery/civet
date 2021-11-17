@@ -26,6 +26,10 @@
           },
           emit: function(id, event, value) {
             console.info('emit', event, 'to', id)
+            if (!events[id]) {
+              console.error('event ', id, 'not exist')
+              return
+            }
             return events[id].emit(event, value)
           },
           on: function(id, event, listener) {

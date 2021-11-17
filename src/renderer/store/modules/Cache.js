@@ -186,6 +186,10 @@ const mutations = {
   },
   display(state, data) {
     console.info('emit display')
+    if (!events) {
+      console.error('event is empty')
+      return
+    }
     events.emit('Overview', 'update', {
       'class': state.viewClass,
       'resource': state.viewItems

@@ -158,7 +158,7 @@ export default {
       } else {
         StyleLoader.load(value.style)
         Vue.set(this.htmls, value.id, {html: value.body, show: true})
-        console.info('new to', value.id, value.body)
+        console.info('new to', value.id)
       }
       this.activateView = value.id
       this.isUpdated = false

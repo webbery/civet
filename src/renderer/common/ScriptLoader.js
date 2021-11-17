@@ -38,9 +38,14 @@ export default (function() {
       // https://stackoverflow.com/questions/50955566/remove-script-tag-from-html-and-from-the-dom-with-js
       if (matchs) {
         console.info('content script')
-        s.innerHTML = matchs[2]
-        document.body.appendChild(s)
-        resolve(true)
+        try {
+          s.innerHTML = matchs[2]
+          document.body.appendChild(s)
+          resolve(true)
+        } catch (err) {
+          // events.emit('civet', 'onErrorMessage', {msg: err})
+          resolve(false)
+        }
       } else {
         s.onload = function() {
           console.info('complete')
