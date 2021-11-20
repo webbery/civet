@@ -1,5 +1,5 @@
 <template>
-  <div class="property">
+  <div class="_cv_property">
       <div :body-style="{ padding: '0px' }">
         <div style="padding: 4px;" class="image-name">
           <InputLabel v-on:changed="onNameChaged">{{filename}}</InputLabel>
@@ -334,7 +334,7 @@ export default {
 </script>
 
 <style scoped>
-.property{
+._cv_property{
   margin: 5px 5px 2px 5px;
 }
 img{

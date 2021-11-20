@@ -15,7 +15,7 @@ import StyleLoader from '@/common/StyleLoader'
 import PopMenu from '@/components/Menu/PopMenu'
 import { mapState } from 'vuex'
 import bus from '../utils/Bus'
-import { clearArgs, events } from '../../common/RendererService'
+import { clearArgs, events, getCurrentViewName, updateCurrentViewName } from '../../common/RendererService'
 import { InternalCommand, commandService } from '@/common/CommandService'
 import { config } from '@/../public/CivetConfig'
 import Vue from 'vue'
@@ -26,7 +26,6 @@ export default {
   data() {
     return {
       htmls: {},
-      activateView: null,
       script: '',
       isUpdated: false,
       menus: [
@@ -43,6 +42,7 @@ export default {
   },
   mounted() {
     console.info('web panel mounted', config.defaultView)
+    updateCurrentViewName(config.defaultView)
     // this.$ipcRenderer.send(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)
     this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, config.defaultView)
   },
@@ -65,10 +65,11 @@ export default {
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break
         case '/uncategory':
-          this.$events.emit('Overview', 'update', {resource: this.$store.state.Cache.viewItems})
+          const view = getCurrentViewName()
+          this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
           break
         case '/untag':
-          this.$events.emit('Overview', 'update', {resource: this.$store.state.Cache.viewItems})
+          this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
           break
         case '/query':
           switch (to.query.type) {
@@ -91,27 +92,27 @@ export default {
   }),
   async updated() {
     if (this.isUpdated) return
+    const activateView = getCurrentViewName()
     try {
       await ScriptLoader.load(this.script)
     } catch (err) {
-      console.error(`load ${this.activateView} javascript exception: ${err}`)
+      console.error(`load ${activateView} javascript exception: ${err}`)
     }
     // console.info(value, 'menu is', menus)
-    const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + this.activateView)
-    console.info('updated', this.activateView)
+    const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + activateView)
     this.extensionMenus = []
     for (let menu of menus) {
       this.extensionMenus.push({
-        id: this.activateView,
+        id: activateView,
         name: menu.name,
         command: menu.command
       })
       if (this.isInternalCommand(menu.command)) {
-        commandService.registInternalCommand(this.activateView, menu.command, this)
+        commandService.registInternalCommand(activateView, menu.command, this)
       } else {
-        events.on(this.activateView, menu.command, function(args) {
+        events.on(activateView, menu.command, function(args) {
           console.info('on event', menu.command)
-          self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: this.activateView, command: 'ext:' + menu.command, args: args})
+          self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: activateView, command: 'ext:' + menu.command, args: args})
         })
       }
     }
@@ -147,9 +148,10 @@ export default {
       // console.info('copy URI:', url)
     },
     onPanelRouterInit(session, value) {
-      console.info('init overview', this.activateView)
-      if (this.activateView && this.activateView !== value.id) {
-        this.htmls[this.activateView].show = false
+      let activateView = getCurrentViewName()
+      console.info('init overview', activateView)
+      if (activateView && activateView !== value.id) {
+        this.htmls[activateView].show = false
       }
       if (this.htmls[value.id]) {
         this.htmls[value.id].show = true
@@ -158,9 +160,9 @@ export default {
         StyleLoader.load(value.style)
         Vue.set(this.htmls, value.id, {html: value.body, show: true})
         console.info('new to', value.id)
+        this.isUpdated = false
       }
-      this.activateView = value.id
-      this.isUpdated = false
+      updateCurrentViewName(value.id)
       this.script = value.script
     },
     isInternalCommand(command) {
@@ -193,12 +195,13 @@ export default {
       }
     },
     onSwitchView(viewid) {
+      const currentView = getCurrentViewName()
       console.info('switch view to', viewid)
-      if (this.activateView && this.activateView !== viewid) {
-        this.htmls[this.activateView].show = false
+      if (currentView && currentView !== viewid) {
+        this.htmls[currentView].show = false
         this.htmls[viewid].show = true
       }
-      this.activateView = viewid
+      updateCurrentViewName(viewid)
     }
   }
 }

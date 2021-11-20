@@ -4,7 +4,19 @@ import util from 'util'
 
 declare const _cv_events: any;
 declare let _cv_command_args: any;
+declare let _cv_activate_view_name: string;
+declare let _cv_overview_listeners: any;
 export const events = _cv_events;
+export function updateCurrentViewName(name: string) {
+  _cv_activate_view_name = name
+}
+export function getCurrentViewName(): string {
+  return _cv_activate_view_name
+}
+
+export function switchViewListener(view: string) {
+  _cv_events
+}
 
 type IPCType = IPCExtensionMessage|IPCNormalMessage;
 type NormalMessageCallback = (session: number, reply: any) => void;

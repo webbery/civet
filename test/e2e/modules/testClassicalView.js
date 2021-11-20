@@ -1,5 +1,6 @@
 const base = require('./base')
 const {expect, assert} = require('chai')
+const search = require('./testSearch')
 
 const CLASSICAL_LAYOUT = 0
 const SelectionIndex = 0
@@ -25,6 +26,7 @@ async function showMenu(page) {
 async function validName(page, name) {
   const images = await page.$$(CSSImage)
   const imageName = await images[SelectionIndex].evaluate(() => document.querySelector('.context').innerHTML)
+  console.info('image name', imageName)
   assert(name === imageName)
 }
 
@@ -63,6 +65,7 @@ module.exports = {
   validName: validName,
   search: async function(page) {
     await base.switchLayout(page, CLASSICAL_LAYOUT)
+    await search.searchByKeyword(page, 'green')
   },
   removeResource: removeResource,
   selectClass: selectClass,
@@ -77,7 +80,8 @@ module.exports = {
     await selectResource(page)
     const newName = 'Image0'
     await property.updateName(page, newName)
-    await page.waitForTimeout(1000)
+    await property.addTag(page, 'green')
+    // await property.removeTag(page)
     // right menu
     await showMenu(page)
     await validName(page, newName)

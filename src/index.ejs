@@ -14,6 +14,8 @@
     <script>
       let _cv_command_args = {}
       let _cv_message_id_ = 0
+      let _cv_activate_view_name = ''
+      let _cv_overview_listeners = {}
       const _cv_events = (function() {
         const { EventEmitter } = require('events')
         let events = new Map()
@@ -65,7 +67,11 @@
             console.info('remove item:', id)
           },
           on: function(event, listener) {
-            _cv_events.on('Overview', event, listener)
+            const name = 'Overview:' + _cv_activate_view_name
+            if (!_cv_overview_listeners[name]) {
+              _cv_overview_listeners[name] = [event, listener]
+            }
+            _cv_events.on(name, event, listener)
           }
         }
         return function() {

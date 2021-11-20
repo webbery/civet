@@ -1,7 +1,7 @@
 import { Resource } from '@/../public/Resource'
 import { TreeNode } from '@/components/Control/Tree'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
-import { service, events } from '@/common/RendererService'
+import { service, events, getCurrentViewName } from '@/common/RendererService'
 import { isEmpty } from '@/../public/Utility'
 import Vue from 'vue'
 import { Cache } from './CacheInstance'
@@ -11,8 +11,13 @@ import { logger } from '@/../public/Logger'
 import { Search } from '@/common/SearchManager'
 import { ViewManager } from './ViewItemManager'
 
-// const maxCacheSize = 40 + 20 + 10
-// console.info(civet.PropertyType.String)
+function updateOverview(state) {
+  const view = getCurrentViewName()
+  events.emit('Overview:' + view, 'update', {
+    'class': state.viewClass,
+    'resource': state.viewItems
+  })
+}
 
 const state = {
   resources: [],
@@ -132,10 +137,7 @@ const mutations = {
       }
       console.info('class result', state.classes)
     }
-    events.emit('Overview', 'update', {
-      'class': state.viewClass,
-      'resource': state.viewItems
-    })
+    updateOverview(state)
     // init classes name
     const generateClassPath = (item, index, array) => {
       if (!array[index].parent) return
@@ -190,10 +192,7 @@ const mutations = {
       console.error('event is empty')
       return
     }
-    events.emit('Overview', 'update', {
-      'class': state.viewClass,
-      'resource': state.viewItems
-    })
+    updateOverview(state)
   },
   query(state, result) {
     state.viewItems.splice(0, state.viewItems.length)
@@ -201,7 +200,8 @@ const mutations = {
     for (let idx = 0; idx < result.length; ++idx) {
       state.viewItems.unshift(Cache.files[result[idx].id])
     }
-    events.emit('Overview', 'update', {
+    const view = getCurrentViewName()
+    events.emit('Overview:' + view, 'update', {
       'resource': state.viewItems
     })
   },
@@ -305,7 +305,8 @@ const mutations = {
     const fileid = mutation.id
     Cache.files[fileid].filename = mutation.filename
     service.send(IPCNormalMessage.UPDATE_RESOURCE_NAME, mutation)
-    events.emit('Overview', 'property', {
+    const view = getCurrentViewName()
+    events.emit('Overview:' + view, 'property', {
       'id': mutation.id,
       'name': mutation.filename
     })
@@ -327,10 +328,7 @@ const mutations = {
       }
     }
     console.info('remove files', filesid, state.viewItems.length)
-    events.emit('Overview', 'update', {
-      'class': state.viewClass,
-      'resource': state.viewItems
-    })
+    updateOverview(state)
     state.allCount -= removeCnt
     // remove from db
     service.send(IPCNormalMessage.REMOVE_RESOURCES, filesid)
@@ -367,10 +365,7 @@ const mutations = {
         Vue.set(state.viewItems, fileIdx++, Cache.files[classesFiles[idx].id])
       }
     }
-    events.emit('Overview', 'update', {
-      'class': state.viewClass,
-      'resource': state.viewItems
-    })
+    updateOverview(state)
     console.info('display classes', state.viewClass)
   },
   clear(state, data) {

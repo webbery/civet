@@ -12,6 +12,7 @@
         }
         #items {
             position: relative;
+            width: 100%;
         }
         .hr-divider {
             line-height: 1em;
@@ -175,7 +176,7 @@
                 item['left'] = minCol * curWidth
                 item['top'] = minVertical[minCol]
                 root.appendChild(generateFromTemplate(item))
-                // console.info('grid element', minCol, minVertical, item)
+                console.info('grid element', minCol, minVertical, item)
                 updateMinColumn(minCol, height)
             }
             function removeAll() {
