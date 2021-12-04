@@ -215,6 +215,9 @@ export default {
 .custom .el-slider__bar {
   height: 6px;
 }
+.custom .el-page-header {
+  white-space: nowrap;
+}
 .custom .el-slider__button {
   width: 8px;
   height: 8px;

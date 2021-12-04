@@ -4,10 +4,8 @@
 <script>
 export default {
   name: 'search-input',
-  data() {
-    return {
-      value: ''
-    }
+  props: {
+    value: ''
   },
   methods: {
     onInputChange(event) {
@@ -18,6 +16,8 @@ export default {
         this.$nextTick(() => {
           self.value = ''
         })
+      } else {
+        this.$emit('keywordChanged', this.value)
       }
     }
   }

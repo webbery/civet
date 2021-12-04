@@ -256,11 +256,11 @@ el-tab-pane {
   margin: 0 20px;
   padding: 0 10px;
 }
-.item:hover {
+._cv_item:hover {
   background-color:rgb(55, 80, 97);
   -webkit-user-select: none;
 }
-.item {
+._cv_item {
   color: white;
   font-size: 14px;
 }

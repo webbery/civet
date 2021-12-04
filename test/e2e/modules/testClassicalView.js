@@ -39,7 +39,9 @@ async function removeResource(page) {
   await menus[menus.length - 1].click()
   await page.waitForTimeout(1000)
   images = await getResources(page)
-  // assert(beforeRemoveLen > images.length)
+  if (images) {
+    assert(beforeRemoveLen > images.length)
+  }
   // const counts = await base.getCounts(page)
   // assert(counts[0] === images.length)
   // assert(counts[1] === images.length)
@@ -54,7 +56,11 @@ async function selectClass(page) {
 }
 
 async function getResources(page) {
-  await page.waitForSelector(CSSImage)
+  try {
+    await page.waitForSelector(CSSImage, {timeout: 2000})
+  } catch (err) {
+    return null
+  }
   const images = await page.$$(CSSImage)
   return images
 }
@@ -81,10 +87,21 @@ module.exports = {
     const newName = 'Image0'
     await property.updateName(page, newName)
     await property.addTag(page, 'green')
-    // await property.removeTag(page)
+    await validName(page, newName)
+    // search
+    await search.searchByKeyword(page, 'green')
+    await page.waitForTimeout(5000)
+
+    await property.removeTag(page)
     // right menu
     await showMenu(page)
-    await validName(page, newName)
     await removeResource(page)
+    // const counts = await base.getCounts(page)
+    // // total count is zero
+    // assert(counts[0] = 0)
+    // // total unclass file is zero
+    // assert(counts[1] = 0)
+    // // total untag file is zero
+    // assert(counts[2] = 0)
   }
 }

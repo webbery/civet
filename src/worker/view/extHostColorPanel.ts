@@ -9,25 +9,9 @@ export class ExtHostColorPanel extends ExtHostView {
 
   constructor(id: string, proxy: RPCProtocal) {
     super(id, proxy)
-    const self = this
+    // const self = this
     const colorArray = new Array<string>();
-    this.#color = new Proxy(colorArray, {
-      apply: function(target: any, thisArg: any, argumentsList: any) {
-        console.info('array :', target)
-        return thisArg[target].apply(this, argumentsList)
-      },
-      deleteProperty: function() {
-        return true
-      },
-      set: function(target, property, value, receiver) {
-        target[property] = value;
-        // update 
-        if (property !== 'length') {
-          self.update(ViewType.Property, 'color', value)
-        }
-        return true
-      }
-    })
+    this.#color = colorArray
   }
 
   get color() {

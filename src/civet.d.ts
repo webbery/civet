@@ -117,7 +117,7 @@ declare module 'civet' {
         name: string;
         preview?: ArrayBuffer;
         colorPanel?: ColorPropertyPanel;
-        tags: string[];
+        tag: string[];
         category?: string[];
         property: ResourceProperty[];
     }

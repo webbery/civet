@@ -11,6 +11,10 @@ export class ExtPropertyView{
   constructor(id: string, rpcProxy: RPCProtocal) {
     this.propertyView = new PropertyView(id, rpcProxy)
   }
+
+  update() {
+    this.propertyView.updateProperty()
+  }
 }
 
 export class PropertyView extends ExtHostView{
@@ -24,24 +28,25 @@ export class PropertyView extends ExtHostView{
   constructor(id: string, rpcProxy: RPCProtocal) {
     super(id, rpcProxy)
     const propArray = new Array<ExtResourceProperty>()
-    const self = this
-    this.property = new Proxy(propArray, {
-      apply: function(target: any, thisArg: any, argumentsList: any) {
-        console.info('array :', target)
-        return thisArg[target].apply(this, argumentsList)
-      },
-      deleteProperty: function() {
-        return true
-      },
-      set: function(target, property, value, receiver) {
-        target[property] = value;
-        // update 
-        if (property !== 'length') {
-          self.update(ViewType.Property, 'properties', value)
-        }
-        return true
-      }
-    })
+    this.property = propArray
+    // const self = this
+    // this.property = new Proxy(propArray, {
+    //   apply: function(target: any, thisArg: any, argumentsList: any) {
+    //     console.info('array :', target)
+    //     return thisArg[target].apply(this, argumentsList)
+    //   },
+    //   deleteProperty: function() {
+    //     return true
+    //   },
+    //   set: function(target, property, value, receiver) {
+    //     target[property] = value;
+    //     // update 
+    //     // if (property !== 'length') {
+    //     //   self.update(ViewType.Property, 'properties', value)
+    //     // }
+    //     return true
+    //   }
+    // })
   }
 
   get name(): string {
@@ -49,12 +54,10 @@ export class PropertyView extends ExtHostView{
   }
   set name(val: string) {
     this.#name = val
-    this.update(ViewType.Property, 'name', val)
   }
 
   set preview(val: ArrayBuffer|null|undefined) {
     this.#preview = val
-    this.update(ViewType.Property, 'preview', val)
   }
 
   get preview() {
@@ -67,12 +70,10 @@ export class PropertyView extends ExtHostView{
 
   set tag(val: string[]) {
     this.#tag = val
-    this.update(ViewType.Property, 'tag', val)
   }
 
   set category(val: string[]) {
     this.#category = val
-    this.update(ViewType.Property, 'classes', val)
   }
 
   get colorPanel() {
@@ -84,5 +85,16 @@ export class PropertyView extends ExtHostView{
 
   set colorPanel(val: ExtHostColorPanel | undefined) {
     this.#colorPanel = val
+  }
+
+  updateProperty() {
+    this.update(ViewType.Property, {
+      name: this.#name,
+      preview: this.#preview,
+      tag: this.#tag,
+      color: this.#colorPanel? this.#colorPanel.color: undefined,
+      category: this.#category,
+      properties: this.property
+    })
   }
 }

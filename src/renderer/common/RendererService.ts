@@ -90,6 +90,13 @@ class RendererService {
             case 3:
               callback(msg.data.id, types[2], types[1], msg.data.msg[0])
               break
+            case 4:
+              if (Array.isArray(msg.data.msg) && Array.isArray(msg.data.msg[0])) {
+                callback(msg.data.id, types[2], types[1], msg.data.msg[0])
+              } else {
+                callback(msg.data.id, types[2], types[1], msg.data.msg)
+              }
+              break
             case 5:
               if (Array.isArray(msg.data.msg) && Array.isArray(msg.data.msg[0])) {
                 callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])

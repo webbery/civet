@@ -12,7 +12,11 @@ export class ExtHostView {
 
   get id() { return this._id; }
 
-  update(type: ViewType, property: string, value: any) {
-    this.proxy.post2property(this._id, type, this.constructor.name, property, value)
+  // update(type: ViewType, property: string, value: any) {
+  //   this.proxy.post2property(this._id, type, this.constructor.name, property, value)
+  // }
+
+  update(type: ViewType, value: any) {
+    this.proxy.post(this._id, type, this.constructor.name, value)
   }
 }

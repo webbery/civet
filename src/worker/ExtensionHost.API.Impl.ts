@@ -41,6 +41,12 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
         let e = new ExtensionHostType.ExtContentItemSelectedEvent()
         e.items.push(resource)
         listener.call(thisArg, e)
+        if (e.items.length === 1) {
+          console.info('update seletion property')
+          extPropertyView.update()
+        } else {
+          // select multiple items
+        }
       }
       rpcProtocal.regist('getSelectContentItemInfo', getResourcesWrapper, thisArg)
     },

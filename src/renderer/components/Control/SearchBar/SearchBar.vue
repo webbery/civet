@@ -5,7 +5,7 @@
       <div class="search-default" v-for="(item, i) in conditions" :key="i" >
         <SearchItem :item="item" @erase="onItemDelete"></SearchItem>
       </div>
-      <SearchInput class="search-input" @addSearchItem="onAddSearchText"></SearchInput>
+      <SearchInput class="search-input" @addSearchItem="onAddSearchText" @keywordChanged="onKeywordChanged" :value="inputText"></SearchInput>
     </div>
     <div class="el-input-group__append">
       <button type="button" class="el-button el-button--default el-button--mini is-round" @click="onSearch()">
@@ -28,7 +28,9 @@ export default {
   data() {
     return {
       conditions: [],
-      choices: null
+      choices: null,
+      inputText: '',
+      keyword: ''
     }
   },
   mounted() {
@@ -36,6 +38,7 @@ export default {
   },
   methods: {
     onAddSearchText(value) {
+      console.info('input search value:', value)
       if (typeof value === 'string') {
         let condition = new SearchCondition()
         condition.type = ConditionType.String
@@ -68,6 +71,10 @@ export default {
         }
       }
     },
+    onKeywordChanged(value) {
+      console.info('onkeyword changed:', value, this.keyword)
+      this.keyword = value
+    },
     onUpdateSearchBar(value) {
       this.onAddSearchText(value)
     },
@@ -82,6 +89,15 @@ export default {
       }
     },
     onSearch() {
+      if (this.conditions.length === 0 && this.keyword) {
+        let condition = new SearchCondition()
+        condition.type = ConditionType.String
+        condition.keyword = this.keyword
+        condition.name = DefaultQueryName.Keyword
+        condition.operation = ConditionOperation.Add
+        this.inputText = ''
+        this.conditions.push(condition)
+      }
       console.info('start search', this.conditions)
       this.$store.dispatch('query', this.conditions)
       this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})

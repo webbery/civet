@@ -32,12 +32,11 @@ function testMeta(page) {
 }
 
 async function getItem(page, index) {
-  console.info('wait for 1')
   await page.waitForSelector(CSSItems)
-  console.info('wait for 2')
   const items = await page.$$(CSSItems)
   return items[index]
 }
+
 
 module.exports = {
   updateName: async function(page, name) {
@@ -51,7 +50,7 @@ module.exports = {
     input.type(name)
     await page.waitForTimeout(1000)
     await input.press('Enter')
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1500)
     await page.waitForSelector(CSSName)
     const value = await page.evaluate(() => document.querySelector('.image-name .context').innerHTML)
     assert(value === name)
@@ -68,14 +67,17 @@ module.exports = {
   },
   removeTag: async function(page) {
     const tag = await getItem(page, TagIndex)
-    console.info('tag:', tag)
-    let btnX = await tag.$('span i')
+    let btnX = await tag.$$('span i')
     const originCount = btnX.length
     assert(originCount > 0)
-    await btnX.click()
+    await btnX[originCount - 1].click()
     await page.waitForTimeout(1000)
-    btnX = await tag.$('span i')
-    const currentCount = btn.length
-    assert(originCount === (currentCount + 1))
+    try {
+      await tag.waitForSelector('span i', {timeout: 1500})
+      btnX = await tag.$$('span i')
+      const currentCount = btn.length
+      assert(originCount === (currentCount + 1))
+    } catch (err) {
+    }
   }
 }

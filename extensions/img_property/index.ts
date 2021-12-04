@@ -18,8 +18,8 @@ window.onDidSelectContentItem(async (e: ContentItemSelectedEvent) => {
     const resource = e.items[0]
     propertyView.name = resource.name
     propertyView.preview = resource.thumbnail
-    window.propertyView.colorPanel.color = resource.color
-    propertyView.tags = resource.tag
+    propertyView.colorPanel.color = resource.color
+    propertyView.tag = resource.tag
     propertyView.category = resource.category
     propertyView.property.splice(0, propertyView.property.length)
     for (let prop of resource.meta) {

@@ -105,36 +105,40 @@ export default {
     this.$ipcRenderer.on('Property', this.onViewUpdate)
   },
   methods: {
-    onViewUpdate(session, id, classname, propname, value) {
+    onViewUpdate(session, id, classname, value) {
       logger.debug(`onViewUpdate id: ${id}, class: ${classname}, value:`, value)
-      switch (propname) {
-        case 'name':
-          this.filename = value
-          break
-        case 'tag':
-          resetArray(this, this.tags, value)
-          break
-        case 'classes':
-          resetArray(this, this.classes, value)
-          break
-        case 'properties':
-          this.metaNames.push(i18n(value.name))
-          // if (value.type === )
-          if (value.name === 'size') {
-            this.metaValues.push(this.getSize(parseInt(value.value)))
-          } else {
-            this.metaValues.push(value.value)
-          }
-          break
-        case 'preview':
-          this.thumbnail = thumbnail2Base64(value)
-          break
-        case 'color':
-          this.colors.push(value)
-          break
-        default:
-          break
-      }
+      this.filename = value.name
+      resetArray(this, this.tags, value.tag)
+      this.thumbnail = thumbnail2Base64(value.preview)
+      this.colors = value.color
+      // switch (propname) {
+      //   case 'name':
+      //     this.filename = value
+      //     break
+      //   case 'tag':
+      //     resetArray(this, this.tags, value)
+      //     break
+      //   case 'classes':
+      //     resetArray(this, this.classes, value)
+      //     break
+      //   case 'properties':
+      //     this.metaNames.push(i18n(value.name))
+      //     // if (value.type === )
+      //     if (value.name === 'size') {
+      //       this.metaValues.push(this.getSize(parseInt(value.value)))
+      //     } else {
+      //       this.metaValues.push(value.value)
+      //     }
+      //     break
+      //   case 'preview':
+      //     this.thumbnail = thumbnail2Base64(value)
+      //     break
+      //   case 'color':
+      //     this.colors.push(value)
+      //     break
+      //   default:
+      //     break
+      // }
     },
     cleanProperty(filesid) {
       this.metaNames.splice(0, this.metaNames.length)
