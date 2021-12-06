@@ -120,7 +120,6 @@ function createRendererWindow() {
   mainWindow.on('closed', () => {
     console.info('main window closed')
   })
-  mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV !== 'production') {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
@@ -133,8 +132,8 @@ function createRendererWindow() {
 }
 function createWorkerWindow (bFirst) {
   workerWindow = new BrowserWindow({
-    show: true,
-    // show: process.env.NODE_ENV !== 'production',
+    // show: true,
+    show: process.env.NODE_ENV !== 'production',
     frame: false,
     webPreferences: {
       nodeIntegration: true,

@@ -99,6 +99,9 @@ export class SearchManager {
           break
       }
     }
+    if (conditions.length === 0) {
+      query['keyword'] = '*'
+    }
     return query
   }
 }

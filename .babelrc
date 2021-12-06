@@ -210,6 +210,9 @@
         "useBuiltIns": true,
         "loose": true
       }
-    ]
+    ],
+    ["./babel-plugin/log-replacer", {
+      "libraryName": "log-replacer-plugin"
+    }]
   ]
 }

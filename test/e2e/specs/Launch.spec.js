@@ -12,7 +12,7 @@ let spawnedProcess
 let app
 let mainWindowPage
 
-const run = async (done) => {
+const run = async () => {
   const port = 9200 // Debugging port
   const startTime = Date.now()
   const timeout = 20000 // Timeout in miliseconds

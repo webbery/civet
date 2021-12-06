@@ -100,7 +100,6 @@ export default {
   },
   methods: {
     onViewUpdate(id, classname, html) {
-      console.info('onViewUpdate', id, html)
       this.$set(this.extensions, id, {html: html})
       // this.extensions[id] = {html: html}
     },

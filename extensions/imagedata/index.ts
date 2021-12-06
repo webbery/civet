@@ -14,7 +14,6 @@ class DataParser{
   async parse(filepath: string, file: IResource) {
     const Sharp = require('sharp')
     try {
-      console.info('sharp:', Sharp)
       const image = Sharp(filepath)
       let scale = 1
       const w = this.getNumberProperty(file, 'width')

@@ -3,7 +3,7 @@
     <!-- <select id="keywords" class="el-input__inner" multiple></select> -->
     <div class="search-group" >
       <div class="search-default" v-for="(item, i) in conditions" :key="i" >
-        <SearchItem :item="item" @erase="onItemDelete"></SearchItem>
+        <SearchItem :item="item" @erase="onItemDelete" :v-if="item.operation !== 1"></SearchItem>
       </div>
       <SearchInput class="search-input" @addSearchItem="onAddSearchText" @keywordChanged="onKeywordChanged" :value="inputText"></SearchInput>
     </div>
@@ -20,7 +20,7 @@ import SearchInput from './SearchInput'
 import { mapState } from 'vuex'
 import bus from '../../utils/Bus'
 import {logger} from '@/../public/Logger'
-import { SearchCondition, ConditionType, ConditionOperation, DefaultQueryName } from '@/common/SearchManager'
+import { SearchCondition, ConditionType, ConditionOperation, DefaultQueryName, Search } from '@/common/SearchManager'
 
 export default {
   name: 'search-bar',
@@ -80,8 +80,10 @@ export default {
     },
     onItemDelete(item) {
       for (let idx = this.conditions.length - 1; idx >= 0; --idx) {
-        const condition = this.conditions[idx]
+        let condition = this.conditions[idx]
         if (condition.type === item.type && condition.text === item.text) {
+          condition.operation = ConditionOperation.Remove
+          Search.update([condition])
           this.conditions.splice(idx, 1)
           bus.emit(bus.EVENT_UPDATE_QUERY_EXTERNAL_CONDITION, item)
           break

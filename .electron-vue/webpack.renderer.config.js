@@ -64,7 +64,7 @@ let rendererConfig = {
         use: 'vue-html-loader'
       },
       {
-        test: /\.js$/,
+        test: /\.(js|ts)$/,
         use: 'babel-loader',
         exclude: /node_modules/
       },
