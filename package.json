@@ -179,7 +179,7 @@
     "devtron": "^1.4.0",
     "dts-bundle": "^0.7.3",
     "ejs": "^3.1.6",
-    "electron": "^11.2.3",
+    "electron": "^11.5.0",
     "electron-builder": "^22.9.0",
     "electron-builder-squirrel-windows": "^22.3.5",
     "electron-debug": "^1.5.0",
