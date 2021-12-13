@@ -52,7 +52,7 @@ export default {
         for (let k of keys) {
           // clean this type of keywords
           for (let idx = this.conditions.length - 1; idx >= 0; --idx) {
-            if (this.conditions[idx].type === k) {
+            if (this.conditions[idx].name === k) {
               this.conditions.splice(idx, 1)
             }
           }
@@ -62,11 +62,11 @@ export default {
             if (item === '*') continue
             let condition = new SearchCondition()
             condition.type = ConditionType.String
-            condition.name = DefaultQueryName.Keyword
+            condition.name = k
             condition.keyword = item
             condition.operation = ConditionOperation.Add
             console.info('add condition', condition)
-            this.conditions.push({type: k, text: item})
+            this.conditions.push(condition)
           }
         }
       }

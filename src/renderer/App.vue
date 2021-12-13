@@ -28,10 +28,12 @@ export default {
     this.$events.on('civet', 'onErrorMessage', this.onErrorTips)
   },
   mounted() {
+    console.info('mount:', config)
     if (config.isFirstTime() || config.getCurrentDB() === undefined) {
       const guider = document.getElementById('guider')
       guider.showModal()
     } else {
+      console.debug('next tick envoke')
       this.$nextTick(() => {
         this.$store.dispatch('init')
         this.$events.on('civet', 'showResourceDetail', this.onResourceShow)

@@ -37,6 +37,7 @@ function checkBasicType<T>(v: T): boolean {
 
 export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T }, ...args: any): T {
   const id = (ctor as any).name
+  console.debug('registSingletonObject:', id)
   if (serviceIds[id] !== undefined) return serviceIds[id]
   let paramsTypes = Reflect.getMetadata('design:paramtypes', ctor)
   if (!paramsTypes) {

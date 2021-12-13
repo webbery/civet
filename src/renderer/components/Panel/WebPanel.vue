@@ -57,19 +57,19 @@ export default {
         case '/':
           // this.$store.dispatch('display')
           console.info('Overview update', this.$store.state.Cache.viewClass)
-          // this.$events.emit('Overview', 'update', {
-          //   'class': this.$store.state.Cache.viewClass,
-          //   'resource': this.$store.state.Cache.viewItems
-          // })
-          this.$store.dispatch('getClassesAndFiles', '/')
+          if (to.query.name === '全部') {
+            this.$store.dispatch('getClassesAndFiles', '/')
+          }
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break
         case '/uncategory':
           const view = getCurrentViewName()
-          this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
+          this.$store.dispatch('getUncategoryResources')
+          // this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
           break
         case '/untag':
-          this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
+          // this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
+          this.$store.dispatch('getUntagResources')
           break
         case '/query':
           switch (to.query.type) {

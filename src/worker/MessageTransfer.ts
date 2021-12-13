@@ -47,19 +47,20 @@ export class MessagePipeline {
       this.#emitters = new Map<string, LinkedList<Emitter>>();
       ipcRenderer.on('message-from-main', async (event: any, arg: any) => {
         if (!this.#isRendererStart) this.#isRendererStart = true
-        console.info('==================')
-        console.info('arg', arg)
-        console.info('==================')
         let reply
-        const [func, self] = this.processor.get(arg.type)
-        if (self !== undefined) {
-          reply = await func.call(self, arg.id, arg.data)
-        } else {
-          reply = await func(arg.id, arg.data)
+        try {
+          const [func, self] = this.processor.get(arg.type)
+          if (self !== undefined) {
+            reply = await func.call(self, arg.id, arg.data)
+          } else {
+            reply = await func(arg.id, arg.data)
+          }
+        } catch (error: any) {
+          console.error(`${arg}, ${error}`)
+          return
         }
-        
-        console.info('reply', reply)
         if (reply === undefined) return
+        console.info('reply', reply)
         let msg = new CivetProtocol()
         msg.id = arg.id
         msg.type = reply.type
@@ -67,7 +68,6 @@ export class MessagePipeline {
         msg.tick = 0
         this.reply(msg)
       })
-      console.info('pipeline init finish')
     }
     reply(msg: CivetProtocol) {
       // if same type exist but id is different, remove smaller id message.
@@ -96,7 +96,6 @@ export class MessagePipeline {
       }
       console.info(this)
       this.timer.start(() => {
-        console.info('timer', this)
         if (this.messageQueue.size === 0) {
           this.timer.stop();
           return;

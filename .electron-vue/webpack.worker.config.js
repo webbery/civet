@@ -65,7 +65,7 @@ let workerConfig = {
         use: 'vue-html-loader'
       },
       {
-        test: /\.(js|ts)$/,
+        test: /\.(ts|js)$/,
         use: 'babel-loader',
         exclude: /node_modules/
       },
@@ -178,7 +178,7 @@ let workerConfig = {
 }
 
 if (process.env.NODE_ENV !== 'development') {
-  workerConfig.devtool = ''
+  // workerConfig.devtool = ''
 
   workerConfig.plugins.push(
     new TerserPlugin(),

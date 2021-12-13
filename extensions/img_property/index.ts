@@ -12,7 +12,6 @@ function shouldDisplay(prop: ResourceProperty): boolean {
 }
 
 window.onDidSelectContentItem(async (e: ContentItemSelectedEvent) => {
-  console.info('onDidSelectContentItem', e)
   let propertyView = window.propertyView
   if (e.items.length === 1) {
     const resource = e.items[0]

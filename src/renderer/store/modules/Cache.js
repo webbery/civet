@@ -11,12 +11,19 @@ import { logger } from '@/../public/Logger'
 import { Search } from '@/common/SearchManager'
 import { ViewManager } from './ViewItemManager'
 
-function updateOverview(state) {
+function updateOverview(state, showClasses) {
   const view = getCurrentViewName()
-  events.emit('Overview:' + view, 'update', {
-    'class': state.viewClass,
-    'resource': state.viewItems
-  })
+  if (showClasses) {
+    events.emit('Overview:' + view, 'update', {
+      'class': state.viewClass,
+      'resource': state.viewItems
+    })
+  } else {
+    events.emit('Overview:' + view, 'update', {
+      'class': [],
+      'resource': state.viewItems
+    })
+  }
 }
 
 const state = {
@@ -137,7 +144,7 @@ const mutations = {
       }
       console.info('class result', state.classes)
     }
-    updateOverview(state)
+    updateOverview(state, true)
     // init classes name
     const generateClassPath = (item, index, array) => {
       if (!array[index].parent) return
@@ -192,7 +199,7 @@ const mutations = {
       console.error('event is empty')
       return
     }
-    updateOverview(state)
+    updateOverview(state, true)
   },
   query(state, result) {
     state.viewItems.splice(0, state.viewItems.length)
@@ -210,6 +217,13 @@ const mutations = {
     state.untags = info.untags.length
     // update tags
     state.tags = info.tags
+  },
+  updateViewResources(state, data) {
+    state.viewItems.splice(0, state.viewItems.length)
+    for (let idx = 0, len = data.length; idx < len; ++idx) {
+      Vue.set(state.viewItems, idx, Cache.files[data[idx]])
+    }
+    updateOverview(state, false)
   },
   // addTag(state, info) {
   //   const { fileID, tag } = info
@@ -298,6 +312,7 @@ const mutations = {
     console.info('changeClassName', mutation, state.classesName)
     const indx = state.classesName.indexOf(mutation.old)
     state.classesName[indx] = mutation.new
+    updateOverview(state, true)
     service.send(IPCNormalMessage.UPDATE_CATEGORY_NAME, { oldName: mutation.old, newName: mutation.new })
   },
   changeFileName(state, mutation) {
@@ -328,7 +343,7 @@ const mutations = {
       }
     }
     console.info('remove files', filesid, state.viewItems.length)
-    updateOverview(state)
+    updateOverview(state, true)
     state.allCount -= removeCnt
     // remove from db
     service.send(IPCNormalMessage.REMOVE_RESOURCES, filesid)
@@ -348,24 +363,37 @@ const mutations = {
     state.untags = counts.untags.length
   },
   getClassesAndFiles(state, classesFiles) {
-    console.info('getClassesAndFiles', classesFiles)
-    // state.viewItems.splice(0, state.viewItems.length)
-    let clsIdx = 0
-    let fileIdx = 0
+    console.debug('getClassesAndFiles', classesFiles)
     state.viewClass.splice(0, state.viewClass.length)
     state.viewItems.splice(0, state.viewItems.length)
-    for (let idx = 0; idx < classesFiles.length; ++idx) {
-      if (classesFiles[idx].type === 'clz') {
+    if (classesFiles.length === 1) {
+      let clsIdx = 0
+      let fileIdx = 0
+      const items = classesFiles[0]
+      for (let idx = 0, len = items.length; idx < len; ++idx) {
+        if (items[idx].type === 'clz') {
+          const item = {}
+          item.path = items[idx].name
+          const pos = items[idx].name.lastIndexOf('/') + 1
+          item.name = items[idx].name.substring(pos)
+          Vue.set(state.viewClass, clsIdx++, item)
+        } else {
+          Vue.set(state.viewItems, fileIdx++, Cache.files[items[idx].id])
+        }
+      }
+    } else {
+      const [resources, classes] = classesFiles
+      for (let idx = 0, len = classes.lenght; idx < len; ++idx) {
         const item = {}
-        item.path = classesFiles[idx].name
-        const pos = classesFiles[idx].name.lastIndexOf('/') + 1
-        item.name = classesFiles[idx].name.substring(pos)
-        Vue.set(state.viewClass, clsIdx++, item)
-      } else {
-        Vue.set(state.viewItems, fileIdx++, Cache.files[classesFiles[idx].id])
+        item.name = classes[idx]
+        item.path = classes[idx]
+        Vue.set(state.viewClass, idx, item)
+      }
+      for (let idx = 0, len = resources.length; idx < len; ++idx) {
+        Vue.set(state.viewItems, idx, Cache.files[resources[idx]])
       }
     }
-    updateOverview(state)
+    updateOverview(state, true)
     console.info('display classes', state.viewClass)
   },
   clear(state, data) {
@@ -397,19 +425,25 @@ const mutations = {
 
 const actions = {
   async init({ commit }, flag) {
-    const { unclasses, untags } = await remote.recieveCounts()
-    const allClasses = await service.get(IPCNormalMessage.GET_ALL_CLASSES, '/')
-    console.info('all classes:', allClasses)
-    const filesSnap = await service.get(IPCNormalMessage.GET_RESOURCES_SNAP)
-    const imagesID = []
-    for (const snap of filesSnap) {
-      imagesID.push(snap.id)
-      // if (imagesID.length > maxCacheSize) break
+    try {
+      const { unclasses, untags } = await remote.recieveCounts()
+      const allClasses = await service.get(IPCNormalMessage.GET_ALL_CLASSES, '/')
+      console.info('all classes:', allClasses)
+      const filesSnap = await service.get(IPCNormalMessage.GET_RESOURCES_SNAP)
+      const imagesID = []
+      for (const snap of filesSnap) {
+        imagesID.push(snap.id)
+        // if (imagesID.length > maxCacheSize) break
+      }
+      const allImages = await service.get(IPCNormalMessage.RENDERER_GET_RESOURCES_INFO, imagesID)
+      const allTags = await service.get(IPCNormalMessage.GET_ALL_TAGS)
+      console.info('recieveCounts:', unclasses, 'tags:', allTags)
+      commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
+    } catch (err) {
+      console.error(err)
+      const guider = document.getElementById('guider')
+      guider.showModal()
     }
-    const allImages = await service.get(IPCNormalMessage.RENDERER_GET_RESOURCES_INFO, imagesID)
-    const allTags = await service.get(IPCNormalMessage.GET_ALL_TAGS)
-    console.info('recieveCounts:', unclasses, 'tags:', allTags)
-    commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
   },
   async query({ commit }, query) {
     const result = await Search.update(query)
@@ -469,9 +503,23 @@ const actions = {
     commit('changeClassName', mutation)
   },
   async getClassesAndFiles({ commit }, query) {
-    const allClasses = await service.get(IPCNormalMessage.GET_CLASSES_DETAIL, query)
-    console.info('all classes', allClasses)
-    commit('getClassesAndFiles', allClasses)
+    console.info('query', query)
+    if (query === '/') {
+      const allResources = await service.get(IPCNormalMessage.GET_UNCATEGORY_RESOURCES)
+      const allClasses = await service.get(IPCNormalMessage.GET_ALL_CLASSES, '/')
+      commit('getClassesAndFiles', [allResources, allClasses])
+    } else {
+      const detail = await service.get(IPCNormalMessage.GET_CLASSES_DETAIL, query)
+      commit('getClassesAndFiles', [detail])
+    }
+  },
+  async getUncategoryResources({ commit }) {
+    const uncalsses = await service.get(IPCNormalMessage.GET_UNCATEGORY_RESOURCES)
+    commit('updateViewResources', uncalsses)
+  },
+  async getUntagResources({ commit }) {
+    const untags = await service.get(IPCNormalMessage.GET_UNTAG_RESOURCES)
+    commit('updateViewResources', untags)
   },
   clear({ commit }, data) {
     commit('clear', data)

@@ -87,6 +87,7 @@ export default {
           {label: 'bmp'}
         ]
       },
+      lastQuery: {},
       clazz: [],
       extensions: {}
     }
@@ -155,14 +156,27 @@ export default {
     },
     onFileTypeChanged(keys) {
       let query = []
-      for (let key of keys) {
+      if (!this.lastQuery[DefaultQueryName.Type]) this.lastQuery[DefaultQueryName.Type] = []
+      const generateCondition = function(key, op) {
         let condition = new SearchCondition()
-        condition.operation = ConditionOperation.Keep
+        condition.operation = op
         condition.keyword = key
         condition.name = DefaultQueryName.Type
         condition.type = ConditionType.ContentType
-        query.push(condition)
+        return condition
       }
+      for (let item of this.lastQuery[DefaultQueryName.Type]) { // find removed item
+        if (keys.includes(item)) continue
+        query.push(generateCondition(item, ConditionOperation.Remove))
+      }
+      for (let key of keys) {
+        if (this.lastQuery[DefaultQueryName.Type].includes(key)) {
+          query.push(generateCondition(key, ConditionOperation.Keep))
+        } else {
+          query.push(generateCondition(key, ConditionOperation.Add))
+        }
+      }
+      this.lastQuery[DefaultQueryName.Type] = keys
       this.$store.dispatch('query', query)
       bus.emit(bus.EVENT_UPDATE_QUERY_BAR, {type: keys})
     },

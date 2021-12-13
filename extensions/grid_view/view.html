@@ -186,7 +186,7 @@
             return {
                 add: function(item) {
                     let block = {}, src
-                    console.info('item', item)
+                    // console.info('item', item)
                     for (let meta of item['meta']) {
                         if (meta['name'] === 'filename') block['name'] = meta.value
                         else if (meta['name'] === 'path') src = meta.value

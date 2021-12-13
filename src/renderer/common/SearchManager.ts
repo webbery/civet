@@ -58,10 +58,14 @@ export class SearchManager {
         this.conditions = this.conditions.filter((item) => {
           return item.keyword !== condition.keyword
         })
-      } else {  // Keep
-        this.conditions = this.conditions.filter((item) => {
-          return (item.operation === ConditionOperation.Keep) && (item.keyword === condition.keyword)
-        })
+        console.debug(this.conditions)
+      } else {  // Keep if exist, else add
+        const comp = (element: SearchCondition): boolean => {
+          return (condition.operation === ConditionOperation.Keep) && (element.keyword === condition.keyword)
+        }
+        if (!this.conditions.some(comp)) {
+          this.conditions.push(condition)
+        }
       }
     }
     console.info(`query: ${JSON.stringify(this.conditions)}`)
@@ -100,7 +104,7 @@ export class SearchManager {
       }
     }
     if (conditions.length === 0) {
-      query['keyword'] = '*'
+      query['type'] = '*'
     }
     return query
   }

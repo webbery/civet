@@ -41,7 +41,7 @@ export class ResourceService{
     pipeline.regist('queryFiles', this.queryFiles, this)
     pipeline.regist('addCategory', this.addCategory, this)
     pipeline.regist(IPCNormalMessage.GET_CLASSES_DETAIL, this.getCategoryDetail, this)
-    pipeline.regist('getUncategoryImages', this.getUncategoryImages, this)
+    pipeline.regist(IPCNormalMessage.GET_UNCATEGORY_RESOURCES, this.getUncategoryImages, this)
     pipeline.regist('getUntagImages', this.getUntagImages, this)
     pipeline.regist('updateCategoryName', this.updateCategoryName, this)
     pipeline.regist('updateFileName', this.updateFileName, this)
@@ -172,7 +172,6 @@ export class ResourceService{
   }
   getCategoryDetail(msgid: number, parent: any) {
     const category = CivetDatabase.getClassDetail(parent)
-    // let category = await CategoryArray.loadFromDB()
     console.info('getCategoryDetail', parent, category)
     return {type: IPCRendererResponse.getCategoryDetail, data: category}
   }

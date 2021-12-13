@@ -48,7 +48,7 @@
     },
     "files": [
       "dist/electron/**/*",
-      "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md,ts}",
+      "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md,ts,map}",
       "!**/*.{ilk,pdb,obj,tlog,vcxproj,filters,iobj,ipdb,exp,lib}",
       "!**/*.{o,Makefile,mk,yml,vcxproj,filters,iobj,ipdb,exp,lib}",
       "!**/Makefile",

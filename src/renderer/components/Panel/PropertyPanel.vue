@@ -109,36 +109,17 @@ export default {
       logger.debug(`onViewUpdate id: ${id}, class: ${classname}, value:`, value)
       this.filename = value.name
       resetArray(this, this.tags, value.tag)
+      resetArray(this, this.classes, value.category)
       this.thumbnail = thumbnail2Base64(value.preview)
       this.colors = value.color
-      // switch (propname) {
-      //   case 'name':
-      //     this.filename = value
-      //     break
-      //   case 'tag':
-      //     resetArray(this, this.tags, value)
-      //     break
-      //   case 'classes':
-      //     resetArray(this, this.classes, value)
-      //     break
-      //   case 'properties':
-      //     this.metaNames.push(i18n(value.name))
-      //     // if (value.type === )
-      //     if (value.name === 'size') {
-      //       this.metaValues.push(this.getSize(parseInt(value.value)))
-      //     } else {
-      //       this.metaValues.push(value.value)
-      //     }
-      //     break
-      //   case 'preview':
-      //     this.thumbnail = thumbnail2Base64(value)
-      //     break
-      //   case 'color':
-      //     this.colors.push(value)
-      //     break
-      //   default:
-      //     break
-      // }
+      for (let property of value.properties) {
+        this.metaNames.push(i18n(property.name))
+        if (value.name === 'size') {
+          this.metaValues.push(this.getSize(parseInt(property.value)))
+        } else {
+          this.metaValues.push(property.value)
+        }
+      }
     },
     cleanProperty(filesid) {
       this.metaNames.splice(0, this.metaNames.length)
