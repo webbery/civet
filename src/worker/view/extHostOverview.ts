@@ -58,7 +58,7 @@ export class ExtOverview extends ExtHostWebView {
     hhtml.body = result.body
     hhtml.script = result.scripts
     hhtml.style = result.styles
-    console.info('html: ', hhtml)
+    // console.info('html: ', hhtml)
     this.setHtml(hhtml)
     this.update()
   }
@@ -148,7 +148,6 @@ export class ExtOverviewEntry {
 
     }
     overview.forceUpdate()
-    console.info('request extension html:', html)
     overview.update()
   }
 

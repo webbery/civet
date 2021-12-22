@@ -60,7 +60,7 @@ export class MessagePipeline {
           return
         }
         if (reply === undefined) return
-        console.info('reply', reply)
+        console.info('reply', reply.type)
         let msg = new CivetProtocol()
         msg.id = arg.id
         msg.type = reply.type
@@ -94,7 +94,6 @@ export class MessagePipeline {
       } else {
         this.messageQueue.set(id, msg);
       }
-      console.info(this)
       this.timer.start(() => {
         if (this.messageQueue.size === 0) {
           this.timer.stop();
@@ -169,7 +168,7 @@ export class MessagePipeline {
       msg.id = 0
       msg.tick = 0
       for (let idx = 0; idx < len; ++idx) {
-        console.info('type:', this.VIPQueue[idx].type, 'message data:', this.VIPQueue[idx].data)
+        console.info('type:', this.VIPQueue[idx].type)
         msg.type = this.VIPQueue[idx].type
         msg.msg = this.VIPQueue[idx].data
         ipcRenderer.send('message-from-worker', { type: this.VIPQueue[idx].type, data: msg })

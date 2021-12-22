@@ -96,10 +96,9 @@ function createRendererWindow() {
     height: 763,
     useContentSize: true,
     width: 1200,
-    icon: path.join(__dirname, 'asset/icon/icon.png'),
+    icon: path.join(__dirname, 'static/icon.png'),
     show: false
   })
-
   mainWindow.maximize()
   // mainWindow.onbeforeunload = (e) => {
   //   console.info('onbeforeunload')

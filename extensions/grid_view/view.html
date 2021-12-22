@@ -301,7 +301,7 @@
             let folders = ''
             for (let item of classItems) {
                 folders += `<div class="folder">
-                                <div class="b-icon b-icon_type_folder" ondblclick="onDbFolderClick('${item.name}')"></div>
+                                <div class="b-icon b-icon_type_folder" onclick="onFolderClick(${item.id})" oncontextmenu="onFolderClick(${item.id})" ondblclick="onDbFolderClick('${item.name}')"></div>
                                 <div >${item.name}</div>
                             </div>`
             }
@@ -314,6 +314,8 @@
                 params: GridViewCache.classPath + classname
             })
         }
+
+        function onFolderClick(classid) {}
 
         function loadClasses(classes) {
             if (!classes || classes.length === 0) return

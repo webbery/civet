@@ -119,10 +119,16 @@ export default {
       condition.name = DefaultQueryName.AddedTime
       condition.comparation = DatetimeOperator.Greater
       condition.operation = ConditionOperation.Keep
+      condition.type = ConditionType.Datetime
       switch (keys) {
         case 'today':
           condition.keyword = today
           // query = {addtime: {$gt: today}}
+          break
+        case 'yesterday':
+          let yesterday = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000)
+          yesterday.setHours(0, 0, 0, 0)
+          condition.keyword = yesterday
           break
         case 'near7':
           let near7 = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
@@ -149,6 +155,7 @@ export default {
           // query = {addtime: {$gt: near365}}
           break
         default:
+          condition.keyword = '*'
           // query = {addtime: '*'}
           break
       }

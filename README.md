@@ -31,7 +31,7 @@
 开发版本下载链接: [Development Version](https://github.com/webbery/civet/releases)  
 由于版本更新比较慢，所以也可以自行编译。  
 编译安装方式：
-  - 确保自己平台的node版本是node 14及以上，C++编译器支持C++11。如果使用的是Ubuntu16，可以使用`update-alternatives`命令安装并切换高版本的gcc
+  - 确保自己平台的node版本是node 14及以上，C++编译器支持C++17。如果使用的是Ubuntu16，可以使用`update-alternatives`命令安装并切换高版本的gcc
   - 在下载的源代码目录下，运行`npm install`安装相关的依赖包
   - 依赖包安装完毕后，可以尝试运行`npm run dev`查看开发环境下是否能正常运行
   - 如果能够正常运行，可以执行`npm run build`打包安装包
@@ -40,13 +40,9 @@
 ### 相关资源
 
 [插件开发](https://webberg.gitee.io/civet/extension.html)  
-[插件市场](https://webberg.gitee.io/civet/market.html)  
+<!-- [插件市场](https://webberg.gitee.io/civet/market.html)   -->
 
 **道阻且长，行则将至。**
-
-#### 问题反馈
-
-如有任何使用上的问题或建议请反馈到[**Issue**](https://github.com/webbery/civet/issues)  
 
 ### 类似软件对比
 |  软件   | 界面 | 开发语言  | 本地存储  | 协议 | 平台
@@ -62,9 +58,6 @@
 + [ ] 增加信息提取插件功能，以增强不同文件类型的信息存储与检索
 + [ ] 引入HTML5批注规范，为各种类型的文件增加批注功能
 + [ ] 升级数据库，增强搜索功能
-
-#### 编译
-C++编译器要求支持C++17, Node版本建议>14  
 
 #### 技术细节
 开发过程踩过许多坑，在填坑的同时记录下这些过程，并编写成文，以便其他开发者在做类似功能的时候能避免踩坑：  

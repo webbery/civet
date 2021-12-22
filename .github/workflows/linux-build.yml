@@ -31,10 +31,10 @@ jobs:
         id: upload
         uses: actions/upload-artifact@v2
         with:
-          name: mac-build
+          name: ubuntu-build
           path: ./build/Civet-${{ steps.version.outputs.version }}.AppImage
   publish:
-    runs-on: linux-latest
+    runs-on: ubuntu-latest
     needs: build
     if: startsWith(github.ref, 'refs/tags')
     steps:
@@ -56,13 +56,13 @@ jobs:
       - name: view cache
         uses: actions/download-artifact@v2
         with:
-          name: linux-build
+          name: ubuntu-build
           path: ~/download/
       - name: upload linux artifact
         env:
           GITHUB_TOKEN: ${{ github.token }}
           CI: true
-          FILE: /Users/runner/download/Civet-${{ steps.version.outputs.version }}.AppImage
+          FILE: /home/runner/download/Civet-${{ steps.version.outputs.version }}.AppImage
         run: |
           curl -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE "https://uploads.github.com/repos/webbery/civet/releases/${{ steps.get_release.outputs.id }}/assets?name=$(basename $FILE)"
 

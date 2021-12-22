@@ -31,7 +31,8 @@ export enum DefaultQueryName {
   Color = 'color',
   Class = 'class',
   Tag = 'tag',
-  AddedTime = 'addtime'
+  // AddedTime = 'addtime'
+  AddedTime = 'datetime'
 }
 
 export class SearchCondition {
@@ -60,10 +61,18 @@ export class SearchManager {
         })
         console.debug(this.conditions)
       } else {  // Keep if exist, else add
-        const comp = (element: SearchCondition): boolean => {
-          return (condition.operation === ConditionOperation.Keep) && (element.keyword === condition.keyword)
+        let exist = false
+        for (const item of this.conditions) {
+          if (item.type === ConditionType.Datetime && condition.type === ConditionType.Datetime) {
+            item.keyword = condition.keyword
+            break
+          }
+          if (condition.operation === ConditionOperation.Keep && item.keyword === condition.keyword) {
+            exist = true
+            break
+          }
         }
-        if (!this.conditions.some(comp)) {
+        if (!exist) {
           this.conditions.push(condition)
         }
       }
@@ -87,6 +96,11 @@ export class SearchManager {
           query[name].push(condition.keyword)
           break
         case ConditionType.Datetime:
+          if (condition.keyword === '*') {
+            delete query[name]
+          } else {
+            query[name] = {$gt: condition.keyword}
+          }
           break
         case ConditionType.Color:
           // if (!condition.comparation)
@@ -103,7 +117,7 @@ export class SearchManager {
           break
       }
     }
-    if (conditions.length === 0) {
+    if (conditions.length === 0 || Object.keys(query).length === 0) {
       query['type'] = '*'
     }
     return query

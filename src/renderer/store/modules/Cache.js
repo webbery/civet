@@ -383,10 +383,10 @@ const mutations = {
       }
     } else {
       const [resources, classes] = classesFiles
-      for (let idx = 0, len = classes.lenght; idx < len; ++idx) {
+      for (let idx = 0, len = classes.length; idx < len; ++idx) {
         const item = {}
-        item.name = classes[idx]
-        item.path = classes[idx]
+        item.name = classes[idx].name
+        item.path = classes[idx].name
         Vue.set(state.viewClass, idx, item)
       }
       for (let idx = 0, len = resources.length; idx < len; ++idx) {

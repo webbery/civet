@@ -14,7 +14,7 @@ import LandingPage from '@/components/LandingPage'
 import Guider from '@/components/Dialog/Guider'
 import { config } from '@/../public/CivetConfig'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-
+import { getCurrentViewName } from '@/common/RendererService'
 export default {
   name: 'civet',
   components: {
@@ -50,8 +50,8 @@ export default {
     onUpdateResources(error, updateResources) {
       if (error) console.log(error)
       this.$store.dispatch('addFiles', updateResources)
-      // console.info('add resources', updateResources)
-      this.$events.emit('Overview', 'add', updateResources)
+      const view = getCurrentViewName()
+      this.$events.emit('Overview:' + view, 'add', updateResources)
     },
     async onResourceShow(resource) {
       const resourceID = resource['id']

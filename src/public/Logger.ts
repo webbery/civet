@@ -23,6 +23,8 @@ switch(env) {
   default:
     break
 }
-console = log
+if ('development' !== process.env.NODE_ENV) {
+  console = log
+}
 
 export const logger = log
