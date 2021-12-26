@@ -10,6 +10,7 @@ import { Resource } from '@/../public/Resource'
 import { ExtSearchBar } from './view/extHostSearchBar'
 import { ExtPropertyView } from './view/extHostPropertyView'
 import { ExtOverview, ExtOverviewEntry } from './view/extHostOverview'
+import { ExtContentViewEntry } from './view/extHostContentView'
 import { ExtMenusEntry } from './contrib/extHostMenus'
 import { ExtCommandsEntry } from './contrib/extCommand'
 
@@ -22,6 +23,7 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
   const extSearchBar = registSingletonObject(ExtSearchBar)
   const extPropertyView = rpcProtocal.set(ExtPropertyView.name, ExtPropertyView)
   const extOverViewEntry = registSingletonObject(ExtOverviewEntry)
+  const extContentViewEntry = registSingletonObject(ExtContentViewEntry)
   const extCommandsEntry = registSingletonObject(ExtCommandsEntry)
 
   const window: typeof civet.window = {
@@ -52,8 +54,11 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
     },
 
     createOverview(id: string, router: string): civet.OverView {
-      console.info('create overview:', id)
       return extOverViewEntry.createOverviewEntry(id, router)
+    },
+
+    createContentView(id: string, suffixes: string[]): civet.ContentView | null {
+      return extContentViewEntry.createContentViewEntry(id, suffixes)
     }
   }
 

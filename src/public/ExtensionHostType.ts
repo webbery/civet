@@ -12,7 +12,7 @@ export enum ViewType {
   Property = 1,
   Navigation = 2,
   Overview = 3,
-  DetailView = 4,
+  ContentView = 4,
   Search = 5
 }
 
@@ -54,6 +54,10 @@ export class ExtClassItem implements civet.ClassItem {
 export class ExtOverviewItemLoadEvent implements civet.OverviewItemLoadEvent {
   resources: civet.IResource[];
   classes: civet.ClassItem[];
+}
+
+export class ExtContentViewLoadEvent implements civet.ContentViewLoadEvent {
+  resource: string;
 }
 
 export class ExtOverviewVisibleRangesChangeEvent implements civet.OverviewVisibleRangesChangeEvent {

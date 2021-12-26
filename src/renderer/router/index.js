@@ -21,8 +21,8 @@ export default new Router({
     },
     {
       path: '/viewImage',
-      name: 'view-image',
-      component: require('@/components/ImagePanel').default
+      name: 'view-resource',
+      component: require('@/components/Panel/ContentPanel').default
     },
     {
       path: '/tagManager',

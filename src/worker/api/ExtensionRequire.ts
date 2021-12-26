@@ -39,7 +39,7 @@ export class ExtensionModule extends Module {
     if (path === 'civet') {
       // inject civet to extension
       const apiFactory = createApiFactoryAndRegisterActors(this._pipeline, this._extensionName)
-      logger.debug(`createApiFactoryAndRegisterActors finish`)
+      logger.debug(`createApiFactoryAndRegisterActors in extenstion ${this._extensionName} finish`)
       return apiFactory(null, null, null)
     }
     if (this._extRequire(path)) {

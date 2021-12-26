@@ -26,7 +26,7 @@ interface ITest {
 const ViewTypeTable = {
   Navigation: ViewType.Navigation,
   Overview: ViewType.Overview,
-  DetailView: ViewType.DetailView,
+  ContentView: ViewType.ContentView,
   Property: ViewType.Property,
   Search: ViewType.Search
 }
@@ -229,7 +229,7 @@ export class ExtensionService {
       return Result.success(`${command} success`)
     } catch (err: any) {
       switch(command) {
-        case 'read':
+        case 'read':  // read file
           console.error('read error:', err)
           this._pipe!.post(IPCRendererResponse.ON_ERROR_MESSAGE, [{filname: args[0], path: args[0], msg: err.message}])
           break

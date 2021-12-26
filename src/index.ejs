@@ -15,7 +15,9 @@
       let _cv_command_args = {}
       let _cv_message_id_ = 0
       let _cv_activate_view_name = ''
+      let _cv_content_view_name = ''
       let _cv_overview_listeners = {}
+      let _cv_contentview_listeners = {}
       const _cv_events = (function() {
         const { EventEmitter } = require('events')
         let events = new Map()
@@ -74,6 +76,15 @@
             _cv_events.on(name, event, listener)
           }
         }
+        const ContentView = {
+          on: function(event, listener) {
+            const name = 'ContentView:' + _cv_content_view_name
+            if (!_cv_contentview_listeners[name]) {
+              _cv_contentview_listeners[name] = [event, listener]
+            }
+            _cv_events.on(name, event, listener)
+          }
+        }
         return function() {
           return {
             postMessage: function(args) {
@@ -86,7 +97,8 @@
             },
             injectCommandParams: function (command, args) { _cv_command_args[command] = args },
             events: _cv_events,
-            Overview: Overview
+            Overview: Overview,
+            ContentView: ContentView
           }
         }
       })()
@@ -147,6 +159,71 @@
         font-size: 14px;
         font-weight: 600;
         color: aliceblue;
+      }
+      ._cv_content_loading {
+        position: relative;
+        margin: 0 auto;
+        width: 100px;
+      }
+      ._cv_content_loading::before {
+        content: '';
+        display: block;
+        padding-top: 100%;
+      }
+      ._cv_circular {
+        animation: rotate 2s linear infinite;
+        height: 100%;
+        transform-origin: center center;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+      ._cv_path {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+        animation: dash 1.5s ease-in-out infinite, color 6s ease-in-out infinite;
+        stroke-linecap: round;
+      }
+      @keyframes rotate {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes dash {
+        0% {
+          stroke-dasharray: 1, 200;
+          stroke-dashoffset: 0;
+        }
+        50% {
+          stroke-dasharray: 89, 200;
+          stroke-dashoffset: -35px;
+        }
+        100% {
+          stroke-dasharray: 89, 200;
+          stroke-dashoffset: -124px;
+        }
+      }
+
+      @keyframes color {
+        100%,
+        0% {
+          stroke: rgb(173, 137, 137);
+        }
+        40% {
+          stroke: rgb(135, 135, 170);
+        }
+        66% {
+          stroke: rgb(118, 146, 118);
+        }
+        80%,
+        90% {
+          stroke: rgb(194, 194, 157);
+        }
       }
       </style>
   </body>

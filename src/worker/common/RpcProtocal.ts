@@ -79,7 +79,7 @@ export class RPCProtocal {
         return 'Overview'
       case ViewType.Navigation:
         return 'Navigation'
-      case ViewType.DetailView:
+      case ViewType.ContentView:
         return 'DetailView'
       default:
         return ''

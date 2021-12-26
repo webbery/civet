@@ -29,6 +29,7 @@
 ### Install
 
 开发版本下载链接: [Development Version](https://github.com/webbery/civet/releases)  
+当前windows环境下因为没有签名的原因，所以需要在安装文件的右键“属性”->“常规”中关闭掉安全选项  
 由于版本更新比较慢，所以也可以自行编译。  
 编译安装方式：
   - 确保自己平台的node版本是node 14及以上，C++编译器支持C++17。如果使用的是Ubuntu16，可以使用`update-alternatives`命令安装并切换高版本的gcc

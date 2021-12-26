@@ -78,7 +78,7 @@ declare module 'civet' {
         Property = 1,
         Navigation = 2,
         Overview = 3,
-        DetailView = 4,
+        ContentView = 4,
         Search = 5
     }
 
@@ -146,6 +146,10 @@ declare module 'civet' {
         classes?: ClassItem[];
     }
 
+    export interface ContentViewLoadEvent {
+        resource: string;
+    }
+
     export enum ScrollType {
         None = 0,
         Horizon = 1,
@@ -184,6 +188,20 @@ declare module 'civet' {
         onDidReceiveMessage(listener: (message: any) => void, thisArg?: any): void;
         onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
     }
+    
+    /**
+     * @brief a view which is display content 
+     */
+    export interface ContentView {
+        html?: string;
+
+        onResourceLoading(listener: (e: ContentViewLoadEvent) => void, thisArg?: any): void;
+        /**
+         * @brief when content view is load for first time, this listener will be called
+         * @param listener a listener is defined for reading html file and it's content should be return
+         */
+        onViewInitialize(listener: () => string): void;
+    }
 
     export namespace window {
         export let searchBar: SearchBar;
@@ -198,7 +216,12 @@ declare module 'civet' {
         export function onDidSelectContentItem(listener: (e: ContentItemSelectedEvent) => void, thisArg?: any): void;
 
         export function createOverview(id: string, router: string): OverView;
-
+        /**
+         * @description create a content view for watching. 
+         * @param id id of content view
+         * @param suffixes   a suffix with open file type such as jpg, png and so on.
+         */
+        export function createContentView(id: string, suffixes: string[]): ContentView|null;
     }
 
     export namespace commands {

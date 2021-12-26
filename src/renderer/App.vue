@@ -59,11 +59,11 @@ export default {
         console.error(`show resource ${resource} fail`)
         return
       }
-      let imageInfo = await this.$ipcRenderer.get(IPCNormalMessage.RENDERER_GET_RESOURCE_INFO, resourceID)
-      if (imageInfo !== null) {
-        imageInfo['id'] = resourceID
-        console.info('onResourceShow:', imageInfo)
-        this.$router.push({name: 'view-image', params: imageInfo, query: {name: imageInfo.filename, cmd: 'display'}})
+      let resourceInfo = await this.$ipcRenderer.get(IPCNormalMessage.RENDERER_GET_RESOURCE_INFO, resourceID)
+      if (resourceInfo !== null) {
+        resourceInfo['id'] = resourceID
+        console.info('onResourceShow:', resourceInfo)
+        this.$router.push({name: 'view-resource', params: resourceInfo, query: {name: resourceInfo.filename, cmd: 'display'}})
       }
     },
     onClassOpen(classpath) {

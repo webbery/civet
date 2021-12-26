@@ -49,6 +49,8 @@ export enum IPCNormalMessage {
   REQUEST_UPDATE_RESOURCES = 'onResourcesLoading',
   RETRIEVE_OVERVIEW = 'rtvOverview',
   GET_OVERVIEW_MENUS = 'getOverviewMenus',
+  // content view
+  RETRIEVE_CONTENT_VIEW = 'rtvContentView',
   // commands
   POST_COMMAND = 'pstCmd',
   GET_ACTIVATE_COMMANDS = 'getActiveCmd'
@@ -77,5 +79,6 @@ export enum IPCRendererResponse {
   ON_VIEW_ROUTER_ADD = 'onVRI',
   ON_VIEW_ROUTER_CLEAR = 'onVRC',
   ON_EXTENSION_ROUTER_UPDATE = 'Overview',
+  ON_EXTENSION_CONTENT_UPDATE = 'ContentView',
   ON_RESOURCE_UPDATED = 'onRU'
 }

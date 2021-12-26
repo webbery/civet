@@ -10,9 +10,8 @@ import { isFileExist, getExtensionPath} from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { PropertyType } from '../public/ExtensionHostType'
 import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstallManager'
-import { logger } from '@/../public/Logger'
 import fs from 'fs'
-import { injectable, showErrorInfo } from './Singleton'
+import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 
 class ExtensionCommandAccessor implements ExtensionAccessor {
@@ -117,10 +116,8 @@ export class ExtensionManager {
       if (fs.statSync(extensionPath + '/' + exts[idx]).isDirectory() && this._isExtension(exts[idx])) continue
       exts.splice(idx, 1)
     }
-    // console.info('-------', exts)
     this._initServices(extensionPath, exts, pipeline)
     this._buildGraph()
-    // console.info('graph:', this._actives)
     // npm extension
     this._initExternalExtension()
     this._initFrontEndEvent(pipeline)
@@ -311,7 +308,7 @@ export class ExtensionManager {
     const args = data.args
     this.onExecuteCommand(target, command, args)
   }
-  
+
   private _initContentTypeExtension(service: ExtensionService) {
     let activeType = service.activeType()
     if (!activeType) return

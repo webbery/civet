@@ -113,12 +113,10 @@ export default function processTpl(tpl, baseURI) {
       return match
     })
     .replace(STYLE_TAG_REGEX, match => {
-      console.info('STYLE_TAG_REGEX', match)
       if (STYLE_IGNORE_REGEX.test(match)) {
         return genIgnoreAssetReplaceSymbol('style file')
       }
       const cleanStyle = removeGlobalStyle(match)
-      console.info('clean:', cleanStyle)
       styles.push(getStyleText(cleanStyle))
       return match
     })

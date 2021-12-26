@@ -39,7 +39,7 @@ export class MessagePipeline {
     messageQueue: Map<string, CivetProtocol> = new Map<string, CivetProtocol>();
     VIPQueue: any[] = [];
     #emitters: Map<string, LinkedList<Emitter>>;
-    processor: Map<string, any> = new Map<string, any>();
+    #processor: Map<string, any> = new Map<string, any>();
     #isRendererStart: boolean = false;
 
     constructor(threshod: number) {
@@ -49,14 +49,15 @@ export class MessagePipeline {
         if (!this.#isRendererStart) this.#isRendererStart = true
         let reply
         try {
-          const [func, self] = this.processor.get(arg.type)
+          const [func, self] = this.#processor.get(arg.type)
           if (self !== undefined) {
             reply = await func.call(self, arg.id, arg.data)
           } else {
             reply = await func(arg.id, arg.data)
           }
         } catch (error: any) {
-          console.error(`${arg}, ${error}`)
+          const item = this.#processor.get(arg.type)
+          console.error(`${error}. Recieved args is ${JSON.stringify(arg)}, current processor is ${JSON.stringify(item)}[${this.#processor.size}]`)
           return
         }
         if (reply === undefined) return
@@ -68,6 +69,7 @@ export class MessagePipeline {
         msg.tick = 0
         this.reply(msg)
       })
+      console.info('construct message pipeline')
     }
     reply(msg: CivetProtocol) {
       // if same type exist but id is different, remove smaller id message.
@@ -131,7 +133,7 @@ export class MessagePipeline {
       ipcRenderer.send('message-from-worker', { type: ReplyType.INFOM_ERROR_MESSAGE, data: msg })
     }
     regist(msgType: string, msgFunc: IMessageCallback, pointer?: any) {
-      this.processor.set(msgType, [msgFunc, pointer]);
+      this.#processor.set(msgType, [msgFunc, pointer]);
     }
     regist_event(msgType: string, event: Emitter) {
       if (this.#emitters[msgType] === undefined) {
@@ -152,7 +154,7 @@ export class MessagePipeline {
     }
 
     tryRun(msgType: string): boolean {
-      const func = this.processor.get(msgType)
+      const func = this.#processor.get(msgType)
       if (!func) return false
       if (!func[1]) {
         func[0](0)

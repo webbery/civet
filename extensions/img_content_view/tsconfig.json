@@ -1,0 +1,12 @@
+{
+  "extends": "../shared.tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./build/",
+    // 
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*", "*.ts"]
+    }
+  },
+  "include": ["*.ts", "src/*.ts", "../imagedata/civet.d.ts"]
+}

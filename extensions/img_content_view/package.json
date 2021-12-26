@@ -1,0 +1,20 @@
+{
+  "name": "img_content_view",
+  "displayName": "Civet图像内容打开扩展",
+  "description": "Civet图像内容打开扩展",
+  "version": "0.0.1",
+  "engines": {
+    "civet": "^0.2.0"
+  },
+  "main": "./index.js",
+  "civet": {
+    "activeEvents": [
+      "onContentType: jpeg,jpg,jpeg,bmp,tif,tiff,png",
+      "onView: ContentView",
+      "onSave:"
+    ]
+  },
+  "dependencies": {
+    "sharp": "^0.28.1"
+  }
+}

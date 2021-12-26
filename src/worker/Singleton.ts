@@ -9,7 +9,7 @@ const serviceIds = new Map<string, any>();
 
 export function getSingleton<T>(ctor: { new (...args: Array<any>): T }): T | undefined {
   const id = (ctor as any).name
-  if (serviceIds[id] !== undefined) return serviceIds[id]
+  if (serviceIds.has(id)) return serviceIds.get(id)
   return undefined
 }
 
@@ -38,12 +38,12 @@ function checkBasicType<T>(v: T): boolean {
 export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T }, ...args: any): T {
   const id = (ctor as any).name
   console.debug('registSingletonObject:', id)
-  if (serviceIds[id] !== undefined) return serviceIds[id]
+  if (serviceIds.has(id)) return serviceIds.get(id)
   let paramsTypes = Reflect.getMetadata('design:paramtypes', ctor)
   if (!paramsTypes) {
     logger.warn(`class ${id} has empty params`)
     const instance = new ctor()
-    serviceIds[id] = instance
+    serviceIds.set(id, instance)
     return instance
   }
   let paramInstances = paramsTypes.map((v: any, i: any) => {
@@ -69,14 +69,14 @@ export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T },
       let vi = serviceIds[(v as any).name]
       if (!vi) {
         vi = new (v as any)()
-        serviceIds[(v as any).name] = vi
+        serviceIds.set((v as any).name, vi)
       }
       return vi
     }
   })
   const instance = new ctor(...paramInstances)
-  // console.info(`new singlecton: ${id}, ${JSON.stringify(paramInstances)}`)
-  serviceIds[id] = instance
+  console.debug(`new singlecton: ${id}`, instance)
+  serviceIds.set(id, instance)
   return instance
 }
 
