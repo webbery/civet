@@ -1,16 +1,31 @@
-<!doctype html>
+<!DOCTYPE HTML>  
 <html>
-<head>
-  <meta charset="utf-8">
-</head>
-<body>
-<div>
-  ContentView Extension
-</div>
-<script>
-  acquireCivetApi().ContentView.on('load', function (resource) {
-    console.info('resource loading')
-  })
-</script>
+<head>  
+    <title>  
+    </title>
+    <style>
+        .viewer{
+            margin:auto;
+            align-self: center;
+        /* display: table-cell; */
+        /* vertical-align: middle; */
+        }
+        .viewer img {
+            width: 100%;
+        }
+    </style>
+</head>  
+<body style = "text-align:center;">  
+    <div class="viewer" id="_cv_img_content">
+        Image loading
+        <!-- <img src="candidates[index].path"> -->
+    </div>
+    <script>
+        acquireCivetApi().ContentView.on('load', (data) => {
+            console.info(`resource ${data} loading`)
+            const div = document.getElementById('_cv_img_content')
+            acquireCivetApi().setHtml('imgContentView', div, '<img src="' + data + '">')
+        })
+    </script>
 </body>
 </html>

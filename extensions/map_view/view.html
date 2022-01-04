@@ -96,7 +96,7 @@ MapLayout = (function() {
         div.style.width = `${item.width}px`
         div.style.height = `${item.height}px`
         // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
-        div.innerHTML = `<div draggable="true" class="image">
+        const html = `<div draggable="true" class="image">
                             <div class="el-card is-never-shadow" style="border: 0px;">
                                 <div class="el-card__body" style="padding: 1px;">
                                     <div class="frame" onclick="MapLayout.onResourceClick(${item.id})" oncontextmenu="MapLayout.onResourceClick(${item.id})" ondblclick="MapLayout.onDbResourceClick(${item.id})">
@@ -108,6 +108,7 @@ MapLayout = (function() {
                                 </div>
                             </div>
                         </div>`
+        acquireCivetApi().setHtml('mapview', div, html)
         return div
     }
     function addHorizonItem(item) {

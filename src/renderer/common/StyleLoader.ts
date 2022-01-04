@@ -1,20 +1,28 @@
-import crypto from 'crypto'
-
+/**
+ * add style to root element. For exmaple:
+ * <style id="root">
+ * .class[data-cv-root] {...}
+ * </style>
+ */
 class StyleLoader {
-  #styles: Map<string, any> = new Map<string, any>();
+  #styles: Set<string> = new Set<string>();
   
-  load(styles: string[]) {
-    this.clear()
+  load(styles: string[], root: string) {
+    if (this.#styles.has(root)) return
+    let style = ''
     for (let idx = 0, len = styles.length; idx < len; ++idx) {
-      this.addStyle(styles[idx])
+      style += this.addStyle(styles[idx], root) + '\n'
     }
+    if (style.length) {
+      let s = document.createElement('style')
+      s.id = root
+      s.innerHTML = style
+      document.head.appendChild(s)
+    }
+    this.#styles.add(root)
   }
 
-  private addStyle(style: string) {
-    // console.info('style:', style)
-    const md5 = crypto.createHash('md5')
-    const hash = md5.update(style).digest('base64')
-    if (this.#styles[hash] !== undefined) return
+  private addStyle(style: string, root: string): string {
     if (style.indexOf('http') >= 0) {
       let link = document.createElement('link')
       // link.id 
@@ -22,21 +30,22 @@ class StyleLoader {
       link.type = 'text/css'
       link.href = style
       document.head.appendChild(link)
-      this.#styles[hash] = link
-    } else {
-      let s = document.createElement('style')
-      s.type = 'text/css'
-      s.innerHTML = style
-      document.head.appendChild(s)
-      this.#styles[hash] = s
+      return ''
     }
+    // add [data-cv-root]
+    const regex = /([\.#]{0,1}[a-zA-Z_-]+)(:)*([a-zA-Z0-9\(\)-]*)( )*({[a-zA-Z0-9:;\s'%/* \(\),\-\.]*})/g
+    const result = style.replace(regex, `$1[data-cv-${root}]$2$3$5`)
+    // console.info('CSS:', result)
+    return result
   }
 
-  private clear() {
-    // for (let style of this.#styles) {
-    //   // document.head.removeChild(style)
-    //   style.parentNode.removeChild(style)
-    // }
+  private clear(root: string) {
+    const r = document.getElementById(root)
+    if (!r) {
+      console.warn(`style of ${root} not exist`)
+      return
+    }
+    r.remove()
   }
 }
 

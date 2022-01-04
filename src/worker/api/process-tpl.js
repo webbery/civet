@@ -24,7 +24,7 @@ const HTML_COMMENT_REGEX = /<!--([\s\S]*?)-->/g
 const LINK_IGNORE_REGEX = /<link(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is
 const STYLE_IGNORE_REGEX = /<style(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is
 const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is
-const BODY_REGEX = /<body>([\s\S]*?)<\/body>/gi
+const BODY_REGEX = /<body[\s\S]*?>([\s\S]*?)<\/body>/gi
 
 function hasProtocol(url) {
   return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://')

@@ -6,7 +6,7 @@
           <!-- <div class="viewer">
             <img :src="candidates[index].path">
           </div> -->
-          <div style="height: 100%" v-html="html"></div>
+          <div style="height: 100%" v-html="html" id="_cv_content_view"></div>
           <div class="next" @click="onClickNext"></div>
         </div>
         </el-scrollbar>
@@ -17,6 +17,10 @@
 import bus from '../utils/Bus'
 import { mapState } from 'vuex'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
+import { clearArgs, events, getContentViewName, updateContentViewName } from '../../common/RendererService'
+import ScriptLoader from '@/common/ScriptLoader'
+import StyleLoader from '@/common/StyleLoader'
+import HtmlLoader from '@/common/HtmlLoader'
 
 export default {
   name: 'image-panel',
@@ -25,7 +29,9 @@ export default {
       resource: null,
       index: 0,
       viewer: null,
-      html: ''
+      html: '',
+      script: '',
+      isUpdated: true
     }
   },
   computed: mapState({
@@ -54,6 +60,21 @@ export default {
       // unkonw file type
     }
   },
+  async updated() {
+    if (this.isUpdated) return
+    const contentView = getContentViewName()
+    try {
+      await ScriptLoader.load(this.script)
+    } catch (err) {
+      console.error(`load ${contentView} javascript exception: ${err}`)
+      this.html = JSON.stringify(err)
+      this.isUpdated = true
+      return
+    }
+    // console.debug('viewname: ', contentView)
+    events.emit('ContentView:' + contentView, 'load', this.resource._path)
+    this.isUpdated = true
+  },
   methods: {
     onClickNext() {
       console.info('next image')
@@ -77,7 +98,11 @@ export default {
     },
     onContentViewUpdate(session, value) {
       console.debug('onContentViewUpdate:', value)
-      this.html = value.body
+      updateContentViewName(value.id)
+      StyleLoader.load(value.style, value.id)
+      this.html = HtmlLoader.load(value.body)
+      this.script = value.script
+      this.isUpdated = false
     }
   }
 }
@@ -96,15 +121,7 @@ export default {
   justify-content: center;
   height: 100%;
 }
-.viewer{
-  margin:auto;
-  align-self: center;
-  /* display: table-cell; */
-  /* vertical-align: middle; */
-}
-.viewer img {
-  width: 100%;
-}
+
 .prev{
   width:50px;
 	height:50px;

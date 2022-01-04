@@ -3,10 +3,12 @@ import { ExtHostWebView, HostHTML } from './extHostWebView'
 import { RPCProtocal } from '../common/RpcProtocal'
 import { ExtContentViewLoadEvent } from '@/../public/ExtensionHostType'
 import { IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
+import crypto from 'crypto'
 import importHTML from '../api/HtmlParser'
 
 class ExtContentView extends ExtHostWebView {
   #suffix: string[];
+  #hash: string;
   #initialize: () => string;
 
   constructor(id: string, rpcProxy: RPCProtocal, suffixes: string[]) {
@@ -14,14 +16,18 @@ class ExtContentView extends ExtHostWebView {
     this.#suffix = suffixes
   }
 
+  get hash() { return this.#hash }
+
   set html(val: string) {
+    const md5 = crypto.createHash('md5')
+    this.#hash = md5.update(val).digest('base64')
     const result = importHTML(val)
     let hhtml = new HostHTML()
     hhtml.html = val
     hhtml.body = result.body
     hhtml.script = result.scripts
     hhtml.style = result.styles
-    // console.info('html: ', hhtml)
+    console.info('html: ', hhtml)
     this.setHtml(hhtml)
   }
 
@@ -104,7 +110,8 @@ export class ExtContentViewEntry {
         break
       case 1:
         const view = views[0]
-        const html = view.getHtml() || view.initialize()
+        let html = view.getHtml() || view.initialize()
+        html['id'] = view.id
         this.#proxy.pipeline.post(IPCRendererResponse.ON_EXTENSION_CONTENT_UPDATE, html)
       default:
         break

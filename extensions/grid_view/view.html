@@ -143,7 +143,7 @@
                 div.style.width = `${item.width}px`
                 div.style.height = `${item.height}px`
                 // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
-                div.innerHTML = `<div draggable="true" class="image">
+                const innerHTML = `<div draggable="true" class="image">
                                     <div class="el-card is-never-shadow" style="border: 0px;">
                                         <div class="el-card__body" style="padding: 1px;">
                                             <div class="frame" onclick="onGridClick(${item.id})" oncontextmenu="onGridClick(${item.id})" ondblclick="onDbResourceClick(${item.id})">
@@ -155,6 +155,7 @@
                                         </div>
                                     </div>
                                 </div>`
+                acquireCivetApi().setHtml('gridview', div, innerHTML)
                 return div
             }
 
@@ -320,7 +321,7 @@
         function loadClasses(classes) {
             if (!classes || classes.length === 0) return
             let div = document.getElementById('_cv_classes')
-            div.innerHTML = classTemplate(classes)
+            acquireCivetApi().setHtml('gridview', div, classTemplate(classes))
         }
     </script>
 </body>

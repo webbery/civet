@@ -12,6 +12,7 @@
   </head>
   <body style="overflow:hidden">
     <script>
+      console.info('0000000000000')
       let _cv_command_args = {}
       let _cv_message_id_ = 0
       let _cv_activate_view_name = ''
@@ -82,6 +83,7 @@
             if (!_cv_contentview_listeners[name]) {
               _cv_contentview_listeners[name] = [event, listener]
             }
+            console.debug('regist contentview event', name)
             _cv_events.on(name, event, listener)
           }
         }
@@ -97,6 +99,14 @@
             },
             injectCommandParams: function (command, args) { _cv_command_args[command] = args },
             events: _cv_events,
+            setHtml: function(viewname, node, html) {
+              let propname = 'cv' + viewname.replace(viewname[0], viewname[0].toUpperCase())
+              if (propname in node.dataset === false) {
+                node.dataset[propname] = ''
+              }
+              node.innerHTML = html.replace(/(<(\"[^\"]*\"|\'[^\']*\'|[^\'\"/>])*)>/g, '$1 data-cv-' + viewname + '>')
+              // console.info('html loader', _cv_activate_view_name)
+            },
             Overview: Overview,
             ContentView: ContentView
           }

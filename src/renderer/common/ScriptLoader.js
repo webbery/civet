@@ -39,7 +39,7 @@ export default (function() {
       if (matchs) {
         console.info('content script')
         try {
-          s.innerHTML = matchs[2]
+          s.innerHTML = matchs[2] || 'Empty Script'
           document.body.appendChild(s)
           resolve(true)
         } catch (err) {

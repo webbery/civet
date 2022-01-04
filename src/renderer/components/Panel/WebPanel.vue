@@ -12,6 +12,7 @@
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
+import HtmlLoader from '@/common/HtmlLoader'
 import PopMenu from '@/components/Menu/PopMenu'
 import { mapState } from 'vuex'
 import bus from '../utils/Bus'
@@ -93,10 +94,13 @@ export default {
   async updated() {
     if (this.isUpdated) return
     const activateView = getCurrentViewName()
+    // HtmlLoader.injector(activateView)
     try {
       await ScriptLoader.load(this.script)
     } catch (err) {
       console.error(`load ${activateView} javascript exception: ${err}`)
+      this.isUpdated = true
+      return
     }
     // console.info(value, 'menu is', menus)
     const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + activateView)
@@ -152,13 +156,15 @@ export default {
       console.info('init overview', activateView)
       if (activateView && activateView !== value.id) {
         this.htmls[activateView].show = false
+        // HtmlLoader.outjector(activateView)
       }
       if (this.htmls[value.id]) {
         this.htmls[value.id].show = true
         console.info('switch to', value.id)
       } else {
-        StyleLoader.load(value.style)
-        Vue.set(this.htmls, value.id, {html: value.body, show: true})
+        StyleLoader.load(value.style, value.id)
+        Vue.set(this.htmls, value.id, {html: HtmlLoader.load(value.body, value.id), show: true})
+        // Vue.set(this.htmls, value.id, {html: value.body, show: true})
         console.info('new to', value.id)
         this.isUpdated = false
       }
