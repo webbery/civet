@@ -1,0 +1,18 @@
+{
+  "name": "meta3d",
+  "displayName": "Civet3D模型处理扩展",
+  "description": "Civet3D模型处理扩展",
+  "version": "0.0.1",
+  "engines": {
+    "civet": "^0.2.1"
+  },
+  "main": "./index.js",
+  "civet": {
+    "activeEvents": [
+      "onContentType: obj,json,stl,dae,ply,fbx,gltf",
+      "onSave:"
+    ]
+  },
+  "dependencies": {
+  }
+}

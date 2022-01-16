@@ -93,6 +93,9 @@ class RendererService {
       try {
         callbacks.forEach((callback: any) => {
           switch(callback.length) {
+            case 1:
+              callback(msg.data.msg[0])
+              break
             case 2:
               callback(msg.data.id, msg.data.msg)
               break

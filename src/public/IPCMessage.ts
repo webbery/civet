@@ -8,7 +8,7 @@ export enum IPCExtensionMessage {
 
 export enum IPCNormalMessage {
   // system
-  ON_ERROR_MESSAGE = 'onErrorMessage',
+  // ON_ERROR_MESSAGE = 'onErrorMessage',
   RENDERER_MOUNTED = 'mounted',
   // resource
   RENDERER_GET_RESOURCE_INFO = 'getImageInfo',

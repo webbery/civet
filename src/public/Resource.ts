@@ -1,6 +1,7 @@
 import { IResource, ExtensionContext, ResourceProperty } from 'civet'
 import { PropertyType } from './ExtensionHostType'
 
+
 export class DisplayProperty{
   name: string;
   query: boolean;
@@ -57,8 +58,8 @@ export class Resource implements IResource {
   constructor(property: any | undefined) {
     if (!property) return
     this.id = property.id || property.fileid
-    this.filetype = property.filetype || 'img'
-    this.type = property.filetype || 'img'
+    this.filetype = property.filetype || property.type || 'img'
+    this.type = property.filetype ||  property.type || 'img'
     this.meta = property.meta || []
     this.keyword = property.keyword || []
     this.category = property.category || property.class || []

@@ -376,14 +376,20 @@ export class ExtensionManager {
     const accessor = new StorageAccessor()
     const store = resource.toJson(accessor)
     CivetDatabase.addFiles([store])
-    CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: resource.getPropertyValue('thumbnail'), type: 'bin' })
-    CivetDatabase.addMeta([resource.id], { name: 'color', value: resource.getPropertyValue('color'), type: 'color', query: true })
+    const thumbnail = resource.getPropertyValue('thumbnail')
+    if (thumbnail) {
+      CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: thumbnail, type: 'bin' })
+    }
+    const colors = resource.getPropertyValue('color')
+    if (colors) {
+      CivetDatabase.addMeta([resource.id], { name: 'color', value: colors, type: 'color', query: true })
+    }
     return Result.success(resource)
   }
 
   async onExecuteCommand(id: string, command: string, ...args: any) {
     console.info(`Execute command ${command} on ${id}, params is ${args}`)
-    const extensions = this._activableExtensions[id]
+    const extensions = this._activableExtensions.get(id)
     if (!extensions || extensions.length === 0) {
       const msg = `No extensions can read ${id} file`
       showErrorInfo({msg: msg})

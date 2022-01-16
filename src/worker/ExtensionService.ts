@@ -60,12 +60,14 @@ class ExtensionPackage {
     this._main = getAbsolutePath(dir + (pack['main'] === undefined? '/main.js': '/' + pack['main']))
     const events = pack['civet']['activeEvents']
     for (let event of events) {
-      const map = event.split(':')
+      const map: string[] = event.split(':')
       if (map.length !== 2) continue
+      const str = map[1].trim()
       if (map[0] === 'onContentType') {
-        this._activeEvents = map[1].split(',')
+        this._activeEvents = str.split(',')
+        // console.debug('support content type:', this._activeEvents)
       } else if (map[0] === 'onView') {
-        const views = map[1].split(',')
+        const views = str.split(',')
         this._viewEvents = views.map((item: string) => {
           return ViewTypeTable[item]
         })
@@ -193,7 +195,7 @@ export class ExtensionService {
     const content = fs.readFileSync(entryPath, 'utf-8')
     const m = new ExtensionModule(this._package.name, module.parent, this._pipe)
     m._compile(content, this._package.name)
-    logger.debug(`${m.exports}`)
+    logger.debug(`initialize ${this._package.name}:${m.exports}`)
     try {
       // m.exports.run()
       if (m.exports.activate) {

@@ -103,3 +103,20 @@ export function resetArray<T>(vue: any, array: T[], newVal: T[]) {
 export function thumbnail2Base64(thumbnail: any) {
   return 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
 }
+
+export function buffer2Base64(buffer: Buffer) {
+  buffer.toString('base64')
+}
+
+export function text2PNG(text: string): string {
+  const background = ['rgb(223, 117, 104)', 'rgb(127, 219, 124)', 'rgb(124, 168, 219)', 'rgb(164, 122, 199)']
+  const { createCanvas } = require('canvas')
+  const canvas = createCanvas(80, 120)
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = background[text.length % 4];
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.font = '20px Impact'
+  ctx.fillStyle = 'white';
+  ctx.fillText(text, (canvas.width - text.length * 10) / 2, 60)
+  return canvas.toDataURL()
+}

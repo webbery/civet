@@ -94,8 +94,10 @@ export class ResourceService{
     const images = []
     for (const img of imgs) {
       let resource = new Resource(img)
-      const thumbnail = thumbnail2Base64(resource.thumbnail)
-      resource.putProperty({name: 'thumbnail', value: thumbnail, type: PropertyType.Binary, query: false, store: true})
+      if (resource.thumbnail) {
+        const thumbnail = thumbnail2Base64(resource.thumbnail)
+        resource.putProperty({name: 'thumbnail', value: thumbnail, type: PropertyType.Binary, query: false, store: true})
+      }
       images.push(resource)
     }
     return {type: ReplyType.REPLY_IMAGES_INFO, data: images}

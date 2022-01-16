@@ -2,14 +2,13 @@ import { Resource } from '@/../public/Resource'
 import { TreeNode } from '@/components/Control/Tree'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
 import { service, events, getCurrentViewName } from '@/common/RendererService'
-import { isEmpty } from '@/../public/Utility'
+import { isEmpty, text2PNG } from '@/../public/Utility'
 import Vue from 'vue'
 import { Cache } from './CacheInstance'
 import * as Assist from './CacheAssist'
 import { config } from '@/../public/CivetConfig'
 import { logger } from '@/../public/Logger'
 import { Search } from '@/common/SearchManager'
-import { ViewManager } from './ViewItemManager'
 
 function updateOverview(state, showClasses) {
   const view = getCurrentViewName()
@@ -24,6 +23,12 @@ function updateOverview(state, showClasses) {
       'resource': state.viewItems
     })
   }
+}
+
+function initResource(file) {
+  const resource = new Resource(file)
+  Cache.files[file.id] = resource
+  return resource
 }
 
 const state = {
@@ -96,21 +101,15 @@ const mutations = {
     console.info('cache init', data)
     state.currentResource = config.getCurrentDB()
     state.resources.splice(0, state.resources.length)
-    const resources = config.getResourcesName()
-    for (let idx = 0, len = resources.length; idx < len; ++idx) {
-      Vue.set(state.resources, idx, resources[idx])
+    const names = config.getResourcesName()
+    for (let idx = 0, len = names.length; idx < len; ++idx) {
+      Vue.set(state.resources, idx, names[idx])
     }
     Cache.snaps = data.filesSnap
-    // let imagesID = []
-    // for (let snap of snaps) {
-    //   imagesID.push(snap.id)
-    //   // if (imagesID.length > 40) break
-    // }
     state.viewItems.splice(0, state.viewItems.length)
-    const images = data.allImages
-    for (const image of images) {
-      const resource = new Resource(image)
-      Cache.files[image.id] = resource
+    const resources = data.allResources
+    for (const image of resources) {
+      const resource = initResource(image)
       // if (Cache.files.length > maxCacheSize) break
       state.viewItems.unshift(resource)
     }
@@ -183,7 +182,7 @@ const mutations = {
         Cache.files[file.id].update(file)
         continue
       }
-      Cache.files[file.id] = new Resource(file)
+      initResource(file)
       cnt += 1
       // setting view panel item
       // if (Cache.files.length > maxCacheSize) break
@@ -435,10 +434,23 @@ const actions = {
         imagesID.push(snap.id)
         // if (imagesID.length > maxCacheSize) break
       }
-      const allImages = await service.get(IPCNormalMessage.RENDERER_GET_RESOURCES_INFO, imagesID)
+      const allResources = await service.get(IPCNormalMessage.RENDERER_GET_RESOURCES_INFO, imagesID)
+      for (let item of allResources) {
+        if (!item.thumbnail) {
+          const png = text2PNG('obj')
+          console.info('image output:', png)
+          item.thumbnail = png
+          item['meta'].push(
+            {
+              name: 'thumbnail',
+              value: item.thumbnail
+            }
+          )
+        }
+      }
       const allTags = await service.get(IPCNormalMessage.GET_ALL_TAGS)
       console.info('recieveCounts:', unclasses, 'tags:', allTags)
-      commit('init', { unclasses, untags, allClasses, filesSnap, allImages, allTags })
+      commit('init', { unclasses, untags, allClasses, filesSnap, allResources, allTags })
     } catch (err) {
       console.error(err)
       const guider = document.getElementById('guider')

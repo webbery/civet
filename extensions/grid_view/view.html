@@ -163,7 +163,6 @@
                 const items = document.querySelectorAll('._cv_waterfall')
                 const root = document.getElementById(rootID)
                 const height = parseInt(item['height']) + TITLE_HEIGHT + 2 * TITLE_GAP
-                // console.info('addElement', height, items.length, minVertical[items.length] > height)
                 if (items.length < HORIZON_COUNT) {
                     item['left'] = items.length * curWidth
                     item['top'] = 0

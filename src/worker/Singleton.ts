@@ -125,6 +125,6 @@ export function  emitEventAsync(id: string, event: string, ...args: any): Promis
 export function showErrorInfo(msg: any) {
   const pipe = getSingleton(MessagePipeline)
   if (!pipe) return
-  console.error(msg)
   pipe.post(IPCRendererResponse.ON_ERROR_MESSAGE, [msg])
+  console.error(msg)
 }

@@ -15,6 +15,7 @@ import Guider from '@/components/Dialog/Guider'
 import { config } from '@/../public/CivetConfig'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { getCurrentViewName } from '@/common/RendererService'
+import { text2PNG } from '@/../public/Utility'
 export default {
   name: 'civet',
   components: {
@@ -47,10 +48,33 @@ export default {
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },
   methods: {
-    onUpdateResources(error, updateResources) {
+    async onUpdateResources(error, updateResources) {
       if (error) console.log(error)
       this.$store.dispatch('addFiles', updateResources)
       const view = getCurrentViewName()
+      const isThumbnailExist = (resource) => {
+        const meta = resource['meta']
+        for (let prop of meta) {
+          if (prop['name'] === 'thumbnail') {
+            return prop
+          }
+        }
+        return null
+      }
+      console.info('add new', updateResources)
+      for (let resource of updateResources) {
+        if (!isThumbnailExist(resource)) {
+          if (!resource.thumbnail) {
+            const png = text2PNG('obj')
+            resource['meta'].push(
+              {
+                name: 'thumbnail',
+                value: png
+              }
+            )
+          }
+        }
+      }
       this.$events.emit('Overview:' + view, 'add', updateResources)
     },
     async onResourceShow(resource) {
