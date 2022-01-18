@@ -64,15 +64,14 @@
 </template>
 
 <script>
-import bus from '../utils/Bus'
 import IconTag from '@/components/IconTag'
 import Preview from '../Control/CVPreview'
 import { i18n, formatOutput } from '@/../public/String'
 import InputLabel from '../Control/CVInputLabel'
-import { config } from '@/../public/CivetConfig'
 import { mapState } from 'vuex'
 import { logger } from '@/../public/Logger'
 import { resetArray, thumbnail2Base64 } from '@/../public/Utility'
+import { Cache } from '@/store/modules/CacheInstance'
 
 export default {
   name: 'property-panel',
@@ -110,8 +109,8 @@ export default {
       this.filename = value.name
       resetArray(this, this.tags, value.tag)
       resetArray(this, this.classes, value.category)
-      this.thumbnail = thumbnail2Base64(value.preview)
       this.colors = value.color
+      let type = ''
       for (let property of value.properties) {
         this.metaNames.push(i18n(property.name))
         if (value.name === 'size') {
@@ -119,6 +118,14 @@ export default {
         } else {
           this.metaValues.push(property.value)
         }
+        if (property.name === 'type') {
+          type = property.value
+        }
+      }
+      if (!value.preview) {
+        this.thumbnail = Cache.icons[type]
+      } else {
+        this.thumbnail = thumbnail2Base64(value.preview)
       }
     },
     cleanProperty(filesid) {

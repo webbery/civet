@@ -11,8 +11,8 @@
     <% } %>
   </head>
   <body style="overflow:hidden">
+    <canvas id="hidden" width="120" height="180"></canvas>
     <script>
-      console.info('0000000000000')
       let _cv_command_args = {}
       let _cv_message_id_ = 0
       let _cv_activate_view_name = ''
@@ -122,6 +122,13 @@
     <% } %>
     <!-- webpack builds are automatically injected -->
     <style>
+      #hidden {
+        position: absolute;
+        /* visibility:hidden; */
+        left: 50px;
+        top: 50px;
+        z-index: -1;
+      }
       .selected {
         font-size: 14px;
         background-color:rgb(16, 125, 197);

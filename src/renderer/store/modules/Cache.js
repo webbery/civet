@@ -437,13 +437,23 @@ const actions = {
       const allResources = await service.get(IPCNormalMessage.RENDERER_GET_RESOURCES_INFO, imagesID)
       for (let item of allResources) {
         if (!item.thumbnail) {
-          const png = text2PNG('obj')
-          console.info('image output:', png)
+          const width = 120
+          const height = 180
+          const png = text2PNG(item.type, width, height)
+          Cache.icons[item.type] = png
           item.thumbnail = png
           item['meta'].push(
             {
               name: 'thumbnail',
               value: item.thumbnail
+            },
+            {
+              name: 'width',
+              value: width
+            },
+            {
+              name: 'height',
+              value: height
             }
           )
         }

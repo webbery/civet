@@ -123,7 +123,6 @@
     "log4js": "^6.3.0",
     "lru-cache": "^6.0.0",
     "reflect-metadata": "^0.1.13",
-    "text2png": "^2.3.0",
     "tinycolor2": "^1.4.2",
     "uuid": "^8.3.1",
     "v-hotkey": "^0.9.0",

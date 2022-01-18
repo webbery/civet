@@ -65,11 +65,23 @@ export default {
       for (let resource of updateResources) {
         if (!isThumbnailExist(resource)) {
           if (!resource.thumbnail) {
-            const png = text2PNG('obj')
+            const width = 300
+            const height = 600
+            const png = text2PNG(resource.type(), width, height)
+            console.info('image output:', png)
+            resource.thumbnail = png
             resource['meta'].push(
               {
                 name: 'thumbnail',
-                value: png
+                value: resource.thumbnail
+              },
+              {
+                name: 'width',
+                value: width
+              },
+              {
+                name: 'height',
+                value: height
               }
             )
           }
