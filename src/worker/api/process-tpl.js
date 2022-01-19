@@ -4,6 +4,7 @@
  * @since 2018-09-03 15:04
  */
 import { getInlineCode, isModuleScriptSupported } from './utils'
+import { hasProtocol } from '../../public/Utility'
 
 const ALL_SCRIPT_REGEX = /(<script[\s\S]*?>)[\s\S]*?<\/script>/gi
 const SCRIPT_TAG_REGEX = /<(script)\s+((?!type=('|")text\/ng-template\3).)*?>.*?<\/\1>/is
@@ -25,10 +26,6 @@ const LINK_IGNORE_REGEX = /<link(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is
 const STYLE_IGNORE_REGEX = /<style(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is
 const SCRIPT_IGNORE_REGEX = /<script(\s+|\s+.+\s+)ignore(\s*|\s+.*|=.*)>/is
 const BODY_REGEX = /<body[\s\S]*?>([\s\S]*?)<\/body>/gi
-
-function hasProtocol(url) {
-  return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://')
-}
 
 function getEntirePath(path, baseURI) {
   return new URL(path, baseURI).toString()
@@ -147,9 +144,9 @@ export default function processTpl(tpl, baseURI) {
           throw new SyntaxError('You should not set multiply entry script!')
         } else {
           // append the domain while the script not have an protocol prefix
-          if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
-            matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI)
-          }
+          // if (matchedScriptSrc && !hasProtocol(matchedScriptSrc)) {
+          //   matchedScriptSrc = getEntirePath(matchedScriptSrc, baseURI)
+          // }
 
           entry = entry || (matchedScriptEntry && matchedScriptSrc)
         }

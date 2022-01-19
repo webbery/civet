@@ -1,6 +1,6 @@
 import { IResource, ExtensionContext, ResourceProperty } from 'civet'
 import { PropertyType } from './ExtensionHostType'
-
+import path from 'path'
 
 export class DisplayProperty{
   name: string;
@@ -73,7 +73,7 @@ export class Resource implements IResource {
       }
     }
     if (!this.thumbnail) this.thumbnail = property.thumbnail
-    if (!this._path) this._path = property.path || ''
+    if (!this._path) this._path = path.normalize(property.path) || ''
     if (!this._remote) this._remote = property.remote || undefined
     if (!this.name) this.name = property.filename || ''
   }
@@ -153,7 +153,7 @@ export class Resource implements IResource {
     let serialize = {
       id: this.id,
       filename: this.name,
-      path: this._path,
+      path: path.normalize(this._path),
       thumbnail: this.thumbnail,
       filetype: this.filetype,
       keyword: this.keyword,

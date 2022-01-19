@@ -3,10 +3,16 @@
         <el-scrollbar style="height: 93vh;" wrap-style="overflow-x:hidden;">
         <div class="image-panel">
           <div class="prev" @click="onClickPrev"></div>
-          <!-- <div class="viewer">
-            <img :src="candidates[index].path">
-          </div> -->
-          <div style="height: 100%" v-html="html" id="_cv_content_view"></div>
+          <!-- <div v-if="!isParsed">
+            <div class="_cv_content_loading">
+              <svg class="_cv_circular" viewBox="25 25 50 50">
+                <circle class="_cv_path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/>
+              </svg>
+            </div>
+          </div>
+          <div v-else style="height: 100%"> -->
+            <div style="height: 100%" v-html="html" id="_cv_content_view"></div>
+          <!-- </div> -->
           <div class="next" @click="onClickNext"></div>
         </div>
         </el-scrollbar>
@@ -31,16 +37,14 @@ export default {
       viewer: null,
       html: '',
       script: '',
-      isUpdated: true
+      isUpdated: false,
+      isParsed: false
     }
   },
   computed: mapState({
     candidates: state => state.Cache.viewItems
   }),
   mounted() {
-    this.html = '<div class="_cv_content_loading"><svg class="_cv_circular" viewBox="25 25 50 50">' +
-      '<circle class="_cv_path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"/>' +
-      '</svg></div>'
     this.resource = this.$route.params
     console.info('content panel mounted:', this.resource, this.candidates)
     if (this.resource.type) {
@@ -71,8 +75,8 @@ export default {
       this.isUpdated = true
       return
     }
-    // console.debug('viewname: ', contentView)
-    events.emit('ContentView:' + contentView, 'load', this.resource._path)
+    const path = require('path')
+    events.emit('ContentView:' + contentView, 'load', path.normalize(this.resource._path))
     this.isUpdated = true
   },
   methods: {
@@ -103,6 +107,7 @@ export default {
       this.html = HtmlLoader.load(value.body)
       this.script = value.script
       this.isUpdated = false
+      this.isParsed = true
     }
   }
 }
@@ -173,5 +178,8 @@ export default {
   left: 16px;
   position: absolute;
   content: "\E604";
+}
+.__cv_transition_content{
+
 }
 </style>

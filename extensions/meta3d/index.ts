@@ -1,4 +1,4 @@
-import { IResource, ResourceProperty, PropertyType } from 'civet'
+import { IResource, ResourceProperty, PropertyType, window, utility } from 'civet'
 
 function convert2ValidDate(str: string): string {
   if (str.match(/[0-9]{4}:[0-9]{2}:[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/g)) {
@@ -10,6 +10,14 @@ function convert2ValidDate(str: string): string {
   }
   return str
 }
+
+let contentView = window.createContentView('3dContentView',
+  ['glb', 'gltf']);
+contentView.onViewInitialize(():string => {
+  const fs = require('fs')
+  const html = fs.readFileSync(utility.extensionPath + '/meta3d/content.html', 'utf-8')
+  return html
+});
 
 class MetaParser {
   constructor() {}

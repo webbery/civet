@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
+</head>
+<body>
+  <model-viewer id="_cv_ext_obj_" auto-rotate="" camera-controls="" style="width: 100%;height: 90vh;" background-color="#455A64"></model-obj>
+  <script>
+    // Meta3DContentView = (function() {
+      acquireCivetApi().ContentView.on('load', (data) => {
+        const elem = document.getElementById('_cv_ext_obj_')
+        elem.setAttribute('src', 'file://' + data)
+        console.info('load 3D data', data)
+      })
+    // })()
+  </script>
+</body>
+</html>

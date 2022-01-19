@@ -67,8 +67,8 @@ export default {
           if (!resource.thumbnail) {
             const width = 300
             const height = 600
-            const png = text2PNG(resource.type(), width, height)
-            console.info('image output:', png)
+            const type = resource.type || resource.filetype
+            const png = text2PNG(type, width, height)
             resource.thumbnail = png
             resource['meta'].push(
               {
@@ -110,7 +110,7 @@ export default {
       console.error(info)
       const h = this.$createElement
       this.$notify.error({
-        title: info.msg,
+        title: info.msg || info,
         dangerouslyUseHTMLString: true,
         message: h('div', {style: 'color: white; font-size: 12px;'}, info.path),
         // duration: 0,

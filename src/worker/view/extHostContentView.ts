@@ -105,7 +105,7 @@ export class ExtContentViewEntry {
     switch(views.length) {
       case 0:
         const msg = `content view of ${suffix} is not install`
-        console.error(msg)
+        console.error('current:', this.#contentviews)
         showErrorInfo(msg)
         break
       case 1:

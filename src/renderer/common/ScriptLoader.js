@@ -1,5 +1,8 @@
 // import vm from 'vm'
 import crypto from 'crypto'
+import path from 'path'
+import { hasProtocol } from '@/../public/Utility'
+import { events } from './RendererService'
 
 export default (function() {
   let groupQueue
@@ -52,12 +55,18 @@ export default (function() {
           resolve(true)
         }
         s.onerror = function(oError) {
-          console.error('The script ' + oError.target.src + ' is not accessible.')
+          const err = 'The script ' + oError.target.src + ' is not accessible.'
+          events.emit('civet', 'onErrorMessage', {msg: err})
           reject(oError)
         }
-        console.info('src script')
         s.async = true
-        s.src = script
+        if (hasProtocol(script)) {
+          s.src = script
+        } else {
+          s.src = path.join(__static, '/' + script)
+        }
+        s.type = 'module'
+        console.info('src script:', s.src)
         document.head.appendChild(s)
       }
     })

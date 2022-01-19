@@ -114,11 +114,19 @@ export function text2PNG(text: string, width: number, height: number): string {
   if (!canvas) return ''
   const ctx = canvas.getContext('2d')
   if (!ctx) return ''
-  ctx.fillStyle = background[text.length % 4];
+  let index = 0
+  for(let idx = 0; idx < text.length; ++idx) {
+    index += text.charCodeAt(idx)
+  }
+  ctx.fillStyle = background[index % 4];
   ctx.fillRect(0, 0, width, height)
   ctx.font = '20px Impact'
-  ctx.fillStyle = 'white'
+  ctx.fillStyle = 'black'
   console.debug('height:', height / 2)
   ctx.fillText(text, (width - text.length * 10) / 2, height / 2 + 5)
   return canvas.toDataURL()
+}
+
+export function hasProtocol(url: string) {
+  return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://')
 }

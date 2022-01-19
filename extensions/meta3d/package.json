@@ -9,10 +9,12 @@
   "main": "./index.js",
   "civet": {
     "activeEvents": [
-      "onContentType: obj,json,stl,dae,ply,fbx,gltf",
+      "onContentType: glb,gltf",
+      "onView: ContentView",
       "onSave:"
     ]
   },
   "dependencies": {
+    "vue-3d-model": "^1.4.0"
   }
 }

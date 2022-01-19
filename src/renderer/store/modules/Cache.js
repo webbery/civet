@@ -439,8 +439,9 @@ const actions = {
         if (!item.thumbnail) {
           const width = 120
           const height = 180
-          const png = text2PNG(item.type, width, height)
-          Cache.icons[item.type] = png
+          const type = item.type || item.filetype
+          const png = text2PNG(type, width, height)
+          Cache.icons[type] = png
           item.thumbnail = png
           item['meta'].push(
             {
