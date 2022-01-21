@@ -120,7 +120,7 @@
     "element-ui": "^2.14.1",
     "image-hash": "^4.0.1",
     "lodash": "^4.17.21",
-    "log4js": "^6.3.0",
+    "log4js": "^6.4.0",
     "lru-cache": "^6.0.0",
     "reflect-metadata": "^0.1.13",
     "tinycolor2": "^1.4.2",
