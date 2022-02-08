@@ -46,6 +46,7 @@ export default {
     updateCurrentViewName(config.defaultView)
     // this.$ipcRenderer.send(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)
     this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, config.defaultView)
+    bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
   },
   watch: {
     $route: function(to, from) {

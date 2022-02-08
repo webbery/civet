@@ -201,6 +201,8 @@ declare module 'civet' {
          * @param listener a listener is defined for reading html file and it's content should be return
          */
         onViewInitialize(listener: () => string): void;
+        onNextResourceDisplay(): void;
+        onPrevResourceDisplay(): void;
     }
 
     export namespace window {

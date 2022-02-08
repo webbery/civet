@@ -18,6 +18,7 @@ export default {
   },
   methods: {
     onUpdateDisplayName(name) {
+      console.info('display resource name:', name)
       this.filename = name
     }
   }
@@ -26,6 +27,7 @@ export default {
 
 <style scoped>
 div{
-  align-content: center;
+  display: flex;
+  justify-content: center;
 }
 </style>

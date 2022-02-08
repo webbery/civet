@@ -50,18 +50,23 @@ export default {
     if (this.resource.type) {
       this.$ipcRenderer.on(IPCRendererResponse.ON_EXTENSION_CONTENT_UPDATE, this.onContentViewUpdate)
       this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, this.resource.type)
-      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '图片显示', cmd: 'display'})
-      // for (let idx = 0; idx < this.candidates.length; ++idx) {
-      //   if (this.candidates[idx].id === this.image.id) {
-      //     this.index = idx
-      //     this.$nextTick(() => {
-      //       bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[idx].filename)
-      //     })
-      //     break
-      //   }
-      // }
+      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '资源', cmd: 'display'})
+      for (let idx = 0; idx < this.candidates.length; ++idx) {
+        if (this.candidates[idx].id === this.resource.id) {
+          this.index = idx
+          break
+        }
+      }
     } else {
       // unkonw file type
+    }
+    this.$nextTick(() => {
+      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.resource.filename || this.resource.name)
+    })
+  },
+  watch: {
+    $route: function(to, from) {
+      console.info('content panel, to: ', to, 'from:', from.path)
     }
   },
   async updated() {
@@ -76,19 +81,22 @@ export default {
       return
     }
     const path = require('path')
-    events.emit('ContentView:' + contentView, 'load', path.normalize(this.resource._path))
+    events.emit('ContentView:' + contentView, 'load', path.normalize(this.candidates[this.index].path))
     this.isUpdated = true
   },
   methods: {
     onClickNext() {
-      console.info('next image')
+      console.info('next image', this.index)
       if (this.index > this.candidates.length) {
         this.index = this.candidates.length
         return
       }
       this.index += 1
       bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[this.index].filename)
-      bus.emit(bus.EVENT_SELECT_IMAGE, this.candidates[this.index].id)
+      const id = this.candidates[this.index].id
+      this.$ipcRenderer.send(IPCNormalMessage.GET_SELECT_CONTENT_ITEM_INFO, {id: [id]})
+      const type = this.candidates[this.index].type
+      this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, type)
     },
     onClickPrev() {
       console.info('prev image')
@@ -98,7 +106,10 @@ export default {
       }
       this.index -= 1
       bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[this.index].filename)
-      bus.emit(bus.EVENT_SELECT_IMAGE, this.candidates[this.index].id)
+      const id = this.candidates[this.index].id
+      this.$ipcRenderer.send(IPCNormalMessage.GET_SELECT_CONTENT_ITEM_INFO, {id: [id]})
+      const type = this.candidates[this.index].type
+      this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, type)
     },
     onContentViewUpdate(session, value) {
       console.debug('onContentViewUpdate:', value)

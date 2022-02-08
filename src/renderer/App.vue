@@ -99,7 +99,7 @@ export default {
       if (resourceInfo !== null) {
         resourceInfo['id'] = resourceID
         console.info('onResourceShow:', resourceInfo)
-        this.$router.push({name: 'view-resource', params: resourceInfo, query: {name: resourceInfo.filename, cmd: 'display'}})
+        this.$router.push({name: 'view-resource', params: resourceInfo, query: {name: resourceInfo.filename || resourceInfo.name, cmd: 'display'}})
       }
     },
     onClassOpen(classpath) {

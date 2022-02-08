@@ -55,6 +55,9 @@ class ExtContentView extends ExtHostWebView {
     this.html = html
     return this.getHtml()
   }
+
+  onNextResourceDisplay(): void {}
+  onPrevResourceDisplay(): void {}
 }
 
 @injectable

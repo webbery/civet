@@ -12,7 +12,6 @@ export default {
   },
   EVENT_UPDATE_IMAGE_IMPORT_DIRECTORY: 'updateImportDirectory',
   EVENT_UPDATE_DISPLAY_IMAGE: 'updateDisplayImage',
-  EVENT_SELECT_IMAGE: 'selectImage',
   EVENT_DISPLAY_FILE_NAME: 'displayFileName',
   EVENT_REMOVE_FILES: 'removeFiles',
   EVENT_REMOVE_ITEM: 'removeTreeItem',

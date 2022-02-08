@@ -98,7 +98,6 @@ export default {
     candidateClasses: state => state.Cache.classesName
   }),
   mounted() {
-    // bus.on(bus.EVENT_SELECT_IMAGE, this.displayProperty)
     this.event = this.$events.get('PropertyView')
     this.event.on('click', this.cleanProperty, this)
     this.$ipcRenderer.on('Property', this.onViewUpdate)
