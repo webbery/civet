@@ -42,15 +42,25 @@
     #container {
         height:75%;
     }
+    ._cv_gv_mini-cover {
+        border-radius: 8px;
+        border: 2px solid;
+        box-sizing: border-box;
+    }
+    ._cv_gv_trans-border{
+        border-color: transparent;
+    }
+    ._cv_gv_border{
+        border-color: white;
+    }
 </style>
 </head>
 <body>
-<div id="container"></div>
+<div id="container" draggable="true" ondragstart="MapLayout.preventDrag(event)" ondrag="MapLayout.preventDrag(event)"></div>
 <div id="resources"></div>
 <script type="text/javascript"
-        src="https://webapi.amap.com/maps?v=1.4.15&key=6918ecca2a3cbfafb6ab59369768ae21&plugin=AMap.MarkerClusterer"></script>
+        src="https://webapi.amap.com/maps?v=2.0&key=6918ecca2a3cbfafb6ab59369768ae21&plugin=AMap.MarkerClusterer"></script>
 <script type="text/javascript">
-// var cluster;
 MapLayout = (function() {
     let markers = []
     let map = new AMap.Map('container', {
@@ -93,14 +103,14 @@ MapLayout = (function() {
         // div.setAttribute('class', '_cv_horizon-image')
         // div.style.left = `0px`
         // div.style.top = `${item.top}px`
-        div.style.width = `${item.width}px`
-        div.style.height = `${item.height}px`
+        div.style.width = `${item.width - 15}px`
+        div.style.height = `${item.height - 10}px`
         // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
         const html = `<div draggable="true" class="image">
                             <div class="el-card is-never-shadow" style="border: 0px;">
-                                <div class="el-card__body" style="padding: 1px;">
-                                    <div class="frame" onclick="MapLayout.onResourceClick(${item.id})" oncontextmenu="MapLayout.onResourceClick(${item.id})" ondblclick="MapLayout.onDbResourceClick(${item.id})">
-                                        <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover">
+                                <div class="el-card__body" style="padding: 4px;">
+                                    <div class="frame" onclick="MapLayout.onResourceClick(${item.id}, this)" oncontextmenu="MapLayout.onResourceClick(${item.id}, this)" ondblclick="MapLayout.onDbResourceClick(${item.id}, this)">
+                                        <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
                                     </div>
                                     <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
                                         <span class="context">${item.name}</span>
@@ -153,41 +163,62 @@ MapLayout = (function() {
         let selections = []
         let curClassPath = ''
         return {
-            addSelection: function (itemid) {
-                selections.push(itemid)
+            addSelection: function (itemid, element) {
+                selections.push([itemid, element])
             },
             classPath: curClassPath,
-            resetSelection: function () { selections = [] },
+            resetSelection: function () {
+                for (let selection of selections) {
+                    const element = selection[1]
+                    let clazz = element.getAttribute('class')
+                    clazz = clazz.replace('_cv_gv_border', '_cv_gv_trans-border')
+                    element.setAttribute('class', clazz)
+                }
+                selections = []
+            },
             getSelection: function() { return selections },
             updateTimer: function(val) { clickTimer = val },
             getTimer: function() { return clickTimer }
         }
     })()
 
-    function onViewClick(itemid) {
+    function onViewClick(itemid, element) {
         acquireCivetApi().Overview.click(itemid)
+        MapViewCache.resetSelection()
+        if (itemid) {
+            MapViewCache.addSelection(itemid, element)
+        }
         if (event.which === 3) {
-            MapViewCache.resetSelection()
             if (!itemid) {
                 return
             }
             console.info('map right click')
-            MapViewCache.addSelection(itemid)
             const selections = MapViewCache.getSelection()
             acquireCivetApi().injectCommandParams('exportResources', selections)
             acquireCivetApi().injectCommandParams('deleteResources', selections)
         }
     }
 
-    function onResourceClick(itemid) {
+    function onResourceClick(itemid, element) {
         if (!MapViewCache.getTimer()) {
             const id = window.setTimeout(() => {
                 clearTimeout(MapViewCache.getTimer())
                 MapViewCache.updateTimer(undefined)
             }, 200)
+            console.info('resource click')
             MapViewCache.updateTimer(id)
-            onViewClick(itemid)
+            const imgElement = element.children[0]
+            onViewClick(itemid, imgElement)
+            let clazz = imgElement.getAttribute('class')
+            clazz = clazz.replace('_cv_gv_trans-border', '_cv_gv_border')
+            imgElement.setAttribute('class', clazz)
         }
+    }
+
+    function preventDrag(event) {
+        event.target.style.opacity = ''
+        event.preventDefault()
+        event.stopPropagation()
     }
 
     acquireCivetApi().Overview.on('update', (data) => {
@@ -237,7 +268,8 @@ MapLayout = (function() {
             let root = document.getElementById('resources')
             root.innerHTML = ''
         },
-        onResourceClick: onResourceClick
+        onResourceClick: onResourceClick,
+        preventDrag: preventDrag,
     }
 })()
 

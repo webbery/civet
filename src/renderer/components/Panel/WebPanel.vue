@@ -135,6 +135,7 @@ export default {
       if (paths.length > 0) {
         this.$ipcRenderer.send(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, paths)
       }
+      event.preventDefault()
     },
     dragStart(event) {
       event.target.style.opacity = '0.5'

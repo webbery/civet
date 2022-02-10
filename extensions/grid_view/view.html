@@ -85,6 +85,19 @@
             text-align: center;
             font-size: 14px;
         }
+        ._cv_gv_frame {
+        }
+        ._cv_gv_mini-cover {
+            border-radius: 8px;
+            border: 2px solid;
+            box-sizing: border-box;
+        }
+        ._cv_gv_trans-border{
+            border-color: transparent;
+        }
+        ._cv_gv_border{
+            border-color: white;
+        }
     </style>
 </head>
 <body>
@@ -138,16 +151,16 @@
             function generateFromTemplate(item) {
                 let div = document.createElement('div')
                 div.setAttribute('class', '_cv_waterfall')
-                div.style.left = `${item.left}px`
+                div.style.left = `${item.left + 5}px`
                 div.style.top = `${item.top}px`
-                div.style.width = `${item.width}px`
+                div.style.width = `${item.width - 10}px`
                 div.style.height = `${item.height}px`
                 // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
                 const innerHTML = `<div draggable="true" class="image">
                                     <div class="el-card is-never-shadow" style="border: 0px;">
                                         <div class="el-card__body" style="padding: 1px;">
-                                            <div class="frame" onclick="onGridClick(${item.id})" oncontextmenu="onGridClick(${item.id})" ondblclick="onDbResourceClick(${item.id})">
-                                                <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="mini-cover">
+                                            <div class="_cv_gv_frame" onclick="onGridClick(${item.id}, this)" oncontextmenu="onGridClick(${item.id}, this)" ondblclick="onDbResourceClick(${item.id})">
+                                                <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
                                             </div>
                                             <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
                                                 <span class="context" id="gv_${item.id}">${item.name}</span>
@@ -248,36 +261,49 @@
             console.info(data)
             elm.innerHTML = data.name
         })
+        acquireCivetApi().Overview.on('click', (data) => {
+            GridViewCache.resetSelection()
+        })
         // Overview.on('all', () => {})
         GridViewCache = (function() {
             let clickTimer = undefined
             let selections = []
             let curClassPath = ''
             return {
-                addSelection: function (itemid) {
-                    selections.push(itemid)
+                addSelection: function (itemid, element) {
+                    selections.push([itemid, element])
                 },
                 classPath: curClassPath,
-                resetSelection: function () { selections = [] },
+                resetSelection: function () {
+                    for (let selection of selections) {
+                        const element = selection[1]
+                        let clazz = element.getAttribute('class')
+                        clazz = clazz.replace('_cv_gv_border', '_cv_gv_trans-border')
+                        element.setAttribute('class', clazz)
+                    }
+                    selections = []
+                },
                 getSelection: function() { return selections },
                 updateTimer: function(val) { clickTimer = val },
                 getTimer: function() { return clickTimer }
             }
         })()
-        function onViewClick(itemid) {
+        function onViewClick(itemid, element) {
             acquireCivetApi().Overview.click(itemid)
+            GridViewCache.resetSelection()
+            if (itemid) {
+                GridViewCache.addSelection(itemid, element)
+            }
             if (event.which === 3) {
-                GridViewCache.resetSelection()
                 if (!itemid) {
                     return
                 }
-                GridViewCache.addSelection(itemid)
                 const selections = GridViewCache.getSelection()
                 acquireCivetApi().injectCommandParams('exportResources', selections)
                 acquireCivetApi().injectCommandParams('deleteResources', selections)
             }
         }
-        function onGridClick(itemid) {
+        function onGridClick(itemid, elm) {
             if (!GridViewCache.getTimer()) {
                 const id = window.setTimeout(() => {
                     clearTimeout(GridViewCache.getTimer())
@@ -285,7 +311,11 @@
                 }, 200)
                 console.info('onGridClick')
                 GridViewCache.updateTimer(id)
-                onViewClick(itemid)
+                const imgElement = elm.children[0]
+                onViewClick(itemid, imgElement)
+                let clazz = imgElement.getAttribute('class')
+                clazz = clazz.replace('_cv_gv_trans-border', '_cv_gv_border')
+                imgElement.setAttribute('class', clazz)
             }
         }
         function onDbResourceClick(itemid) {

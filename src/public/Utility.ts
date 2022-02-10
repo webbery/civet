@@ -109,7 +109,7 @@ export function buffer2Base64(buffer: Buffer) {
 }
 
 export function text2PNG(text: string, width: number, height: number): string {
-  const background = ['rgb(223, 117, 104)', 'rgb(127, 219, 124)', 'rgb(124, 168, 219)', 'rgb(164, 122, 199)']
+  const background = ['rgb(223, 117, 104)', 'rgb(127, 219, 124)', 'rgb(124, 168, 219)', 'rgb(164, 122, 199)', 'rgb(215, 216, 143)']
   const canvas: HTMLCanvasElement = document.getElementById('hidden') as HTMLCanvasElement
   if (!canvas) return ''
   const ctx = canvas.getContext('2d')
@@ -118,7 +118,7 @@ export function text2PNG(text: string, width: number, height: number): string {
   for(let idx = 0; idx < text.length; ++idx) {
     index += text.charCodeAt(idx)
   }
-  ctx.fillStyle = background[index % 4];
+  ctx.fillStyle = background[index % 5];
   ctx.fillRect(0, 0, width, height)
   ctx.font = '20px Impact'
   ctx.fillStyle = 'black'

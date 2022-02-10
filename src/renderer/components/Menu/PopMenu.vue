@@ -52,6 +52,8 @@
 
 <script>
 import { events, getCommandArgs } from '../../common/RendererService'
+import { getCurrentViewName } from '@/common/RendererService'
+import { globalEvents } from '@/common/GlobalEvents'
 
 export default {
   name: 'PopMenu',
@@ -116,10 +118,14 @@ export default {
         this.axis = axis
       }
     })
-    document.addEventListener('click', () => {
+    globalEvents.addEventListener('click', () => {
       console.info('click', this.show)
       this.show = false
     }, true)
+    globalEvents.setEventFinishLisetner('click', () => {
+      const view = getCurrentViewName()
+      this.$events.emit('Overview:' + view, 'click')
+    })
   },
   watch: {
     axis() {

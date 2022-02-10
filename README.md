@@ -24,7 +24,7 @@
 > :kissing_heart: 支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
 目标是希望像VSCode那样，以扩展的形式为用户提供一个数字资产(图片、文档、视频、文献、网页等)的管理软件。
 
-![界面预览](https://raw.githubusercontent.com/webbery/civet/master/show.gif)
+![界面预览](https://raw.fastgit.org/webbery/civet/master/show.gif)
 
 ### Install
 
@@ -61,9 +61,10 @@
 + [ ] 升级数据库，增强搜索功能
 
 #### 技术细节
-开发过程踩过许多坑，在填坑的同时记录下这些过程，并编写成文，以便其他开发者在做类似功能的时候能避免踩坑：  
+开发过程踩过许多坑，在填坑的同时记录下这些过程，以便其他开发者在做类似功能的时候能避免踩坑：  
 [如何实现vscode的require劫持](https://zhuanlan.zhihu.com/p/382381432)  
 [civet的图像主色彩抽取算法](https://zhuanlan.zhihu.com/p/355278737)  
+[Node如何调用C++代码](https://zhuanlan.zhihu.com/p/395634920)  
 
 ---
 
