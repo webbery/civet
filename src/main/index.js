@@ -90,6 +90,7 @@ function createRendererWindow() {
       nodeIntegrationInWorker: true,
       enableRemoteModule: true,
       webSecurity: false,
+      contextIsolation: false,
       additionalArguments: ['renderer']
     },
     backgroundColor: '#222933',
@@ -139,6 +140,7 @@ function createWorkerWindow (bFirst) {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
       enableRemoteModule: true,
+      contextIsolation: false,
       additionalArguments: ['worker']
     }
   })

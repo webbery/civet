@@ -2,7 +2,7 @@
       <el-main style="height: 100%">
         <el-scrollbar style="height: 93vh;" wrap-style="overflow-x:hidden;">
         <div class="image-panel">
-          <div class="prev" @click="onClickPrev"></div>
+          <div class="__cv_prev" @click="onClickPrev"></div>
           <!-- <div v-if="!isParsed">
             <div class="_cv_content_loading">
               <svg class="_cv_circular" viewBox="25 25 50 50">
@@ -13,7 +13,7 @@
           <div v-else style="height: 100%"> -->
             <div style="height: 100%" v-html="html" id="_cv_content_view"></div>
           <!-- </div> -->
-          <div class="next" @click="onClickNext"></div>
+          <div class="__cv_next" @click="onClickNext"></div>
         </div>
         </el-scrollbar>
       </el-main>
@@ -138,7 +138,7 @@ export default {
   height: 100%;
 }
 
-.prev{
+.__cv_prev{
   width:50px;
 	height:50px;
 	position:fixed;
@@ -156,17 +156,17 @@ export default {
   font-family: 'element-icons' !important;
   left: 18.5%;
 }
-.prev::before{
+.__cv_prev::before{
   top: 16px;
   left: 16px;
   position: absolute;
   content: "\E600";
 }
 .next:hover
-.prev:hover {
+.__cv_prev:hover {
 	opacity:0.9;
 }
-.next {
+.__cv_next {
   width:50px;
 	height:50px;
 	position:fixed;
@@ -184,13 +184,11 @@ export default {
   font-family: 'element-icons' !important;
   right: 18.5%;
 }
-.next::before{
+.__cv_next::before{
   top: 16px;
   left: 16px;
   position: absolute;
   content: "\E604";
 }
-.__cv_transition_content{
 
-}
 </style>

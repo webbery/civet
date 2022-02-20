@@ -19,33 +19,33 @@
         border: 0;
         background-color: transparent;
     }
-    /* ._cv_horizon-image {
-        transform: rotate(90deg);
-    } */
-    /* ::-webkit-scrollbar{
-        width:4px;
-        height:2px;
-    }
-    ::-webkit-scrollbar-button{
-        width:4px;
-        height:2px;
-    } */
-    #resources {
-        height:20%;
-        /* background-color: #222933; */
+    #__cv_map_resources {
+        height:25vh;
         width: 100%;
-        white-space: nowrap;
+    }
+    .__cv_map_image {
+        display: flex;
+        flex-wrap: wrap;
         overflow-y: hidden;
         overflow-x: auto;
-        display: flex;
     }
-    #container {
-        height:75%;
+    .__cv_map_image::after {
+        content: '';
+        flex-grow: 99999;
+    }
+    .__cv_mapbox {
+        margin: 2px;
+        object-fit: cover;
+    }
+    #__cv_map_container {
+        height:75vh;
     }
     ._cv_gv_mini-cover {
         border-radius: 8px;
         border: 2px solid;
         box-sizing: border-box;
+        height: 18vh;
+        object-fit: cover;
     }
     ._cv_gv_trans-border{
         border-color: transparent;
@@ -56,8 +56,10 @@
 </style>
 </head>
 <body>
-<div id="container" draggable="true" ondragstart="MapLayout.preventDrag(event)" ondrag="MapLayout.preventDrag(event)"></div>
-<div id="resources"></div>
+<div id="__cv_map_container" draggable="true" ondragstart="MapLayout.preventDrag(event)" ondrag="MapLayout.preventDrag(event)"></div>
+<div id="__cv_map_resources">
+    <div class="__cv_map_image"></div>
+</div>
 <script type="text/javascript"
         src="https://webapi.amap.com/maps?v=2.0&key=6918ecca2a3cbfafb6ab59369768ae21&plugin=AMap.MarkerClusterer"></script>
 <script type="text/javascript">
@@ -101,21 +103,17 @@ MapLayout = (function() {
     function generateFromTemplate(item) {
         let div = document.createElement('div')
         // div.setAttribute('class', '_cv_horizon-image')
-        // div.style.left = `0px`
+        div.style['flex-grow'] = 1
         // div.style.top = `${item.top}px`
-        div.style.width = `${item.width - 15}px`
-        div.style.height = `${item.height - 10}px`
+        // div.style.width = `${item.width - 15}px`
+        // div.style.height = `${item.height - 10}px`
         // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
-        const html = `<div draggable="true" class="image">
-                            <div class="el-card is-never-shadow" style="border: 0px;">
-                                <div class="el-card__body" style="padding: 4px;">
-                                    <div class="frame" onclick="MapLayout.onResourceClick(${item.id}, this)" oncontextmenu="MapLayout.onResourceClick(${item.id}, this)" ondblclick="MapLayout.onDbResourceClick(${item.id}, this)">
-                                        <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
-                                    </div>
-                                    <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
-                                        <span class="context">${item.name}</span>
-                                    </div>
-                                </div>
+        const html = `<div draggable="true" class="__cv_mapbox" style="border: 0px;padding: 4px;">
+                            <div class="frame" onclick="MapLayout.onResourceClick(${item.id}, this)" oncontextmenu="MapLayout.onResourceClick(${item.id}, this)" ondblclick="MapLayout.onDbResourceClick(${item.id}, this)">
+                                <img src="${item.thumbnail?item.thumbnail:item.src}" height="95%" class="_cv_gv_mini-cover _cv_gv_trans-border">
+                            </div>
+                            <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
+                                <span class="context">${item.name}</span>
                             </div>
                         </div>`
         acquireCivetApi().setHtml('mapview', div, html)
@@ -123,7 +121,7 @@ MapLayout = (function() {
     }
     function addHorizonItem(item) {
         // const items = document.querySelectorAll('#resources')
-        const root = document.getElementById('resources')
+        const root = document.getElementsByClassName('__cv_image')[0]
         const defaultHeight = root.offsetHeight
         console.info('Item Height', defaultHeight)
         let block = {}, src = undefined
@@ -194,11 +192,19 @@ MapLayout = (function() {
             }
             console.info('map right click')
             const selections = MapViewCache.getSelection()
-            acquireCivetApi().injectCommandParams('exportResources', selections)
-            acquireCivetApi().injectCommandParams('deleteResources', selections)
+            const ids = selections.map(item => item[0])
+            acquireCivetApi().injectCommandParams('exportResources', ids)
+            acquireCivetApi().injectCommandParams('deleteResources', ids)
         }
     }
 
+    function onDbResourceClick(itemid) {
+        acquireCivetApi().postMessage({
+            command: 'showResourceDetail',
+            id: itemid
+        })
+    }
+    
     function onResourceClick(itemid, element) {
         if (!MapViewCache.getTimer()) {
             const id = window.setTimeout(() => {
@@ -228,6 +234,9 @@ MapLayout = (function() {
         for (let resource of resources) {
             MapLayout.add(resource)
         }
+    })
+    acquireCivetApi().Overview.on('click', (data) => {
+        MapViewCache.resetSelection()
     })
     return {
         add: function(item) {
@@ -265,10 +274,11 @@ MapLayout = (function() {
             // if (cluster) {
             //     cluster.setMap(null);
             // }
-            let root = document.getElementById('resources')
+            let root = document.getElementsByClassName('__cv_image')[0]
             root.innerHTML = ''
         },
         onResourceClick: onResourceClick,
+        onDbResourceClick: onDbResourceClick,
         preventDrag: preventDrag,
     }
 })()

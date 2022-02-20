@@ -2,9 +2,9 @@
  * Created by ayou on 18/2/6.
  */
 
-let handlerCache
+let handlerCache: any;
 
-export const addHandler = function(element, type, handler) {
+export const addHandler = function(element: any, type: string, handler: any) {
   handlerCache = handler
   if (element.addEventListener) {
     element.addEventListener(type, handler, false)
@@ -15,7 +15,7 @@ export const addHandler = function(element, type, handler) {
   }
 }
 
-export const removeHandler = function(element, type) {
+export const removeHandler = function(element: any, type: string) {
   if (element.removeEventListener) {
     element.removeEventListener(type, handlerCache, false)
   } else if (element.detachEvent) {
@@ -26,7 +26,7 @@ export const removeHandler = function(element, type) {
 }
 
 // depth first search
-export const traverseTree = root => {
+export const traverseTree = (root: any) => {
   const newRoot = {}
 
   for (const k in root) {
@@ -36,9 +36,9 @@ export const traverseTree = root => {
   }
 
   if (root.children && root.children.length > 0) {
-    newRoot.children = []
+    newRoot['children'] = []
     for (let i = 0, len = root.children.length; i < len; i++) {
-      newRoot.children.push(traverseTree(root.children[i]))
+      newRoot['children'].push(traverseTree(root.children[i]))
     }
   }
   return newRoot

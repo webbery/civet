@@ -5,7 +5,6 @@
           <InputLabel v-on:changed="onNameChaged">{{filename}}</InputLabel>
         </div>
           <Preview :src="thumbnail"></Preview>
-          <!-- <JImage :src="imagepath" :interact="false"></JImage> -->
           <div class="color-container">
             <span v-if="colors.length!==0" ><span class="main-color" v-for="color of colors" :key="color" :style="{'background-color': color}" ></span></span>
             <span v-else icon="el-icon-loading"></span>
@@ -64,7 +63,6 @@
 </template>
 
 <script>
-import IconTag from '@/components/IconTag'
 import Preview from '../Control/CVPreview'
 import { i18n, formatOutput } from '@/../public/String'
 import InputLabel from '../Control/CVInputLabel'
@@ -92,7 +90,7 @@ export default {
     }
   },
   components: {
-    IconTag, Preview, InputLabel
+    Preview, InputLabel
   },
   computed: mapState({
     candidateClasses: state => state.Cache.classesName

@@ -299,8 +299,9 @@
                     return
                 }
                 const selections = GridViewCache.getSelection()
-                acquireCivetApi().injectCommandParams('exportResources', selections)
-                acquireCivetApi().injectCommandParams('deleteResources', selections)
+                const ids = selections.map(item => item[0])
+                acquireCivetApi().injectCommandParams('exportResources', ids)
+                acquireCivetApi().injectCommandParams('deleteResources', ids)
             }
         }
         function onGridClick(itemid, elm) {

@@ -1,11 +1,11 @@
 import { MessagePipeline } from './MessageTransfer'
-import { createDecorator } from './ServiceDecorator'
 import { Result } from './common/Result'
 import { getAbsolutePath } from '@/../public/Utility'
 import { IPCRendererResponse } from '@/../public/IPCMessage'
 import { ViewType } from '@/../public/ExtensionHostType'
 import { ExtensionModule } from './api/ExtensionRequire'
 import { logger } from '@/../public/Logger'
+import { Emitter } from 'public/Emitter'
 const fs = require('fs')
 
 export interface ExtensionAccessor {
@@ -118,16 +118,16 @@ class ExtensionPackage {
   get menus() { return this._menus }
 }
 
-const decoratorTest = createDecorator<ITest>('ITest');
-
 export class ExtensionService {
   private _package: ExtensionPackage;
   private _pipe: MessagePipeline;
   private _instance: any = null;
   private _nexts: ExtensionService[] = [];  //dependency service
+  #event: Emitter;
 
-  constructor(@decoratorTest packagePath: string, pipe: MessagePipeline) {
+  constructor(packagePath: string, pipe: MessagePipeline) {
     this._package = new ExtensionPackage(packagePath)
+    this.#event = new Emitter()
     this._pipe = pipe
     if (this.hasType(ExtensionActiveType.ExtView)) {
       const result = this._initialize()
@@ -210,6 +210,14 @@ export class ExtensionService {
     }
   }
 
+  on(event: string, listener: (...args: any[]) => void) {
+    this.#event.on(event, listener, [this, event])
+  }
+
+  emit(event: string, ...args: any[]) {
+    return this.#event.emit(event, args)
+  }
+
   async run(command: string, ...args: any[]): Promise<Result<string, string>> {
     if (this._instance === null) {
       if (this.hasType(ExtensionActiveType.ExtView)) return Result.success(`${command} not exist in ${this._package.name}`)
@@ -226,7 +234,8 @@ export class ExtensionService {
       }
       for (let service of this._nexts) {
         console.info('run next extension', service.name)
-        await service.run(command, ...args)
+        service.emit(service.name + ':' + command, args)
+        // await service.run(command, ...args)
       }
       return Result.success(`${command} success`)
     } catch (err: any) {

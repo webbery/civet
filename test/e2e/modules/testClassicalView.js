@@ -1,6 +1,7 @@
 const base = require('./base')
 const {expect, assert} = require('chai')
 const search = require('./testSearch')
+const content = require('./testContentPanel')
 
 const CLASSICAL_LAYOUT = 0
 const SelectionIndex = 0
@@ -65,6 +66,13 @@ async function getResources(page) {
   return images
 }
 
+async function showResourceContent(page) {
+  const resources = await getResources(page)
+  await resources[0].click({ clickCount: 2, delay: 100 })
+  await content.isPanelDisplay(page)
+  await content.backPage(page)
+}
+
 module.exports = {
   selectResource: selectResource,
   showMenu: showMenu,
@@ -88,12 +96,18 @@ module.exports = {
     await property.updateName(page, newName)
     await property.addTag(page, 'green')
     await validName(page, newName)
+    
     // search
     await search.searchByKeyword(page, 'green')
     await page.waitForTimeout(5000)
 
     await property.removeTag(page)
+
+    // display content of resource
+    await showResourceContent(page)
+
     // right menu
+    // await base.switchLayout(page, CLASSICAL_LAYOUT)
     await showMenu(page)
     await removeResource(page)
     // const counts = await base.getCounts(page)

@@ -11,14 +11,12 @@ import 'element-theme-dark'
 import { service, events } from './common/RendererService'
 import commands from './common/CommandService'
 import VueLazyload from 'vue-lazyload'
-import VueHotkey from 'v-hotkey'
 import upperFirst from 'lodash/upperFirst'
 import camelCase from 'lodash/camelCase'
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 // Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 Vue.use(ElementUI)
-Vue.use(VueHotkey)
 Vue.use(VueLazyload, {
   // lazyComponent: true,
   // dispatchEvent: true

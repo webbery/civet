@@ -13,6 +13,7 @@ import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstall
 import fs from 'fs'
 import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
+import { AlgorithmService } from './service/AlgorithmService'
 
 class ExtensionCommandAccessor implements ExtensionAccessor {
   #commands: Set<string>;
@@ -99,6 +100,7 @@ export class ExtensionManager {
   private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
+  private _algorithmService: AlgorithmService = new AlgorithmService();
 
   constructor(pipeline: MessagePipeline) {
     this._pipeline = pipeline
@@ -187,6 +189,7 @@ export class ExtensionManager {
       for (let pos = 0; pos < len; ++pos) {
         if (service.dependency === extServs[pos].name) {
           extServs[pos].addDependency(service)
+          this._algorithmService.registExtension(service.name, service)
           break
         }
       }

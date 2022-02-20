@@ -189,6 +189,8 @@ declare module 'civet' {
         onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
     }
     
+    export interface Anotator {}
+
     /**
      * @brief a view which is display content 
      */

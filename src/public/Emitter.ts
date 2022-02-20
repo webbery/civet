@@ -7,9 +7,10 @@ export class Emitter {
     this.#event = new EventEmitter()
   }
 
-  on(event: string, listener: (...args: any[]) => void) {
+  on(event: string, listener: (...args: any[]) => void, option: any = undefined) {
     const done = (...args: any[]) => {
-      listener(args)
+      if (!option) listener(args)
+      else listener(option, args)
       this.#event.emit('done')
     }
     this.#event.on(event, done)

@@ -113,7 +113,7 @@
 
 <script>
 import { TreeNode } from './Tree'
-import { addHandler, removeHandler } from './tools.js'
+import { addHandler, removeHandler } from './tools'
 import { isEmpty } from '@/../public/Utility'
 
 let compInOperation = null
