@@ -1,7 +1,7 @@
 import { MessagePipeline } from '../MessageTransfer'
 import { joinPath } from '../../public/String'
 import { ReplyType } from '../Message'
-import { CivetProtocol } from '../../public/Event'
+import { CivetProtocol } from 'public/Event'
 import { Resource, SerializeAccessor } from '../../public/Resource'
 import { thumbnail2Base64 } from '../../public/Utility'
 import { IPCNormalMessage, IPCRendererResponse } from 'public/IPCMessage'
@@ -243,7 +243,7 @@ export class ResourceService{
         console.info('Reply', msg.msg)
         msg.tick = 0
         msg.id = msgid
-        this.pipeline.reply(msg)
+        // this.pipeline.reply(msg)
         if (cb) {
           cb(resource)
         }

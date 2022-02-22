@@ -1,5 +1,5 @@
 import path from 'path'
-import { ExtensionActiveType, ExtensionService, MenuDetail, ExtensionAccessor } from './ExtensionService'
+import { ExtensionActiveType, ExtensionService, ExtensionAccessor } from './ExtensionService'
 import { MessagePipeline } from './MessageTransfer'
 import { Resource, StorageAccessor } from '@/../public/Resource'
 import { ResourcePath } from './common/ResourcePath'
@@ -14,6 +14,7 @@ import fs from 'fs'
 import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { AlgorithmService } from './service/AlgorithmService'
+import { MenuDetail } from './ExtensionPackage'
 
 class ExtensionCommandAccessor implements ExtensionAccessor {
   #commands: Set<string>;
@@ -100,7 +101,7 @@ export class ExtensionManager {
   private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
-  private _algorithmService: AlgorithmService = new AlgorithmService();
+  // private _algorithmService: AlgorithmService = null;
 
   constructor(pipeline: MessagePipeline) {
     this._pipeline = pipeline
@@ -189,7 +190,7 @@ export class ExtensionManager {
       for (let pos = 0; pos < len; ++pos) {
         if (service.dependency === extServs[pos].name) {
           extServs[pos].addDependency(service)
-          this._algorithmService.registExtension(service.name, service)
+          // this._algorithmService.registExtension(service.name, service)
           break
         }
       }

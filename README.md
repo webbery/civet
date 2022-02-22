@@ -24,7 +24,7 @@
 > :kissing_heart: 支持多平台(Windows/Mac/Ubuntu)的图片素材管理软件。  
 目标是希望像VSCode那样，以扩展的形式为用户提供一个数字资产(图片、文档、视频、文献、网页等)的管理软件。
 
-![界面预览](https://raw.fastgit.org/webbery/civet/master/show.gif)
+![界面预览](show.gif)
 
 ### Install
 
