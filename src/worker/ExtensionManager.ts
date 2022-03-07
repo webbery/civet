@@ -15,6 +15,7 @@ import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { AlgorithmService } from './service/AlgorithmService'
 import { MenuDetail } from './ExtensionPackage'
+import { BaseService } from './service/ServiceInterface'
 
 class ExtensionCommandAccessor implements ExtensionAccessor {
   #commands: Set<string>;
@@ -98,6 +99,7 @@ export class ExtensionManager {
   // aviable extension of this
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
+  #extensions: BaseService[] = [];
   private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;

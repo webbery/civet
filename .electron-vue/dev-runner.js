@@ -182,7 +182,6 @@ function startElectron () {
   }
 
   electronProcess = spawn(electron, args)
-  
   electronProcess.stdout.on('data', data => {
     electronLog(data, 'blue')
   })
