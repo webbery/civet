@@ -9,11 +9,11 @@ export enum PropertyType {
 }
 
 export enum ViewType {
-  Property = 1,
-  Navigation = 2,
-  Overview = 3,
-  ContentView = 4,
-  Search = 5
+  Property = 0x1,
+  Navigation = 0x2,
+  Overview = 0x4,
+  ContentView = 0x8,
+  Search = 0x10
 }
 
 export enum OverviewItemLayout {

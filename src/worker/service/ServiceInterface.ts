@@ -4,6 +4,7 @@ import fs from 'fs'
 
 export abstract class BaseService {
   #event: Emitter;
+  #instance: any = null;
 
   constructor() {
     this.#event = new Emitter()
@@ -17,9 +18,11 @@ export abstract class BaseService {
     return this.#event.emit(event, args)
   }
 
+  get service() { return this.#instance; }
+  set service(s: any) { this.#instance = s; }
 }
 
-export interface IAlgorithmService {
+export interface IBackgroundService {
     onExtractEvent(): void;
 }
 

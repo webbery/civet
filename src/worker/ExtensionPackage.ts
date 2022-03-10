@@ -16,6 +16,10 @@ const ViewTypeTable = {
   Search: ViewType.Search
 }
 
+export enum ExtensionType {
+  ServiceExtension = 1<<8,
+  ViewExtension = 1 << 9
+}
 export abstract class BaseExtension {
   #name: string = '';
   #instance: any = null;
@@ -36,8 +40,8 @@ export class ExtensionPackage extends BaseExtension {
   private _license?: string;
   private _description?: string;
   private _activeEvents: string[] = [];
-  private _viewEvents: ViewType[] = [];
-  private _dependency: string|undefined;
+  private _extensionInfo: number = 0;
+  private _dependency: string[]|undefined;
   private _menus: Map<string, MenuDetail[]> = new Map<string, MenuDetail[]>();  // 
   // private _dependency: Map<string, string> = new Map<string, string>();
 
@@ -58,12 +62,15 @@ export class ExtensionPackage extends BaseExtension {
       if (map[0] === 'onContentType') {
         this._activeEvents = str.split(',')
         // console.debug('support content type:', this._activeEvents)
+        this._extensionInfo |= ExtensionType.ServiceExtension
       } else if (map[0] === 'onView') {
         const views = str.split(',')
-        this._viewEvents = views.map((item: string) => {
-          return ViewTypeTable[item]
+        views.forEach(item => {
+          this._extensionInfo |= ViewTypeTable[item]
         })
+        this._extensionInfo |= ExtensionType.ViewExtension
       } else if (map[0] === 'onSave') {
+        this._extensionInfo |= ExtensionType.ServiceExtension
       }
     }
     // contrib
@@ -73,13 +80,7 @@ export class ExtensionPackage extends BaseExtension {
       this._initMenus(contrib['menus'])
     }
     // dependency
-    const dependency = pack['civet']['dependency']
-    if (dependency !== undefined) {
-      for (let name in dependency) {
-        // this._dependency[name] = dependency[name]
-        this._dependency = name
-      }
-    }
+    this._dependency = pack['civet']['dependency']
   }
 
   private _initMenus(menus: any) {
@@ -106,6 +107,7 @@ export class ExtensionPackage extends BaseExtension {
   get owner() { return this._owner; }
   get activeTypes() { return this._activeEvents }
   get dependency() { return this._dependency }
-  get viewEvents() { return this._viewEvents }
+  get viewEvents() { return this._extensionInfo }
+  get extensionType(): ExtensionType { return (this._extensionInfo & (ExtensionType.ServiceExtension|ExtensionType.ViewExtension)) }
   get menus() { return this._menus }
 }

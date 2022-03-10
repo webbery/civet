@@ -13,8 +13,8 @@ import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstall
 import fs from 'fs'
 import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-import { AlgorithmService } from './service/AlgorithmService'
-import { MenuDetail } from './ExtensionPackage'
+import { ServiceFactory } from './service/ServiceFactory'
+import { ExtensionType, MenuDetail } from './ExtensionPackage'
 import { BaseService } from './service/ServiceInterface'
 
 class ExtensionCommandAccessor implements ExtensionAccessor {
@@ -99,7 +99,8 @@ export class ExtensionManager {
   // aviable extension of this
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
-  #extensions: BaseService[] = [];
+  #services: Map<string,BaseService> = new Map<string,BaseService>(); // name, service
+  #extensions: Map<string,BaseService[]> = new Map<string, BaseService[]>();  // contentType, service
   private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
@@ -167,8 +168,13 @@ export class ExtensionManager {
   private _initService(root: string, extensionName: string, pipeline: MessagePipeline): boolean {
     let service = this._getService(extensionName)
     try {
+      const packPath = root + '/' + extensionName
+      if (!this.#services.has(extensionName)) {
+        const serv = ServiceFactory.createService(packPath)
+        if (!serv) return false
+        this.#services.set(extensionName, serv)
+      }
       if (!service) {
-        const packPath = root + '/' + extensionName
         service = new ExtensionService(packPath, pipeline)
         this._extensions.push(service)
         console.info('extension name:', extensionName)
@@ -182,21 +188,22 @@ export class ExtensionManager {
 
   private _buildGraph() {
     this._activableExtensions.clear()
+    this.#extensions.clear()
     console.info('service:', this._extensions)
     let extServs: ExtensionService[] = this._extensions
     console.info('service:', extServs)
     // build dependent service
-    for (let idx = 0, len = extServs.length; idx < len; ++idx) {
-      let service = extServs[idx]
-      if (!service.dependency) continue
-      for (let pos = 0; pos < len; ++pos) {
-        if (service.dependency === extServs[pos].name) {
-          extServs[pos].addDependency(service)
-          // this._algorithmService.registExtension(service.name, service)
-          break
-        }
-      }
-    }
+    // for (let idx = 0, len = extServs.length; idx < len; ++idx) {
+    //   let service = extServs[idx]
+    //   if (!service.dependency) continue
+    //   for (let pos = 0; pos < len; ++pos) {
+    //     if (service.dependency === extServs[pos].name) {
+    //       extServs[pos].addDependency(service)
+    //       // this._algorithmService.registExtension(service.name, service)
+    //       break
+    //     }
+    //   }
+    // }
     // check if loop circle exist
     // build empty dependent service
     for (let idx = extServs.length - 1; idx >= 0; --idx) {
@@ -331,7 +338,7 @@ export class ExtensionManager {
 
   private _initViewExtension(service: ExtensionService) {
     let activeType = service.viewType()
-    if (!activeType) return
+    if (!(activeType & ExtensionType.ViewExtension)) return
     this._viewServices.set(service.name, service)
   }
 

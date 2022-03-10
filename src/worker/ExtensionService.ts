@@ -4,7 +4,7 @@ import { IPCRendererResponse } from '@/../public/IPCMessage'
 import { ViewType } from '@/../public/ExtensionHostType'
 import { ExtensionModule } from './api/ExtensionRequire'
 import { logger } from '@/../public/Logger'
-import { ExtensionPackage } from './ExtensionPackage'
+import { ExtensionPackage, ExtensionType } from './ExtensionPackage'
 const fs = require('fs')
 
 export interface ExtensionAccessor {
@@ -61,7 +61,7 @@ export class ExtensionService {
     return this._package.activeTypes
   }
 
-  viewType(): ViewType[] {
+  viewType(): ViewType {
     return this._package.viewEvents
   }
 
@@ -79,7 +79,7 @@ export class ExtensionService {
       case ExtensionActiveType.ExtContentType:
         return this._package.activeTypes.length > 0
       case ExtensionActiveType.ExtView:
-        return this._package.viewEvents.length > 0
+        return this._package.viewEvents & ExtensionType.ViewExtension
       default:
         return false
     }

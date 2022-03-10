@@ -48,7 +48,7 @@ class ExtContentView extends ExtHostWebView {
     if (!this.#initialize) {
       const msg = 'Please reigst ExtContentView::onViewInitialize listener'
       console.error(msg)
-      showErrorInfo(msg)
+      showErrorInfo({msg: msg})
       return undefined
     }
     const html = this.#initialize()
@@ -109,7 +109,7 @@ export class ExtContentViewEntry {
       case 0:
         const msg = `content view of ${suffix} is not install`
         console.error('current:', this.#contentviews)
-        showErrorInfo(msg)
+        showErrorInfo({msg: msg})
         break
       case 1:
         const view = views[0]
