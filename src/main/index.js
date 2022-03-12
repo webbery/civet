@@ -121,6 +121,7 @@ function createRendererWindow() {
   mainWindow.on('closed', () => {
     console.info('main window closed')
   })
+  mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV !== 'production') {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
@@ -167,6 +168,7 @@ function createWorkerWindow (bFirst) {
   if (process.env.NODE_ENV !== 'production') {
     workerWindow.webContents.openDevTools()
   }
+  workerWindow.show()
 }
 
 app.on('window-all-closed', async () => {

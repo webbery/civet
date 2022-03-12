@@ -9,7 +9,6 @@
   "main": "./index.js",
   "civet": {
     "activeEvents": [
-      "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png",
       "onView:Search",
       "onSave:"
     ]

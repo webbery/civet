@@ -17,6 +17,7 @@ class DataParser{
       const image = Sharp(filepath)
       let scale = 1
       const w = this.getNumberProperty(file, 'width')
+      console.debug('image:', w, file)
       if (w > 200) {
         scale = 200.0 / w
       }

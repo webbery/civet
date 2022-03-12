@@ -17,8 +17,9 @@ const ViewTypeTable = {
 }
 
 export enum ExtensionType {
-  ServiceExtension = 1<<8,
-  ViewExtension = 1 << 9
+  BackgroundExtension = 1 << 8,
+  ViewExtension = 1 << 9,
+  StorageExtension = 1 << 10
 }
 export abstract class BaseExtension {
   #name: string = '';
@@ -41,7 +42,7 @@ export class ExtensionPackage extends BaseExtension {
   private _description?: string;
   private _activeEvents: string[] = [];
   private _extensionInfo: number = 0;
-  private _dependency: string[]|undefined;
+  private _dependency: Object;
   private _menus: Map<string, MenuDetail[]> = new Map<string, MenuDetail[]>();  // 
   // private _dependency: Map<string, string> = new Map<string, string>();
 
@@ -62,7 +63,7 @@ export class ExtensionPackage extends BaseExtension {
       if (map[0] === 'onContentType') {
         this._activeEvents = str.split(',')
         // console.debug('support content type:', this._activeEvents)
-        this._extensionInfo |= ExtensionType.ServiceExtension
+        this._extensionInfo |= ExtensionType.BackgroundExtension
       } else if (map[0] === 'onView') {
         const views = str.split(',')
         views.forEach(item => {
@@ -70,7 +71,10 @@ export class ExtensionPackage extends BaseExtension {
         })
         this._extensionInfo |= ExtensionType.ViewExtension
       } else if (map[0] === 'onSave') {
-        this._extensionInfo |= ExtensionType.ServiceExtension
+        const enable = str.split(',')
+        if (enable.length) {
+          this._extensionInfo |= ExtensionType.StorageExtension
+        }
       }
     }
     // contrib
@@ -108,6 +112,6 @@ export class ExtensionPackage extends BaseExtension {
   get activeTypes() { return this._activeEvents }
   get dependency() { return this._dependency }
   get viewEvents() { return this._extensionInfo }
-  get extensionType(): ExtensionType { return (this._extensionInfo & (ExtensionType.ServiceExtension|ExtensionType.ViewExtension)) }
+  get extensionType(): ExtensionType { return (this._extensionInfo & (ExtensionType.BackgroundExtension|ExtensionType.ViewExtension)) }
   get menus() { return this._menus }
 }

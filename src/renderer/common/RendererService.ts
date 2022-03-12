@@ -1,7 +1,7 @@
 import { ViewType } from '@/../public/ExtensionHostType'
 import { IPCExtensionMessage, IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
 import util from 'util'
-
+console.info('33333333333333')
 declare const _cv_events: any;
 declare let _cv_command_args: any;
 declare let _cv_activate_view_name: string;

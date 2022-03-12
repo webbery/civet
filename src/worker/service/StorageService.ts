@@ -24,7 +24,7 @@ export class StorageService extends BaseService implements IStorageService{
   #pipeline: MessagePipeline;
 
   constructor(pipeline: MessagePipeline, extension: ExtensionPackage) {
-    super()
+    super(extension)
     this.#pipeline = pipeline
   }
 

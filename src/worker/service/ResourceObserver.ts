@@ -21,8 +21,8 @@ export class ResourceObserver {
     return this._listener.switchResourceDB(newdb)
   }
   
-  read(uri: ResourcePath) {
-    return this._listener.read(uri)
+  read(msgid: number, uri: ResourcePath) {
+    return this._listener.read(msgid, uri)
   }
 
   initWorkbenchView(): Map<string, WorkbenchItem> {

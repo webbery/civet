@@ -26,19 +26,19 @@ export class APIFactory {
             // CivetDatabase.setTags([target.id], target.tag)
             break
           case 'thumbnail':
-            // console.info('type:', typeof value, value)
-            // CivetDatabase.addMeta([target.id], {name: key, value: value, type: 'bin'})
-            const thumbnail = thumbnail2Base64(value)
-            // console.info('thumbnail', target)
-            // let property:IProperty;
-            // target.addMeta('thumbnail', thumbnail, 'undefined')
-            const result = Reflect.set(target, key, thumbnail)
-            // console.info('thumbnail', target)
-            const data = target.toJson(_accessor)
-            // console.info('post data', data)
-            pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, data)
-            return result
+            {
+              const thumbnail = thumbnail2Base64(value)
+              const result = Reflect.set(target, key, thumbnail)
+              const data = target.toJson(_accessor)
+              pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, data)
+              return result
+            }
           default:
+            {
+              console.debug('update resource property', target, key, value)
+              // const data = target.toJson(_accessor)
+              // pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, data)
+            }
             break;
         }
         return Reflect.set(target, key, value)

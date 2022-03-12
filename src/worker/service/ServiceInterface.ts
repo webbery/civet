@@ -1,29 +1,68 @@
 import { Emitter } from 'public/Emitter'
 import { PropertyType } from 'public/ExtensionHostType'
 import fs from 'fs'
+import { getSingleton, showErrorInfo } from 'worker/Singleton';
+import { ExtensionPackage } from 'worker/ExtensionPackage';
+import { ExtensionManager } from 'worker/ExtensionManager';
 
 export abstract class BaseService {
   #event: Emitter;
   #instance: any = null;
+  #extension: ExtensionPackage;
+  #next: BaseService[] = [];
+  #storageEmmiter: boolean = false;
 
-  constructor() {
+  constructor(extension: ExtensionPackage) {
     this.#event = new Emitter()
+    this.#extension = extension
   }
 
   on(event: string, listener: (...args: any[]) => void) {
-    this.#event.on(event, listener, [this, event])
+    this.#event.on(event, listener)
   }
 
   emit(event: string, ...args: any[]) {
-    return this.#event.emit(event, args)
+    return this.#event.emit(event, ...args)
   }
 
   get service() { return this.#instance; }
-  set service(s: any) { this.#instance = s; }
+  set service(s: any) {
+    this.#instance = s;
+    // regist event of activate
+    for (const name in s) {
+      console.info('service name:', name)
+      const self = this
+      const wrapper = async function (msgid: number, resourceID: number, ...args: any) {
+        console.debug(...args)
+        try{
+          const props = await s[name](...args)
+          for (const service of self.#next) {
+            // service.emit(service.name, ...args)
+          }
+          // emit to storage service
+          if (self.#storageEmmiter) {
+            const manager = getSingleton(ExtensionManager)
+            // manager!.emitStorageEvent(msgid, resourceID, props)
+          }
+        } catch (err: any) {
+          showErrorInfo({msg: err})
+        }
+      }
+      this.on(name, wrapper)
+    }
+  }
+
+  get extension() {return this.#extension; }
+
+  activeType() { return this.#extension.activeTypes; }
+  get name() {return this.#extension.name; }
+  set storageEmitter(emitter: boolean) {
+    this.#storageEmmiter = emitter
+  }
 }
 
 export interface IBackgroundService {
-    onExtractEvent(): void;
+    onBackgroundEvent(): void;
 }
 
 export class StorageUpdateData {
@@ -57,5 +96,9 @@ export interface IStorageService {
 }
 
 export interface IAnotationService {
-    onUpdateEvent(): void;
+    onAnnotationUpdateEvent(): void;
+}
+
+export interface IViewService {
+
 }

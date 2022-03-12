@@ -1,11 +1,13 @@
 const log4js = require('log4js')
-
+const app = require('./System').default.app()
+const logpath = app.getPath('logs')
+console.info('logpath:', logpath)
 log4js.configure({
   appenders: {
     console: { type: 'console' },
-    worker: {type: 'file', filename: 'logs/civet.log', maxLogSize: 16 * 1024 * 1024},
-    renderer: {type: 'file', filename: 'logs/civet.log', maxLogSize: 16 * 1024 * 1024},
-    main: {type: 'file', filename: 'logs/civet.log', maxLogSize: 16 * 1024 * 1024}
+    worker: {type: 'file', filename: logpath + '/civet.log', maxLogSize: 16 * 1024 * 1024},
+    renderer: {type: 'file', filename: logpath + '/civet.log', maxLogSize: 16 * 1024 * 1024},
+    main: {type: 'file', filename: logpath + '/civet.log', maxLogSize: 16 * 1024 * 1024}
   },
   categories: {default: {appenders: ['console', 'main'], level: 'debug'}}
 })

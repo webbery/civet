@@ -96,21 +96,24 @@ function isExclude(extension) {
 
 function getBuildLog() {
   if (fs.existsSync(logfile)) {
-    return JSON.parse(fs.readFileSync(logfile))
+    const str = fs.readFileSync(logfile).toString('utf-8')
+    return JSON.parse(str)
   }
   fs.writeFileSync(logfile, '{}')
   return {}
 }
 
-function shouldUpdate(package, lasttime) {
+function shouldUpdate(extension, package, lasttime) {
   let buildHistory = getBuildLog()
-  if (!buildHistory[package]) {
-    buildHistory[package] = lasttime
+  if (!buildHistory[extension]) {
+    buildHistory[extension] = lasttime
     fs.writeFileSync(logfile, JSON.stringify(buildHistory))
+    console.info('scan', package)
     return true
   }
-  if (buildHistory[package] === lasttime) return false
-  buildHistory[package] = lasttime
+  if (buildHistory[extension] === lasttime) return false
+  buildHistory[extension] = lasttime
+  console.info(package, 'will be update')
   fs.writeFileSync(logfile, JSON.stringify(buildHistory))
   return true
 }
@@ -122,7 +125,7 @@ function parseExtensions() {
     if (isExclude(extension) || !stat || stat.isFile()) continue
     const packagePath = path.join(__dirname, './extensions/'  + extension + '/package.json')
     const stime = stat.mtime / 1000
-    if (shouldUpdate(packagePath, stime)) {
+    if (shouldUpdate(extension, packagePath, stime)) {
       const pack = fs.readFileSync(packagePath, 'utf-8')
       const jsn = JSON.parse(pack)
       for (let name in jsn['dependencies']) {
@@ -143,9 +146,13 @@ function parseExtensions() {
 
 function installDependencies() {
   for (let name in installPackages) {
-    if (fs.existsSync(path.resolve(__dirname, './extensions/node_modules/' + name))) {
-      const stat = fs.statSync(path.resolve(__dirname, './extensions/node_modules/' + name))
-      if (stat.isFile() || stat.isDirectory()) continue
+    const filepath = path.resolve(__dirname, './extensions/node_modules/' + name)
+    if (fs.existsSync(filepath)) {
+      const stat = fs.statSync(filepath)
+      if (stat.isFile() || stat.isDirectory()) {
+        console.info('file', filepath, 'exist')
+        continue
+      }
     }
     console.info(`install ${name}@${installPackages[name]}`)
     runCommand('npm install --prefix extensions ' + name + '@' + installPackages[name])

@@ -232,7 +232,7 @@ export class ResourceService{
     if (info.isDirectory()) {
       this.readDir.call(this, msgid, resourcePath, cb)
     } else {
-      const result = await this.observer.read(resourcePath)
+      const result = await this.observer.read(msgid, resourcePath)
       console.info(result)
       if (result.isSuccess()) {
         let resource = <Resource>result.value

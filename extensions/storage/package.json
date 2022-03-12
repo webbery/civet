@@ -1,7 +1,7 @@
 {
-  "name": "meta3d",
-  "displayName": "Civet3D模型处理扩展",
-  "description": "Civet3D模型处理扩展",
+  "name": "storage",
+  "displayName": "Civet标准存储扩展",
+  "description": "Civet标准存储扩展",
   "version": "0.0.1",
   "engines": {
     "civet": "^0.2.1"
@@ -9,8 +9,7 @@
   "main": "./index.js",
   "civet": {
     "activeEvents": [
-      "onView: ContentView",
-      "onSave:"
+      "onSave:Enable"
     ]
   },
   "dependencies": {

@@ -13,9 +13,15 @@ import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstall
 import fs from 'fs'
 import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-import { ServiceFactory } from './service/ServiceFactory'
-import { ExtensionType, MenuDetail } from './ExtensionPackage'
+import { ExtensionPackage, ExtensionType, MenuDetail } from './ExtensionPackage'
 import { BaseService } from './service/ServiceInterface'
+import { StorageService } from './service/StorageService'
+import { ViewService } from './service/ViewService'
+import { BackgroundService } from './service/BackgroundService'
+import { Emitter } from 'public/Emitter'
+import { createMixService as applyMixService, MixService } from './service/MixService'
+import { ExtensionModule } from './api/ExtensionRequire'
+import { ResourceProperty } from 'civet'
 
 class ExtensionCommandAccessor implements ExtensionAccessor {
   #commands: Set<string>;
@@ -99,8 +105,10 @@ export class ExtensionManager {
   // aviable extension of this
   private _extensionsOfConfig: string[] = [];
   private _extensions: ExtensionService[] = []; //
-  #services: Map<string,BaseService> = new Map<string,BaseService>(); // name, service
-  #extensions: Map<string,BaseService[]> = new Map<string, BaseService[]>();  // contentType, service
+  #extensionPackages: Map<string,ExtensionPackage> = new Map<string,ExtensionPackage>(); // name, extension package
+  #services: Map<string, BaseService> = new Map<string, BaseService>();
+  #extensionsOfContentType: Map<string,BaseService[]> = new Map<string, BaseService[]>();  // contentType, service
+  #storageService: BaseService[] = [];
   private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
@@ -141,7 +149,7 @@ export class ExtensionManager {
     } else {
       let visited = {}
       for (let name of this._extensionsOfConfig) {
-        if (this._initService(root, name, pipeline)) {
+        if (this._initPackageAndViewService(root, name, pipeline)) {
           visited[name] = name
         }
       }
@@ -158,27 +166,101 @@ export class ExtensionManager {
 
   private _initRestService(root: string, extensionsName: string[], pipeline: MessagePipeline) {
     for (let name of extensionsName) {
-      this._initService(root, name, pipeline)
+      this._initPackageAndViewService(root, name, pipeline)
+    }
+  }
+
+  private createService(entry: string): BaseService|null {
+    const pack = new ExtensionPackage(entry)
+    const instance = this.initialize(pack.name, pack.main)
+    if (!instance) return null
+    console.debug('create service:', pack.name, pack.extensionType)
+    switch(pack.extensionType) {
+      case ExtensionType.ViewExtension:
+      {
+        const service = new ViewService(pack)
+        service.service = instance
+        return service
+      }
+      case ExtensionType.BackgroundExtension:
+      {
+        const service = new BackgroundService(pack)
+        service.service = instance
+        return service
+      }
+      case ExtensionType.StorageExtension:
+      {
+        const pipe = getSingleton(MessagePipeline)
+        const service = new StorageService(pipe!, pack)
+        // emitter.on()
+        service.storageEmitter = true
+        return null
+      }
+      default:
+        {
+          let mixCtor = []
+          if (pack.extensionType & ExtensionType.ViewExtension) {
+            mixCtor.push(ViewService)
+          }
+          if (pack.extensionType & ExtensionType.BackgroundExtension) {
+            mixCtor.push(BackgroundService)
+          }
+          const service = new MixService(pack)
+          service.service = instance
+          applyMixService(service, mixCtor)
+          return service
+        }
+    }
+  }
+
+  private initialize(name: string, entryPath: string): any {
+    if (!fs.existsSync(entryPath)) {
+      const msg = `file not exist: ${entryPath}`
+      showErrorInfo({msg: msg})
+      return null
+    }
+    const content = fs.readFileSync(entryPath, 'utf-8')
+    const pipe = getSingleton(MessagePipeline)
+    const m = new ExtensionModule(name, module.parent, pipe!)
+    m._compile(content, name)
+    console.debug(`initialize ${name}:${m.exports}`)
+    try {
+      // m.exports.run()
+      let instance = null
+      if (m.exports.activate) {
+        instance = m.exports.activate()
+      }
+      if (!instance) {
+        const msg = `${name}'s activate is not defined.`
+        showErrorInfo({msg: msg})
+        return null
+      }
+      return instance
+    } catch (error) {
+      const msg = `initialize ${name} fail: ${error}`
+      showErrorInfo({msg: msg})
+      return null
     }
   }
 
   /**
    * return true if create new service, else return false
    */
-  private _initService(root: string, extensionName: string, pipeline: MessagePipeline): boolean {
-    let service = this._getService(extensionName)
+  private _initPackageAndViewService(root: string, extensionName: string, pipeline: MessagePipeline): boolean {
     try {
-      const packPath = root + '/' + extensionName
-      if (!this.#services.has(extensionName)) {
-        const serv = ServiceFactory.createService(packPath)
-        if (!serv) return false
-        this.#services.set(extensionName, serv)
-      }
-      if (!service) {
-        service = new ExtensionService(packPath, pipeline)
-        this._extensions.push(service)
-        console.info('extension name:', extensionName)
-        return true
+      if (!this.#extensionPackages.has(extensionName)) {
+        const packPath = root + '/' + extensionName
+        const pack = new ExtensionPackage(packPath)
+        this.#extensionPackages.set(extensionName, pack)
+        if (pack.extensionType & ExtensionType.ViewExtension) {
+          let mixCtor = [ViewService]
+          const instance = this.initialize(pack.name, pack.main)
+          const service = new MixService(pack)
+          service.service = instance
+          applyMixService(service, mixCtor)
+          this.#services.set(service.name, service)
+          return true
+        }
       }
     } catch (err) {
       console.error(`init extension ${extensionName} fail: ${err}`)
@@ -187,41 +269,30 @@ export class ExtensionManager {
   }
 
   private _buildGraph() {
-    this._activableExtensions.clear()
-    this.#extensions.clear()
-    console.info('service:', this._extensions)
-    let extServs: ExtensionService[] = this._extensions
-    console.info('service:', extServs)
-    // build dependent service
-    // for (let idx = 0, len = extServs.length; idx < len; ++idx) {
-    //   let service = extServs[idx]
-    //   if (!service.dependency) continue
-    //   for (let pos = 0; pos < len; ++pos) {
-    //     if (service.dependency === extServs[pos].name) {
-    //       extServs[pos].addDependency(service)
-    //       // this._algorithmService.registExtension(service.name, service)
-    //       break
-    //     }
-    //   }
-    // }
-    // check if loop circle exist
-    // build empty dependent service
-    for (let idx = extServs.length - 1; idx >= 0; --idx) {
-      let service = extServs[idx]
-      console.info('service:', service)
-      if (!service.dependency) {
-        this._initContentTypeExtension(service)
-        this._initViewExtension(service)
-        this._initStorageExtension(service)
+    let extensions: Map<string, BaseService> = new Map<string, BaseService>()
+    for(const pack of this.#extensionPackages) {
+      if (!(pack[1].extensionType & ExtensionType.BackgroundExtension)) continue
+      // console.debug(pack[0], 'extension type', pack[1].extensionType, pack[1].extensionType & ExtensionType.BackgroundExtension)
+      const dependencies = pack[1].dependency
+      if (!dependencies) {
+        const instance = this.initialize(pack[1].name, pack[1].main)
+        const service = new MixService(pack[1])
+        service.service = instance
+        applyMixService(service, [BackgroundService])
+        this.#services.set(service.name, service)
+        const types = service.activeType()
+        for (const type of types) {
+          let services = this.#extensionsOfContentType.get(type)
+          if (!services) services = [service]
+          else services.push(service)
+          this.#extensionsOfContentType.set(type, services)
+        }
+        continue
+      }
+      for (const dependency in dependencies) {
+        console.debug('dependency', dependency)
       }
     }
-  }
-
-  private _getService(name: string) {
-    for (let service of this._extensions) {
-      if (service.name === name) return service
-    }
-    return null
   }
 
   private _initFrontEndEvent(pipeline: MessagePipeline) {
@@ -258,7 +329,7 @@ export class ExtensionManager {
     if (result) {
       // load extension
       const root = getExtensionPath()
-      this._initService(root, extinfo.name, this._pipeline)
+      this._initPackageAndViewService(root, extinfo.name, this._pipeline)
     }
     return {type: IPCRendererResponse.install, data: result}
   }
@@ -342,7 +413,9 @@ export class ExtensionManager {
     this._viewServices.set(service.name, service)
   }
 
-  private _initStorageExtension(service: ExtensionService) { }
+  emitStorageEvent(msgid: number, resourceId: number, properties: ResourceProperty[]) {
+
+  }
 
   // enable resource's extensions
   switchResourceDB(dbname: string) {
@@ -362,10 +435,10 @@ export class ExtensionManager {
     return extensions
   }
 
-  async read(uri: ResourcePath): Promise<Result<Resource, string>> {
+  async read(msgid: number, uri: ResourcePath): Promise<Result<Resource, string>> {
     const f = path.parse(uri.local())
     const extname = f.ext.substr(1).toLowerCase()
-    const extensions = this._activableExtensions.get(extname)
+    const extensions = this.#extensionsOfContentType.get(extname)
     if (!extensions || extensions.length === 0) {
       const msg = `No extensions can read ${extname} file`
       showErrorInfo({msg: msg})
@@ -381,22 +454,26 @@ export class ExtensionManager {
     resource.putProperty({ name: 'type', value: extname, type: PropertyType.String, query: true, store: true })
     resource.putProperty({ name: 'filename', value: f.base, type: PropertyType.String, query: true, store: true })
     resource.putProperty({ name: 'path', value: uri.local(), type: PropertyType.String, query: false, store: true })
-    for (const extension of extensions) {
-      await extension.run('read', uri.local(), resource)
-      // this._pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, [resource.toJson()])
+    const services = this.#extensionsOfContentType.get(extname)
+    for (const service of services!) {
+      console.debug(service.name, 'emit read')
+      service.emit('read', msgid, resource.id, uri.local(), resource)
     }
-    console.info('add files:', resource)
-    const accessor = new StorageAccessor()
-    const store = resource.toJson(accessor)
-    CivetDatabase.addFiles([store])
-    const thumbnail = resource.getPropertyValue('thumbnail')
-    if (thumbnail) {
-      CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: thumbnail, type: 'bin' })
-    }
-    const colors = resource.getPropertyValue('color')
-    if (colors) {
-      CivetDatabase.addMeta([resource.id], { name: 'color', value: colors, type: 'color', query: true })
-    }
+    // for (const extension of extensions) {
+    //   await extension.run('read', uri.local(), resource)
+    // }
+    // console.info('add files:', resource)
+    // const accessor = new StorageAccessor()
+    // const store = resource.toJson(accessor)
+    // CivetDatabase.addFiles([store])
+    // const thumbnail = resource.getPropertyValue('thumbnail')
+    // if (thumbnail) {
+    //   CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: thumbnail, type: 'bin' })
+    // }
+    // const colors = resource.getPropertyValue('color')
+    // if (colors) {
+    //   CivetDatabase.addMeta([resource.id], { name: 'color', value: colors, type: 'color', query: true })
+    // }
     return Result.success(resource)
   }
 

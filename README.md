@@ -1,6 +1,5 @@
 <div align="center">
-<img src="https://raw.fastgit.org/webbery/civet/master/src/main/asset/icon/icon.png" alt=""/>
-<h1>Civet</h1>
+<h1><img src="src/main/asset/icon.png" alt="" height="35" width="35"/>Civet</h1>
 <blockquote>资源管理新体验</blockquote>
 <a href="https://github.com/webbery/civet/actions">
 <img src="https://github.com/webbery/civet/workflows/win-build/badge.svg" alt="">
@@ -32,7 +31,7 @@
 当前windows环境下因为没有签名的原因，所以需要在安装文件的右键“属性”->“常规”中关闭掉安全选项  
 由于版本更新比较慢，所以也可以自行编译。  
 编译安装方式：
-  - 确保自己平台的node版本是node 14及以上，C++编译器支持C++17。如果使用的是Ubuntu16，可以使用`update-alternatives`命令安装并切换高版本的gcc
+  - 确保自己平台的node版本是**node 14**，C++编译器支持C++17。如果使用的是Ubuntu16，可以使用`update-alternatives`命令安装并切换高版本的gcc
   - 在下载的源代码目录下，运行`npm install`安装相关的依赖包
   - 执行`npm run build`打包安装包；执行该命令会安装插件的依赖项
   - 如果是在Mac环境下，请确保自己的环境能够进行签名打包
@@ -53,11 +52,11 @@
 | PicSee  | ObjectC | ObjectC | Realm | 私有 | Mac
 
 #### RoadMap
-:white_square_button: 自定义界面扩展，增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取和展示
++ :white_square_button: 自定义界面扩展，增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取和展示  
 + [ ] 增加存储插件功能，以支持多种数据存储方式(如本地复制、云存储等)  
-:white_square_button: 增加信息提取插件功能，以增强不同文件类型的信息存储与检索
-+ [ ] 引入HTML5批注规范，为各种类型的文件增加批注功能
-+ [ ] 升级数据库，增强搜索功能
++ :white_square_button: 增加信息提取插件功能，以增强不同文件类型的信息存储与检索  
++ [ ] 引入HTML5批注规范，为各种类型的文件增加批注功能  
++ [ ] 升级数据库，增强搜索功能  
 
 #### 技术细节
 开发过程踩过许多坑，在填坑的同时记录下这些过程，以便其他开发者在做类似功能的时候能避免踩坑：  
