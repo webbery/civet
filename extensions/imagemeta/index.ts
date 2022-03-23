@@ -21,6 +21,7 @@ class MetaParser {
     const meta = ExifReader.load(buffer)
     console.info('meta', meta)
     delete meta.MakerNote
+    let update: ResourceProperty[] = []
     // datetime
     if (meta.DateTime !== undefined && meta.DateTime.value) {
       console.info(meta.DateTime.value)
@@ -31,6 +32,7 @@ class MetaParser {
         query: true,
         store: true
       };
+      update.push(prop)
       file.putProperty(prop)
       // file.addMeta('datetime', convert2ValidDate(meta.DateTime.value[0]), 'date')
     }
@@ -43,69 +45,83 @@ class MetaParser {
         query: false,
         store: true
       };
+      update.push(prop)
       file.putProperty(prop)
     }
     // width, height
     if (!meta.Orientation || meta.Orientation.value === 1 || meta.Orientation.value === 3) {
-      file.putProperty({
+      let prop: ResourceProperty = {
         name: 'width',
         value: this.getImageWidth(meta),
         type: PropertyType.Number,
         query: false,
         store: true
-      })
-      file.putProperty({
+      }
+      update.push(prop)
+      file.putProperty(prop)
+      prop = {
         name: 'height',
         value: this.getImageHeight(meta),
         type: PropertyType.Number,
         query: false,
         store: true
-      })
+      }
+      update.push(prop)
+      file.putProperty(prop)
       // file.addMeta('height', this.getImageHeight(meta), 'val')
     } else { // rotation 90
-      file.putProperty({
+      let prop: ResourceProperty = {
         name: 'height',
         value: this.getImageWidth(meta),
         type: PropertyType.Number,
         query: false,
         store: true
-      })
-      file.putProperty({
+      }
+      update.push(prop)
+      file.putProperty(prop)
+      prop = {
         name: 'height',
         value: this.getImageHeight(meta),
         type: PropertyType.Number,
         query: false,
         store: true
-      })
-      // file.addMeta('height', this.getImageWidth(meta), 'val')
-      // file.addMeta('width', this.getImageHeight(meta), 'val')
+      }
+      update.push(prop)
+      file.putProperty(prop)
     }
     // size
     const stat = fs.statSync(filepath)
-    file.putProperty({
+    let prop: ResourceProperty = {
       name: 'size',
       value: stat.size,
       type: PropertyType.Number,
       query: true,
       store: true
-    })
+    }
+    update.push(prop)
+    file.putProperty(prop)
     // GPS
     if (meta.GPSLatitude && meta.GPSLongitude) {
-      file.putProperty({
+      prop = {
         name: 'lng',
         value: parseFloat(meta.GPSLongitude['description']) * 100000,
         type: PropertyType.Number,
         query: false,
         store: true
-      })
-      file.putProperty({
+      }
+      update.push(prop)
+      file.putProperty(prop)
+      prop = {
         name: 'lat',
         value: parseFloat(meta.GPSLatitude['description']) * 100000,
         type: PropertyType.Number,
         query: false,
         store: true
-      })
+      }
+      update.push(prop)
+      file.putProperty(prop)
     }
+    return update
   }
 
   getImageWidth(meta: any): number {
@@ -121,12 +137,67 @@ class MetaParser {
   }
 }
 
+class DataParser{
+  constructor() {
+  }
+
+  getNumberProperty(file: IResource, name: string): number {
+    const prop = file.getProperty(name)
+    if (!prop) {
+      return 0;
+    }
+    return prop.value
+  }
+
+  async parse(filepath: string, file: IResource) {
+    const Sharp = require('sharp')
+    try {
+      const image = Sharp(filepath)
+      let scale = 1
+      const w = this.getNumberProperty(file, 'width')
+      console.debug('image:', w, file)
+      if (w > 200) {
+        scale = 200.0 / w
+      }
+      const h = this.getNumberProperty(file, 'height')
+      const width = Math.round(w * scale)
+      const height = Math.round(h * scale)
+      const data = await image.resize(width, height)
+        .jpeg().toBuffer()
+      // console.info('ThumbnailParser:', data)
+      let prop: ResourceProperty = {
+        name: 'thumbnail',
+        value: data,
+        type: PropertyType.Binary,
+        query: false,
+        store: true
+      }
+      let update: ResourceProperty[] = []
+      update.push(prop)
+      file.putProperty(prop)
+      // update preview
+      file.thumbnail = data
+      // console.info('thumbnail:', typeof data)
+      // storage.addMeta([file.id], {name: 'thumbnail', value: file.thumbnail, type: 'bin'})
+      file.raw = await image.resize(width, height)
+        .raw().toBuffer()
+      return update
+    } catch(err) {
+      console.error(err)
+    }
+    return null
+  }
+}
+
 export function activate() {
   const metaParser = new MetaParser()
+  const dataParser = new DataParser()
   return {
-    read: (filepath: string, resource: IResource) => {
-      metaParser.parse(filepath, resource)
-      return true
+    read: async (filepath: string, resource: IResource) => {
+      let updates = metaParser.parse(filepath, resource)
+      const data = await dataParser.parse(filepath, resource)
+      if (!data) return updates
+      return updates.concat(data)
     }
   }
 }

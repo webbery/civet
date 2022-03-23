@@ -12,7 +12,13 @@
     "viewer",
     "preview"
   ],
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E $1"
+    }
+  },
   "scripts": {
+    "prepare": "husky install & npx husky-init",
     "build": "cross-env NODE_ENV=production node .electron-vue/build.js && electron-builder -p onTag",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
@@ -163,6 +169,8 @@
     "@babel/runtime-corejs2": "^7.11.2",
     "@babel/traverse": "^7.14.2",
     "@babel/types": "^7.14.2",
+    "@commitlint/cli": "^16.2.3",
+    "@commitlint/config-conventional": "^16.2.1",
     "@types/node": "^15.6.1",
     "@vue/babel-plugin-transform-vue-jsx": "^1.2.1",
     "ajv": "^6.5.0",
@@ -200,6 +208,7 @@
     "eslint-plugin-standard": "^3.1.0",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "^7.0.0",
     "inject-loader": "^4.0.1",
     "less": "^4.1.1",
     "less-loader": "^7.3.0",
@@ -213,6 +222,7 @@
     "puppeteer-in-electron": "^3.0.4",
     "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
+    "semantic-commit-emoji": "^0.6.2",
     "source-map-loader": "^2.0.1",
     "strip-eof": "^2.0.0",
     "style-loader": "^0.21.0",
@@ -222,6 +232,7 @@
     "tweetnacl": "^1.0.3",
     "typescript": "^4.1.5",
     "url-loader": "^2.0.1",
+    "validate-commit-msg": "^2.14.0",
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^15.9.6",
     "vue-style-loader": "^4.1.0",
@@ -232,5 +243,8 @@
     "webpack-hot-middleware": "^2.22.2",
     "webpack-merge": "^4.1.3",
     "worker-loader": "^3.0.0"
+  },
+  "engines": {
+    "node": "==14"
   }
 }

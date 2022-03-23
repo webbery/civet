@@ -1,9 +1,9 @@
 import { Emitter } from 'public/Emitter'
-import { PropertyType } from 'public/ExtensionHostType'
-import fs from 'fs'
 import { getSingleton, showErrorInfo } from 'worker/Singleton';
 import { ExtensionPackage } from 'worker/ExtensionPackage';
 import { ExtensionManager } from 'worker/ExtensionManager';
+import { IResource, ResourceProperty } from 'civet';
+import { Resource } from 'public/Resource';
 
 export abstract class BaseService {
   #event: Emitter;
@@ -33,16 +33,18 @@ export abstract class BaseService {
       console.info('service name:', name)
       const self = this
       const wrapper = async function (msgid: number, resourceID: number, ...args: any) {
-        console.debug(...args)
         try{
           const props = await s[name](...args)
+          console.debug(self.name, 'nexts:', self.#next)
           for (const service of self.#next) {
-            // service.emit(service.name, ...args)
+            console.debug('emit next:', service.name)
+            service.emit(name, msgid, resourceID, ...args)
           }
           // emit to storage service
-          if (self.#storageEmmiter) {
+          if (self.#storageEmmiter && props.length) {
+            console.debug(self.name, 'emit storage event')
             const manager = getSingleton(ExtensionManager)
-            // manager!.emitStorageEvent(msgid, resourceID, props)
+            manager!.emitStorageEvent(msgid, resourceID, props, args[args.length - 1])
           }
         } catch (err: any) {
           showErrorInfo({msg: err})
@@ -59,30 +61,14 @@ export abstract class BaseService {
   set storageEmitter(emitter: boolean) {
     this.#storageEmmiter = emitter
   }
+
+  addNext(service: BaseService) {
+    this.#next.push(service)
+  }
 }
 
 export interface IBackgroundService {
     onBackgroundEvent(): void;
-}
-
-export class StorageUpdateData {
-  #id: string;
-  #name: string;
-  #value: any;
-  #type: PropertyType;
-  #query: boolean;
-  #storage: boolean;
-
-  get name() { return this.#name;}
-  get value() { return this.#value;}
-  get type() { return this.#type;}
-  get query() { return this.#query;}
-  get storage() { return this.#storage;}
-  set name(n: string) { this.#name = n;}
-  set value(v: any) { this.#name = v;}
-  set type(t: PropertyType) { this.#type = t;}
-  set query(q: boolean) { this.#query = q;}
-  set storage(s: boolean) { this.#storage = s;}
 }
 
 export interface IStorageService {
@@ -91,8 +77,9 @@ export interface IStorageService {
      * @param rId resource id
      * @param data update data of resource
      */
-    onUpdateEvent(messageId: number, rId: string, data: StorageUpdateData[]): void;
+    onUpdateEvent(messageId: number, rId: number, data: ResourceProperty[], resource: Resource): void;
     onRetrieveEvent(): void;
+    onSearchEvent(): void;
 }
 
 export interface IAnotationService {

@@ -185,6 +185,7 @@ function buildExtension() {
     // runCommand('"node_modules/.bin/tsc" index.ts')
     if (!runCommand(cmd)) {
       console.error(`build extensions[${extension}] fail: ${cmd}`)
+      throw new Error(`build extensions[${extension}] fail: ${cmd}`)
     }
     // process.chdir('../..')
   }

@@ -13,7 +13,7 @@
       "onSave:"
     ],
     "dependency": {
-      "imagedata": "0.0.1"
+      "imagemeta": "0.0.1"
     }
   },
   "dependencies": {

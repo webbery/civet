@@ -16,6 +16,8 @@ import { config } from '@/../public/CivetConfig'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { getCurrentViewName } from '@/common/RendererService'
 import { text2PNG } from '@/../public/Utility'
+import { Cache } from '@/store/modules/CacheInstance'
+
 export default {
   name: 'civet',
   components: {
@@ -50,7 +52,12 @@ export default {
   methods: {
     async onUpdateResources(error, updateResources) {
       if (error) console.log(error)
-      this.$store.dispatch('addFiles', updateResources)
+      for (const resource of updateResources) {
+        if (Cache.files[resource.id]) {
+          this.$store.dispatch('addFiles', updateResources)
+          return
+        }
+      }
       const view = getCurrentViewName()
       const isThumbnailExist = (resource) => {
         const meta = resource['meta']
@@ -88,6 +95,7 @@ export default {
         }
       }
       this.$events.emit('Overview:' + view, 'add', updateResources)
+      this.$store.dispatch('addFiles', updateResources)
     },
     async onResourceShow(resource) {
       const resourceID = resource['id']

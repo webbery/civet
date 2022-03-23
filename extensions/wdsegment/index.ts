@@ -1,4 +1,4 @@
-
+import { ResourceProperty, PropertyType } from 'civet'
 class Segmentor {
   private _segment: any;
   private _POSTAG: any;
@@ -27,7 +27,6 @@ class Segmentor {
 }
 
 export function activate() {
-  console.info('I\'m activated!')
   let segment = new Segmentor()
   return {
     read: (filepath: string, resource: any) => {
@@ -36,8 +35,17 @@ export function activate() {
       if (resource.tag.length > 0) {
         resource.keyword = resource.tag
       }
+      let update: ResourceProperty[] = []
+      let prop = {
+        name: 'tag',
+        value: resource.tag,
+        type: PropertyType.String,
+        query: true,
+        store: true
+      }
+      update.push(prop)
       // console.info('segment:', filepath, resource)
-      return true
+      return update
     }
   }
 }

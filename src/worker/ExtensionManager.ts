@@ -14,14 +14,14 @@ import fs from 'fs'
 import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { ExtensionPackage, ExtensionType, MenuDetail } from './ExtensionPackage'
-import { BaseService } from './service/ServiceInterface'
+import { BaseService, IStorageService } from './service/ServiceInterface'
 import { StorageService } from './service/StorageService'
 import { ViewService } from './service/ViewService'
 import { BackgroundService } from './service/BackgroundService'
 import { Emitter } from 'public/Emitter'
 import { createMixService as applyMixService, MixService } from './service/MixService'
 import { ExtensionModule } from './api/ExtensionRequire'
-import { ResourceProperty } from 'civet'
+import { IResource, ResourceProperty } from 'civet'
 
 class ExtensionCommandAccessor implements ExtensionAccessor {
   #commands: Set<string>;
@@ -108,7 +108,7 @@ export class ExtensionManager {
   #extensionPackages: Map<string,ExtensionPackage> = new Map<string,ExtensionPackage>(); // name, extension package
   #services: Map<string, BaseService> = new Map<string, BaseService>();
   #extensionsOfContentType: Map<string,BaseService[]> = new Map<string, BaseService[]>();  // contentType, service
-  #storageService: BaseService[] = [];
+  #storageService: StorageService[] = [];
   private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
   private _installManager: ExtensionInstallManager|null = null;
@@ -136,8 +136,11 @@ export class ExtensionManager {
     this._initExternalExtension()
     this._initFrontEndEvent(pipeline)
     // this._installRouter()
+    // storage service for test
+    this.#storageService.push(new StorageService())
   }
 
+  get services() { return this.#services; }
   private _isExtension(name: string) {
     if (name === 'node_modules' || name === '.DS_Store') return false
     return true
@@ -170,47 +173,19 @@ export class ExtensionManager {
     }
   }
 
-  private createService(entry: string): BaseService|null {
-    const pack = new ExtensionPackage(entry)
-    const instance = this.initialize(pack.name, pack.main)
-    if (!instance) return null
-    console.debug('create service:', pack.name, pack.extensionType)
-    switch(pack.extensionType) {
-      case ExtensionType.ViewExtension:
-      {
-        const service = new ViewService(pack)
-        service.service = instance
-        return service
-      }
-      case ExtensionType.BackgroundExtension:
-      {
-        const service = new BackgroundService(pack)
-        service.service = instance
-        return service
-      }
-      case ExtensionType.StorageExtension:
-      {
-        const pipe = getSingleton(MessagePipeline)
-        const service = new StorageService(pipe!, pack)
-        // emitter.on()
-        service.storageEmitter = true
-        return null
-      }
-      default:
-        {
-          let mixCtor = []
-          if (pack.extensionType & ExtensionType.ViewExtension) {
-            mixCtor.push(ViewService)
-          }
-          if (pack.extensionType & ExtensionType.BackgroundExtension) {
-            mixCtor.push(BackgroundService)
-          }
-          const service = new MixService(pack)
-          service.service = instance
-          applyMixService(service, mixCtor)
-          return service
-        }
+  private createServiceByPackage(pack: ExtensionPackage): BaseService {
+    let mixCtor = []
+    if (pack.extensionType & ExtensionType.ViewExtension) {
+      mixCtor.push(ViewService)
     }
+    if (pack.extensionType & ExtensionType.BackgroundExtension) {
+      mixCtor.push(BackgroundService)
+    }
+    if (pack.extensionType & ExtensionType.StorageExtension) {
+      mixCtor.push(StorageService)
+    }
+    applyMixService(MixService, mixCtor)
+    return new MixService(pack)
   }
 
   private initialize(name: string, entryPath: string): any {
@@ -232,7 +207,7 @@ export class ExtensionManager {
       }
       if (!instance) {
         const msg = `${name}'s activate is not defined.`
-        showErrorInfo({msg: msg})
+        console.error(msg)
         return null
       }
       return instance
@@ -252,15 +227,12 @@ export class ExtensionManager {
         const packPath = root + '/' + extensionName
         const pack = new ExtensionPackage(packPath)
         this.#extensionPackages.set(extensionName, pack)
-        if (pack.extensionType & ExtensionType.ViewExtension) {
-          let mixCtor = [ViewService]
-          const instance = this.initialize(pack.name, pack.main)
-          const service = new MixService(pack)
-          service.service = instance
-          applyMixService(service, mixCtor)
-          this.#services.set(service.name, service)
-          return true
-        }
+        if (!(pack.extensionType & ExtensionType.ViewExtension)) return false
+        const service = this.createServiceByPackage(pack)
+        const instance = this.initialize(pack.name, pack.main)
+        service.service = instance
+        this.#services.set(service.name, service)
+        return true
       }
     } catch (err) {
       console.error(`init extension ${extensionName} fail: ${err}`)
@@ -269,17 +241,22 @@ export class ExtensionManager {
   }
 
   private _buildGraph() {
-    let extensions: Map<string, BaseService> = new Map<string, BaseService>()
+    const _createMixService = function(name: string, pack: ExtensionPackage, self: ExtensionManager) {
+      let service = self.services.get(name)
+      if (!service) {
+        service = self.createServiceByPackage(pack)
+        const instance = self.initialize(pack.name, pack.main)
+        service.service = instance
+        self.services.set(name, service)
+      }
+      return service
+    }
     for(const pack of this.#extensionPackages) {
       if (!(pack[1].extensionType & ExtensionType.BackgroundExtension)) continue
       // console.debug(pack[0], 'extension type', pack[1].extensionType, pack[1].extensionType & ExtensionType.BackgroundExtension)
       const dependencies = pack[1].dependency
       if (!dependencies) {
-        const instance = this.initialize(pack[1].name, pack[1].main)
-        const service = new MixService(pack[1])
-        service.service = instance
-        applyMixService(service, [BackgroundService])
-        this.#services.set(service.name, service)
+        const service = _createMixService(pack[0], pack[1], this)
         const types = service.activeType()
         for (const type of types) {
           let services = this.#extensionsOfContentType.get(type)
@@ -287,10 +264,18 @@ export class ExtensionManager {
           else services.push(service)
           this.#extensionsOfContentType.set(type, services)
         }
+        service.storageEmitter = true
         continue
       }
+      let next = this.#services.get(pack[0])
+      if (!next) {
+        next = _createMixService(pack[0], this.#extensionPackages.get(pack[0])!, this)
+        next.storageEmitter = true
+      }
       for (const dependency in dependencies) {
-        console.debug('dependency', dependency)
+        console.debug(pack[0], 'dependency is', dependency)
+        const service = _createMixService(dependency, this.#extensionPackages.get(dependency)!, this)
+        service.addNext(next!)
       }
     }
   }
@@ -407,14 +392,13 @@ export class ExtensionManager {
     }
   }
 
-  private _initViewExtension(service: ExtensionService) {
-    let activeType = service.viewType()
-    if (!(activeType & ExtensionType.ViewExtension)) return
-    this._viewServices.set(service.name, service)
-  }
-
-  emitStorageEvent(msgid: number, resourceId: number, properties: ResourceProperty[]) {
-
+  emitStorageEvent(msgid: number, resourceId: number, properties: ResourceProperty[], resource: Resource) {
+    console.debug('storage service', this.#storageService, 'props:', properties)
+    for(let service of this.#storageService) {
+      // service.emit('save', msgid, resourceId, properties)
+      // let storage = service as MixService
+      service.onUpdateEvent(msgid, resourceId, properties, resource)
+    }
   }
 
   // enable resource's extensions

@@ -1,5 +1,6 @@
+import { ResourceProperty } from "civet";
 import { ExtensionPackage } from "worker/ExtensionPackage";
-import { BaseService, IAnotationService, IBackgroundService, IStorageService, IViewService, StorageUpdateData } from "./ServiceInterface";
+import { BaseService, IAnotationService, IBackgroundService, IStorageService, IViewService } from "./ServiceInterface";
 
 export class MixService extends BaseService implements IBackgroundService, IViewService, IStorageService, IAnotationService{
 
@@ -10,7 +11,7 @@ export class MixService extends BaseService implements IBackgroundService, IView
   onBackgroundEvent(): void {
     throw new Error("Method not implemented.");
   }
-  onUpdateEvent(messageId: number, rId: string, data: StorageUpdateData[]): void {
+  onUpdateEvent(messageId: number, rId: number, data: ResourceProperty[]): void {
     throw new Error("Method not implemented.");
   }
   onRetrieveEvent(): void {
@@ -19,18 +20,25 @@ export class MixService extends BaseService implements IBackgroundService, IView
   onAnnotationUpdateEvent(): void {
     throw new Error("Method not implemented.");
   }
+  onSearchEvent(): void {
+    throw new Error('Method not implemented.');
+  }
 
 }
 
 export function createMixService(derivedCtor: any, baseCtor: any[]) {
-  baseCtor.forEach(father => {
-    Object.getOwnPropertyNames(father.prototype).forEach(name => {
-      if (!derivedCtor.prototy) {
-        console.debug(name, 'undefined')
-        return
-      }
-      console.debug('apply', name)
-      derivedCtor.prototy[name] = father.prototype[name]
-    })
-  })
+  // const names = Object.getOwnPropertyNames(derivedCtor.prototype)
+  // for (const name of names) {
+  //     if (name === 'constructor') continue
+  //     derivedCtor.prototype[name] = undefined
+  // }
+  for (const base of baseCtor) {
+    const props = Object.getOwnPropertyNames(base.prototype)
+    for (const prop of props) {
+      if (prop === 'constructor') continue
+      console.debug('prop name', prop)
+      derivedCtor.prototype[prop] = base.prototype[prop]
+      console.debug('prop name finish')
+    }
+  }
 }
