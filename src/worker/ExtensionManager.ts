@@ -1,5 +1,4 @@
 import path from 'path'
-import { ExtensionActiveType, ExtensionService, ExtensionAccessor } from './ExtensionService'
 import { MessagePipeline } from './MessageTransfer'
 import { Resource, StorageAccessor } from '@/../public/Resource'
 import { ResourcePath } from './common/ResourcePath'
@@ -23,6 +22,11 @@ import { createMixService as applyMixService, MixService } from './service/MixSe
 import { ExtensionModule } from './api/ExtensionRequire'
 import { IResource, ResourceProperty } from 'civet'
 
+export interface ExtensionAccessor {
+  visit(extension: ViewService): void;
+  result(): any;
+}
+
 class ExtensionCommandAccessor implements ExtensionAccessor {
   #commands: Set<string>;
   #overview: string;
@@ -31,7 +35,7 @@ class ExtensionCommandAccessor implements ExtensionAccessor {
     this.#commands = new Set<string>()
   }
 
-  visit(service: ExtensionService) {
+  visit(service: ViewService) {
     this.menu(service)
   }
 
@@ -39,8 +43,8 @@ class ExtensionCommandAccessor implements ExtensionAccessor {
     return this.#commands
   }
 
-  private menu(service: ExtensionService) {
-    const m = service.menus
+  private menu(service: ViewService) {
+    const m = service.menus()
     const items: MenuDetail[] = m[this.#overview]
     if (items) {
       for (let item of items) {
@@ -58,8 +62,8 @@ class ExtensionMenuAccessor implements ExtensionAccessor {
     this.#context = context
   }
 
-  visit(service: ExtensionService) {
-    const m = service.menus
+  visit(service: ViewService) {
+    const m = service.menus()
     const items: MenuDetail[] = m[this.#context]
     if (items) {
       this.#menus = this.#menus.concat(items)
@@ -80,11 +84,10 @@ class MenuCommand {
 class ExtensionAllMenuAccessor implements ExtensionAccessor {
   #menus: any[] = [];
 
-  visit(service: ExtensionService) {
-    const m = service.menus
+  visit(service: ViewService) {
+    const m = service.menus()
     for (let context in m) {
       const items: MenuDetail[] = m[context]
-      console.info('context:', context, items)
       for (let item of items) {
         this.#menus.push({
           id: context,
@@ -104,13 +107,12 @@ export class ExtensionManager {
   private _pipeline: MessagePipeline;
   // aviable extension of this
   private _extensionsOfConfig: string[] = [];
-  private _extensions: ExtensionService[] = []; //
+  // private _extensions: ExtensionService[] = []; //
   #extensionPackages: Map<string,ExtensionPackage> = new Map<string,ExtensionPackage>(); // name, extension package
   #services: Map<string, BaseService> = new Map<string, BaseService>();
   #extensionsOfContentType: Map<string,BaseService[]> = new Map<string, BaseService[]>();  // contentType, service
   #storageService: StorageService[] = [];
-  private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
-  private _viewServices: Map<string, ExtensionService> = new Map<string, ExtensionService>();
+  // private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _installManager: ExtensionInstallManager|null = null;
   // private _algorithmService: AlgorithmService = null;
 
@@ -157,13 +159,13 @@ export class ExtensionManager {
         }
       }
       // clean service that is not in the config
-      for (let idx = this._extensions.length; idx >= 0; ++idx) {
-        let name = this._extensions[idx].name
-        console.info('key', name)
-        if (visited[name] === undefined) {
-          this._extensions.splice(idx)
-        }
-      }
+      // for (let idx = this._extensions.length; idx >= 0; ++idx) {
+      //   let name = this._extensions[idx].name
+      //   console.info('key', name)
+      //   if (visited[name] === undefined) {
+      //     this._extensions.splice(idx)
+      //   }
+      // }
     }
   }
 
@@ -188,31 +190,31 @@ export class ExtensionManager {
     return new MixService(pack)
   }
 
-  private initialize(name: string, entryPath: string): any {
-    if (!fs.existsSync(entryPath)) {
-      const msg = `file not exist: ${entryPath}`
+  private initialize(pack: ExtensionPackage): any {
+    if (!fs.existsSync(pack.main)) {
+      const msg = `file not exist: ${pack.main}`
       showErrorInfo({msg: msg})
       return null
     }
-    const content = fs.readFileSync(entryPath, 'utf-8')
+    const content = fs.readFileSync(pack.main, 'utf-8')
     const pipe = getSingleton(MessagePipeline)
-    const m = new ExtensionModule(name, module.parent, pipe!)
-    m._compile(content, name)
-    console.debug(`initialize ${name}:${m.exports}`)
+    const m = new ExtensionModule(pack.name, module.parent, pipe!)
+    m._compile(content, pack.name)
+    console.debug(`initialize ${pack.name}:${m.exports}`)
     try {
       // m.exports.run()
       let instance = null
       if (m.exports.activate) {
         instance = m.exports.activate()
       }
-      if (!instance) {
-        const msg = `${name}'s activate is not defined.`
+      if (!instance && (pack.extensionType & ExtensionType.BackgroundExtension)) {
+        const msg = `${pack.name}'s activate is not defined.`
         console.error(msg)
         return null
       }
       return instance
     } catch (error) {
-      const msg = `initialize ${name} fail: ${error}`
+      const msg = `initialize ${pack.name} fail: ${error}`
       showErrorInfo({msg: msg})
       return null
     }
@@ -229,7 +231,7 @@ export class ExtensionManager {
         this.#extensionPackages.set(extensionName, pack)
         if (!(pack.extensionType & ExtensionType.ViewExtension)) return false
         const service = this.createServiceByPackage(pack)
-        const instance = this.initialize(pack.name, pack.main)
+        const instance = this.initialize(pack)
         service.service = instance
         this.#services.set(service.name, service)
         return true
@@ -245,7 +247,7 @@ export class ExtensionManager {
       let service = self.services.get(name)
       if (!service) {
         service = self.createServiceByPackage(pack)
-        const instance = self.initialize(pack.name, pack.main)
+        const instance = self.initialize(pack)
         service.service = instance
         self.services.set(name, service)
       }
@@ -347,8 +349,8 @@ export class ExtensionManager {
   disable(msgid: number, extname: string) {}
 
   accessMenu(menuAccessor: ExtensionAccessor) {
-    this._extensions.forEach((service: ExtensionService) => {
-      menuAccessor.visit(service)
+    this.#services.forEach((service: BaseService) => {
+      menuAccessor.visit(service as ViewService)
     })
     const menus = menuAccessor.result()
     return {type: IPCRendererResponse.getOverviewMenus, data: menus}
@@ -365,8 +367,8 @@ export class ExtensionManager {
 
   replyAllCommand(msgid: number) {
     let cmdAccessor: ExtensionCommandAccessor = new ExtensionCommandAccessor(config.defaultView)
-    this._extensions.forEach((service: ExtensionService) => {
-      cmdAccessor.visit(service)
+    this.#services.forEach((service: BaseService) => {
+      cmdAccessor.visit(service as ViewService)
     })
     return {type: IPCRendererResponse.getActiveCmd, data: Array.from(cmdAccessor.result())}
   }
@@ -378,19 +380,19 @@ export class ExtensionManager {
     this.onExecuteCommand(target, command, args)
   }
 
-  private _initContentTypeExtension(service: ExtensionService) {
-    let activeType = service.activeType()
-    if (!activeType) return
-    for (let active of activeType) {
-      active = active.toLowerCase()
-      let events = this._activableExtensions.get(active)
-      if (!events) {
-        events = []
-      }
-      events.push(service)
-      this._activableExtensions.set(active, events)
-    }
-  }
+  // private _initContentTypeExtension(service: ExtensionService) {
+  //   let activeType = service.activeType()
+  //   if (!activeType) return
+  //   for (let active of activeType) {
+  //     active = active.toLowerCase()
+  //     let events = this._activableExtensions.get(active)
+  //     if (!events) {
+  //       events = []
+  //     }
+  //     events.push(service)
+  //     this._activableExtensions.set(active, events)
+  //   }
+  // }
 
   emitStorageEvent(msgid: number, resourceId: number, properties: ResourceProperty[], resource: Resource) {
     console.debug('storage service', this.#storageService, 'props:', properties)
@@ -408,16 +410,16 @@ export class ExtensionManager {
     // this._extensionsOfConfig = resource['extensions']
   }
 
-  getExtensionsByType(extensionType: ExtensionActiveType): ExtensionService[] {
-    let extensions: ExtensionService[] = []
-    for (let idx = 0, len = this._extensions.length; idx < len; ++idx) {
-      const extension = this._extensions[idx]
-      if (extension.hasType(extensionType)) {
-        extensions.push(extension)
-      }
-    }
-    return extensions
-  }
+  // getExtensionsByType(extensionType: ExtensionActiveType): ExtensionService[] {
+  //   let extensions: ExtensionService[] = []
+  //   for (let idx = 0, len = this._extensions.length; idx < len; ++idx) {
+  //     const extension = this._extensions[idx]
+  //     if (extension.hasType(extensionType)) {
+  //       extensions.push(extension)
+  //     }
+  //   }
+  //   return extensions
+  // }
 
   async read(msgid: number, uri: ResourcePath): Promise<Result<Resource, string>> {
     const f = path.parse(uri.local())
@@ -443,40 +445,25 @@ export class ExtensionManager {
       console.debug(service.name, 'emit read')
       service.emit('read', msgid, resource.id, uri.local(), resource)
     }
-    // for (const extension of extensions) {
-    //   await extension.run('read', uri.local(), resource)
-    // }
-    // console.info('add files:', resource)
-    // const accessor = new StorageAccessor()
-    // const store = resource.toJson(accessor)
-    // CivetDatabase.addFiles([store])
-    // const thumbnail = resource.getPropertyValue('thumbnail')
-    // if (thumbnail) {
-    //   CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: thumbnail, type: 'bin' })
-    // }
-    // const colors = resource.getPropertyValue('color')
-    // if (colors) {
-    //   CivetDatabase.addMeta([resource.id], { name: 'color', value: colors, type: 'color', query: true })
-    // }
     return Result.success(resource)
   }
 
   async onExecuteCommand(id: string, command: string, ...args: any) {
-    console.info(`Execute command ${command} on ${id}, params is ${args}`)
-    const extensions = this._activableExtensions.get(id)
-    if (!extensions || extensions.length === 0) {
-      const msg = `No extensions can read ${id} file`
-      showErrorInfo({msg: msg})
-      return Result.failure(msg)
-    }
-    const [kind, cmd] = command.split(':')
-    if (kind === 'ext') {
-      for (const extension of extensions) {
-        await extension.run(cmd, args)
-      }
-    } else {
-      console.error('unknow command', command)
-    }
+    // console.info(`Execute command ${command} on ${id}, params is ${args}`)
+    // const extensions = this._activableExtensions.get(id)
+    // if (!extensions || extensions.length === 0) {
+    //   const msg = `No extensions can read ${id} file`
+    //   showErrorInfo({msg: msg})
+    //   return Result.failure(msg)
+    // }
+    // const [kind, cmd] = command.split(':')
+    // if (kind === 'ext') {
+    //   for (const extension of extensions) {
+    //     await extension.run(cmd, args)
+    //   }
+    // } else {
+    //   console.error('unknow command', command)
+    // }
     return Result.success(true)
   }
 }

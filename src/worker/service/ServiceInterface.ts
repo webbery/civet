@@ -1,6 +1,6 @@
 import { Emitter } from 'public/Emitter'
 import { getSingleton, showErrorInfo } from 'worker/Singleton';
-import { ExtensionPackage } from 'worker/ExtensionPackage';
+import { ExtensionPackage, MenuDetail } from 'worker/ExtensionPackage';
 import { ExtensionManager } from 'worker/ExtensionManager';
 import { IResource, ResourceProperty } from 'civet';
 import { Resource } from 'public/Resource';
@@ -87,5 +87,5 @@ export interface IAnotationService {
 }
 
 export interface IViewService {
-
+  menus(): Map<string, MenuDetail[]>;
 }

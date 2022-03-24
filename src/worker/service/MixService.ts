@@ -1,11 +1,14 @@
 import { ResourceProperty } from "civet";
-import { ExtensionPackage } from "worker/ExtensionPackage";
+import { ExtensionPackage, MenuDetail } from "worker/ExtensionPackage";
 import { BaseService, IAnotationService, IBackgroundService, IStorageService, IViewService } from "./ServiceInterface";
 
 export class MixService extends BaseService implements IBackgroundService, IViewService, IStorageService, IAnotationService{
 
   constructor(extension: ExtensionPackage) {
     super(extension)
+  }
+  menus(): Map<string, MenuDetail[]> {
+    throw new Error("Method not implemented.");
   }
 
   onBackgroundEvent(): void {
