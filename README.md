@@ -78,6 +78,6 @@
 [civet的图像主色彩抽取算法](https://zhuanlan.zhihu.com/p/355278737)  
 [Node如何调用C++代码](https://zhuanlan.zhihu.com/p/395634920)  
 
----
-
-开发者名单：webberg
+## <a name='Contributors'></a>Contributors
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->

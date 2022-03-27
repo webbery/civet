@@ -8,7 +8,7 @@ export class MixService extends BaseService implements IBackgroundService, IView
     super(extension)
   }
   menus(): Map<string, MenuDetail[]> {
-    throw new Error("Method not implemented.");
+    return this.extension.menus
   }
 
   onBackgroundEvent(): void {

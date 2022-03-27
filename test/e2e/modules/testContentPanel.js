@@ -24,6 +24,7 @@ async function backPage(page) {
 
 async function isPanelDisplay(page) {
   await page.waitForSelector(CSSContent, {timeout: 5000})
+  return true
 }
 
 module.exports = {

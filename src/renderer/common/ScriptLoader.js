@@ -74,7 +74,6 @@ export default (function() {
 
   let loadGroup = async function() {
     for (;groupCursor < groupQueue.length; ++groupCursor) {
-      console.info('load group', groupCursor)
       await loadScript(groupQueue[groupCursor])
     }
   }

@@ -15,6 +15,9 @@ jobs:
     env:
       CI: true
     steps:
+      - uses: akhilmhdh/contributors-readme-action@v2.3.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:

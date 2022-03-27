@@ -88,10 +88,11 @@ describe('****************Start Functional Test*************', function (resolve
   })
   it('waterfall layout view', async function() {
     await testClassicalView.test(mainWindowPage)
+    console.info('waterfall layout view finish')
   })
-  it('mapview layout', async function() {
-    await testMapView.test(mainWindowPage)
-  })
+  // it('mapview layout', async function() {
+  //   await testMapView.test(mainWindowPage)
+  // })
   // it('file property', async function() {
   //   const files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(files).not.to.be.null
@@ -111,9 +112,6 @@ describe('****************Start Functional Test*************', function (resolve
   //   done()
   // })
   
-  // it('search file', function(done) {
-  //   done()
-  // })
   // it('file menu operation', async function() {
   //   let files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(files).not.to.be.null
@@ -127,6 +125,7 @@ describe('****************Start Functional Test*************', function (resolve
   //   expect(beforeLength).to.be.above(files.length)
   // })
   it('uninstall local extension', async function() {
+    console.info('uninstall local extension begin')
     await testLocalExtension.uninstall(mainWindowPage)
   })
   it('clean operation in classify panel ', async function() {

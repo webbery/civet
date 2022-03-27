@@ -2,6 +2,7 @@ const base = require('./base')
 const {expect, assert} = require('chai')
 const search = require('./testSearch')
 const content = require('./testContentPanel')
+const classify = require('./testClassifyPanel')
 
 const CLASSICAL_LAYOUT = 0
 const SelectionIndex = 0
@@ -68,9 +69,10 @@ async function getResources(page) {
 
 async function showResourceContent(page) {
   const resources = await getResources(page)
+  assert(resources !== null)
   await resources[0].click({ clickCount: 2, delay: 100 })
-  await content.isPanelDisplay(page)
-  await content.backPage(page)
+  const result = await content.isPanelDisplay(page)
+  assert(result === true)
 }
 
 module.exports = {
@@ -104,12 +106,17 @@ module.exports = {
     await property.removeTag(page)
 
     // display content of resource
+    await classify.selectNavigation(page, 0)
     await showResourceContent(page)
+    // console.info('6666666666')
 
     // right menu
     // await base.switchLayout(page, CLASSICAL_LAYOUT)
-    await showMenu(page)
-    await removeResource(page)
+    await page.waitForTimeout(2000)
+    await classify.selectNavigation(page, 0)
+    // await showMenu(page)
+    // console.info('7777777777')
+    // await removeResource(page)
     // const counts = await base.getCounts(page)
     // // total count is zero
     // assert(counts[0] = 0)

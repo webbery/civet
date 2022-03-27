@@ -22,16 +22,27 @@
     #__cv_map_resources {
         height:25vh;
         width: 100%;
+        display: flex;
+        flex-direction: row;
     }
     .__cv_map_image {
-        display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         overflow-y: hidden;
         overflow-x: auto;
+        display: flex;
+        justify-content: space-between;
+        list-style-type: none;
+        padding-inline-start: 0;
+        margin-block-start:0;
+        margin-block-end: 0;
     }
-    .__cv_map_image::after {
+    /* .__cv_map_image::after {
         content: '';
         flex-grow: 99999;
+    } */
+    .__cv_map_image li{
+        padding: 2px;
+        margin: 5px;
     }
     .__cv_mapbox {
         margin: 2px;
@@ -58,7 +69,7 @@
 <body>
 <div id="__cv_map_container" draggable="true" ondragstart="MapLayout.preventDrag(event)" ondrag="MapLayout.preventDrag(event)"></div>
 <div id="__cv_map_resources">
-    <div class="__cv_map_image"></div>
+    <ul class="__cv_map_image"></ul>
 </div>
 <script type="text/javascript"
         src="https://webapi.amap.com/maps?v=2.0&key=6918ecca2a3cbfafb6ab59369768ae21&plugin=AMap.MarkerClusterer"></script>
@@ -101,11 +112,12 @@ MapLayout = (function() {
     //     renderClusterMarker: _renderClusterMarker
     // });
     function generateFromTemplate(item) {
-        let div = document.createElement('div')
+        let li = document.createElement('li')
         // div.setAttribute('class', '_cv_horizon-image')
-        div.style['flex-grow'] = 1
+        li.style['flex-grow'] = 1
         // div.style.top = `${item.top}px`
-        // div.style.width = `${item.width - 15}px`
+        li.style.width = `${item.width - 20}px`
+        // console.debug(item.id, 'width:', item.width - 15)
         // div.style.height = `${item.height - 10}px`
         // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
         const html = `<div draggable="true" class="__cv_mapbox" style="border: 0px;padding: 4px;">
@@ -116,12 +128,12 @@ MapLayout = (function() {
                                 <span class="context">${item.name}</span>
                             </div>
                         </div>`
-        acquireCivetApi().setHtml('mapview', div, html)
-        return div
+        acquireCivetApi().setHtml('mapview', li, html)
+        return li
     }
     function addHorizonItem(item) {
         // const items = document.querySelectorAll('#resources')
-        const root = document.getElementsByClassName('__cv_image')[0]
+        const root = document.getElementsByClassName('__cv_map_image')[0]
         const defaultHeight = root.offsetHeight
         console.info('Item Height', defaultHeight)
         let block = {}, src = undefined
@@ -149,7 +161,7 @@ MapLayout = (function() {
         root.appendChild(generateFromTemplate(block))
     }
     function clean() {}
-    const root = document.getElementById('resources')
+    const root = document.getElementsByClassName('__cv_map_image')[0]
     root.onwheel = (event) => {
         event.preventDefault();
         console.info('scroll event', event.deltaY)
@@ -274,7 +286,7 @@ MapLayout = (function() {
             // if (cluster) {
             //     cluster.setMap(null);
             // }
-            let root = document.getElementsByClassName('__cv_image')[0]
+            let root = document.getElementsByClassName('__cv_map_image')[0]
             root.innerHTML = ''
         },
         onResourceClick: onResourceClick,

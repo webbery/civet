@@ -10,6 +10,7 @@ async function switchLayout(page, index) {
   await page.waitForSelector(CSSLayouts)
   const layouts = await page.$$(CSSLayouts)
   const view = layouts[index]
+  console.info(`switch layout[${layouts.length}]: ${index}`)
   await view.click()
 }
 
