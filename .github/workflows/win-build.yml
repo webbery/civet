@@ -38,6 +38,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
+      - name: tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 60
       - name: test
         run: |
           npm install

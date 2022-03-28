@@ -23,10 +23,11 @@ function runCommand(cmd) {
     execSync(cmd)
     return true
   } catch (err) {
+    const chalk = require('chalk')
     if (err.stdout) {
-      console.error(err.stdout.toString())
+      console.info(chalk.red(err.stdout.toString()))
     } else {
-      console.error(err)
+      console.info(chalk.red(err))
     }
     return false
   }
@@ -124,6 +125,10 @@ function parseExtensions() {
     const stat = fs.statSync(extPath)
     if (isExclude(extension) || !stat || stat.isFile()) continue
     const packagePath = path.join(__dirname, './extensions/'  + extension + '/package.json')
+    if (!fs.existsSync(packagePath)) {
+      console.info(`${packagePath} not exist, is this extension correct?`)
+      continue
+    }
     const stime = stat.mtime / 1000
     if (shouldUpdate(extension, packagePath, stime)) {
       const pack = fs.readFileSync(packagePath, 'utf-8')
@@ -184,8 +189,9 @@ function buildExtension() {
     // runCommand('node_modules\\.bin\\tsc extensions/imagedata/index.ts')
     // runCommand('"node_modules/.bin/tsc" index.ts')
     if (!runCommand(cmd)) {
-      console.error(`build extensions[${extension}] fail: ${cmd}`)
-      throw new Error(`build extensions[${extension}] fail: ${cmd}`)
+      const chalk = require('chalk')
+      console.info(chalk.red(`build extensions[${extension}] fail: ${cmd}, please clean this directory before retry.`))
+      // throw new Error(`build extensions[${extension}] fail: ${cmd}`)
     }
     // process.chdir('../..')
   }

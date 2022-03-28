@@ -19,9 +19,10 @@
   },
   "scripts": {
     "prepare": "husky install",
+    "clean": "node .electron-vue/clean.js",
     "build": "cross-env NODE_ENV=production node .electron-vue/build.js && electron-builder -p onTag",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
-    "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
+    "build:clean": "node .electron-vue/clean.js && cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:extend": "node .electron-vue/extension.js",
     "dev": "npm run pack:dev_woker && node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && cross-env NODE_ENV=production mocha test/e2e",
