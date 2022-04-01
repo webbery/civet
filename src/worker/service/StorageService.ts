@@ -44,7 +44,9 @@ export class StorageService implements IStorageService{
       if (data[0].name === 'color') {
         CivetDatabase.addMeta([rId], { name: data[0].name, value: data[0].value, type: 'color', query: true })
       } else {
-        CivetDatabase.addMeta([rId], { name: data[0].name, value: data[0].value, type: data[0].type })
+        if (data[0].value && data[0].value.length !== 0) {
+          CivetDatabase.addMeta([rId], { name: data[0].name, value: data[0].value, type: data[0].type })
+        }
       }
     }
 

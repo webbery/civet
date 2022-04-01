@@ -30,6 +30,10 @@ jobs:
         with:
           name: win-build
           path: ./build/Civet Setup ${{ steps.tagVersion.outputs.tag }}.exe
+      - name: tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 60
   test:
     runs-on: windows-latest
     needs: build
@@ -38,16 +42,16 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14
+      - name: test
+        run: |
+          npm install
+          npm run test --loglevel silly
+        env:
+          CI: true
       - name: tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 60
-      - name: test
-        run: |
-          npm install
-          npm run test
-        env:
-          CI: true
   publish:
     runs-on: windows-latest
     needs: build

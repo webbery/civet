@@ -247,10 +247,10 @@ export default {
     onDeleteTag(tag) {
       this.tags.splice(this.tags.indexOf(tag), 1)
       // this.$store.dispatch('updateImageProperty', {id: this.picture.id, key: 'tag', value: this.dynamicTags})
-      // this.$store.dispatch('removeTags', {id: this.picture.id, tag: tag})
+      this.$store.dispatch('removeTags', {id: this.id, tag: tag})
     },
     onDeleteClass(clazz) {
-      // await this.$store.dispatch('removeClassOfFile', {id: this.picture.id, path: clazz})
+      // await this.$store.dispatch('removeClassOfFile', {id: this.id, path: clazz})
     },
     showInput() {
       if (!this.id) return

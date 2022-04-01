@@ -164,7 +164,7 @@ MapLayout = (function() {
     const root = document.getElementsByClassName('__cv_map_image')[0]
     root.onwheel = (event) => {
         event.preventDefault();
-        console.info('scroll event', event.deltaY)
+        // console.info('scroll event', event.deltaY)
         root.scrollLeft += event.deltaY
     }
     

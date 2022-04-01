@@ -201,11 +201,14 @@ function copyModules() {
   const source = path.join(__dirname, './extensions/node_modules')
   if (process.env.NODE_ENV === 'development') {
     const dest = path.join(__dirname, './node_modules')
-    console.info('develop mode')
     copyDir(source, dest, [], console.error)
+    const chalk = require('chalk')
+    console.info(chalk.yellow(`Develop Mode: copy ${source} to ${dest}`))
   } else {
     const dest = path.join(__dirname, './extensions-dist/node_modules')
     copyDir(source, dest, [], console.error)
+    const chalk = require('chalk')
+    console.info(chalk.yellow(`copy ${source} to ${dest}`))
   }
 }
 
@@ -218,6 +221,8 @@ function copyExtensions() {
   } else {
     const dest = path.join(__dirname, './extensions-dist')
     copyDir(source, dest, excludeNames, console.error)
+    const chalk = require('chalk')
+    console.info(chalk.yellow(`copy ${source} to ${dest}`))
   }
 }
 
@@ -227,7 +232,8 @@ function installInternalExtension() {
   buildExtension()
   copyExtensions()
   copyModules()
-  console.info('install extensions finish')
+  const chalk = require('chalk')
+  console.info(chalk.yellow('install extensions finish'))
 }
 
 module.exports = installInternalExtension

@@ -5,7 +5,6 @@ import { autoUpdater } from 'electron-updater'
 const path = require('path')
 const fs = require('fs')
 
-app.allowRendererProcessReuse = false
 app.setPath('crashDumps', path.join(__dirname, './logs'))
 // var util = require('util')
 // var logFile = fs.createWriteStream('/Users/v_yuanwenbin/debug.log', {flags: 'w'})
@@ -58,7 +57,6 @@ initUpdater()
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
-
 // function enableDevTools(window) {
 //   window.webContents.on('did-frame-finish-load', () => {
 //     window.webContents.once('devtools-opened', () => {
@@ -88,7 +86,6 @@ function createRendererWindow() {
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
-      enableRemoteModule: true,
       webSecurity: false,
       contextIsolation: false,
       additionalArguments: ['renderer']
@@ -101,6 +98,8 @@ function createRendererWindow() {
     icon: path.join(__dirname, 'static/icon.png'),
     show: false
   })
+  const remoteMain = require('@electron/remote/main')
+  remoteMain.enable(mainWindow.webContents)
   mainWindow.maximize()
   // mainWindow.onbeforeunload = (e) => {
   //   console.info('onbeforeunload')
@@ -121,7 +120,7 @@ function createRendererWindow() {
   mainWindow.on('closed', () => {
     console.info('main window closed')
   })
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
   if (process.env.NODE_ENV !== 'production') {
     // enableDevTools(mainWindow)
     mainWindow.webContents.openDevTools()
@@ -140,11 +139,12 @@ function createWorkerWindow (bFirst) {
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
-      enableRemoteModule: true,
       contextIsolation: false,
       additionalArguments: ['worker']
     }
   })
+  const remoteMain = require('@electron/remote/main')
+  remoteMain.enable(workerWindow.webContents)
   workerWindow.on('closed', () => {
     console.log('background window closed')
   })
@@ -164,7 +164,7 @@ function createWorkerWindow (bFirst) {
     const urlpath = url.format({pathname: workerURL, protocol: 'file:', slashes: true})
     workerWindow.loadURL(urlpath)
   }
-  workerWindow.webContents.openDevTools()
+  // workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV !== 'production') {
     workerWindow.webContents.openDevTools()
   }
@@ -218,6 +218,7 @@ app.whenReady().then(() => {
 })
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)
+  require('@electron/remote/main').initialize()
   createWorkerWindow()
   createRendererWindow()
   ipcMain.on('message-from-worker', (event, arg) => {

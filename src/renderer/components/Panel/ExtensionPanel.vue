@@ -102,7 +102,7 @@ export default {
         kw = this.keyword
       }
       const fetchURL = 'https://api.npms.io/v2/search?q=scope:civet-extend'// + kw
-      const { net } = require('electron').remote
+      const { net } = require('@electron/remote')
       const request = net.request(fetchURL)
       let self = this
       let str = ''
