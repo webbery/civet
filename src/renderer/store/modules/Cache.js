@@ -7,8 +7,16 @@ import Vue from 'vue'
 import { Cache } from './CacheInstance'
 import * as Assist from './CacheAssist'
 import { config } from '@/../public/CivetConfig'
-import { logger } from '@/../public/Logger'
 import { Search } from '@/common/SearchManager'
+import { PerformanceObserver, performance } from 'perf_hooks'
+
+const messageObs = new PerformanceObserver((items) => {
+  const measurements = items.getEntriesByType('measure')
+  measurements.forEach(measurement => {
+    console.debug('performance', measurement.name, measurement.duration)
+  })
+})
+messageObs.observe({ entryTypes: ['measure'] })
 
 function updateOverview(state, showClasses) {
   const view = getCurrentViewName()
@@ -97,6 +105,16 @@ const remote = {
 }
 
 const mutations = {
+  initViewResources(state, viewResources) {
+    state.viewItems.splice(0, state.viewItems.length)
+    const resources = viewResources
+    for (const image of resources) {
+      const resource = initResource(image)
+      state.viewItems.unshift(resource)
+    }
+    performance.mark('init view resources end')
+    performance.measure('view display time:', 'init resouce view begin', 'init view resources end')
+  },
   init(state, data) {
     console.info('cache init', data)
     state.currentResource = config.getCurrentDB()
@@ -106,13 +124,6 @@ const mutations = {
       Vue.set(state.resources, idx, names[idx])
     }
     Cache.snaps = data.filesSnap
-    state.viewItems.splice(0, state.viewItems.length)
-    const resources = data.allResources
-    for (const image of resources) {
-      const resource = initResource(image)
-      // if (Cache.files.length > maxCacheSize) break
-      state.viewItems.unshift(resource)
-    }
     // const len = state.cache.length
     // get classes
     const cls = data.allClasses
@@ -142,6 +153,8 @@ const mutations = {
         state.viewClass.push({name: clazz.name})
       }
       console.info('class result', state.classes)
+      performance.mark('init view infomation end')
+      performance.measure('infomation display time:', 'init view infomation begin', 'init view infomation end')
     }
     updateOverview(state, true)
     // init classes name
@@ -425,9 +438,7 @@ const mutations = {
 const actions = {
   async init({ commit }, flag) {
     try {
-      const { unclasses, untags } = await remote.recieveCounts()
-      const allClasses = await service.get(IPCNormalMessage.GET_ALL_CLASSES, '/')
-      console.info('all classes:', allClasses)
+      performance.mark('init resouce view begin')
       const filesSnap = await service.get(IPCNormalMessage.GET_RESOURCES_SNAP)
       const imagesID = []
       for (const snap of filesSnap) {
@@ -459,9 +470,14 @@ const actions = {
           )
         }
       }
+      commit('initViewResources', allResources)
+      performance.mark('init view infomation begin')
+      const { unclasses, untags } = await remote.recieveCounts()
+      const allClasses = await service.get(IPCNormalMessage.GET_ALL_CLASSES, '/')
+      console.info('all classes:', allClasses)
       const allTags = await service.get(IPCNormalMessage.GET_ALL_TAGS)
       console.info('recieveCounts:', unclasses, 'tags:', allTags)
-      commit('init', { unclasses, untags, allClasses, filesSnap, allResources, allTags })
+      commit('init', { unclasses, untags, allClasses, filesSnap, allTags })
     } catch (err) {
       console.error(err)
       const guider = document.getElementById('guider')

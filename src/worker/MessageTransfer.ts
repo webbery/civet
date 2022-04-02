@@ -61,7 +61,6 @@ export class MessagePipeline {
           return
         }
         if (reply === undefined) return
-        console.info('reply', reply.type)
         let msg = new CivetProtocol()
         msg.id = arg.id
         msg.type = reply.type

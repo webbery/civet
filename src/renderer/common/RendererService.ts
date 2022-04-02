@@ -1,7 +1,7 @@
 import { ViewType } from '@/../public/ExtensionHostType'
 import { IPCExtensionMessage, IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
 import util from 'util'
-console.info('33333333333333')
+
 declare const _cv_events: any;
 declare let _cv_command_args: any;
 declare let _cv_activate_view_name: string;
@@ -83,11 +83,11 @@ class RendererService {
   constructor() {
     const { ipcRenderer } = require('electron')
     this.ipc = ipcRenderer
-    // this.session = 0
     const self = this
     this.ipc.on('message-to-renderer', (sender, msg) => {
       const types = msg.type.split('.')
       const callbacks = self.response.get(types[0])
+      
       console.info('callbacks:', callbacks, msg)
       if (callbacks === undefined) return
       try {
@@ -123,7 +123,6 @@ class RendererService {
         console.error(`RendererService error ${err}`)
         events.emit('civet', 'onErrorMessage', {msg: err})
       }
-      
     })
   }
 

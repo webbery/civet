@@ -112,9 +112,7 @@ export class ExtensionManager {
   #services: Map<string, BaseService> = new Map<string, BaseService>();
   #extensionsOfContentType: Map<string,BaseService[]> = new Map<string, BaseService[]>();  // contentType, service
   #storageService: StorageService[] = [];
-  // private _activableExtensions: Map<string, ExtensionService[]> = new Map<string, ExtensionService[]>();  // contentType, service
   private _installManager: ExtensionInstallManager|null = null;
-  // private _algorithmService: AlgorithmService = null;
 
   constructor(pipeline: MessagePipeline) {
     this._pipeline = pipeline
@@ -409,17 +407,6 @@ export class ExtensionManager {
     if (!resource) {}
     // this._extensionsOfConfig = resource['extensions']
   }
-
-  // getExtensionsByType(extensionType: ExtensionActiveType): ExtensionService[] {
-  //   let extensions: ExtensionService[] = []
-  //   for (let idx = 0, len = this._extensions.length; idx < len; ++idx) {
-  //     const extension = this._extensions[idx]
-  //     if (extension.hasType(extensionType)) {
-  //       extensions.push(extension)
-  //     }
-  //   }
-  //   return extensions
-  // }
 
   async read(msgid: number, uri: ResourcePath): Promise<Result<Resource, string>> {
     const f = path.parse(uri.local())

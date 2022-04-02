@@ -51,7 +51,7 @@ jobs:
       - name: tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 60
+        timeout-minutes: 120
   publish:
     runs-on: windows-latest
     needs: build
