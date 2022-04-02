@@ -18,7 +18,6 @@ let extensions = []
 let excludeNames = ['shared.tsconfig.json', 'build.js', '.DS_Store', 'node_modules', 'package-lock.json', 'package.json']
 
 function runCommand(cmd) {
-  // console.info(process.cwd(), __dirname)
   try {
     execSync(cmd)
     return true
@@ -150,6 +149,9 @@ function parseExtensions() {
 }
 
 function installDependencies() {
+  const package_json_path = path.resolve(__dirname, './extensions/package.json')
+  let package_json = {}
+  if (fs.existsSync(package_json_path)) package_json = JSON.parse(fs.readFileSync(package_json_path).toString())
   for (let name in installPackages) {
     const filepath = path.resolve(__dirname, './extensions/node_modules/' + name)
     if (fs.existsSync(filepath)) {
@@ -161,7 +163,10 @@ function installDependencies() {
     }
     console.info(`install ${name}@${installPackages[name]}`)
     runCommand('npm install --prefix extensions ' + name + '@' + installPackages[name])
+    if (!package_json['dependencies']) package_json['dependencies'] = {}
+    package_json['dependencies'][name] = installPackages[name]
   }
+  fs.writeFileSync(package_json_path, JSON.stringify(package_json))
 }
 
 function ejsInfomations() {}
@@ -186,8 +191,6 @@ function buildExtension() {
       fs.writeFileSync(inputDir + '/' + extension + '/view.html')
     }
     // process.chdir('extensions/imagedata')
-    // runCommand('node_modules\\.bin\\tsc extensions/imagedata/index.ts')
-    // runCommand('"node_modules/.bin/tsc" index.ts')
     if (!runCommand(cmd)) {
       const chalk = require('chalk')
       console.info(chalk.red(`build extensions[${extension}] fail: ${cmd}, please clean this directory before retry.`))

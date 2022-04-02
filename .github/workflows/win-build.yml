@@ -15,6 +15,7 @@ jobs:
           node-version: 14
       - name: build
         run: |
+          npm install -g windows-build-tools
           npm install
           npm run build
         env:
@@ -44,6 +45,7 @@ jobs:
           node-version: 14
       - name: test
         run: |
+          npm install -g windows-build-tools
           npm install
           npm run test --loglevel silly
         env:
