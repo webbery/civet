@@ -38,7 +38,6 @@
 </template>
 
 <script>
-import { remote } from 'electron'
 import bus from './utils/Bus'
 import ViewFilter from '@/components/ViewFilter'
 import ImageOperator from '@/components/ImageOperator'

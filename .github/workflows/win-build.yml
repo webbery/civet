@@ -9,13 +9,13 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 14
       - name: build
         run: |
-          npm install -g windows-build-tools
+          npm install --global --production windows-build-tools --vs2015
           npm install
           npm run build
         env:
@@ -39,13 +39,13 @@ jobs:
     runs-on: windows-latest
     needs: build
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 14
       - name: test
         run: |
-          npm install -g windows-build-tools
+          npm install --global --production windows-build-tools --vs2015
           npm install
           npm run test --loglevel silly
         env:

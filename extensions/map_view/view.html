@@ -74,12 +74,13 @@
 <script type="text/javascript"
         src="https://webapi.amap.com/maps?v=2.0&key=6918ecca2a3cbfafb6ab59369768ae21&plugin=AMap.MarkerClusterer"></script>
 <script type="text/javascript">
+// let points_test = [{"lnglat":["113.864691","22.942327"]},{"lnglat":["113.370643","22.938827"]},{"lnglat":["112.985037","23.15046"]},{"lnglat":["110.361899","20.026695"]},{"lnglat":["121.434529","31.215641"]}]
 MapLayout = (function() {
     let markers = []
+    let items = new Set()
     let map = new AMap.Map('__cv_map_container', {
-        resizeEnable: true,
         center: [116.397428, 39.90923],
-        zoom: 10
+        zoom: 5
     });
     let count = 0;
     const _renderClusterMarker = function (context) {
@@ -104,7 +105,21 @@ MapLayout = (function() {
         div.style.textAlign = 'center';
         context.marker.setOffset(new AMap.Pixel(-size / 2, -size / 2));
         context.marker.setContent(div)
-        console.info('map render', count)
+    }
+    const _renderMarker = function(context) {
+        let div = document.createElement('div');
+        div.style.backgroundColor = 'rgba(255,255,178,.9)'
+        div.style.height = '18px'
+        div.style.width = '18px'
+        div.style.border = '1px solid rgba(255,255,178,1)'
+        div.style.borderRadius = '12px'
+        div.style.boxShadow = 'rgba(0, 0, 0, 1) 0px 0px 3px'
+        div.onclick = function () {
+            acquireCivetApi().Overview.click(context.data[0].id)
+        }
+        context.marker.setContent(div)
+        let offset = new AMap.Pixel(-9, -9);
+        context.marker.setOffset(offset)
     }
     let cluster
     // let cluster = new AMap.MarkerClusterer(map, markers, {
@@ -132,7 +147,6 @@ MapLayout = (function() {
         return li
     }
     function addHorizonItem(item) {
-        // const items = document.querySelectorAll('#resources')
         const root = document.getElementsByClassName('__cv_map_image')[0]
         const defaultHeight = root.offsetHeight
         console.info('Item Height', defaultHeight)
@@ -151,14 +165,15 @@ MapLayout = (function() {
             else if (meta['name'] === 'width') block['width'] = meta.value
         }
         if (!src) src = item.path
-        if (!src) return ''
-        if (src.indexOf(':') < 0 && src[0] !== '/') return ''
+        if (!src) return false
+        if (src.indexOf(':') < 0 && src[0] !== '/') return false
         block['id'] = item.id
         block['src'] = 'file://' + src
         let scale = defaultHeight / block.height
         block.width = block.width * scale
         block.height = defaultHeight
         root.appendChild(generateFromTemplate(block))
+        return true
     }
     function clean() {}
     const root = document.getElementsByClassName('__cv_map_image')[0]
@@ -260,26 +275,35 @@ MapLayout = (function() {
                     latitude = meta.value
                 }
             }
-            if (longitude && latitude) {
-                const pos = [longitude/100000, latitude/100000]
-                console.info(`add GPS point: ${pos}`)
-                markers.push(new AMap.Marker({
-                    position: pos,
-                    content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
-                        onclick="onResourceClick(${item.id})"></div>`,
-                    offset: new AMap.Pixel(-15, -15)
-                }))
+            
+            if (addHorizonItem(item)) {
+                if (!items.has(item.id) && longitude && latitude) {
+                    const pos = [longitude/100000, latitude/100000]
+                    console.info(`add GPS point: ${pos}`)
+                    // const marker = new AMap.Marker({
+                    //     position: pos,
+                    //     content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
+                    //         onclick="onResourceClick(${item.id})"></div>`,
+                    //     offset: new AMap.Pixel(-15, -15)
+                    // })
+                    // marker.setMap(map)
+                    items.add(item.id)
+                    markers.push({lnglat: [longitude/100000, latitude/100000], id: item.id})
+                }
             }
-            addHorizonItem(item)
-            count = markers.length
-            console.info('add map resource', item)
+            if (markers.length !== count) {
+                count = markers.length
+                delete cluster
+                cluster = null
+            }
+            console.info('markers', count)
             // addCluster(2, map, markers)
             if (!cluster) {
-                cluster = new AMap.MarkerClusterer(map, markers, {
+                cluster = new AMap.MarkerCluster(map, markers, {
                     gridSize: 80,
-                    renderClusterMarker: _renderClusterMarker
-                });
-                // cluster.setMap(null);
+                    renderClusterMarker: _renderClusterMarker,
+                    renderMarker:_renderMarker
+                })
             }
         },
         clear: function() {
@@ -294,13 +318,6 @@ MapLayout = (function() {
         preventDrag: preventDrag,
     }
 })()
-
-// let points = [{"lnglat":["113.864691","22.942327"], id: 121},{"lnglat":["113.370643","22.938827"], id: 121},{"lnglat":["112.985037","23.15046"], id: 121}]
-// function loadResources(resources) {
-//     if (!resources) return
-//     console.info('loadResources', resources)
-//     MapLayout.add(resources)
-// }
 
 </script>
 </body>
