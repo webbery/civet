@@ -120,10 +120,11 @@ export function text2PNG(text: string, width: number, height: number): string {
   }
   ctx.fillStyle = background[index % 5];
   ctx.fillRect(0, 0, width, height)
-  ctx.font = '20px Impact'
+  ctx.font = '24px Impact'
+  ctx.textAlign = 'center'
   ctx.fillStyle = 'black'
-  console.debug('height:', height / 2)
-  ctx.fillText(text, (width - text.length * 10) / 2, height / 2 + 5)
+  const y = height / 2 + 5
+  ctx.fillText(text, width / 2, y)
   return canvas.toDataURL()
 }
 

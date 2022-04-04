@@ -9,6 +9,7 @@
   "main": "./index.js",
   "civet": {
     "activeEvents": [
+      "onContentType:glb,gltf",
       "onView: ContentView",
       "onSave:"
     ]

@@ -63,17 +63,19 @@ export default {
         const meta = resource['meta']
         for (let prop of meta) {
           if (prop['name'] === 'thumbnail') {
-            return prop
+            return prop['value']
           }
         }
         return undefined
       }
-      console.info('add new', updateResources)
+      let dumplicateID = new Set()
+      let addedResources = []
       for (let resource of updateResources) {
         if (!isThumbnailExist(resource)) {
+          if (resource.thumbnail === undefined) continue
           if (resource.thumbnail === null) {
-            const width = 300
-            const height = 600
+            const width = 120
+            const height = 180
             const type = resource.type || resource.filetype
             const png = text2PNG(type, width, height)
             resource.thumbnail = png
@@ -93,9 +95,13 @@ export default {
             )
           }
         }
+        if (dumplicateID.has(resource.id)) continue
+        dumplicateID.add(resource.id)
+        addedResources.push(resource)
       }
-      this.$events.emit('Overview:' + view, 'add', updateResources)
-      this.$store.dispatch('addFiles', updateResources)
+      console.info('add new', addedResources)
+      this.$events.emit('Overview:' + view, 'add', addedResources)
+      this.$store.dispatch('addFiles', addedResources)
     },
     async onResourceShow(resource) {
       const resourceID = resource['id']

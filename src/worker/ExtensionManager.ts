@@ -378,20 +378,6 @@ export class ExtensionManager {
     this.onExecuteCommand(target, command, args)
   }
 
-  // private _initContentTypeExtension(service: ExtensionService) {
-  //   let activeType = service.activeType()
-  //   if (!activeType) return
-  //   for (let active of activeType) {
-  //     active = active.toLowerCase()
-  //     let events = this._activableExtensions.get(active)
-  //     if (!events) {
-  //       events = []
-  //     }
-  //     events.push(service)
-  //     this._activableExtensions.set(active, events)
-  //   }
-  // }
-
   emitStorageEvent(msgid: number, resourceId: number, properties: ResourceProperty[], resource: Resource) {
     console.debug('storage service', this.#storageService, 'props:', properties)
     for(let service of this.#storageService) {
@@ -427,6 +413,7 @@ export class ExtensionManager {
     resource.putProperty({ name: 'type', value: extname, type: PropertyType.String, query: true, store: true })
     resource.putProperty({ name: 'filename', value: f.base, type: PropertyType.String, query: true, store: true })
     resource.putProperty({ name: 'path', value: uri.local(), type: PropertyType.String, query: false, store: true })
+    this.emitStorageEvent(msgid, resource.id, resource.getProperties(), resource)
     const services = this.#extensionsOfContentType.get(extname)
     for (const service of services!) {
       console.debug(service.name, 'emit read')

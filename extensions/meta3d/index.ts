@@ -24,6 +24,17 @@ class MetaParser {
 
   parse(filepath: string, file: IResource) {
     console.info('3D model:', filepath)
+    let prop: ResourceProperty = {
+      name: 'thumbnail',
+      value: null,
+      type: PropertyType.Binary,
+      query: false,
+      store: false
+    }
+    let update: ResourceProperty[] = []
+    update.push(prop)
+    file.putProperty(prop)
+    return update
   }
 
 }
@@ -32,8 +43,7 @@ export function activate() {
   const metaParser = new MetaParser()
   return {
     read: (filepath: string, resource: IResource) => {
-      metaParser.parse(filepath, resource)
-      return true
+      return metaParser.parse(filepath, resource)
     }
   }
 }

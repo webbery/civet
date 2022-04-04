@@ -165,6 +165,9 @@ export class Resource implements IResource {
       // if (serialize[prop.name]) continue
       const p = accessor.access(prop)
       if (!p) continue
+      if (prop.name === 'thumbnail') {
+        serialize['thumbnail'] = prop.value
+      }
       serialize['meta'].push(p)
     }
     return serialize

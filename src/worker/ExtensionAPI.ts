@@ -26,6 +26,9 @@ export class APIFactory {
             break
           case 'thumbnail':
             {
+              if (value === null) {
+                return Reflect.set(target, key, value)
+              }
               const thumbnail = thumbnail2Base64(value)
               const result = Reflect.set(target, key, thumbnail)
               // const data = target.toJson(_accessor)
