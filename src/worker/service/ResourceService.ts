@@ -2,7 +2,7 @@ import { MessagePipeline } from '../MessageTransfer'
 import { joinPath } from '../../public/String'
 import { ReplyType } from '../Message'
 import { CivetProtocol } from 'public/Event'
-import { Resource, SerializeAccessor } from '../../public/Resource'
+import { Resource } from '../../public/Resource'
 import { thumbnail2Base64 } from '../../public/Utility'
 import { IPCNormalMessage, IPCRendererResponse } from 'public/IPCMessage'
 import { CivetDatabase } from '../Kernel'
@@ -232,22 +232,7 @@ export class ResourceService{
     if (info.isDirectory()) {
       this.readDir.call(this, msgid, resourcePath, cb)
     } else {
-      const result = await this.observer.read(msgid, resourcePath)
-      console.info(result)
-      if (result.isSuccess()) {
-        let resource = <Resource>result.value
-        let msg = new CivetProtocol()
-        msg.type = IPCRendererResponse.ON_RESOURCE_UPDATED //ReplyType.WORKER_UPDATE_RESOURCES
-        const accessor = new SerializeAccessor()
-        msg.msg = [resource.toJson(accessor)]
-        console.info('Reply', msg.msg)
-        msg.tick = 0
-        msg.id = msgid
-        // this.pipeline.reply(msg)
-        if (cb) {
-          cb(resource)
-        }
-      }
+      await this.observer.read(msgid, resourcePath)
     }
   }
 

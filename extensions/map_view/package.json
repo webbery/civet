@@ -9,8 +9,7 @@
   "main": "./index.js",
   "civet": {
     "activeEvents": [
-      "onView:Overview",
-      "onSave:"
+      "onView:Overview"
     ],
     "contributes": {
       "menus": {

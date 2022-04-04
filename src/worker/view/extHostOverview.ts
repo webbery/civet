@@ -8,7 +8,7 @@ import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewVisibleRangesChangeEvent
 import { IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
 import { registHostEvent } from '../Singleton'
 import { CivetProtocol } from '@/../public/Event'
-import { Resource, SerializeAccessor } from '../../public/Resource'
+import { Resource } from '../../public/Resource'
 import crypto from 'crypto'
 import { config } from '@/../public/CivetConfig'
 
@@ -46,7 +46,6 @@ export class ExtOverview extends ExtHostWebView {
   }
 
   set html(val: string) {
-    console.info('filename:', __filename)
     const md5 = crypto.createHash('md5')
     const hash = md5.update(val).digest('base64')
     if (hash === this.#hash) return

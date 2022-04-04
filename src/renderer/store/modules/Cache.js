@@ -110,7 +110,7 @@ const mutations = {
     const resources = viewResources
     for (const image of resources) {
       const resource = initResource(image)
-      state.viewItems.unshift(resource)
+      state.viewItems.push(resource)
     }
     performance.mark('init view resources end')
     performance.measure('view display time:', 'init resouce view begin', 'init view resources end')
@@ -171,7 +171,6 @@ const mutations = {
       const children = array[index].children
       if (!children) return
       children.map(generateClassPath)
-      // classesPath.unshift(cpath)
     }
     if (state.classes && state.classes.children && state.classes.children.length) {
       const candidates = state.classes.children.map(generateClassPath)
@@ -199,7 +198,7 @@ const mutations = {
       cnt += 1
       // setting view panel item
       // if (Cache.files.length > maxCacheSize) break
-      state.viewItems.unshift(Cache.files[file.id])
+      state.viewItems.push(Cache.files[file.id])
       // const pos = state.viewItems.length + idx
       // Vue.set(state.viewItems, pos, Cache.files[file.id])
     }
@@ -217,7 +216,7 @@ const mutations = {
     state.viewItems.splice(0, state.viewItems.length)
     if (!result) return
     for (let idx = 0; idx < result.length; ++idx) {
-      state.viewItems.unshift(Cache.files[result[idx].id])
+      state.viewItems.push(Cache.files[result[idx].id])
     }
     const view = getCurrentViewName()
     events.emit('Overview:' + view, 'update', {

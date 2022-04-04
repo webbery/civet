@@ -9,8 +9,7 @@
   "main": "./index.js",
   "civet": {
     "activeEvents": [
-      "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png",
-      "onSave:"
+      "onContentType:img/jpeg,jpg,jpeg,bmp,tif,tiff,png"
     ],
     "dependency": {
       "imagemeta": "0.0.1"

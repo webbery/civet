@@ -13,7 +13,6 @@ import commands from './common/CommandService'
 import VueLazyload from 'vue-lazyload'
 import upperFirst from 'lodash/upperFirst'
 import camelCase from 'lodash/camelCase'
-console.info('++++++++++++++')
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 // Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false

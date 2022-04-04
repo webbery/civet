@@ -66,12 +66,12 @@ export default {
             return prop
           }
         }
-        return null
+        return undefined
       }
       console.info('add new', updateResources)
       for (let resource of updateResources) {
         if (!isThumbnailExist(resource)) {
-          if (!resource.thumbnail) {
+          if (resource.thumbnail === null) {
             const width = 300
             const height = 600
             const type = resource.type || resource.filetype

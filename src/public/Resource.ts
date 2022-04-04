@@ -12,14 +12,10 @@ export class DisplayProperty{
 export class SerializeAccessor {
   constructor() {}
   access(property: ResourceProperty): DisplayProperty|null {
-    switch (property.name) {
-      case 'thumbnail': return null;
-      case 'filename': return null;
-      case 'path': return null;
-      case 'filetype': return null;
-      case 'tag': return null;
-      default: break
-    }
+    // switch (property.name) {
+    //   case 'thumbnail': return null;
+    //   default: break
+    // }
     return {name: property.name, type: property.type, value: property.value, query: property.query}
   }
 }

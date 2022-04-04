@@ -1,10 +1,9 @@
-import { Resource, SerializeAccessor } from '@/../public/Resource'
+import { Resource } from '@/../public/Resource'
 import { MessagePipeline } from './MessageTransfer'
 import { thumbnail2Base64 } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
 import { ReplyType } from './Message'
 
-const _accessor: SerializeAccessor = new SerializeAccessor();
 export class APIFactory {
   constructor() {}
 
@@ -29,13 +28,13 @@ export class APIFactory {
             {
               const thumbnail = thumbnail2Base64(value)
               const result = Reflect.set(target, key, thumbnail)
-              const data = target.toJson(_accessor)
-              pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, data)
+              // const data = target.toJson(_accessor)
+              // pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, data)
               return result
             }
           default:
             {
-              console.debug('update resource property', target, key, value)
+              // console.debug('update resource property', target, key, value)
               // const data = target.toJson(_accessor)
               // pipeline.post(ReplyType.WORKER_UPDATE_RESOURCES, data)
             }

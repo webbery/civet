@@ -71,7 +71,7 @@ class MetaParser {
       // file.addMeta('height', this.getImageHeight(meta), 'val')
     } else { // rotation 90
       let prop: ResourceProperty = {
-        name: 'height',
+        name: 'width',
         value: this.getImageWidth(meta),
         type: PropertyType.Number,
         query: false,

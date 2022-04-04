@@ -83,6 +83,7 @@ MapLayout = (function() {
         zoom: 5
     });
     let count = 0;
+    let cluster
     const _renderClusterMarker = function (context) {
         if (count === 0) return;
         let factor = Math.pow(context.count / count, 1 / 18);
@@ -121,7 +122,6 @@ MapLayout = (function() {
         let offset = new AMap.Pixel(-9, -9);
         context.marker.setOffset(offset)
     }
-    let cluster
     // let cluster = new AMap.MarkerClusterer(map, markers, {
     //     gridSize: 80,
     //     renderClusterMarker: _renderClusterMarker
@@ -155,10 +155,16 @@ MapLayout = (function() {
             if (meta['name'] === 'filename') block['name'] = meta.value
             else if (meta['name'] === 'path') src = meta.value
             else if (meta['name'] === 'thumbnail') {
-                if (!meta.value.data) {
+                if (meta.value === null) {
                     block['thumbnail'] = meta.value
+                } else if (meta.value === undefined) {
+                    return false
                 } else {
-                    block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value.data))
+                    if (typeof meta.value === 'string') {
+                        block['thumbnail'] = meta.value
+                    } else {
+                        block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value))
+                    }
                 }
             }
             else if (meta['name'] === 'height') block['height'] = meta.value
@@ -172,7 +178,7 @@ MapLayout = (function() {
         let scale = defaultHeight / block.height
         block.width = block.width * scale
         block.height = defaultHeight
-        root.appendChild(generateFromTemplate(block))
+        root.prepend(generateFromTemplate(block))
         return true
     }
     function clean() {}
@@ -265,6 +271,12 @@ MapLayout = (function() {
     acquireCivetApi().Overview.on('click', (data) => {
         MapViewCache.resetSelection()
     })
+    acquireCivetApi().Overview.on('add', (resources) => {
+        for (let resource of resources) {
+            console.debug('begin add', resource)
+            MapLayout.add(resource)
+        }
+    })
     return {
         add: function(item) {
             let longitude, latitude
@@ -280,13 +292,6 @@ MapLayout = (function() {
                 if (!items.has(item.id) && longitude && latitude) {
                     const pos = [longitude/100000, latitude/100000]
                     console.info(`add GPS point: ${pos}`)
-                    // const marker = new AMap.Marker({
-                    //     position: pos,
-                    //     content: `<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"
-                    //         onclick="onResourceClick(${item.id})"></div>`,
-                    //     offset: new AMap.Pixel(-15, -15)
-                    // })
-                    // marker.setMap(map)
                     items.add(item.id)
                     markers.push({lnglat: [longitude/100000, latitude/100000], id: item.id})
                 }
@@ -296,7 +301,7 @@ MapLayout = (function() {
                 delete cluster
                 cluster = null
             }
-            console.info('markers', count)
+            console.info('map view add item, count:', count)
             // addCluster(2, map, markers)
             if (!cluster) {
                 cluster = new AMap.MarkerCluster(map, markers, {

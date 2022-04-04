@@ -204,10 +204,16 @@
                         if (meta['name'] === 'filename') block['name'] = meta.value
                         else if (meta['name'] === 'path') src = meta.value
                         else if (meta['name'] === 'thumbnail') {
-                            if (!meta.value.data) {
+                            if (meta.value === null) {
                                 block['thumbnail'] = meta.value
+                            } else if (meta.value === undefined) {
+                                return false
                             } else {
-                                block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value.data))
+                                if (typeof meta.value === 'string') {
+                                    block['thumbnail'] = meta.value
+                                } else {
+                                    block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value))
+                                }
                             }
                         }
                         else if (meta['name'] === 'height') block['height'] = meta.value
