@@ -47,7 +47,7 @@ class CivetConfig {
         first: true,
         version: version,
         default: {
-          layout: 'mapview'
+          layout: 'gridview'
         }
       },
       resources: []
@@ -65,7 +65,7 @@ class CivetConfig {
         config.app.version = version
         if (typeof config.app.default === 'string') { // 0.1.2 -> 0.2.0
           const dbname = config.app.default
-          config.app.default = {layout: 'mapview', dbname: dbname}
+          config.app.default = {layout: 'gridview', dbname: dbname}
         }
       }
       cfg = config

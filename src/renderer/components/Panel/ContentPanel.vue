@@ -23,10 +23,11 @@
 import bus from '../utils/Bus'
 import { mapState } from 'vuex'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-import { clearArgs, events, getContentViewName, updateContentViewName } from '../../common/RendererService'
+import { civetApi, events, getContentViewName, updateContentViewName } from '../../common/RendererService'
 import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
 import HtmlLoader from '@/common/HtmlLoader'
+import path from 'path'
 
 export default {
   name: 'image-panel',
@@ -80,36 +81,47 @@ export default {
       this.isUpdated = true
       return
     }
-    const path = require('path')
     events.emit('ContentView:' + contentView, 'load', path.normalize(this.candidates[this.index].path))
     this.isUpdated = true
   },
   methods: {
+    showContent(index) {
+      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[index].filename)
+      const contentView = getContentViewName()
+      events.emit('ContentView:' + contentView, 'load', path.normalize(this.candidates[index].path))
+      const id = this.candidates[index].id
+      civetApi().Overview.click(id)
+      // this.$ipcRenderer.send(IPCNormalMessage.GET_SELECT_CONTENT_ITEM_INFO, {id: [id]})
+    },
     onClickNext() {
-      console.info('next image', this.index)
+      console.info(`next image: ${this.index}, total: ${this.candidates.length}`)
       if (this.index > this.candidates.length) {
         this.index = this.candidates.length
         return
       }
       this.index += 1
-      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[this.index].filename)
-      const id = this.candidates[this.index].id
-      this.$ipcRenderer.send(IPCNormalMessage.GET_SELECT_CONTENT_ITEM_INFO, {id: [id]})
-      const type = this.candidates[this.index].type
-      this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, type)
+      if (this.candidates[this.index].type !== this.resource.type) {
+        this.resource = this.candidates[this.index]
+        this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, this.resource.type)
+      }
+      this.$nextTick(() => {
+        this.showContent(this.index)
+      })
     },
     onClickPrev() {
-      console.info('prev image')
+      console.info(`prev image: ${this.index}, total: ${this.candidates.length}`)
       if (this.index < 0) {
         this.index = 0
         return
       }
       this.index -= 1
-      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[this.index].filename)
-      const id = this.candidates[this.index].id
-      this.$ipcRenderer.send(IPCNormalMessage.GET_SELECT_CONTENT_ITEM_INFO, {id: [id]})
-      const type = this.candidates[this.index].type
-      this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, type)
+      if (this.candidates[this.index].type !== this.resource.type) {
+        this.resource = this.candidates[this.index]
+        this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, this.resource.type)
+      }
+      this.$nextTick(() => {
+        this.showContent(this.index)
+      })
     },
     onContentViewUpdate(session, value) {
       console.debug('onContentViewUpdate:', value)

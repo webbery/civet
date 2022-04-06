@@ -48,10 +48,10 @@ jobs:
           npm run test --loglevel silly
         env:
           CI: true
-      - name: tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 120
+      # - name: tmate session
+      #   if: ${{ failure() }}
+      #   uses: mxschmitt/action-tmate@v3
+      #   timeout-minutes: 120
   publish:
     runs-on: windows-2019
     needs: build

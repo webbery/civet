@@ -125,6 +125,10 @@ export class Resource implements IResource {
   public erase(): boolean {
     return true
   }
+
+  public getProperties(): ResourceProperty[] {
+    return this.meta
+  }
   
   public update(resource: Resource) {
     console.info('update', resource)
