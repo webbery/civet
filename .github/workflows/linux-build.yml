@@ -16,6 +16,7 @@ jobs:
       CI: true
     steps:
       - uses: akhilmhdh/contributors-readme-action@v2.3.4
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v2

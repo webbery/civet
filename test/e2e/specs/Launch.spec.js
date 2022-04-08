@@ -76,19 +76,40 @@ describe('****************Start Functional Test*************', function (resolve
       done()
     })
   })
-  it('add operation in classify panel ', async function() {
-    await testClassPanel.addClass(mainWindowPage)
+  it('add operation in classify panel ', function(done) {
+    (async function() {
+      try{
+        await testClassPanel.addClass(mainWindowPage)
+        done()
+      } catch (err) {
+        done(err)
+      }
+    })()
   })
-  it('install local extensions', async function() {
-    await testLocalExtension.install(mainWindowPage)
+  it('install local extensions', function(done) {
+    (async function() {
+      try{
+        await testLocalExtension.install(mainWindowPage)
+        done()
+      } catch (err) {
+        done(err)
+      }
+    })()
   })
   it('browser extension: add files', function(done) {
     // create process and use websocket as a browser extension to add resource
     testBrowserExtension.run(done, mainWindowPage)
   })
-  it('waterfall layout view', async function() {
-    await testClassicalView.test(mainWindowPage)
-    console.info('waterfall layout view finish')
+  it('waterfall layout view', function(done) {
+    (async function () {
+      try{
+        await testClassicalView.test(mainWindowPage)
+        console.info('waterfall layout view finish')
+        done()
+      } catch (err) {
+        done(err)
+      }
+    })()
   })
   // it('mapview layout', async function() {
   //   await testMapView.test(mainWindowPage)
@@ -124,12 +145,25 @@ describe('****************Start Functional Test*************', function (resolve
   //   files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(beforeLength).to.be.above(files.length)
   // })
-  it('uninstall local extension', async function() {
-    console.info('uninstall local extension begin')
-    await testLocalExtension.uninstall(mainWindowPage)
+  it('uninstall local extension', function(done) {
+    (async function() {
+      try{
+        await testLocalExtension.uninstall(mainWindowPage)
+        done()
+      } catch (err) {
+        done(err)
+      }
+    })()
   })
-  it('clean operation in classify panel ', async function() {
-    await testClassPanel.removeClass(mainWindowPage)
+  it('clean operation in classify panel ', function(done) {
+    (async function() {
+      try {
+        await testClassPanel.removeClass(mainWindowPage)
+        done()
+      } catch (err) {
+        done(err)
+      }
+    })()
   })
   after((done) => {
     setTimeout(() => {

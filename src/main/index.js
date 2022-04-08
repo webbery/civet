@@ -167,8 +167,8 @@ function createWorkerWindow (bFirst) {
   // workerWindow.webContents.openDevTools()
   if (process.env.NODE_ENV !== 'production') {
     workerWindow.webContents.openDevTools()
+    workerWindow.show()
   }
-  workerWindow.show()
 }
 
 app.on('window-all-closed', async () => {

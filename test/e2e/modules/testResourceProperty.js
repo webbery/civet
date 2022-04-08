@@ -52,7 +52,7 @@ module.exports = {
     await input.press('Enter')
     await page.waitForTimeout(1500)
     await page.waitForSelector(CSSName)
-    const value = await page.evaluate(() => document.querySelector('.image-name .context').innerHTML)
+    const value = await page.evaluate((selector) => document.querySelector(selector).innerHTML, CSSName)
     assert(value === name)
   },
   addTag: async function(page, value) {
@@ -79,5 +79,24 @@ module.exports = {
       assert(originCount === (currentCount + 1))
     } catch (err) {
     }
-  }
+  },
+  getTagCount: async function (page) {
+    await page.waitForSelector(CSSItems)
+    const items = await page.$$(CSSItems)
+    return items[0].length
+  },
+  getClassCount: async function (page) {
+    await page.waitForSelector(CSSItems)
+    const items = await page.$$(CSSItems)
+    return items[1].length
+  },
+  getCurrentResourceName: async function (page) {
+    await page.waitForSelector(CSSName)
+    await page.waitForTimeout(500)
+    const value = await page.evaluate(selector => {
+      return document.querySelector(selector).innerHTML
+    }, CSSName)
+    return value
+  },
+  getProperties: async function (page) {}
 }
