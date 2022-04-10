@@ -1,6 +1,6 @@
 {
   "name": "civet",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "author": "webberg <webbery@foxmail.com>",
   "description": "素材管理软件",
   "license": "MIT",
@@ -37,7 +37,7 @@
     "unit": "karma start test/unit/karma.conf.js",
     "postinstall": "npm run lint:fix && electron-builder install-app-deps",
     "changelog": "npx conventional-changelog -p @favoloso/emoji -i CHANGELOG.md -s",
-    "publish": "node_modules/.bin/publish"
+    "publish": "node_modules/.bin/publish -p"
   },
   "build": {
     "productName": "Civet",

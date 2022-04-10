@@ -54,6 +54,7 @@
 [Wiki](https://github.com/webbery/civet/wiki)  
 [插件开发](https://webberg.gitee.io/civet/extension.html)  
 <!-- [插件市场](https://webberg.gitee.io/civet/market.html)   -->
+[讨论区](https://gitter.im/webbery/civet)  
 
 **道阻且长，行则将至。**
 

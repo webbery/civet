@@ -53,6 +53,10 @@ function getBodyText(body) {
 function getStyleText(style) {
   return style.replace(/(<style>|<\/style>)/g, '')
 }
+
+function getScriptText(script) {
+  return script.replace(/(<script[\s\S]*?>|<\/script>)/g, '')
+}
 /**
  * parse the script link from the template
  * 1. collect stylesheets
@@ -164,7 +168,6 @@ export default function processTpl(tpl, baseURI) {
           scripts.push(asyncScript ? { async: true, src: matchedScriptSrc } : matchedScriptSrc)
           return genScriptReplaceSymbol(matchedScriptSrc, asyncScript)
         }
-
         return match
       } else {
         if (scriptIgnore) {
@@ -182,6 +185,7 @@ export default function processTpl(tpl, baseURI) {
         const isPureCommentBlock = code.split(/[\r\n]+/).every(line => !line.trim() || line.trim().startsWith('//'))
 
         if (!isPureCommentBlock) {
+          match = getScriptText(match)
           scripts.push(match)
         }
 

@@ -24,9 +24,10 @@ import bus from '../utils/Bus'
 import { mapState } from 'vuex'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { civetApi, events, getContentViewName, updateContentViewName } from '../../common/RendererService'
-import ScriptLoader from '@/common/ScriptLoader'
+// import ScriptLoader from '@/common/ScriptLoader'
 import StyleLoader from '@/common/StyleLoader'
 import HtmlLoader from '@/common/HtmlLoader'
+import SandBoxManager from '@/common/JSSandBox'
 import path from 'path'
 
 export default {
@@ -74,7 +75,8 @@ export default {
     if (this.isUpdated) return
     const contentView = getContentViewName()
     try {
-      await ScriptLoader.load(this.script)
+      // await ScriptLoader.load(this.script)
+      await SandBoxManager.switchSandbox(contentView, this.script)
     } catch (err) {
       console.error(`load ${contentView} javascript exception: ${err}`)
       this.html = JSON.stringify(err)

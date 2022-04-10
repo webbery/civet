@@ -10,7 +10,7 @@
 </template>
 <script>
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-import ScriptLoader from '@/common/ScriptLoader'
+import SandBoxManager from '@/common/JSSandBox'
 import StyleLoader from '@/common/StyleLoader'
 import HtmlLoader from '@/common/HtmlLoader'
 import PopMenu from '@/components/Menu/PopMenu'
@@ -97,7 +97,8 @@ export default {
     const activateView = getCurrentViewName()
     // HtmlLoader.injector(activateView)
     try {
-      await ScriptLoader.load(this.script)
+      // await ScriptLoader.load(this.script, activateView)
+      await SandBoxManager.switchSandbox(activateView, this.script)
     } catch (err) {
       console.error(`load ${activateView} javascript exception: ${err}`)
       this.isUpdated = true
@@ -208,6 +209,7 @@ export default {
       if (currentView && currentView !== viewid) {
         this.htmls[currentView].show = false
         this.htmls[viewid].show = true
+        SandBoxManager.switchSandbox(viewid)
       }
       updateCurrentViewName(viewid)
     }

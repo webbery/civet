@@ -43,8 +43,8 @@ module.exports = {
     // add local image to civet
     await util.wait(1000)
     const fs = require('fs')
-    const buffer = fs.readFileSync('show.JPG')
-    const msgAddBufferResource = {id: 'load', db: dbs[0], data: {name: 'from_browser.jpg', bin: buffer}}
+    const buffer = fs.readFileSync('show.gif')
+    const msgAddBufferResource = {id: 'load', db: dbs[0], data: {name: 'from_browser.gif', bin: buffer}}
     sock.send(JSON.stringify(msgAddBufferResource))
   },
   close: () => { if(sock) sock.close()}
