@@ -159,7 +159,7 @@
                 const innerHTML = `<div draggable="true" class="image">
                                     <div class="el-card is-never-shadow" style="border: 0px;">
                                         <div class="el-card__body" style="padding: 1px;">
-                                            <div class="_cv_gv_frame" onclick="onGridClick(${item.id}, this)" oncontextmenu="onGridClick(${item.id}, this)" ondblclick="onDbResourceClick(${item.id})">
+                                            <div class="_cv_gv_frame" onclick="WaterfallLayout.onGridClick(${item.id}, this)" oncontextmenu="WaterfallLayout.onGridClick(${item.id}, this)" ondblclick="WaterfallLayout.onDbResourceClick(${item.id})">
                                                 <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
                                             </div>
                                             <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
@@ -196,6 +196,71 @@
                 const root = document.getElementById(rootID)
                 root.innerHTML = ''
             }
+            function onViewClick(itemid, element) {
+                acquireCivetApi().Overview.click(itemid)
+                GridViewCache.resetSelection()
+                if (itemid) {
+                    GridViewCache.addSelection(itemid, element)
+                }
+                if (event.which === 3) {
+                    if (!itemid) {
+                        return
+                    }
+                    const selections = GridViewCache.getSelection()
+                    const ids = selections.map(item => item[0])
+                    acquireCivetApi().injectCommandParams('exportResources', ids)
+                    acquireCivetApi().injectCommandParams('deleteResources', ids)
+                }
+            }
+
+            function classTemplate(classItems) {
+                const folderDeliver = '<div data-content="分类" class="hr-divider"></div>'
+                const fileDeliver = '<div data-content="文件" class="hr-divider"></div>'
+                let folders = ''
+                for (let item of classItems) {
+                    folders += `<div class="folder">
+                                    <div class="b-icon b-icon_type_folder" onclick="WaterfallLayout.onFolderClick(${item.id})" oncontextmenu="WaterfallLayout.onFolderClick(${item.id})" ondblclick="WaterfallLayout.onDbFolderClick('${item.name}')"></div>
+                                    <div >${item.name}</div>
+                                </div>`
+                }
+                return folderDeliver + folders + fileDeliver
+            }
+
+            function loadClasses(classes) {
+                if (!classes || classes.length === 0) return
+                let div = document.getElementById('_cv_classes')
+                acquireCivetApi().setHtml('gridview', div, classTemplate(classes))
+            }
+            function clearClass() {
+                const root = document.getElementById('_cv_classes')
+                root.innerHTML = ''
+            }
+            acquireCivetApi().Overview.on('add', (resources) => {
+                // console.info('add resource in document', resources)
+                for (let resource of resources) {
+                    WaterfallLayout.add(resource)
+                }
+            })
+            acquireCivetApi().Overview.on('update', (data) => {
+                clearClass()
+                WaterfallLayout.clear()
+                const resources = data.resource
+                for (let resource of resources) {
+                    WaterfallLayout.add(resource)
+                }
+                const classes = data['class']
+                loadClasses(classes)
+            })
+            acquireCivetApi().Overview.on('property', (data) => {
+                const resourceID = data.id
+                const elm = document.getElementById('gv_' + resourceID)
+                if (!elm) return
+                console.info(data)
+                elm.innerHTML = data.name
+            })
+            acquireCivetApi().Overview.on('click', (data) => {
+                GridViewCache.resetSelection()
+            })
             return {
                 add: function(item) {
                     let block = {}, src
@@ -237,40 +302,38 @@
                 erase: function(item) {},
                 clear: function() {
                     removeAll()
-                }
+                },
+                onGridClick: function (itemid, elm) {
+                    if (!GridViewCache.getTimer()) {
+                        const id = window.setTimeout(() => {
+                            clearTimeout(GridViewCache.getTimer())
+                            GridViewCache.updateTimer(undefined)
+                        }, 200)
+                        console.info('onGridClick')
+                        GridViewCache.updateTimer(id)
+                        const imgElement = elm.children[0]
+                        onViewClick(itemid, imgElement)
+                        let clazz = imgElement.getAttribute('class')
+                        clazz = clazz.replace('_cv_gv_trans-border', '_cv_gv_border')
+                        imgElement.setAttribute('class', clazz)
+                    }
+                },
+                onDbResourceClick: function (itemid) {
+                    acquireCivetApi().postMessage({
+                        command: 'showResourceDetail',
+                        id: itemid
+                    })
+                },
+                onDbFolderClick: function (classname) {
+                    acquireCivetApi().postMessage({
+                        command: 'openClass',
+                        params: GridViewCache.classPath + classname
+                    })
+                },
+                onFolderClick: function (classid) {}
             }
         })('items')
-        function clearClass() {
-            const root = document.getElementById('_cv_classes')
-            root.innerHTML = ''
-        }
-        acquireCivetApi().Overview.on('add', (resources) => {
-            // console.info('add resource in document', resources)
-            for (let resource of resources) {
-                WaterfallLayout.add(resource)
-            }
-        })
-        acquireCivetApi().Overview.on('update', (data) => {
-            clearClass()
-            WaterfallLayout.clear()
-            const resources = data.resource
-            for (let resource of resources) {
-                WaterfallLayout.add(resource)
-            }
-            const classes = data['class']
-            loadClasses(classes)
-        })
-        acquireCivetApi().Overview.on('property', (data) => {
-            const resourceID = data.id
-            const elm = document.getElementById('gv_' + resourceID)
-            if (!elm) return
-            console.info(data)
-            elm.innerHTML = data.name
-        })
-        acquireCivetApi().Overview.on('click', (data) => {
-            GridViewCache.resetSelection()
-        })
-        // Overview.on('all', () => {})
+        
         GridViewCache = (function() {
             let clickTimer = undefined
             let selections = []
@@ -294,71 +357,7 @@
                 getTimer: function() { return clickTimer }
             }
         })()
-        function onViewClick(itemid, element) {
-            acquireCivetApi().Overview.click(itemid)
-            GridViewCache.resetSelection()
-            if (itemid) {
-                GridViewCache.addSelection(itemid, element)
-            }
-            if (event.which === 3) {
-                if (!itemid) {
-                    return
-                }
-                const selections = GridViewCache.getSelection()
-                const ids = selections.map(item => item[0])
-                acquireCivetApi().injectCommandParams('exportResources', ids)
-                acquireCivetApi().injectCommandParams('deleteResources', ids)
-            }
-        }
-        function onGridClick(itemid, elm) {
-            if (!GridViewCache.getTimer()) {
-                const id = window.setTimeout(() => {
-                    clearTimeout(GridViewCache.getTimer())
-                    GridViewCache.updateTimer(undefined)
-                }, 200)
-                console.info('onGridClick')
-                GridViewCache.updateTimer(id)
-                const imgElement = elm.children[0]
-                onViewClick(itemid, imgElement)
-                let clazz = imgElement.getAttribute('class')
-                clazz = clazz.replace('_cv_gv_trans-border', '_cv_gv_border')
-                imgElement.setAttribute('class', clazz)
-            }
-        }
-        function onDbResourceClick(itemid) {
-            acquireCivetApi().postMessage({
-                command: 'showResourceDetail',
-                id: itemid
-            })
-        }
-
-        function classTemplate(classItems) {
-            const folderDeliver = '<div data-content="分类" class="hr-divider"></div>'
-            const fileDeliver = '<div data-content="文件" class="hr-divider"></div>'
-            let folders = ''
-            for (let item of classItems) {
-                folders += `<div class="folder">
-                                <div class="b-icon b-icon_type_folder" onclick="onFolderClick(${item.id})" oncontextmenu="onFolderClick(${item.id})" ondblclick="onDbFolderClick('${item.name}')"></div>
-                                <div >${item.name}</div>
-                            </div>`
-            }
-            return folderDeliver + folders + fileDeliver
-        }
-
-        function onDbFolderClick(classname) {
-            acquireCivetApi().postMessage({
-                command: 'openClass',
-                params: GridViewCache.classPath + classname
-            })
-        }
-
-        function onFolderClick(classid) {}
-
-        function loadClasses(classes) {
-            if (!classes || classes.length === 0) return
-            let div = document.getElementById('_cv_classes')
-            acquireCivetApi().setHtml('gridview', div, classTemplate(classes))
-        }
+        
     </script>
 </body>
 

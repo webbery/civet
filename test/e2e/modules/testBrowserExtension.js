@@ -4,6 +4,19 @@ const WebSock = require('ws')
 
 let sock
 let dbs
+let msgid = 0
+
+const AddResource = 'addResource'
+const GetAllResourceDB = 'getAllDB'
+const GetCurrentDB = 'getCurrentDB'
+
+const NotifyDBChanged = 'notifyDBChanged'
+const NotifyDownloadError = 'notifyDownloadError'
+const NotifyDownloadSuccess = 'notifyDownloadSuccess'
+const NotifyConnectError = 'notifyConnectError'
+const NotifyAllResourceDB = 'notifyAllResourceDB'
+const NotifyCurrentDB = 'notifyCurrentDB'
+const NotifyReconnect = 'notifyReconnect'
 
 module.exports = {
   dbs: dbs,
@@ -13,16 +26,22 @@ module.exports = {
     sock.on('message', (str) => {
       const data = JSON.parse(str)
       // console.info(data)
-      switch(data.id) {
-        case 'config':
-          dbs = data['config']['db']
+      switch(data.method) {
+        case NotifyCurrentDB:
+          dbs = data['params']['curdb']
           // console.info('recieve:', dbs)
-          assert(dbs.length > 0)
+          assert(dbs !== undefined)
           break;
-        case 'download':
-          // console.error(`download fail: ${data.url}`)
-          assert(data.url.length > 0)
-          done()
+        case NotifyDownloadSuccess:
+          // console.debug(`download success ${JSON.stringify(data['params'])}`)
+          assert(data.params.url || data.params.location )
+          if (!data['params']['url']) {
+            done()
+          }
+          break;
+        case NotifyDownloadError:
+          // console.error(`download fail: ${JSON.stringify(data)}`)
+          assert(data.params.url.length > 0)
           break;
         default:
           console.info('recieve 111:', data.id)
@@ -35,16 +54,22 @@ module.exports = {
     while(dbs.length === 0) {
       await util.wait(1000)
     }
-    const msgAddResource = {id: 'load', db: dbs[0], data: {url: 'https://cn.bing.com/th?id=OHR.BurleighHeads_ZH-CN6052781534_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp'} }
+    const msgAddResource = {id: ++msgid, method: AddResource, params: {
+      db: dbs[0], url: 'https://cn.bing.com/th?id=OHR.BurleighHeads_ZH-CN6052781534_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp'}
+    }
     sock.send(JSON.stringify(msgAddResource))
     await util.wait(1000)
-    const msgAddWrongResource = {id: 'load', db: dbs[0], data: {url: 'https://cn.bing.com/thaf'} }
+    const msgAddWrongResource = {id: ++msgid, method: AddResource, params: {
+      db: dbs[0], url: 'https://cn.bing.com/thaf'}
+    }
     sock.send(JSON.stringify(msgAddWrongResource))
     // add local image to civet
     await util.wait(1000)
     const fs = require('fs')
-    const buffer = fs.readFileSync('show.gif')
-    const msgAddBufferResource = {id: 'load', db: dbs[0], data: {name: 'from_browser.gif', bin: buffer}}
+    const buffer = fs.readFileSync('static/icon.png')
+    const msgAddBufferResource = {id: ++msgid, method: AddResource, params: {
+      db: dbs[0], name: 'from_browser.png', bin: buffer}
+    }
     sock.send(JSON.stringify(msgAddBufferResource))
   },
   close: () => { if(sock) sock.close()}

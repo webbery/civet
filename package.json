@@ -141,7 +141,7 @@
     "vue-multiselect": "^2.1.6",
     "vue-router": "^3.5.2",
     "vuex": "^3.5.1",
-    "ws": "^7.4.4",
+    "ws": "^8.5.0",
     "yallist": "^4.0.0"
   },
   "devDependencies": {

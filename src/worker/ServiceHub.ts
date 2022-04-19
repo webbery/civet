@@ -11,10 +11,7 @@ class ServiceHub {
     registSingletonObject(ExtensionManager)
     registSingletonObject(ResourceObserver, this.mocks)
     this.resourceService = registSingletonObject(ResourceService)
-    // this.resourceObserver = new ResourceObserver(this.extensionManager, this.mocks);
-    // this.workbenchObserver = new WorkbenchObserver(pipeline, this.extensionManager);
     // this.workbechService = new WorkbenchService(pipeline, this.workbenchObserver);
-    // this.resourceService = new ResourceService(pipeline, this.resourceObserver);
     const WebSocketServer = require('ws').Server
     this.server = new WebSocketServer({address: 'localhost', port: 21313 })
     const self = this
