@@ -43,6 +43,8 @@ module.exports = {
           // console.error(`download fail: ${JSON.stringify(data)}`)
           assert(data.params.url.length > 0)
           break;
+        case NotifyDBChanged:
+          break;
         default:
           console.info('recieve 111:', data.id)
           break;
@@ -54,6 +56,8 @@ module.exports = {
     while(dbs.length === 0) {
       await util.wait(1000)
     }
+    // switch to test resource database
+
     const msgAddResource = {id: ++msgid, method: AddResource, params: {
       db: dbs[0], url: 'https://cn.bing.com/th?id=OHR.BurleighHeads_ZH-CN6052781534_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp'}
     }

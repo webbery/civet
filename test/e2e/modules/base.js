@@ -25,6 +25,10 @@ async function getCounts(page) {
   return result
 }
 
+async function switchResourceDB(name) {
+  
+}
+
 module.exports = {
   switchLayout: function(page, index) {
     return switchLayout(page, index)

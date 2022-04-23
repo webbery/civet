@@ -51,13 +51,15 @@
   - 如果是在Mac环境下，请确保自己的环境能够进行签名打包
 
 ##  2. <a name='Design'></a>wiki
-[Wiki](https://github.com/webbery/civet/wiki)  
 [插件开发](https://webberg.gitee.io/civet/extension.html)  
-<!-- [插件市场](https://webberg.gitee.io/civet/market.html)   -->
+[浏览器扩展接口](https://github.com/webbery/civet-extension)  
+[浏览器图片下载扩展(支持firefox/chrome/opera)](https://github.com/webbery/image-steam)  
 [讨论区](https://gitter.im/webbery/civet)  
+[Wiki](https://github.com/webbery/civet/wiki)  
+<!-- [插件市场](https://webberg.gitee.io/civet/market.html)   -->
 
 **道阻且长，行则将至。**
-
+    
 ##  3. <a name='SoftComp'></a>类似软件对比
 |  软件   | 界面 | 开发语言  | 本地存储  | 协议 | 平台
 | :----: | :----: | :----:  |  :----: | :----: | :----: |

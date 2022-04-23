@@ -50,7 +50,7 @@ export class RendererMock {
     const self = this
     sock.on('message', async function(data: string) {
       const msg = JSON.parse(data)
-      logger.debug(msg)
+      logger.debug('recive browser message:', msg)
       switch(msg.method) {
         case ExtensionRequest.AddResource:
           logger.debug(`ws load file: ${msg.params.name}/${msg.params.url}`)
@@ -82,24 +82,28 @@ export class RendererMock {
       sock.isAlive = false;
     });
     this.notifyCurrentResourceDB()
+    this.notifyAllResourceDB()
   }
 
   registRendererNotify() {}
 
   switchResourceDB(newdb: string) {
     const response = new CivetExtensionResponse(ExtensionResponse.NotifyDBChanged, {value: newdb})
+    console.debug('switchResourceDB:', newdb)
     this._ws.send(JSON.stringify(response.toJson()))
   }
 
   notifyCurrentResourceDB() {
     const currentResourceDB = config.getCurrentDB()
     const response = new CivetExtensionResponse(ExtensionResponse.NotifyCurrentDB, {curdb: currentResourceDB})
+    console.debug('notifyCurrentResourceDB:', currentResourceDB)
     this._ws.send(JSON.stringify(response.toJson()))
   }
 
   notifyAllResourceDB() {
     const allResourcesDB = config.getResourcesName()
     const response = new CivetExtensionResponse(ExtensionResponse.NotifyAllResourceDB, {dbs: allResourcesDB})
+    console.debug('notifyAllResourceDB:', allResourcesDB)
     this._ws.send(JSON.stringify(response.toJson()))
   }
 
