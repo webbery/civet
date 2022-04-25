@@ -175,7 +175,9 @@
             function addElement(item) {
                 const items = document.querySelectorAll('._cv_waterfall')
                 const root = document.getElementById(rootID)
-                const height = parseInt(item['height']) + TITLE_HEIGHT + 2 * TITLE_GAP
+                let originHeight = parseInt(item['height'])
+                if (isNaN(originHeight)) originHeight = parseInt(item['width'])
+                const height = originHeight + TITLE_HEIGHT + 2 * TITLE_GAP
                 if (items.length < HORIZON_COUNT) {
                     item['left'] = items.length * curWidth
                     item['top'] = 0

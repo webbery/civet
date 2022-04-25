@@ -44,7 +44,6 @@ module.exports = {
     "no-multiple-empty-lines": [2, {"max": 99999, "maxEOF": 0}],
     "no-callback-literal": 0,
     "no-unused-vars": ["warn", { "vars": "all" }],
-    "experimentalObjectRestSpread": true,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
   }
 }
