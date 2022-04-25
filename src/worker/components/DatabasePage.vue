@@ -25,24 +25,24 @@ export default {
     this.loadOtherDisplayInfo()
   },
   methods: {
-    async loadImages() {
-      // let snaps = await localStorage.getImagesSnap()
-      // let data = []
-      // for (let snapIdx in snaps) {
-      //   let img = {imageid: snapIdx, step: snaps[snapIdx].step, name: snaps[snapIdx].name}
-      //   let info = await localStorage.getImageInfo(snapIdx)
-      //   console.info('loadImages', info)
-      //   img.tag = this.convert(info.tag)
-      //   img.keyword = this.convert(info.keyword)
-      //   img.clazz = this.convert(info.category)
-      //   img.fullpath = info.path
-      //   img.size = info.size
-      //   img.box = 'width: ' + info.width + ', height: ' + info.height
-      //   img.type = info.type
-      //   data.push(img)
-      // }
-      // this.tableData = data
-    },
+    // async loadImages() {
+    // let snaps = await localStorage.getImagesSnap()
+    // let data = []
+    // for (let snapIdx in snaps) {
+    //   let img = {imageid: snapIdx, step: snaps[snapIdx].step, name: snaps[snapIdx].name}
+    //   let info = await localStorage.getImageInfo(snapIdx)
+    //   console.info('loadImages', info)
+    //   img.tag = this.convert(info.tag)
+    //   img.keyword = this.convert(info.keyword)
+    //   img.clazz = this.convert(info.category)
+    //   img.fullpath = info.path
+    //   img.size = info.size
+    //   img.box = 'width: ' + info.width + ', height: ' + info.height
+    //   img.type = info.type
+    //   data.push(img)
+    // }
+    // this.tableData = data
+    // },
     loadOtherDisplayInfo() {
       // let unclazzImages = CivetDatabase.getUnClassifyFiles()
       // let untagImages = CivetDatabase.getUnTagFiles()

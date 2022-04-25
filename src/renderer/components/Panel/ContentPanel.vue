@@ -154,19 +154,19 @@ export default {
 
 .__cv_prev{
   width:50px;
-	height:50px;
-	position:fixed;
-	top:50%;
-	margin-top:-25px;
-	cursor:pointer;
-	opacity:0.7;
-	z-index:999999;
-	-moz-box-shadow:0px 0px 3px #000;
-	-webkit-box-shadow:0px 0px 3px #000;
-	box-shadow:0px 0px 3px #000;
-	-moz-border-radius:25px;
-	-webkit-border-radius:25px;
-	border-radius:25px;
+  height:50px;
+  position:fixed;
+  top:50%;
+  margin-top:-25px;
+  cursor:pointer;
+  opacity:0.7;
+  z-index:999999;
+  -moz-box-shadow:0px 0px 3px #000;
+  -webkit-box-shadow:0px 0px 3px #000;
+  box-shadow:0px 0px 3px #000;
+  -moz-border-radius:25px;
+  -webkit-border-radius:25px;
+  border-radius:25px;
   font-family: 'element-icons' !important;
   left: 18.5%;
 }
@@ -178,23 +178,23 @@ export default {
 }
 .next:hover
 .__cv_prev:hover {
-	opacity:0.9;
+  opacity:0.9;
 }
 .__cv_next {
   width:50px;
-	height:50px;
-	position:fixed;
-	top:50%;
-	margin-top:-25px;
-	cursor:pointer;
-	opacity:0.7;
-	z-index:999999;
-	-moz-box-shadow:0px 0px 3px #000;
-	-webkit-box-shadow:0px 0px 3px #000;
-	box-shadow:0px 0px 3px #000;
-	-moz-border-radius:25px;
-	-webkit-border-radius:25px;
-	border-radius:25px;
+  height:50px;
+  position:fixed;
+  top:50%;
+  margin-top:-25px;
+  cursor:pointer;
+  opacity:0.7;
+  z-index:999999;
+  -moz-box-shadow:0px 0px 3px #000;
+  -webkit-box-shadow:0px 0px 3px #000;
+  box-shadow:0px 0px 3px #000;
+  -moz-border-radius:25px;
+  -webkit-border-radius:25px;
+  border-radius:25px;
   font-family: 'element-icons' !important;
   right: 18.5%;
 }

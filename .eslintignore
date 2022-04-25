@@ -6,3 +6,4 @@ test/**/*
 test/**
 src/generated/**
 src/public/Loader.js
+src/worker/api/process-tpl.js

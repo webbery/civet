@@ -125,7 +125,8 @@ function parseExtensions() {
     if (isExclude(extension) || !stat || stat.isFile()) continue
     const packagePath = path.join(__dirname, './extensions/'  + extension + '/package.json')
     if (!fs.existsSync(packagePath)) {
-      console.info(`${packagePath} not exist, is this extension correct?`)
+      const chalk = require('chalk')
+      console.info(chalk.yellow(`${packagePath} not exist, is this extension correct?`))
       continue
     }
     const stime = stat.mtime / 1000

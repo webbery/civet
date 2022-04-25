@@ -33,7 +33,6 @@
         <el-button slot="append" icon="el-icon-search" size="mini" round @click="onSearch()"></el-button>
       </el-input> -->
     </el-col>
-    
   </el-row>
 </template>
 
@@ -244,8 +243,8 @@ export default {
   display:inline;
   font-size: large;
   border-top-style: none;
-	border-right-style: none;
-	border-bottom-style: none;
+  border-right-style: none;
+  border-bottom-style: none;
   border-left-style: solid;
   padding-left: 10px;
 }
