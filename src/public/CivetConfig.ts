@@ -24,7 +24,12 @@ const fs = require('fs')
           // for example, which overview should be display? it seems that it's not important, because user know what they want.
           extension
         ],
-        meta: schema
+        meta: schema,
+        command: [
+          // active command on start up
+          // default is `std.search`
+          // `std.search` means using civet standard search tool
+        ]
       }
     ]
   }
@@ -176,7 +181,10 @@ class CivetConfig {
       name: name,
       db: { path: path + '/' + name },
       extensions: [],
-      meta: this.schema()
+      meta: this.schema(),
+      command: [
+        'std.search'
+      ]
     })
   }
 
@@ -281,6 +289,11 @@ class CivetConfig {
       { name: 'width', value: '宽', type: 'str', display: true },
       { name: 'height', value: '高', type: 'str', display: true }
     ]
+  }
+
+  getActiveCommand(name: string): string[] {
+    const resource = this.getResourceByName(name)
+    return resource['command']
   }
 }
 

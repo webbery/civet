@@ -59,9 +59,3 @@ export class ExtOverviewItemLoadEvent implements civet.OverviewItemLoadEvent {
 export class ExtContentViewLoadEvent implements civet.ContentViewLoadEvent {
   resource: string;
 }
-
-export class ExtOverviewVisibleRangesChangeEvent implements civet.OverviewVisibleRangesChangeEvent {
-  view: civet.OverView;
-  scroll: ScrollType;
-  percent: number;
-}

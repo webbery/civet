@@ -83,15 +83,28 @@ declare module 'civet' {
     }
 
     /**
-     * ConditionItem is embeded into search bar, which is to update search conditions
+     * Selectors is embeded into search bar, which is to update search conditions
      */
-    export interface ConditionItem {
-        html: string;
-        conditions: Array<string|Date>;
-        // onQueryChange();
+    export interface EnumSelector {
+        readonly size: number;
+        addEnumeration(desc: string): void;
     }
+    export interface DatetimeSelector {
+        readonly datetime: number;
+    }
+    export interface ColorSelector {
+        readonly color: string;
+    }
+    export interface RangeSelector {
+
+    }
+    
     export interface SearchBar {
-        items: ConditionItem[];
+        createEnumSelector(queryWord: string): EnumSelector;
+        createDatetimeSelector(): DatetimeSelector;
+        createColorSelector(): ColorSelector;
+        createRangeSelector(): RangeSelector;
+        addSelector(selector: EnumSelector | DatetimeSelector | ColorSelector | RangeSelector): boolean;
     }
 
     /**
@@ -126,13 +139,6 @@ declare module 'civet' {
         readonly items: IResource[];
     }
 
-    export enum OverviewItemLayout {
-        WaterFall = 0,
-        Grid = 1,
-        Row = 2,
-        Custom = 3
-    }
-
     export interface ClassItem {
         name: string;
         path?: string;
@@ -150,27 +156,6 @@ declare module 'civet' {
         resource: string;
     }
 
-    export enum ScrollType {
-        None = 0,
-        Horizon = 1,
-        Vertical = 2
-    }
-
-    export interface OverviewVisibleRangesChangeEvent {
-        view: OverView;
-        scroll: ScrollType;
-        percent: number;
-    }
-
-    export enum OverviewItemType {
-        Resource = 0,
-        Class = 1
-    }
-
-    export interface OverviewItem {
-        id: number;
-        type: OverviewItemType
-    }
     /**
      * @brief an overview is to display all items in the center  
      */
@@ -186,7 +171,7 @@ declare module 'civet' {
         onDragResources(listener: (e: OverviewItemLoadEvent) => void, thisArg?: any): void;
         
         onDidReceiveMessage(listener: (message: any) => void, thisArg?: any): void;
-        onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
+        // onDidChangeOverviewVisibleRanges(listener: (e: OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void;
     }
     
     export interface Anotator {}
@@ -210,8 +195,6 @@ declare module 'civet' {
     export namespace window {
         export let searchBar: SearchBar;
 
-        export function createConditionItem(id: string): ConditionItem;
-
         export let propertyView: PropertyView;
         /**
          * @description after an item is selected, this event is envoked and item's property will be passed
@@ -233,6 +216,9 @@ declare module 'civet' {
     }
 
     export namespace utility {
+        /**
+         * @description extension path that can be retrieved by extension
+         */
         export const extensionPath: string;
         /**
          * @description get all classes, which likes /a/b/c

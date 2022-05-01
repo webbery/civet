@@ -1,4 +1,4 @@
-import { window, ConditionItem } from 'civet'
+import { window } from 'civet'
 
 function raw(a: TemplateStringsArray, ...values: any[]): string
 {

@@ -1,0 +1,17 @@
+{
+  "name": "std_search",
+  "displayName": "搜索扩展",
+  "description": "在工具栏展示搜索控件",
+  "version": "0.0.1",
+  "engines": {
+    "civet": "^0.2.0"
+  },
+  "main": "./index.js",
+  "civet": {
+    "activeEvents": [
+      "onCommand: std.search"
+    ]
+  },
+  "dependencies": {
+  }
+}

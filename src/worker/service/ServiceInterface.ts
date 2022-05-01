@@ -4,13 +4,16 @@ import { ExtensionPackage, MenuDetail } from 'worker/ExtensionPackage';
 import { ExtensionManager } from 'worker/ExtensionManager';
 import { IResource, ResourceProperty } from 'civet';
 import { Resource } from 'public/Resource';
+import { ExtensionModule } from '../api/ExtensionRequire'
 
 export abstract class BaseService {
   #event: Emitter;
-  #instance: any = null;
+  // #instance: any = null;
+  #module: ExtensionModule;
   #extension: ExtensionPackage;
   #next: BaseService[] = [];
   #storageEmmiter: boolean = false;
+  #isActivate: boolean = false;
 
   constructor(extension: ExtensionPackage) {
     this.#event = new Emitter()
@@ -25,16 +28,21 @@ export abstract class BaseService {
     return this.#event.emit(event, ...args)
   }
 
-  get service() { return this.#instance; }
-  set service(s: any) {
-    this.#instance = s;
+  get module() { return this.#module; }
+  set module(val: ExtensionModule) { this.#module = val }
+
+  activate() {
+    if (this.#isActivate || !this.#module.exports.activate) return
+    this.#isActivate = true
+    const instance = this.#module.exports.activate()
+    if (!instance) return
     // regist event of activate
-    for (const name in s) {
+    for (const name in instance) {
       console.info('service name:', name)
       const self = this
       const wrapper = async function (msgid: number, resourceID: number, ...args: any) {
         try{
-          const props = await s[name](...args)
+          const props = await instance[name](...args)
           console.debug(self.name, 'nexts:', self.#next)
           for (const service of self.#next) {
             console.debug('emit next:', service.name)
@@ -53,6 +61,16 @@ export abstract class BaseService {
       this.on(name, wrapper)
     }
   }
+
+  deactivate() {
+    if (!this.#isActivate || !this.#module.exports.deactivate) return
+    this.#isActivate = false
+    this.#module.exports.deactivate()
+  }
+  // get service() { return this.#instance; }
+  // set service(s: any) {
+  //   this.#instance = s;
+  // }
 
   get extension() {return this.#extension; }
 

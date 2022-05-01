@@ -30,10 +30,10 @@ jobs:
         with:
           name: win-build
           path: ./build/Civet Setup ${{ steps.tagVersion.outputs.tag }}.exe
-      - name: tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 60
+      # - name: tmate session
+      #   if: ${{ failure() }}
+      #   uses: mxschmitt/action-tmate@v3
+      #   timeout-minutes: 60
   test:
     runs-on: windows-2019
     needs: build

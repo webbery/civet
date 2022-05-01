@@ -1,14 +1,19 @@
 <template>
-    <el-select v-model="value" :placeholder="placeholder" ref="resizeable" @change="_adjustSize">
-      <el-option
+    <div class="cv-select" :placeholder="placeholder" ref="resizeable" @change="_adjustSize">
+      <input type="text">
+      <div
         v-for="item in options"
         :key="item.value"
         :label="item.label"
         :value="item.value"
-      ></el-option>
-    </el-select>
+      >
+      </div>
+    </div>
 </template>
 <script>
+/**
+ * fitted select is a control that display selection in one line
+ */
 export default {
   name: 'fitted-select',
   props: {
@@ -60,11 +65,25 @@ export default {
 </script>
 
 <style scoped>
-span.resizeable-shadow {
+.cv-select {
   display: inline-block;
+  -webkit-box-direction: normal;
+  position: relative;
+  color: rgb(248, 241, 241);
+}
+.cv-select input {
+  height: 28px;
+  line-height: 28px;
+  -webkit-appearance: none;
+  background-color: #222933;
+  border-radius: 4px;
+  border: 1px solid #121820;
   box-sizing: border-box;
-  position: absolute;
-  left: -99999px;
-  top: -99999px;
+  color: #eee;
+  display: inline-block;
+  font-size: inherit;
+  outline: none;
+  width: 100%;
+  padding: 0 15px;
 }
 </style>

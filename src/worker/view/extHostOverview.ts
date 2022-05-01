@@ -4,7 +4,7 @@ import { ExtHostWebView, HostHTML } from './extHostWebView'
 import { RPCProtocal } from '../common/RpcProtocal'
 import { CivetDatabase } from '../Kernel'
 import importHTML from '../api/HtmlParser'
-import { ViewType, ExtOverviewItemLoadEvent, ExtOverviewVisibleRangesChangeEvent } from '@/../public/ExtensionHostType'
+import { ViewType, ExtOverviewItemLoadEvent } from '@/../public/ExtensionHostType'
 import { IPCNormalMessage, IPCRendererResponse } from '@/../public/IPCMessage'
 import { registHostEvent } from '../Singleton'
 import { CivetProtocol } from '@/../public/Event'
@@ -97,7 +97,7 @@ export class ExtOverview extends ExtHostWebView {
 
   onDidReceiveMessage(listener: (message: any) => void, thisArg?: any): void {}
 
-  onDidChangeOverviewVisibleRanges(listener: (e: civet.OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void {}
+  // onDidChangeOverviewVisibleRanges(listener: (e: civet.OverviewVisibleRangesChangeEvent) => void, thisArg?: any): void {}
 }
 
 @injectable

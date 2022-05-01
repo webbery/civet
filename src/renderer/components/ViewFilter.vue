@@ -20,7 +20,7 @@
         >
         </el-option>
       </el-select>
-      <!-- <MutiSelect v-model="aaa" :options="test" placeholder="1111" :multiple="true" :show-labels="true"></MutiSelect> -->
+      <FittedSelect></FittedSelect>
       <!-- <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
@@ -43,8 +43,9 @@
 
 <script>
 import RangeInput from './Control/RangeInput'
-import MutiSelect from './Control/Multiselect'
+import FittedSelect from './Control/FittedSelect'
 import { debounce } from 'lodash'
+import { IPCRendererResponse } from '@/../public/IPCMessage'
 import bus from './utils/Bus'
 import { Search,
   SearchCondition,
@@ -59,7 +60,7 @@ export default {
   name: 'view-filter',
   components: {
     RangeInput,
-    MutiSelect
+    FittedSelect
   },
   data() {
     // current datetime
@@ -89,8 +90,13 @@ export default {
       },
       lastQuery: {},
       clazz: [],
-      extensions: {}
+      extensions: {},
+      test: [],
+      aaa: []
     }
+  },
+  created() {
+    this.$ipcRenderer.on(IPCRendererResponse.ON_SEARCH_INIT_COMMAND, this.onViewInit)
   },
   beforeMount() {
     this.$ipcRenderer.on('Search', this.onViewUpdate)
@@ -100,6 +106,9 @@ export default {
     bus.on(bus.EVENT_UPDATE_QUERY_EXTERNAL_CONDITION, this.onQueryConditionChanged)
   },
   methods: {
+    onViewInit(params) {
+      console.debug('recieved std.search command:', params)
+    },
     onViewUpdate(id, classname, html) {
       this.$set(this.extensions, id, {html: html})
       // this.extensions[id] = {html: html}

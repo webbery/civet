@@ -80,5 +80,6 @@ export enum IPCRendererResponse {
   ON_VIEW_ROUTER_CLEAR = 'onVRC',
   ON_EXTENSION_ROUTER_UPDATE = 'Overview',
   ON_EXTENSION_CONTENT_UPDATE = 'ContentView',
-  ON_RESOURCE_UPDATED = 'onRU'
+  ON_RESOURCE_UPDATED = 'onRU',
+  ON_SEARCH_INIT_COMMAND = 'onSIC'
 }

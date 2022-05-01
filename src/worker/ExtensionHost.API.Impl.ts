@@ -7,7 +7,7 @@ import { logger } from '@/../public/Logger'
 import { CivetDatabase } from './Kernel'
 import { getExtensionPath} from '@/../public/Utility'
 import { Resource } from '@/../public/Resource'
-import { ExtSearchBar } from './view/extHostSearchBar'
+import { ExtSearchBar, ExtSearchBarManager } from './view/extHostSearchBar'
 import { ExtPropertyView } from './view/extHostPropertyView'
 import { ExtOverview, ExtOverviewEntry } from './view/extHostOverview'
 import { ExtContentViewEntry } from './view/extHostContentView'
@@ -20,20 +20,15 @@ export interface IExtensionApiFactory {
 
 export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, extensionName: string): IExtensionApiFactory {
   const rpcProtocal = registSingletonObject(RPCProtocal)
-  const extSearchBar = registSingletonObject(ExtSearchBar)
+  const extSearchBarManager = registSingletonObject(ExtSearchBarManager)
   const extPropertyView = rpcProtocal.set(ExtPropertyView.name, ExtPropertyView)
   const extOverViewEntry = registSingletonObject(ExtOverviewEntry)
   const extContentViewEntry = registSingletonObject(ExtContentViewEntry)
   const extCommandsEntry = registSingletonObject(ExtCommandsEntry)
 
   const window: typeof civet.window = {
-    get searchBar() { return extSearchBar.searchBar },
+    get searchBar() { return extSearchBarManager as civet.SearchBar },
   
-    createConditionItem(id: string): civet.ConditionItem {
-      logger.debug(`${id} create entry ${extSearchBar.proxy}`)
-      return extSearchBar.createConditionItemEntry(id)
-    },
-
     get propertyView() { return extPropertyView.propertyView },
 
     onDidSelectContentItem(listener: (e: civet.ContentItemSelectedEvent) => void, thisArg?: any): void {
@@ -90,9 +85,6 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
       // enum
       PropertyType: ExtensionHostType.PropertyType,
       ViewType: ExtensionHostType.ViewType,
-      OverviewItemLayout: ExtensionHostType.OverviewItemLayout,
-      ScrollType: ExtensionHostType.ScrollType,
-      OverviewItemType: ExtensionHostType.OverviewItemType,
       // function
       activate: null,
       unactivate: null

@@ -96,7 +96,7 @@ module.exports = {
     await selectResource(page)
     const newName = 'Image0'
     const name = await property.getCurrentResourceName(page)
-    assert(name.length !== 0 && name !== undefined && name !== newName)
+    assert(name !== undefined && name.length !== 0 && name !== newName)
     await property.updateName(page, newName)
     await property.addTag(page, 'green')
     await validName(page, newName)

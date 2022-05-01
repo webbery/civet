@@ -37,6 +37,20 @@ jobs:
         with:
           name: ubuntu-build
           path: ./build/Civet-${{ steps.version.outputs.version }}.AppImage
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - name: test
+        run: |
+          npm install
+          npm run test --loglevel silly
+        env:
+          CI: true
   publish:
     runs-on: ubuntu-latest
     needs: build

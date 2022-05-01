@@ -16,10 +16,11 @@ const ViewTypeTable = {
   Search: ViewType.Search
 }
 
-export enum ExtensionType {
+export enum ExtensionActiveType {
   BackgroundExtension = 1 << 8,
   ViewExtension = 1 << 9,
-  StorageExtension = 1 << 10
+  StorageExtension = 1 << 10,
+  Command = 1 << 11
 }
 export abstract class BaseExtension {
   #name: string = '';
@@ -40,11 +41,12 @@ export class ExtensionPackage extends BaseExtension {
   private _main: string = './main.js';
   private _license?: string;
   private _description?: string;
-  private _activeEvents: string[] = [];
+  private _activeContentTypes: string[] = [];
   private _extensionInfo: number = 0;
   private _dependency: Object;
   private _menus: Map<string, MenuDetail[]> = new Map<string, MenuDetail[]>();  // 
-  // private _dependency: Map<string, string> = new Map<string, string>();
+  #activeEventsInitMap: Map<string, (params: string[]) => void>;
+  #activeCommand: string[] = [];
 
   constructor(dir: string) {
     super()
@@ -56,25 +58,19 @@ export class ExtensionPackage extends BaseExtension {
     this._engines = pack['engines']
     this._main = getAbsolutePath(dir + (pack['main'] === undefined? '/main.js': '/' + pack['main']))
     const events = pack['civet']['activeEvents']
+    this.#activeEventsInitMap = new Map<string, any>()
+    this.#activeEventsInitMap.set('onContentType', this._registContentTypeEvent.bind(this))
+    this.#activeEventsInitMap.set('onView', this._registViewEvent.bind(this))
+    this.#activeEventsInitMap.set('onSave', this._registStorageEvent.bind(this))
+    this.#activeEventsInitMap.set('onCommand', this._registCommandEvent.bind(this))
     for (let event of events) {
       const map: string[] = event.split(':')
       if (map.length !== 2) continue
       const str = map[1].trim()
-      if (map[0] === 'onContentType') {
-        this._activeEvents = str.split(',')
-        // console.debug('support content type:', this._activeEvents)
-        this._extensionInfo |= ExtensionType.BackgroundExtension
-      } else if (map[0] === 'onView') {
-        const views = str.split(',')
-        views.forEach(item => {
-          this._extensionInfo |= ViewTypeTable[item]
-        })
-        this._extensionInfo |= ExtensionType.ViewExtension
-      } else if (map[0] === 'onSave') {
-        const enable = str.split(',')
-        if (enable.length) {
-          this._extensionInfo |= ExtensionType.StorageExtension
-        }
+      const params = str.split(',')
+      const initActiveEvent = this.#activeEventsInitMap.get(map[0])
+      if (initActiveEvent) {
+        initActiveEvent(params)
       }
     }
     // contrib
@@ -104,14 +100,38 @@ export class ExtensionPackage extends BaseExtension {
     console.info(super.name, 'init menus', this._menus)
   }
 
+  private _registContentTypeEvent(params: string[]) {
+    this._activeContentTypes = params
+    this._extensionInfo |= ExtensionActiveType.BackgroundExtension
+  }
+
+  private _registViewEvent(params: string[]) {
+    params.forEach(item => {
+      this._extensionInfo |= ViewTypeTable[item]
+    })
+    this._extensionInfo |= ExtensionActiveType.ViewExtension
+  }
+
+  private _registStorageEvent(params: string[]) {
+    if (params.length) {
+      this._extensionInfo |= ExtensionActiveType.StorageExtension
+    }
+  }
+
+  private _registCommandEvent(params: string[]) {
+    console.debug('regist command:', params)
+    this.#activeCommand = params
+  }
+
   get name() { return super.name; }
   get displayName() { return this._displayName; }
   get version() { return this._version; }
   get main() { return this._main; }
   get owner() { return this._owner; }
-  get activeTypes() { return this._activeEvents }
+  get activeTypes() { return this._activeContentTypes }
+  get activeCommands() { return this.#activeCommand }
   get dependency() { return this._dependency }
   get viewEvents() { return this._extensionInfo }
-  get extensionType(): ExtensionType { return (this._extensionInfo & (ExtensionType.BackgroundExtension|ExtensionType.ViewExtension)) }
+  get extensionType(): ExtensionActiveType { return (this._extensionInfo & (ExtensionActiveType.BackgroundExtension|ExtensionActiveType.ViewExtension)) }
   get menus() { return this._menus }
 }

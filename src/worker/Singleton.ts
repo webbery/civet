@@ -62,7 +62,7 @@ export function registSingletonObject<T>(ctor: { new (...args: Array<any>): T },
           return ret
         }
       }
-      throw new Error(`params[${i}]: class ${(v as any).name} is not injected`)
+      throw new Error(`${id} params[${i}]: class ${(v as any).name} is not injected`)
     } else if (v.length) {
       return registSingletonObject(v)
     } else {

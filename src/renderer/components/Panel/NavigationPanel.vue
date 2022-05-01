@@ -169,9 +169,11 @@ export default {
       console.info(name, parent, data.model)
       this.$store.dispatch('removeClass', data.model)
     },
-    onExportClasses(params) {},
+    onExportClasses(params) {
+      console.debug(params)
+    },
     onAddClass(name, parent, data) {
-      console.info('add node:', data)
+      console.info(name, parent, 'add node:', data)
       var node = new TreeNode({ name: '', isLeaf: false, editable: true })
       this.$store.dispatch('addClass', {parent: data.model, node})
       this.$nextTick(() => {
@@ -179,14 +181,14 @@ export default {
       })
     },
     onMenuChangeName(name, parent, data) {
-      console.info(data)
+      console.info(name, parent, data)
       data.operator.setEditable()
     },
     onDropNode(params) {
       console.info('onDropNode', params)
     },
     onSelectMenu(indexList) {
-      console.info('navi menu')
+      console.info('navi menu', indexList)
     },
     // renderContent(h, {node, data, store}) {
     //   return (

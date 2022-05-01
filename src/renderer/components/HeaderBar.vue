@@ -39,7 +39,7 @@
 <script>
 import bus from './utils/Bus'
 import ViewFilter from '@/components/ViewFilter'
-import ImageOperator from '@/components/ImageOperator'
+import ResourceHeader from '@/components/ResourceHeader'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
 // import Service from '@/components/utils/Service'
 import PageMenu from '@/components/Menu/PageMenu'
@@ -71,7 +71,7 @@ export default {
   },
   components: {
     ViewFilter,
-    ImageOperator,
+    ResourceHeader,
     PageMenu,
     SearchBar
   },
@@ -155,7 +155,7 @@ export default {
           this.comName = ViewFilter
           break
         case 'display':
-          this.comName = ImageOperator
+          this.comName = ResourceHeader
           break
         default:
           break
