@@ -20,7 +20,9 @@
         >
         </el-option>
       </el-select>
-      <FittedSelect></FittedSelect>
+      <div v-for="(item, idx) in searchComponents" :key="idx">
+        <component :is="item.component" :attributes="item.attributes"></component>
+      </div>
       <!-- <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
@@ -34,9 +36,6 @@
           <RangeInput firstPlaceholder="最小" lastPlaceholder="最大" unit="Kb"></RangeInput>
         </el-dropdown-menu>
       </el-dropdown> -->
-      <span v-for="(item, i) of extensions" :key="i">
-        <span v-html="item.html"></span>
-      </span>
     </span>
   </div>
 </template>
@@ -47,6 +46,7 @@ import FittedSelect from './Control/FittedSelect'
 import { debounce } from 'lodash'
 import { IPCRendererResponse } from '@/../public/IPCMessage'
 import bus from './utils/Bus'
+import Vue from 'vue'
 import { Search,
   SearchCondition,
   ConditionOperation,
@@ -90,9 +90,7 @@ export default {
       },
       lastQuery: {},
       clazz: [],
-      extensions: {},
-      test: [],
-      aaa: []
+      searchComponents: []
     }
   },
   created() {
@@ -108,6 +106,22 @@ export default {
   methods: {
     onViewInit(params) {
       console.debug('recieved std.search command:', params)
+      for (const param of params) {
+        console.debug('onViewInit param:', param)
+        switch (param.type) {
+          case 'enum':
+            Vue.set(this.searchComponents, this.searchComponents.length, {
+              item: FittedSelect,
+              attributes: {
+                placeholder: '类型',
+                options: param.options
+              }
+            })
+            break
+          default: break
+        }
+      }
+      console.debug('components:', this.searchComponents.length)
     },
     onViewUpdate(id, classname, html) {
       this.$set(this.extensions, id, {html: html})

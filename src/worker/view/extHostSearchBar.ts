@@ -16,6 +16,7 @@ export class ExtEnumSelector implements ISelector {
 
   toJSON(): any {
     return {
+      type: 'enum',
       keyword: this.#keyword,
       options: this.options
     }
@@ -37,6 +38,7 @@ export class ExtColorSelector implements ISelector {
 
   toJSON(): any {
     return {
+      type: 'color',
       keyword: 'color',
       color: this.color
     }
@@ -48,6 +50,7 @@ export class ExtDatetimeSelector implements ISelector {
 
   toJSON(): any {
     return {
+      type: 'datetime',
       keyword: 'datetime',
       datetime: this.datetime
     }
@@ -57,6 +60,7 @@ export class ExtDatetimeSelector implements ISelector {
 export class ExtRangeSelector implements ISelector{
   toJSON(): any {
     return {
+      type: 'range',
       keyword: 'range'
     }
   }
@@ -84,12 +88,12 @@ export class ExtSearchBar {
     return true
   }
 
-  toString(): string {
+  toJSON(): any {
     let value = []
     for (const selector of this.#selectors) {
       value.push(selector.toJSON())
     }
-    return JSON.stringify(value)
+    return value
   }
 }
 
@@ -136,7 +140,7 @@ export class ExtSearchBarManager {
   initSearchBarFinish() {
     const searchBar = this.createSearchBarEntry()
     const pipeline = this.#proxy.pipeline
-    pipeline.post(IPCRendererResponse.ON_SEARCH_INIT_COMMAND, searchBar.toString())
+    pipeline.post(IPCRendererResponse.ON_SEARCH_INIT_COMMAND, [searchBar.toJSON()])
   }
 
 }
