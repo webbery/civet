@@ -20,9 +20,10 @@
         >
         </el-option>
       </el-select>
-      <div v-for="(item, idx) in searchComponents" :key="idx">
-        <component :is="item.component" :attributes="item.attributes"></component>
+      <div v-for="(item, idx) in searchComponents" :key="idx" style="display: inline-block;">
+        <MixComponent :type="item.type" :attributes="item.attributes"></MixComponent>
       </div>
+      <!-- <FittedSelect :type="testType" :attributes="attributes"></FittedSelect> -->
       <!-- <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
         <el-dropdown-menu slot="dropdown">
@@ -42,6 +43,7 @@
 
 <script>
 import RangeInput from './Control/RangeInput'
+import MixComponent from './Control/MixComponent'
 import FittedSelect from './Control/FittedSelect'
 import { debounce } from 'lodash'
 import { IPCRendererResponse } from '@/../public/IPCMessage'
@@ -60,7 +62,8 @@ export default {
   name: 'view-filter',
   components: {
     RangeInput,
-    FittedSelect
+    FittedSelect,
+    MixComponent
   },
   data() {
     // current datetime
@@ -90,7 +93,11 @@ export default {
       },
       lastQuery: {},
       clazz: [],
-      searchComponents: []
+      searchComponents: [],
+      testType: 'enum',
+      attributes: {
+        placeholder: '类型',
+        options: ['jpg', 'png']}
     }
   },
   created() {
@@ -111,7 +118,7 @@ export default {
         switch (param.type) {
           case 'enum':
             Vue.set(this.searchComponents, this.searchComponents.length, {
-              item: FittedSelect,
+              type: param.type,
               attributes: {
                 placeholder: '类型',
                 options: param.options
