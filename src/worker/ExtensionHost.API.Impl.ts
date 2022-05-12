@@ -7,7 +7,7 @@ import { logger } from '@/../public/Logger'
 import { CivetDatabase } from './Kernel'
 import { getExtensionPath} from '@/../public/Utility'
 import { Resource } from '@/../public/Resource'
-import { ExtSearchBar, ExtSearchBarManager } from './view/extHostSearchBar'
+import { ExtSearchBarManager } from './view/extHostSearchBar'
 import { ExtPropertyView } from './view/extHostPropertyView'
 import { ExtOverview, ExtOverviewEntry } from './view/extHostOverview'
 import { ExtContentViewEntry } from './view/extHostContentView'
@@ -50,6 +50,10 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
 
     createOverview(id: string, router: string): civet.OverView {
       return extOverViewEntry.createOverviewEntry(id, router)
+    },
+
+    getActiveOverview(): civet.OverView {
+      return extOverViewEntry.getActiveView()
     },
 
     createContentView(id: string, suffixes: string[]): civet.ContentView | null {

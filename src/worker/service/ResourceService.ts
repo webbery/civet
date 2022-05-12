@@ -38,7 +38,6 @@ export class ResourceService{
     pipeline.regist('getAllTags', this.getAllTags, this)
     pipeline.regist(IPCNormalMessage.GET_ALL_CLASSES, this.getAllCategory, this)
     pipeline.regist('getAllTagsWithImages', this.getAllTagsWithImages, this)
-    pipeline.regist('queryFiles', this.queryFiles, this)
     pipeline.regist('addCategory', this.addCategory, this)
     pipeline.regist(IPCNormalMessage.GET_CLASSES_DETAIL, this.getCategoryDetail, this)
     pipeline.regist(IPCNormalMessage.GET_UNCATEGORY_RESOURCES, this.getUncategoryImages, this)
@@ -151,13 +150,7 @@ export class ResourceService{
     console.info('allTags', allTags)
     // reply2Renderer(ReplyType.REPLY_ALL_TAGS_WITH_IMAGES, allTags)
   }
-  queryFiles(msgid: number, nsql: any) {
-    console.info('query:', nsql)
-    const allFiles = CivetDatabase.query(nsql)
-    console.info('reply: ', allFiles)
-    // reply2Renderer(ReplyType.REPLY_QUERY_FILES, allFiles)
-    return {type: ReplyType.REPLY_QUERY_FILES, data: allFiles}
-  }
+
   addCategory(msgid: number, mutation: any) {
     console.info('add class', mutation)
     if (typeof mutation === 'string') {

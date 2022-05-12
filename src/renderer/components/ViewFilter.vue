@@ -1,17 +1,10 @@
 <template>
   <div style="display: flex; justify-content: center">
-    <el-color-picker v-model="color" size="mini" style="" @active-change="onColorChanged" @change="onColorChanged"></el-color-picker>
+    <div v-for="(item, idx) in searchComponents" :key="idx" style="display: inline-block;">
+      <MixComponent :type="item.type" :query="item.query" :attributes="item.attributes" @change="onConditionChanged"></MixComponent>
+    </div>
     <span class="custom">
-      <el-select v-model="query.type" @change="onFileTypeChanged" clearable placeholder=" 类型" size="mini" multiple>
-        <el-option
-          v-for="(item, idx) in conditions['type']"
-          :key="idx"
-          :label="item.label"
-          :value="item.label"
-        >
-        </el-option>
-      </el-select>
-      <el-select v-model="timeRange" @change="onTimeSelectChanged" clearable placeholder=" 时间" size="mini">
+      <!-- <el-select v-model="timeRange" @change="onTimeSelectChanged" clearable placeholder=" 时间" size="mini">
         <el-option
           v-for="(item, idx) in timeRanges"
           :key="idx"
@@ -19,10 +12,7 @@
           :value="item.key"
         >
         </el-option>
-      </el-select>
-      <div v-for="(item, idx) in searchComponents" :key="idx" style="display: inline-block;">
-        <MixComponent :type="item.type" :attributes="item.attributes"></MixComponent>
-      </div>
+      </el-select> -->
       <!-- <FittedSelect :type="testType" :attributes="attributes"></FittedSelect> -->
       <!-- <el-dropdown trigger="click">
         <el-button size="mini">尺寸<i class="el-icon-arrow-down el-icon--right"></i></el-button>
@@ -112,20 +102,32 @@ export default {
   },
   methods: {
     onViewInit(params) {
-      console.debug('recieved std.search command:', params)
       for (const param of params) {
         console.debug('onViewInit param:', param)
         switch (param.type) {
           case 'enum':
             Vue.set(this.searchComponents, this.searchComponents.length, {
               type: param.type,
+              query: param.keyword,
               attributes: {
-                placeholder: '类型',
+                placeholder: param.name,
+                multiple: param.multiple,
                 options: param.options
               }
             })
             break
-          default: break
+          case 'color':
+            Vue.set(this.searchComponents, this.searchComponents.length, {
+              type: param.type,
+              query: param.keyword,
+              attributes: {
+                color: param.color
+              }
+            })
+            break
+          default:
+            console.warn(`unknow search condition ${param.type}`)
+            break
         }
       }
       console.debug('components:', this.searchComponents.length)
@@ -142,81 +144,59 @@ export default {
       this.$store.dispatch('siftByTag', item)
       this.$router.push({path: '/query', query: {name: '标签“' + item + '”', type: 'tag'}})
     },
-    onTimeSelectChanged(keys) {
-      let today = new Date(new Date().toLocaleDateString())
-      // let yesterdy = new Date(today.getTime() - 24 * 60 * 60 * 1000)
-      let condition = new SearchCondition()
-      condition.name = DefaultQueryName.AddedTime
-      condition.comparation = DatetimeOperator.Greater
-      condition.operation = ConditionOperation.Keep
-      condition.type = ConditionType.Datetime
-      switch (keys) {
-        case 'today':
-          condition.keyword = today
-          // query = {addtime: {$gt: today}}
-          break
-        case 'yesterday':
-          let yesterday = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000)
-          yesterday.setHours(0, 0, 0, 0)
-          condition.keyword = yesterday
-          break
-        case 'near7':
-          let near7 = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-          near7.setHours(0, 0, 0, 0)
-          condition.keyword = near7
-          // query = {addtime: {$gt: near7}}
-          break
-        case 'near30':
-          let near30 = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
-          near30.setHours(0, 0, 0, 0)
-          condition.keyword = near30
-          // query = {addtime: {$gt: near30}}
-          break
-        case 'near90':
-          let near90 = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000)
-          near90.setHours(0, 0, 0, 0)
-          condition.keyword = near90
-          // query = {addtime: {$gt: near90}}
-          break
-        case 'near365':
-          let near365 = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000)
-          near365.setHours(0, 0, 0, 0)
-          condition.keyword = near365
-          // query = {addtime: {$gt: near365}}
-          break
-        default:
-          condition.keyword = '*'
-          // query = {addtime: '*'}
-          break
-      }
-      this.$store.dispatch('query', [condition])
+    onConditionChanged(selections, name) {
+      console.debug('search selections', selections)
+      this.$store.dispatch('query', {selections, name})
     },
-    onFileTypeChanged(keys) {
-      let query = []
-      if (!this.lastQuery[DefaultQueryName.Type]) this.lastQuery[DefaultQueryName.Type] = []
-      const generateCondition = function(key, op) {
-        let condition = new SearchCondition()
-        condition.operation = op
-        condition.keyword = key
-        condition.name = DefaultQueryName.Type
-        condition.type = ConditionType.ContentType
-        return condition
-      }
-      for (let item of this.lastQuery[DefaultQueryName.Type]) { // find removed item
-        if (keys.includes(item)) continue
-        query.push(generateCondition(item, ConditionOperation.Remove))
-      }
-      for (let key of keys) {
-        if (this.lastQuery[DefaultQueryName.Type].includes(key)) {
-          query.push(generateCondition(key, ConditionOperation.Keep))
-        } else {
-          query.push(generateCondition(key, ConditionOperation.Add))
-        }
-      }
-      this.lastQuery[DefaultQueryName.Type] = keys
-      this.$store.dispatch('query', query)
-      bus.emit(bus.EVENT_UPDATE_QUERY_BAR, {type: keys})
-    },
+    // onTimeSelectChanged(keys) {
+    //   let today = new Date(new Date().toLocaleDateString())
+    //   // let yesterdy = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+    //   let condition = new SearchCondition()
+    //   condition.name = DefaultQueryName.AddedTime
+    //   condition.comparation = DatetimeOperator.Greater
+    //   condition.operation = ConditionOperation.Keep
+    //   condition.type = ConditionType.Datetime
+    //   switch (keys) {
+    //     case 'today':
+    //       condition.keyword = today
+    //       // query = {addtime: {$gt: today}}
+    //       break
+    //     case 'yesterday':
+    //       let yesterday = new Date(today.getTime() - 1 * 24 * 60 * 60 * 1000)
+    //       yesterday.setHours(0, 0, 0, 0)
+    //       condition.keyword = yesterday
+    //       break
+    //     case 'near7':
+    //       let near7 = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+    //       near7.setHours(0, 0, 0, 0)
+    //       condition.keyword = near7
+    //       // query = {addtime: {$gt: near7}}
+    //       break
+    //     case 'near30':
+    //       let near30 = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+    //       near30.setHours(0, 0, 0, 0)
+    //       condition.keyword = near30
+    //       // query = {addtime: {$gt: near30}}
+    //       break
+    //     case 'near90':
+    //       let near90 = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000)
+    //       near90.setHours(0, 0, 0, 0)
+    //       condition.keyword = near90
+    //       // query = {addtime: {$gt: near90}}
+    //       break
+    //     case 'near365':
+    //       let near365 = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000)
+    //       near365.setHours(0, 0, 0, 0)
+    //       condition.keyword = near365
+    //       // query = {addtime: {$gt: near365}}
+    //       break
+    //     default:
+    //       condition.keyword = '*'
+    //       // query = {addtime: '*'}
+    //       break
+    //   }
+    //   this.$store.dispatch('query', [condition])
+    // },
     onQueryConditionChanged(value) {
       const filterType = value.type
       const query = this.query[filterType]
@@ -227,24 +207,7 @@ export default {
           break
         }
       }
-    },
-    onColorChanged: debounce(async function (color) {
-      let condition = new SearchCondition()
-      condition.name = DefaultQueryName.Color
-      if (!color) {
-        condition.operation = ConditionOperation.Remove
-        condition.keyword = this.color
-        this.$store.dispatch('query', [condition])
-      } else {
-        const tinyColor = require('tinycolor2')
-        const hex = tinyColor(color).toHexString()
-        condition.keyword = hex
-        condition.operation = ConditionOperation.Add
-        condition.type = ConditionType.Color
-        this.$store.dispatch('query', [condition])
-        this.color = color
-      }
-    }, 100)
+    }
   }
 }
 </script>

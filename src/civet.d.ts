@@ -82,25 +82,40 @@ declare module 'civet' {
         Search = 0x10
     }
 
+    export interface SelectionChangedEvent {
+        values: string[];
+    }
     /**
      * Selectors is embeded into search bar, which is to update search conditions
      */
     export interface EnumSelector {
         readonly size: number;
-        addEnumeration(desc: string): void;
+        addEnumeration(desc: string[]): void;
+        /**
+         *  @brief after enumeration select, you can process selection result before it send to query.
+         */
+        onSelectionChanged(listener: (e: SelectionChangedEvent) => Object | string[] | string, thisArg?: any): void;
     }
     export interface DatetimeSelector {
         readonly datetime: number;
+        onSelectionChanged(listener: (e: SelectionChangedEvent) => Object | string[] | string, thisArg?: any): void;
     }
     export interface ColorSelector {
         readonly color: string;
+        onSelectionChanged(listener: (e: SelectionChangedEvent) => Object | string[] | string, thisArg?: any): void;
     }
     export interface RangeSelector {
-
+        onSelectionChanged(listener: (e: SelectionChangedEvent) => Object | string[] | string, thisArg?: any): void;
     }
     
     export interface SearchBar {
-        createEnumSelector(queryWord: string): EnumSelector;
+        /**
+         * 
+         * @param queryWord a query word that use for query as a keyword
+         * @param defaultName this name is display when none of selection
+         * @param multiple if selection is single only, the value is false. Otherwise is true
+         */
+        createEnumSelector(queryWord: string, defaultName: string, multiple: boolean): EnumSelector;
         createDatetimeSelector(): DatetimeSelector;
         createColorSelector(): ColorSelector;
         createRangeSelector(): RangeSelector;
@@ -203,6 +218,8 @@ declare module 'civet' {
         export function onDidSelectContentItem(listener: (e: ContentItemSelectedEvent) => void, thisArg?: any): void;
 
         export function createOverview(id: string, router: string): OverView;
+        
+        export function getActiveOverview(): OverView;
         /**
          * @description create a content view for watching. 
          * @param id id of content view

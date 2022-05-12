@@ -159,4 +159,14 @@ export class ExtOverviewEntry {
     }
     overview.event.emit(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, resource)
   }
+
+  getActiveView() {
+    const overview = this.#overviews.get(this.#activeView)
+    if (!overview) {
+      const msg = `overview extension ${this.#activeView} not exist`
+      console.error(msg)
+      throw Error(msg)
+    }
+    return overview
+  }
 }

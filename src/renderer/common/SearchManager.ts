@@ -44,83 +44,25 @@ export class SearchCondition {
 }
 
 export class SearchManager {
-  conditions: SearchCondition[] = [];
+  conditions: any = {};
 
   constructor() {
     console.info('initialize search instance')
   }
   
-  async update(conditions: SearchCondition[]) {
-    for (const condition of conditions) {
-      if (condition.operation === ConditionOperation.Add) {
-        if(this.conditions.includes(condition)) continue
-        this.conditions.push(condition)
-      } else if (condition.operation === ConditionOperation.Remove) {
-        this.conditions = this.conditions.filter((item) => {
-          return item.keyword !== condition.keyword
-        })
-        console.debug(this.conditions)
-      } else {  // Keep if exist, else add
-        let exist = false
-        for (const item of this.conditions) {
-          if (item.type === ConditionType.Datetime && condition.type === ConditionType.Datetime) {
-            item.keyword = condition.keyword
-            break
-          }
-          if (condition.operation === ConditionOperation.Keep && item.keyword === condition.keyword) {
-            exist = true
-            break
-          }
-        }
-        if (!exist) {
-          this.conditions.push(condition)
-        }
+  async update(payload: any) {
+    console.info(`query begin: ${JSON.stringify(payload)}`)
+    const name = payload.name
+    if (payload.selections.length === 0) {
+      delete this.conditions[name]
+    } else {
+      this.conditions[name] = []
+      for (const condition of payload.selections) {
+        this.conditions[name].push(condition.keyword)
       }
     }
-    console.info(`query: ${JSON.stringify(this.conditions)}`)
-    const query = this.parse(this.conditions)
-    return await service.get(IPCNormalMessage.QUERY_RESOURCES, query)
-  }
-
-  private parse(conditions: SearchCondition[]) {
-    let query = {}
-    for (const condition of conditions) {
-      const name = condition.name
-      switch(condition.type) {
-        case ConditionType.String:
-          if (!query[name]) query[name] = []
-          query[name].push(condition.keyword)
-          break
-        case ConditionType.ContentType:
-          if (!query[name]) query[name] = []
-          query[name].push(condition.keyword)
-          break
-        case ConditionType.Datetime:
-          if (condition.keyword === '*') {
-            delete query[name]
-          } else {
-            query[name] = {$gt: condition.keyword}
-          }
-          break
-        case ConditionType.Color:
-          // if (!condition.comparation)
-          query[name] = {$near: condition.keyword}
-          break
-        case ConditionType.Class:
-          if (!query[name]) query[name] = []
-          query[name].push(condition.keyword)
-          break
-        case ConditionType.Tag:
-          query[name] = condition.keyword
-          break
-        default:
-          break
-      }
-    }
-    if (conditions.length === 0 || Object.keys(query).length === 0) {
-      query['type'] = '*'
-    }
-    return query
+    console.info(`query finish: ${JSON.stringify(this.conditions)}`)
+    return await service.get(IPCNormalMessage.QUERY_RESOURCES, this.conditions)
   }
 }
 

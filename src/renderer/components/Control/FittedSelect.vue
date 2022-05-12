@@ -1,5 +1,5 @@
 <template>
-    <div class="cv-select" :placeholder="attributes.placeholder" ref="resizeable" >
+    <div class="cv-select" ref="resizeable" >
       <div class="cv-select-bar" @click="onClick">
         <div class="search-default" v-for="(item, i) in selections" :key="i" >
           <SearchItem :item="item" @erase="onItemDelete" :v-if="item.operation !== 1"></SearchItem>
@@ -11,12 +11,21 @@
         <div class="cv-pop-arrow" ></div>
         <div class="el-scrollbar">
           <div class="el-select-dropdown__wrap el-scrollbar__wrap" style="margin-bottom: -17px; margin-right: -17px;">
-            <ul class="el-scrollbar__view el-select-dropdown__list">
+            <ul class="el-scrollbar__view el-select-dropdown__list" v-if="attributes.multiple">
               <li class="cv-select-item"
                 v-for="(item, idx) of attributes.options"
                 :key="idx"
               >
-                <el-checkbox v-model="checks[idx]" @change="onItemSelect(idx)">{{item}}</el-checkbox>
+                <el-checkbox v-model="checks[idx]" @change="onMultipleItemSelect(idx)" >{{item}}</el-checkbox>
+              </li>
+            </ul>
+            <ul class="el-scrollbar__view el-select-dropdown__list" v-else>
+              <li class="cv-select-item"
+                v-for="(item, idx) of attributes.options"
+                :key="idx"
+                @click="onItemSelect(idx)"
+              >
+                <span>{{item}}</span>
               </li>
             </ul>
           </div>
@@ -40,6 +49,7 @@ export default {
   name: 'fitted-select',
   components: {SearchItem},
   props: {
+    query: String,
     attributes: Object
   },
   data() {
@@ -80,13 +90,15 @@ export default {
           break
         }
       }
+      this.$emit('change', this.selections, this.query)
     },
-    onItemSelect(idx) {
+    onMultipleItemSelect(idx) {
       if (this.checks[idx]) {
+        console.debug('select item:', this.query)
         const condition = {
           type: ConditionType.String,
           keyword: this.attributes.options[idx],
-          name: DefaultQueryName.Keyword,
+          name: this.query,
           operation: ConditionOperation.Add
         }
         this.selections.push(condition)
@@ -98,6 +110,24 @@ export default {
           }
         }
       }
+      this.$emit('change', this.selections, this.query)
+    },
+    onItemSelect(idx) {
+      console.debug('onItemSelect', idx)
+      for (let pos = this.selections.length - 1; pos >= 0; --pos) {
+        if (this.selections[pos].keyword === this.attributes.options[idx]) {
+          return
+        }
+      }
+      if (this.selections.length) this.selections.splice(0, 1)
+      const condition = {
+        type: ConditionType.String,
+        keyword: this.attributes.options[idx],
+        name: this.query,
+        operation: ConditionOperation.Add
+      }
+      this.selections.push(condition)
+      this.$emit('change', this.selections, this.query)
     }
   }
 }
@@ -125,15 +155,16 @@ export default {
   padding: 0 15px;
   cursor: pointer;
 }
-.cv-select input:hover {
+.cv-select-bar:hover {
   border-color: #eee;
 }
-.cv-select input:focus {
+.cv-select-bar:focus {
   border-color: #00adff;
 }
 .cv-select-arraw {
-  position: absolute;
+  /* position: absolute; */
   /* right: 1px; */
+  transform: scale(0.5);
   pointer-events: none;
 }
 .cv-input_inner {
@@ -146,7 +177,7 @@ export default {
   line-height: 20px;
   height: 28px;
   text-align: center;
-  transform: rotate(0deg);
+  transform: rotate(0deg)scale(0.7);
   transition: transform 0.2s;
 }
 .cv-caret-down::before {
@@ -161,7 +192,7 @@ export default {
   color: #eee;
 }
 .rotate-up {
-  transform: rotate(-180deg);
+  transform: rotate(-180deg)scale(0.7);;
   transition: transform 0.2s;
 }
 .cv-hide-enum {
@@ -210,6 +241,7 @@ export default {
 }
 .cv-select-item span {
   position: absolute;
+  width: 100%;
   pointer-events: none;
 }
 .search-default {
@@ -219,12 +251,12 @@ export default {
 .cv-select-bar{
   display: inline-block;
   vertical-align: top;
-  width: calc(100% + 16px);
   border: 1px solid black;
   border-top-left-radius: 2.5px;
   border-bottom-left-radius: 2.5px;
   overflow: hidden;
   background-color: #222933;
   border-radius: 4px;
+  width: 100%;
 }
 </style>
