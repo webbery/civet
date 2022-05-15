@@ -132,8 +132,6 @@ export class ExtensionManager {
     this._initCommandExtension()
     // storage service for test
     this.#storageService.push(new StorageService())
-    // execute startup command
-    this._postStartupCommand()
   }
 
   get services() { return this.#services; }
@@ -190,22 +188,6 @@ export class ExtensionManager {
     m._compile(content, pack.name)
     console.debug(`initialize ${pack.name}:${JSON.stringify(m.exports)}`)
     return m
-    // try {
-    //   let instance = null
-    //   if (m.exports.activate && pack.activeCommands.length == 0) {
-    //     instance = m.exports.activate()
-    //   }
-    //   if (!instance && (pack.extensionType & ExtensionActiveType.BackgroundExtension)) {
-    //     const msg = `${pack.name}'s activate is not defined.`
-    //     console.error(msg)
-    //     return null
-    //   }
-    //   return instance
-    // } catch (error) {
-    //   const msg = `initialize ${pack.name} fail: ${error}`
-    //   showErrorInfo({msg: msg})
-    //   return null
-    // }
   }
 
   /**
@@ -222,7 +204,6 @@ export class ExtensionManager {
         const instance = this.initialize(pack)
         if (!instance) return false
         service.module = instance
-        service.activate()
         this.#services.set(service.name, service)
         return true
       }
@@ -250,7 +231,6 @@ export class ExtensionManager {
       if (!dependencies) {
         const service = _createMixService(pack[0], pack[1], this)
         const types = service.activeType()
-        if (types.length) service.activate()
         for (const type of types) {
           let services = this.#extensionsOfContentType.get(type)
           if (!services) services = [service]
@@ -317,7 +297,7 @@ export class ExtensionManager {
     }
   }
 
-  private _postStartupCommand() {
+  postStartupCommand() {
     const activate = function (extens: Map<string, BaseService[]>, cmd: string) {
       const services = extens.get(cmd)
       console.debug('startup service', services)
@@ -349,6 +329,7 @@ export class ExtensionManager {
       // load extension
       const root = getExtensionPath()
       this._initPackageAndViewService(root, extinfo.name, this._pipeline)
+      this.#services.get(extinfo.name)!.activate()
     }
     return {type: IPCRendererResponse.install, data: result}
   }
@@ -428,6 +409,14 @@ export class ExtensionManager {
     // this._extensionsOfConfig = resource['extensions']
   }
 
+  activeAllService() {
+    console.debug('begin active extension')
+    for (const service of this.#services) {
+      service[1].activate()
+    }
+    console.debug('finish active extension')
+  }
+
   async read(msgid: number, uri: ResourcePath): Promise<Result<Resource, string>> {
     const f = path.parse(uri.local())
     const extname = f.ext.substr(1).toLowerCase()
@@ -473,5 +462,13 @@ export class ExtensionManager {
     //   console.error('unknow command', command)
     // }
     return Result.success(true)
+  }
+
+  getSupportContentType() {
+    let supports = []
+    for (const extension of this.#extensionsOfContentType) {
+      supports.push(extension[0])
+    }
+    return supports
   }
 }

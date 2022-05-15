@@ -38,6 +38,19 @@ const eventProcess = {
   }
 }
 
+const contentType2SearchType  = {
+  'img/jpeg': 'jpg',
+  'jpg': 'jpg',
+  'jpeg': 'jpg',
+  'bmp': 'bmp',
+  'tif': 'tif',
+  'tiff': 'tif',
+  'png': 'png',
+  'glb': 'glb',
+  'gltf': 'gltf',
+  'gif': 'gif'
+}
+
 function selectChangedListener(e: SelectionChangedEvent): Object | string[] | string {
   let newQuery = []
   for (const key of e.values) {
@@ -62,7 +75,13 @@ export function activate() {
   colorSelector.onSelectionChanged(selectColorListener)
   window.searchBar.addSelector(colorSelector)
   const enumSelector = window.searchBar.createEnumSelector('type', '类型', true)
-  enumSelector.addEnumeration(['jpg', 'png', 'tif', 'bmp'])
+  const supports = utility.getSupportContentType()
+  let type = new Set()
+  for (const t of supports) {
+    type.add(contentType2SearchType[t])
+  }
+  console.debug('support content types:', type)
+  enumSelector.addEnumeration(Array.from(type) as string[])
   window.searchBar.addSelector(enumSelector)
   const timeSelector = window.searchBar.createEnumSelector('datetime', '时间', false)
   timeSelector.addEnumeration(['今日', '昨日', '最近7日', '最近30日', '最近90日', '最近365日'])

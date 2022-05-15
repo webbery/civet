@@ -245,5 +245,7 @@ declare module 'civet' {
          * @description get all tags
          */
         export function getTags(): string[];
+
+        export function getSupportContentType(): string[];
     }
 }

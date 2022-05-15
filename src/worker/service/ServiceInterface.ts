@@ -32,7 +32,7 @@ export abstract class BaseService {
   set module(val: ExtensionModule) { this.#module = val }
 
   activate() {
-    if (this.#isActivate || !this.#module.exports.activate) return
+    if (!this.#module || this.#isActivate || !this.#module.exports.activate) return
     this.#isActivate = true
     const instance = this.#module.exports.activate()
     if (!instance) return

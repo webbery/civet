@@ -13,6 +13,7 @@ import { ExtOverview, ExtOverviewEntry } from './view/extHostOverview'
 import { ExtContentViewEntry } from './view/extHostContentView'
 import { ExtMenusEntry } from './contrib/extHostMenus'
 import { ExtCommandsEntry } from './contrib/extCommand'
+import { ExtensionManager } from './ExtensionManager'
 
 export interface IExtensionApiFactory {
 	(extension: any, registry: any, configProvider: any): typeof civet;
@@ -76,6 +77,10 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
     getTags(): string[] {
       const allTags = CivetDatabase.getAllTags()
       return allTags
+    },
+    getSupportContentType(): string[] {
+      const manager = getSingleton(ExtensionManager)
+      return manager!.getSupportContentType()
     }
   }
   
