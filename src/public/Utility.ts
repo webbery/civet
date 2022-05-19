@@ -1,4 +1,6 @@
 import path from 'path'
+import sudo from 'sudo-prompt'
+
 const fs = require('fs')
 
 export function convert2ValidDate(str: string): string {
@@ -56,13 +58,31 @@ export function isFileExist(filepath: string): boolean {
   return false;
 }
 
-export function runCommand(cmd: string, dir: string): boolean {
+export async function runCommand(cmd: string, dir: string, auth: boolean = false): Promise<boolean> {
   const curDir = process.cwd()
   process.chdir(dir)
-  const { execSync } = require('child_process');
   try {
-    let child = execSync(cmd).toString()
-    console.info(child)
+    let info;
+    if (!auth) {
+      const { execSync } = require('child_process');
+      info = execSync(cmd).toString()
+      process.chdir(curDir)
+      return true
+    } else {
+      const f = new Promise(function (resolve, reject) {
+        sudo.exec(cmd, {
+          name: 'Civet'
+        }, function (error: Error|undefined, stdout, stderr) {
+          if (error) {
+            reject(error)
+            return
+          }
+          resolve(stdout)
+        })
+      })
+      info = await f
+    }
+    console.info(info)
   }catch(error) {
     process.chdir(curDir)
     return false

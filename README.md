@@ -32,7 +32,6 @@
 * 2. [Wiki](#Design)
 * 3. [类似软件对比](#SoftComp)
 * 4. [RoadMap](#RoadMap)
-* 5. [技术文档](#TechDoc)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -43,6 +42,7 @@
 
 开发版本下载链接: [Development Version](https://github.com/webbery/civet/releases)  
 当前windows环境下因为没有签名的原因，所以需要在安装文件的右键“属性”->“常规”中关闭掉安全选项  
+![tips](tips.png)  
 由于版本更新比较慢，所以也可以自行编译。  
 编译安装方式：
   - 确保自己平台的node版本是**node 14**，C++编译器支持C++17。如果使用的是Ubuntu16，可以使用`update-alternatives`命令安装并切换高版本的gcc
@@ -56,6 +56,9 @@
 [浏览器图片下载扩展(支持firefox/chrome/opera)](https://github.com/webbery/image-steam)  
 [讨论区](https://gitter.im/webbery/civet)  
 [Wiki](https://github.com/webbery/civet/wiki)  
+  - [如何实现vscode的require劫持](https://zhuanlan.zhihu.com/p/382381432)  
+  - [civet的图像主色彩抽取算法](https://zhuanlan.zhihu.com/p/355278737)  
+  - [Node如何调用C++代码](https://zhuanlan.zhihu.com/p/395634920)  
 <!-- [插件市场](https://webberg.gitee.io/civet/market.html)   -->
 
 **道阻且长，行则将至。**
@@ -74,12 +77,6 @@
 + [x] 增加信息提取插件功能，以增强不同文件类型的信息存储与检索  
 + [ ] 引入HTML5批注规范，为各种类型的文件增加批注功能  
 + [ ] 升级数据库，增强搜索功能  
-
-##  5. <a name='TechDoc'></a>技术文档
-开发过程踩过许多坑，在填坑的同时记录下这些过程，以便其他开发者在做类似功能的时候能避免踩坑：  
-[如何实现vscode的require劫持](https://zhuanlan.zhihu.com/p/382381432)  
-[civet的图像主色彩抽取算法](https://zhuanlan.zhihu.com/p/355278737)  
-[Node如何调用C++代码](https://zhuanlan.zhihu.com/p/395634920)  
 
 ## <a name='Contributors'></a>Contributors
 <!-- readme: contributors -start -->

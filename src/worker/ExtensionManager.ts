@@ -321,23 +321,28 @@ export class ExtensionManager {
     searchBar!.initSearchBarFinish()
   }
 
-  install(msgid: number, extinfo: any) {
+  async install(msgid: number, extinfo: any) {
     const extPath = getExtensionPath()
     this._initInstaller(extPath)
-    const result = this._installManager!.install(extinfo.name, extinfo.version)
+    const result = await this._installManager!.install(extinfo.name, extinfo.version)
     if (result) {
       // load extension
       const root = getExtensionPath()
-      this._initPackageAndViewService(root, extinfo.name, this._pipeline)
-      this.#services.get(extinfo.name)!.activate()
+      try {
+        console.debug('install', root, extinfo)
+        this._initPackageAndViewService(root, extinfo.name, this._pipeline)
+        this.#services.get(extinfo.name)!.activate()
+      } catch (err: any) {
+        console.error('install', err)
+      }
     }
     return {type: IPCRendererResponse.install, data: result}
   }
 
-  uninstall(msgid: number, extname: string) {
+  async uninstall(msgid: number, extname: string) {
     const extPath = getExtensionPath()
     this._initInstaller(extPath)
-    const result = this._installManager!.uninstall(extname)
+    const result = await this._installManager!.uninstall(extname)
     return {type: IPCRendererResponse.uninstall, data: result}
   }
 

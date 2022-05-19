@@ -17,19 +17,35 @@ export class ExtensionInstallManager {
     this._extensionPath = extensionPath
   }
 
-  install(extensionName: string, version: string): boolean {
+  private hasAuthority(dir: string) {
+    try {
+      fs.accessSync(dir, fs.constants.W_OK)
+      return true
+    } catch (err: any) {
+      return false
+    }
+  }
+  async install(extensionName: string, version: string): Promise<boolean> {
     const requirements = path.resolve(this._extensionPath, './extensions.txt')
+    let auth = this.hasAuthority(this._extensionPath)
     fs.appendFileSync(requirements, `${extensionName}:${version}\n`)
     logger.debug(`install path: ${requirements}`)
     // here we do not check dependencis conflit
-    if(runCommand(`npm install ${extensionName}@${version}`, this._extensionPath))
+    if(await runCommand(`npm install ${extensionName}@${version}`, this._extensionPath, !auth))
     {
+      if (!fs.existsSync(this._extensionPath + '/@civet-extend')) {
+        fs.mkdirSync(this._extensionPath + '/@civet-extend')
+      }
+      const currentPath = this._extensionPath + '/' + extensionName
+      if (!fs.existsSync(currentPath)) {
+        fs.renameSync(this._extensionPath + '/node_modules/' + extensionName, currentPath)
+      }
       return true
     }
     return false
   }
 
-  uninstall(extensionName: string): boolean {
+  async uninstall(extensionName: string): Promise<boolean> {
     const requirements = path.resolve(this._extensionPath, './extensions.txt')
     const content = fs.readFileSync(requirements).toString()
     const extensions = content.split('\n')
@@ -41,7 +57,12 @@ export class ExtensionInstallManager {
     }
     logger.debug(`uninstall rest content: ${result}`)
     fs.writeFileSync(requirements, result)
-    if(runCommand(`npm uninstall ${extensionName}`, this._extensionPath))
+    const currentPath = this._extensionPath + '/' + extensionName
+    if (fs.existsSync(currentPath)) {
+      fs.renameSync(currentPath, this._extensionPath + '/node_modules/' + extensionName)
+    }
+    let auth = this.hasAuthority(this._extensionPath)
+    if(await runCommand(`npm uninstall ${extensionName}`, this._extensionPath, !auth))
     {
       return true
     }
