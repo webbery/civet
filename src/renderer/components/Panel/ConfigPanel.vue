@@ -15,7 +15,26 @@
   <!-- <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button> -->
     <div class="modules">
       <el-collapse accordion>
-        <el-collapse-item title="基本信息" name="1">
+        <el-collapse-item title="快捷键" name="1">
+          <el-row :gutter="20">
+            <el-col :span="6"><div>快捷键</div></el-col>
+            <el-col :span="6"><div>命令</div></el-col>
+            <el-col :span="6"><div>所属插件</div></el-col>
+            <el-col :span="6"><div>功能描述</div></el-col>
+          </el-row>
+          <el-divider></el-divider>
+          <div v-for="(item, idx) of shortcuts" :key="idx">
+            <el-row :gutter="20">
+              <el-col :span="6"><div>{{item.shortcut}}</div></el-col>
+              <el-col :span="6"><div>{{item.command}}</div></el-col>
+              <el-col :span="6"><div>{{item.extension}}</div></el-col>
+              <el-col :span="6"><div>{{item.desc}}</div></el-col>
+            </el-row>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
+      <el-collapse accordion>
+        <el-collapse-item title="基本信息" name="2">
           <el-row :gutter="20">
             <el-col :span="6"><div>键</div></el-col>
             <el-col :span="6"><div>名称</div></el-col>
@@ -91,6 +110,7 @@ export default {
       oldConfig: '',
       config: '',
       properties: [],
+      shortcuts: [],
       valiablePlugins: [
         {path: '', name: 'image', version: '0.0.1', valid: true}
       ],
@@ -109,7 +129,16 @@ export default {
       this.properties.push(s)
     }
     this.version = config.version
-    // console.info('schema', this.properties)
+    const shortcuts = config.getShortCuts()
+    console.debug('shortcuts:', shortcuts)
+    for (const key in shortcuts) {
+      this.shortcuts.push({
+        shortcut: key,
+        command: shortcuts[key].command,
+        extension: shortcuts[key].extension,
+        desc: shortcuts[key].description
+      })
+    }
   },
   methods: {
     loadPlugins: () => {

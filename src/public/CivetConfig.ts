@@ -1,4 +1,3 @@
-const fs = require('fs')
 /**
  * cfg.json describe as follows:
  {
@@ -8,6 +7,9 @@ const fs = require('fs')
       default: {
         dbname: dbname,  // last used database/resources library name
         layout: mapview,  // default layout of overview
+      },
+      shortcut: {
+        key: {command: command, extension: extension, description: desc},
       }
     },
     resources: [
@@ -34,7 +36,8 @@ const fs = require('fs')
     ]
   }
  */
-class CivetConfig {
+  const fs = require('fs')
+  class CivetConfig {
   configPath: string;
   config: any;
   oldVersion: boolean = false;
@@ -71,6 +74,11 @@ class CivetConfig {
         if (typeof config.app.default === 'string') { // 0.1.2 -> 0.2.0
           const dbname = config.app.default
           config.app.default = {layout: 'gridview', dbname: dbname}
+        }
+        if (!config.app.shortcut) {
+          config.app.shortcut = {
+            'Ctrl+C': { command: 'Copy', extension: undefined, description: 'copy files'}
+          }
         }
       }
       cfg = config
@@ -294,6 +302,16 @@ class CivetConfig {
   getActiveCommand(name: string): string[] {
     const resource = this.getResourceByName(name)
     return resource['command']
+  }
+
+  getShortCuts(): any {
+    return this.config.app.shortcut
+  }
+
+  updateShortCut(old: string, newest: string) {
+    const shortcut = this.config.app.shortcut[old]
+    this.config.app.shortcut[newest] = shortcut
+    delete this.config.app.shortcut[old]
   }
 }
 
