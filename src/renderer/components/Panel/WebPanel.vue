@@ -37,16 +37,18 @@ export default {
       extensionMenus: []
     }
   },
-  beforeMount() {
+  created() {
+    console.info('web panel created')
     this.$ipcRenderer.on(IPCRendererResponse.ON_EXTENSION_ROUTER_UPDATE, this.onPanelRouterInit)
     this.$events.on('civet', 'onSwitchView', this.onSwitchView)
-  },
-  mounted() {
     console.info('web panel mounted', config.defaultView)
     updateCurrentViewName(config.defaultView)
     // this.$ipcRenderer.send(IPCNormalMessage.REQUEST_UPDATE_RESOURCES)
     this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, config.defaultView)
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+  },
+  mounted() {
+    console.info('web panel mounted', config.defaultView)
   },
   watch: {
     $route: function(to, from) {
@@ -97,7 +99,6 @@ export default {
     const activateView = getCurrentViewName()
     // HtmlLoader.injector(activateView)
     try {
-      // await ScriptLoader.load(this.script, activateView)
       await SandBoxManager.switchSandbox(activateView, this.script)
     } catch (err) {
       console.error(`load ${activateView} javascript exception: ${err}`)

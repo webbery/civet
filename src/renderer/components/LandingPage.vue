@@ -17,7 +17,9 @@
       <el-col :span="16">
         <div class="display">
           <div id="loading-progress" v-if="loadProgress < 100"></div>
+          <keep-alive>
           <router-view></router-view>
+          </keep-alive>
         </div>
       </el-col>
       <el-col :span="4" class="nav-light">

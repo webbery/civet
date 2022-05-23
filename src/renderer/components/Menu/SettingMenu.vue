@@ -60,11 +60,16 @@ export default {
   },
   methods: {
     onSettingClicked() {
+      if (this.activate === '') return
       this.$router.push({path: '/config', query: {name: '配置'}})
+      this.activate = ''
     },
     onLayoutClicked(name) {
       if (name === this.activate) return
-      console.info('select layout', name)
+      console.info('onLayoutClicked', this.activate, name)
+      if (this.activate === '') {
+        this.$router.push({path: '/', query: {name: '全部', cmd: 'display-all'}})
+      }
       this.show = false
       this.activate = name
       this.$emit('onDisplayChanged', this.show)
