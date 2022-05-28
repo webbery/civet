@@ -25,7 +25,7 @@
           <el-divider></el-divider>
           <div v-for="(item, idx) of shortcuts" :key="idx">
             <el-row :gutter="20">
-              <el-col :span="6"><div>{{item.shortcut}}</div></el-col>
+              <el-col :span="6"><ShortCut :defaultShortcuts="item.shortcut" @changed="onShortCutChanged"></ShortCut></el-col>
               <el-col :span="6"><div>{{item.command}}</div></el-col>
               <el-col :span="6"><div>{{item.extension}}</div></el-col>
               <el-col :span="6"><div>{{item.desc}}</div></el-col>
@@ -33,7 +33,7 @@
           </div>
         </el-collapse-item>
       </el-collapse>
-      <el-collapse accordion>
+      <!-- <el-collapse accordion>
         <el-collapse-item title="基本信息" name="2">
           <el-row :gutter="20">
             <el-col :span="6"><div>键</div></el-col>
@@ -51,7 +51,7 @@
             </el-row>
           </div>
         </el-collapse-item>
-      </el-collapse>
+      </el-collapse> -->
     <!-- <el-divider content-position="left">可用插件</el-divider>
     <el-collapse v-model="valiablePlugins" @change="handlePluginChange">
       <div v-for="(item, idx) of valiablePlugins" :key="idx">
@@ -97,9 +97,11 @@ import Folder from '../utils/Folder'
 import fs from 'fs'
 import { config } from '@/../public/CivetConfig'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
+import ShortCut from '../Control/Shortcut'
 
 export default {
   name: 'config-page',
+  components: {ShortCut},
   data() {
     return {
       version: '',
@@ -182,6 +184,11 @@ export default {
           this.oldConfig.db.path = this.config.db.path
         }
       }
+    },
+    onShortCutChanged(originShortcut, newshortcut) {
+      console.debug('save short cut:', originShortcut, newshortcut)
+      config.updateShortCut(originShortcut, newshortcut.join(' '))
+      config.save()
     }
   }
 }

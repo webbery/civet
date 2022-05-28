@@ -77,7 +77,7 @@
         }
         if (!config.app.shortcut) {
           config.app.shortcut = {
-            'Ctrl+C': { command: 'Copy', extension: undefined, description: 'copy files'}
+            'Ctrl R': { command: 'Rename', extension: 'System', description: 'rename resource'}
           }
         }
       }
