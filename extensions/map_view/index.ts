@@ -11,7 +11,12 @@ const i18n = {
     'map layout': 'map layout'
   }
 }
-let mapView = window.createOverview('mapview', i18n[navigator.language]['map layout']);
+let lang = i18n[navigator.language]
+if (!lang) {
+  lang = i18n['en_US']
+  console.warn(`language ${navigator.language} not support`)
+}
+let mapView = window.createOverview('mapview', lang['map layout']);
 
 mapView.onResourcesLoading((e: OverviewItemLoadEvent) => {
   const fs = require('fs')

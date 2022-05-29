@@ -11,7 +11,12 @@ const i18n = {
     'waterfall layout': 'waterfall layout'
   }
 }
-let gridview = window.createOverview('gridview', i18n[navigator.language]['waterfall layout']);
+let lang = i18n[navigator.language]
+if (!lang) {
+  lang = i18n['en_US']
+  console.warn(`language ${navigator.language} not support`)
+}
+let gridview = window.createOverview('gridview', lang['waterfall layout']);
 
 const fs = require('fs')
 

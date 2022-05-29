@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer-core'
+import util from '../util'
 const electron = require('electron')
 const { spawn } = require('child_process')
 const {describe, it} = require('mocha')
@@ -111,13 +112,7 @@ describe('****************Start Functional Test*************', function (resolve
         done()
       } catch (err) {
         done(err)
-        const fs = require('fs')
-        console.info('++++++++++++++++++ LOG BEGIN +++++++++++++++++++')
-        if (fs.existsSync('C:/Users/runneradmin/AppData/Roaming/civet/logs/civet.log')) {
-          const content = fs.readFileSync('C:/Users/runneradmin/AppData/Roaming/civet/logs/civet.log').toString()
-          console.info(content)
-        }
-        console.info('++++++++++++++++++  LOG END  +++++++++++++++++++')
+        util.printLog()
       }
     })()
   })
