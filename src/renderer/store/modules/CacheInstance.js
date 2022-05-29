@@ -7,7 +7,12 @@ export const Cache = {
   i18n: {}
 }
 
-const locale = 'static/i18n/' + navigator.language + '.properties'
+console.debug('pwd:', process.cwd())
+let locale = process.cwd()
+if (process.env.NODE_ENV !== 'development') {
+  locale += '/resources'
+}
+locale += '/static/i18n/' + navigator.language + '.properties'
 if (fs.existsSync(locale)) {
   const content = fs.readFileSync(locale).toString()
   Cache.i18n = JSON.parse(content)

@@ -118,7 +118,8 @@
         "filter": [
           "**/*"
         ]
-      }
+      },
+      "static/**/*"
     ]
   },
   "dependencies": {
