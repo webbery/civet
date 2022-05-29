@@ -34,7 +34,6 @@ export default {
   data() {
     return {
       setting: i18n('setting'),
-      layout: i18n('layout'),
       layouts: [],
       activate: '',
       history: []
@@ -61,14 +60,14 @@ export default {
   methods: {
     onSettingClicked() {
       if (this.activate === '') return
-      this.$router.push({path: '/config', query: {name: '配置'}})
+      this.$router.push({path: '/config', query: {name: this.$store.getters.i18n('setting')}})
       this.activate = ''
     },
     onLayoutClicked(name) {
       if (name === this.activate) return
       console.info('onLayoutClicked', this.activate, name)
       if (this.activate === '') {
-        this.$router.push({path: '/', query: {name: '全部', cmd: 'display-all'}})
+        this.$router.push({path: '/', query: {name: this.$store.getters.i18n('all'), cmd: 'display-all'}})
       }
       this.show = false
       this.activate = name
@@ -85,6 +84,7 @@ export default {
     onViewRouterInit(session, routers) {
       console.info('created init:', routers, config.defaultView)
       for (let route of routers) {
+        route.display = this.$store.getters.i18n(route.display)
         this.layouts.push(route)
       }
       this.activate = config.defaultView

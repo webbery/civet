@@ -8,7 +8,7 @@ import { ExtensionModule } from '../api/ExtensionRequire'
 
 export abstract class BaseService {
   #event: Emitter;
-  // #instance: any = null;
+  #instance: any = null;
   #module: ExtensionModule;
   #extension: ExtensionPackage;
   #next: BaseService[] = [];
@@ -34,15 +34,15 @@ export abstract class BaseService {
   activate() {
     if (!this.#module || this.#isActivate || !this.#module.exports.activate) return
     this.#isActivate = true
-    const instance = this.#module.exports.activate()
-    if (!instance) return
+    this.#instance = this.#module.exports.activate()
+    if (!this.#instance) return
     // regist event of activate
-    for (const name in instance) {
+    for (const name in this.#instance) {
       console.info('service name:', name)
       const self = this
       const wrapper = async function (msgid: number, resourceID: number, ...args: any) {
         try{
-          const props = await instance[name](...args)
+          const props = await self.#instance[name](...args)
           console.debug(self.name, 'nexts:', self.#next)
           for (const service of self.#next) {
             console.debug('emit next:', service.name)
@@ -67,10 +67,13 @@ export abstract class BaseService {
     this.#isActivate = false
     this.#module.exports.deactivate()
   }
-  // get service() { return this.#instance; }
-  // set service(s: any) {
-  //   this.#instance = s;
-  // }
+  
+  envoke(command: string, ...args: any) {
+    if (this.#instance && this.#instance[command]) {
+      return this.#instance[command](...args)
+    }
+    return null
+  }
 
   get extension() {return this.#extension; }
 

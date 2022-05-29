@@ -28,6 +28,7 @@ export default {
     // regist ipc message process function
     this.$ipcRenderer.on(IPCRendererResponse.ON_RESOURCE_UPDATED, this.onUpdateResources)
     this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
+    this.$ipcRenderer.on(IPCRendererResponse.ON_I18N, this.onI18N)
     this.$events.on('civet', 'onErrorMessage', this.onErrorTips)
   },
   mounted() {
@@ -134,6 +135,10 @@ export default {
     onCloseGuider() {
       const cfg = document.getElementById('guider')
       cfg.close()
+    },
+    onI18N(i18n) {
+      console.debug('on i18n:', i18n)
+      this.$store.commit('upsetI18n', i18n)
     }
   },
   destroyed: function() {

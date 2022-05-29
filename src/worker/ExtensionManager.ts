@@ -321,6 +321,20 @@ export class ExtensionManager {
     searchBar!.initSearchBarFinish()
   }
 
+  async broadcastCommand(command: string, ...args: any) {
+    for (let item of this.#extensionPackages) {
+      if (item[1].viewEvents & ExtensionActiveType.StorageExtension) {
+        const service = this.#services.get(item[0])
+        if (!service) continue
+        const results = await service.envoke(command, args)
+        if (results) {
+          const pipe = getSingleton(MessagePipeline)
+          pipe?.post(command, results)
+        }
+      }
+    }
+  }
+
   async install(msgid: number, extinfo: any) {
     const extPath = getExtensionPath()
     this._initInstaller(extPath)

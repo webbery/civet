@@ -111,6 +111,13 @@ describe('****************Start Functional Test*************', function (resolve
         done()
       } catch (err) {
         done(err)
+        const fs = require('fs')
+        console.info('++++++++++++++++++ LOG BEGIN +++++++++++++++++++')
+        if (fs.existsSync('C:/Users/runneradmin/AppData/Roaming/civet/logs/civet.log')) {
+          const content = fs.readFileSync('C:/Users/runneradmin/AppData/Roaming/civet/logs/civet.log').toString()
+          console.info(content)
+        }
+        console.info('++++++++++++++++++  LOG END  +++++++++++++++++++')
       }
     })()
   })

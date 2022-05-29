@@ -96,7 +96,7 @@ class RendererService {
         callbacks.forEach((callback: any) => {
           switch(callback.length) {
             case 1:
-              callback(msg.data.msg[0])
+              callback(msg.data.msg[0] || msg.data.msg)
               break
             case 2:
               callback(msg.data.id, msg.data.msg)
@@ -105,18 +105,10 @@ class RendererService {
               callback(msg.data.id, types[2], types[1], msg.data.msg[0])
               break
             case 4:
-              if (Array.isArray(msg.data.msg) && Array.isArray(msg.data.msg[0])) {
-                callback(msg.data.id, types[2], types[1], msg.data.msg[0])
-              } else {
-                callback(msg.data.id, types[2], types[1], msg.data.msg)
-              }
+              callback(msg.data.id, types[2], types[1], msg.data.msg[0] || msg.data.msg)
               break
             case 5:
-              if (Array.isArray(msg.data.msg) && Array.isArray(msg.data.msg[0])) {
-                callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0])
-              } else {
-                callback(msg.data.id, types[2], types[1], types[3], msg.data.msg)
-              }
+              callback(msg.data.id, types[2], types[1], types[3], msg.data.msg[0] || msg.data.msg)
               break
             default: break
           }

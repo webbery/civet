@@ -13,6 +13,7 @@ class ServiceHub {
     this.resourceService = registSingletonObject(ResourceService)
     manager.postStartupCommand()
     manager.activeAllService()
+    manager.broadcastCommand('i18n')
     // this.workbechService = new WorkbenchService(pipeline, this.workbenchObserver);
     const WebSocketServer = require('ws').Server
     this.server = new WebSocketServer({address: 'localhost', port: 21313 })

@@ -1,6 +1,17 @@
 import { window, OverviewItemLoadEvent, IResource, utility } from 'civet'
 
-let gridview = window.createOverview('gridview', 'waterfall layout');
+const i18n = {
+  'zh-CN': {
+    'waterfall layout': '瀑布流布局'
+  },
+  'en': {
+    'waterfall layout': 'waterfall layout'
+  },
+  'en_US': {
+    'waterfall layout': 'waterfall layout'
+  }
+}
+let gridview = window.createOverview('gridview', i18n[navigator.language]['waterfall layout']);
 
 const fs = require('fs')
 
@@ -14,6 +25,11 @@ export function activate() {
   return {
     'deleteResources': function (args: any) {
       console.info('deleteResources:', args)
+    },
+    'i18n': () => {
+      return {
+        'waterfall layout': ''
+      }
     }
   }
 }

@@ -89,7 +89,13 @@ const getters = {
   unclasses: state => { return state.unclasses },
   tags: state => { return state.tags },
   allCount: state => { return state.allCount },
-  histories: state => { return state.histories }
+  histories: state => { return state.histories },
+  i18n: (state, getters) => { 
+    return (key) => {
+      console.debug('get i18n:', key, Cache.i18n)
+      return Cache.i18n[key] || key
+    }
+  }
 }
 
 const remote = {
@@ -235,6 +241,11 @@ const mutations = {
       Vue.set(state.viewItems, idx, Cache.files[data[idx]])
     }
     updateOverview(state, false)
+  },
+  upsetI18n(state, data) {
+    for (const key in data) {
+      Cache.i18n[key] = data[key]
+    }
   },
   // addTag(state, info) {
   //   const { fileID, tag } = info
@@ -558,6 +569,9 @@ const actions = {
   async getUntagResources({ commit }) {
     const untags = await service.get(IPCNormalMessage.GET_UNTAG_RESOURCES)
     commit('updateViewResources', untags)
+  },
+  upsetI18n({commit}, data) {
+    commit('upsetI18n', data)
   },
   clear({ commit }, data) {
     commit('clear', data)

@@ -2,10 +2,10 @@
   <div>
     <el-scrollbar style="height:99vh;">
       <table rules="none" cellspacing=0 >
-        <tr @click="handleResourceClick(headOptions[0], 0)" :class="{selected: headOptions[0].isSelected, _cv_item: !headOptions[0].isSelected}"><td><i :class="headOptions[0].icon"></i>全部</td><td>{{allcount}}</td></tr>
-        <tr @click="handleResourceClick(headOptions[1], 1)" :class="{selected: headOptions[1].isSelected, _cv_item: !headOptions[1].isSelected}"><td><i :class="headOptions[1].icon"></i>未分类</td><td>{{unclasses}}</td></tr>
-        <tr @click="handleResourceClick(headOptions[2], 2)" :class="{selected: headOptions[2].isSelected, _cv_item: !headOptions[2].isSelected}"><td><i :class="headOptions[2].icon"></i>未标签</td><td>{{untags}}</td></tr>
-        <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, _cv_item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>标签管理</td><td></td></tr>
+        <tr @click="handleResourceClick(headOptions[0], 0)" :class="{selected: headOptions[0].isSelected, _cv_item: !headOptions[0].isSelected}"><td><i :class="headOptions[0].icon"></i>{{headOptions[0].label}}</td><td>{{allcount}}</td></tr>
+        <tr @click="handleResourceClick(headOptions[1], 1)" :class="{selected: headOptions[1].isSelected, _cv_item: !headOptions[1].isSelected}"><td><i :class="headOptions[1].icon"></i>{{headOptions[1].label}}</td><td>{{unclasses}}</td></tr>
+        <tr @click="handleResourceClick(headOptions[2], 2)" :class="{selected: headOptions[2].isSelected, _cv_item: !headOptions[2].isSelected}"><td><i :class="headOptions[2].icon"></i>{{headOptions[2].label}}</td><td>{{untags}}</td></tr>
+        <tr @click="handleResourceClick(headOptions[3], 3)" :class="{selected: headOptions[3].isSelected, _cv_item: !headOptions[3].isSelected}"><td><i :class="headOptions[3].icon"></i>{{headOptions[3].label}}</td><td></td></tr>
       </table>
       <TreePanel :isActive="true" @addRootClass="addRootClass">
         <PopMenu :list="menus" :underline="false" @ecmcb="onSelectMenu" tag="classTree"></PopMenu>
@@ -53,28 +53,28 @@ export default {
       activeName: 'resources',
       headOptions: [
         {
-          label: '全部',
+          label: this.$store.getters.i18n('all'),
           name: 'all',
           icon: 'el-icon-menu',
           value: 0,
           isSelected: false
         },
         {
-          label: '未分类',
+          label: this.$store.getters.i18n('unclass'),
           name: 'unclass',
           icon: 'el-icon-document',
           value: 0,
           isSelected: false
         },
         {
-          label: '未标签',
+          label: this.$store.getters.i18n('untag'),
           name: 'untag',
           icon: 'el-icon-news',
           value: 0,
           isSelected: false
         },
         {
-          label: '标签管理',
+          label: this.$store.getters.i18n('tag manager'),
           name: 'manageTag',
           icon: 'el-icon-tickets',
           isSelected: false
@@ -84,10 +84,10 @@ export default {
       newCategoryName: '',
       // index: 0,
       menus: [
-        {name: '导出到计算机', cb: this.onExportClasses},
-        {name: '重命名', cb: this.onMenuChangeName},
-        {name: '添加', cb: this.onAddClass},
-        {name: '删除', cb: this.onDeleteClass}
+        {name: this.$store.getters.i18n('export to computer'), cb: this.onExportClasses},
+        {name: this.$store.getters.i18n('rename'), cb: this.onMenuChangeName},
+        {name: this.$store.getters.i18n('add'), cb: this.onAddClass},
+        {name: this.$store.getters.i18n('delete'), cb: this.onDeleteClass}
       ]
     }
   },
@@ -209,11 +209,11 @@ export default {
       switch (node.name) {
         case 'manageTag':
           this.$router.push({path: '/tagManager', query: {name: node.label, cmd: 'manage-tag'}})
-          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '标签管理', cmd: 'display-tag'})
+          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: this.$store.getters.i18n('tag manager'), cmd: 'display-tag'})
           break
         case 'untag':
           this.$router.push({path: '/untag', query: {name: node.label, cmd: ''}})
-          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '未标签', cmd: 'display-tagless'})
+          bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: this.$store.getters.i18n('untag'), cmd: 'display-tagless'})
           break
         case 'all':
           this.$router.push({path: '/', query: {name: node.label, cmd: 'display-all'}})
