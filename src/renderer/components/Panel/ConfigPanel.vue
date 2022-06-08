@@ -95,7 +95,7 @@
 
 <script>
 import bus from '../utils/Bus'
-import { remote } from 'electron'
+import { dialog, getCurrentWindow } from '@electron/remote'
 import Folder from '../utils/Folder'
 import fs from 'fs'
 import { config } from '@/../public/CivetConfig'
@@ -162,7 +162,7 @@ export default {
     },
     onSelectDBPath() {
       let self = this
-      remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+      dialog.showOpenDialog(getCurrentWindow(), {
         properties: ['openDirectory', 'openFile']
       }).then(async (data) => {
         if (data === undefined) return

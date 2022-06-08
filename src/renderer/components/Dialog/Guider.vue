@@ -13,7 +13,7 @@
   </div>
 </template>
 <script>
-import { remote } from 'electron'
+import { dialog, getCurrentWindow } from '@electron/remote'
 import { config } from '../../../public/CivetConfig'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
 import bus from '../utils/Bus'
@@ -68,7 +68,7 @@ export default {
     },
     onSelectDBPath() {
       let self = this
-      remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+      dialog.showOpenDialog(getCurrentWindow(), {
         properties: ['openDirectory', 'openFile']
       }).then(async (data) => {
         if (data === undefined) return
