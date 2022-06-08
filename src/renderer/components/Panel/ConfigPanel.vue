@@ -10,6 +10,9 @@
           </el-input>
           <label>提示：数据库存储文件的数据信息。如果删除掉，所有文件数据将不再可用，标签及分类等信息完全丢失</label>
         </div>
+        <div>
+          <label>日志路径：{{logpath}}</label>
+        </div>
       </el-collapse-item>
     </el-collapse>
   <!-- <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button> -->
@@ -111,6 +114,7 @@ export default {
       tansferMessage: '开始迁移',
       oldConfig: '',
       config: '',
+      logpath: '',
       properties: [],
       shortcuts: [],
       valiablePlugins: [
@@ -141,6 +145,8 @@ export default {
         desc: shortcuts[key].description
       })
     }
+    const app = require('@/../public/System').default.app()
+    this.logpath = app.getPath('logs')
   },
   methods: {
     loadPlugins: () => {
