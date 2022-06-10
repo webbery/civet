@@ -21,7 +21,7 @@ let gridview = window.createOverview('gridview', lang['waterfall layout']);
 const fs = require('fs')
 
 gridview.onResourcesLoading((e: OverviewItemLoadEvent) => {
-  console.info('grid view onResourcesLoading', e.resources.length)
+  if (e.resources) console.info('grid view onResourcesLoading', e.resources.length)
   let frame = fs.readFileSync(utility.extensionPath + '/grid_view/view.html', 'utf-8')
   gridview.html = frame.toString()
 }, gridview);

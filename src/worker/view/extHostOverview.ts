@@ -80,9 +80,14 @@ export class ExtOverview extends ExtHostWebView {
   }
 
   onResourcesLoading(listener: (e: ExtOverviewItemLoadEvent) => void, thisArg?: any): void {
+    const self = this
     const onResourcesLoadingWrapper = function (): void {
       let event = generateResourcesLoadingEvent()
-      listener.call(thisArg, event)
+      try {
+        listener.call(thisArg, event)
+      } catch (err: any) {
+        console.error(`extension '${self.id}' onResourcesLoading run fail: ${err}`)
+      }
     }
     this.proxy.pipeline.regist(IPCNormalMessage.REQUEST_UPDATE_RESOURCES, onResourcesLoadingWrapper)
     this.event.on(IPCNormalMessage.REQUEST_UPDATE_RESOURCES, onResourcesLoadingWrapper);

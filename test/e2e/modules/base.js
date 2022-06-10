@@ -1,5 +1,5 @@
 
-const CSSSettingBtn = '.sidenav .el-icon-setting'
+const CSSSettingBtn = '.sidenav .dock-bottom'
 const CSSLayouts = '.sm-container div'
 const CSSCounter = '._cv_item'
 

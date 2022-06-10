@@ -8,7 +8,7 @@ const CLASSICAL_LAYOUT = 0
 const SelectionIndex = 0
 
 const CSSFolder = '.folder'
-const CSSImage = '._cv_waterfall'
+const CSSImage = '._cv_gv_frame'
 const CSSMenus = '.cm-container li'
 
 async function selectResource(page) {

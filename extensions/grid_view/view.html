@@ -98,6 +98,10 @@
         ._cv_gv_border{
             border-color: white;
         }
+        input {
+            border:0;
+            outline:0;
+        }
     </style>
 </head>
 <body>
@@ -156,13 +160,13 @@
                 div.style.width = `${item.width - 10}px`
                 div.style.height = `${item.height}px`
                 // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
-                const innerHTML = `<div draggable="true" class="image">
+                const innerHTML = `<div draggable="true" class="__cv_image">
                                     <div class="el-card is-never-shadow" style="border: 0px;">
                                         <div class="el-card__body" style="padding: 1px;">
                                             <div class="_cv_gv_frame" onclick="WaterfallLayout.onGridClick(${item.id}, this)" oncontextmenu="WaterfallLayout.onGridClick(${item.id}, this)" ondblclick="WaterfallLayout.onDbResourceClick(${item.id})">
                                                 <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
                                             </div>
-                                            <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;">
+                                            <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;" ondblclick="WaterfallLayout.onDbNameClick(this, ${item.id})">
                                                 <span class="context" id="gv_${item.id}">${item.name}</span>
                                             </div>
                                         </div>
@@ -332,7 +336,11 @@
                         params: GridViewCache.classPath + classname
                     })
                 },
-                onFolderClick: function (classid) {}
+                onFolderClick: function (classid) {},
+                onDbNameClick: function (self, itemid) {
+                    // rename
+                    console.debug('db name click')
+                }
             }
         })('items')
         

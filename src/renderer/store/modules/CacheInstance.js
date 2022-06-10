@@ -17,5 +17,5 @@ if (fs.existsSync(locale)) {
   const content = fs.readFileSync(locale).toString()
   Cache.i18n = JSON.parse(content)
 } else {
-  console.error(`i18n ${navigator.language}.properties file not exist`)
+  console.error(`i18n ${locale} file not exist`)
 }

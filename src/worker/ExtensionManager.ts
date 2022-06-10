@@ -308,7 +308,7 @@ export class ExtensionManager {
     // read startup command of config
     const curDB = config.getCurrentDB() || ''
     const db = config.getResourceByName(curDB)
-    const commands = db['command'] || []
+    const commands = (db !== null? db['command'] : []) || []
     for (const cmd of commands) {
       activate(this.#extensionOfCommand, cmd)
     }

@@ -95,7 +95,7 @@
 
 <script>
 import bus from '../utils/Bus'
-import { dialog, getCurrentWindow } from '@electron/remote'
+import { dialog, getCurrentWindow, globalShortcut } from '@electron/remote'
 import Folder from '../utils/Folder'
 import fs from 'fs'
 import { config } from '@/../public/CivetConfig'
@@ -192,9 +192,24 @@ export default {
       }
     },
     onShortCutChanged(originShortcut, newshortcut) {
+      if (newshortcut.length === 0 || originShortcut.length === 0) return
       console.debug('save short cut:', originShortcut, newshortcut)
       config.updateShortCut(originShortcut, newshortcut.join(' '))
       config.save()
+      const converter = function(shortcutArr) {
+        let str = ''
+        for (let item of shortcutArr) {
+          str += item
+          str += '+'
+        }
+        return str.substr(0, str.length - 1)
+      }
+      const old = converter(originShortcut.split(' '))
+      globalShortcut.unregister(old)
+      const newer = converter(newshortcut)
+      globalShortcut.register(newer, () => {
+        console.debug('run shortcut:', newer)
+      })
     }
   }
 }
