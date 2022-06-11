@@ -92,12 +92,13 @@ module.exports = {
     return items[1].length
   },
   getCurrentResourceName: async function (page) {
+    // In grid view
     await page.waitForSelector(CSSName)
     await page.waitForTimeout(500)
-    const value = await page.evaluate(selector => {
-      // console.error('999999999', document.querySelector(selector))
-      return document.querySelector(selector)[0].innerHTML
-    }, CSSName)
+    let items = await page.$$(CSSName)
+    const value = await page.evaluate(item => {
+      return item.innerHTML
+    }, items[0])
     return value
   },
   getProperties: async function (page) {}
