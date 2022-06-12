@@ -105,7 +105,8 @@ export class ResourceService{
 
   getFilesSnap(msgid: number, data: any) {
     // 全部图片信息
-    const imagesSnap = CivetDatabase.getFilesSnap(undefined)
+    let imagesSnap = CivetDatabase.getFilesSnap(undefined)
+    if (!imagesSnap) imagesSnap = []
     return {type: ReplyType.REPLY_FILES_SNAP, data: imagesSnap}
     // reply2Renderer(ReplyType.REPLY_FILES_SNAP, imagesSnap)
   }

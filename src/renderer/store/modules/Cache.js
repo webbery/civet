@@ -490,8 +490,10 @@ const actions = {
       commit('init', { unclasses, untags, allClasses, filesSnap, allTags })
     } catch (err) {
       console.error(err)
-      const guider = document.getElementById('guider')
-      guider.showModal()
+      if (config.getCurrentDB() === undefined) {
+        const guider = document.getElementById('guider')
+        guider.showModal()
+      }
     }
   },
   async query({ commit }, query) {
