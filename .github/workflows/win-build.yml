@@ -48,10 +48,11 @@ jobs:
           npm run test --loglevel silly
         env:
           CI: true
-      # - name: tmate session
-      #   if: ${{ failure() }}
-      #   uses: mxschmitt/action-tmate@v3
-      #   timeout-minutes: 120
+      - name: get release when fail
+        if: ${{ failure() }}
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   publish:
     runs-on: windows-2019
     needs: build
