@@ -124,7 +124,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.8",
-    "civetkern": "^0.3.4",
+    "civetkern": "^0.3.5",
     "download": "^8.0.0",
     "electron-updater": "^4.3.5",
     "element-ui": "^2.14.1",
