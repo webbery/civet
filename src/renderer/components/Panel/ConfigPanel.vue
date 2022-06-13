@@ -13,6 +13,9 @@
         <div>
           <label>日志路径：{{logpath}}</label>
         </div>
+        <div>
+          <label>配置路径：{{configPath}}</label>
+        </div>
       </el-collapse-item>
     </el-collapse>
   <!-- <el-button :disabled="!enableTransfer" slot="append" @click="onStartTransfer()">{{tansferMessage}}</el-button> -->
@@ -106,10 +109,11 @@ export default {
   name: 'config-page',
   components: {ShortCut},
   data() {
+    const configPath = config.getConfigPath()
     return {
       version: '',
       activeResource: ['1'],
-      configPath: '',
+      configPath: configPath,
       enableTransfer: false,
       tansferMessage: '开始迁移',
       oldConfig: '',

@@ -97,6 +97,11 @@ export function getExtensionPath(): string {
     const os = require('os')
     switch(os.platform()) {
       case 'linux':
+        {
+          const process = require('./System').default.proc()
+          extensionLocation = 'resources/app.asar.unpacked'
+          return path.dirname(process.execPath) + '/' + extensionLocation
+        }
       case 'win32':
         extensionLocation = 'resources/app.asar.unpacked'
         return path.resolve('.') + '/' + extensionLocation

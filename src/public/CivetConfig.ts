@@ -64,7 +64,7 @@
     if (!fs.existsSync(this.configPath)) {
       fs.writeFileSync(this.configPath, JSON.stringify(cfg))
     } else {
-      const config = JSON.parse(fs.readFileSync(this.configPath))
+      const config = JSON.parse(fs.readFileSync(this.configPath).toString())
       // cfg.app.first = false
       if (!config.app.version || config.app.version !== version) {
         // upgrade config here
@@ -81,6 +81,9 @@
           }
         }
       }
+      if (!config.app.default) { // avoid first time exception cause a wrong format file
+        config.app.default = {layout: 'gridview'}
+      }
       cfg = config
     }
     this.#lastModify = this.getModifyTime()
@@ -90,6 +93,10 @@
   private getModifyTime(): number {
     const stat = fs.statSync(this.configPath)
     return stat.mtime.getTime()
+  }
+
+  getConfigPath(): string {
+    return this.configPath
   }
 
   getConfig(reload: boolean) {
@@ -104,6 +111,7 @@
   }
 
   getCurrentDB(): string|undefined {
+    if (!this.config.app.default) return undefined
     return this.config.app.default['dbname']
   }
 
@@ -120,6 +128,7 @@
   }
 
   get defaultView() {
+    if (!this.config.app.default) return 'gridview'
     return this.config.app.default.layout
   }
 

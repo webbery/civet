@@ -94,7 +94,8 @@ export class ExtContentViewEntry {
   private getContentViewByID(id: string, suffixes: string[]): ExtContentView | null {
     for (let suffix of suffixes) {
       if (this.#contentviews.has(suffix)) {
-        for (let view of this.#contentviews[suffix]) {
+        const views = this.getContentViews(suffix)
+        for (let view of views) {
           if (view.id === id) return view
         }
       }
