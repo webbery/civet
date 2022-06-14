@@ -80,7 +80,7 @@ export default {
         if (e.which === 17 && Global.ctrlPressed) {
           Global.ctrlPressed = false
         }
-      } else if (platform === 'mac') {
+      } else if (platform === 'darwin') {
         if (e.metaKey && Global.ctrlPressed) {
           Global.ctrlPressed = false
         }
