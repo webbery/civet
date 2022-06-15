@@ -114,13 +114,6 @@ export class ResourceService{
   getImageInfo(msgid: number, imageID: number) {
     const img = CivetDatabase.getFilesInfo([imageID])
     console.info('getImagesInfo', img)
-    // let blob = new Blob([file.thumbnail], { type: 'image/jpeg' })
-    //     let reader = new FileReader()
-    //     reader.onload = function(e) {
-    //       this.thumbnail = e.target.result
-    //       console.info('this.thumbnail', this.thumbnail)
-    //     }
-    // reader.readAsDataURL(blob)
     const image = new Resource(img[0])
     // reply2Renderer(ReplyType.REPLY_IMAGE_INFO, image)
     return {type: ReplyType.REPLY_IMAGE_INFO, data: image}

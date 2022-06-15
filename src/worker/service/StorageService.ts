@@ -41,12 +41,18 @@ export class StorageService implements IStorageService{
         CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: thumbnail, type: 'bin' })
       }
     } else {
-      if (data[0].name === 'color') {
-        CivetDatabase.addMeta([rId], { name: data[0].name, value: data[0].value, type: 'color', query: true })
-      } else {
-        if (data[0].value && data[0].value.length !== 0) {
-          CivetDatabase.addMeta([rId], { name: data[0].name, value: data[0].value, type: data[0].type })
-        }
+      switch(data[0].name) {
+        case 'color':
+          CivetDatabase.addMeta([rId], { name: data[0].name, value: data[0].value, type: 'color', query: true })
+          break
+        case 'tag':
+          CivetDatabase.setTags([rId], data[0].value)
+          break
+        default:
+          if (data[0].value && data[0].value.length !== 0) {
+            CivetDatabase.addMeta([rId], { name: data[0].name, value: data[0].value, type: data[0].type })
+          }
+          break
       }
     }
 

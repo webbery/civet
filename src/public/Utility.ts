@@ -127,7 +127,7 @@ export function resetArray<T>(vue: any, array: T[], newVal: T[]) {
 }
 
 export function thumbnail2Base64(thumbnail: any) {
-  return 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
+  return 'data:image/png;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
 }
 
 export function buffer2Base64(buffer: Buffer) {

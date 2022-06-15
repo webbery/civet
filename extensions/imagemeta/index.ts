@@ -163,8 +163,8 @@ class DataParser{
       const width = Math.round(w * scale)
       const height = Math.round(h * scale)
       const data = await image.resize(width, height)
-        .jpeg().toBuffer()
-      // console.info('ThumbnailParser:', data)
+        .png().toBuffer()
+      // console.info('image:', image)
       let prop: ResourceProperty = {
         name: 'thumbnail',
         value: data,
@@ -178,9 +178,9 @@ class DataParser{
       // update preview
       file.thumbnail = data
       // console.info('thumbnail:', typeof data)
-      // storage.addMeta([file.id], {name: 'thumbnail', value: file.thumbnail, type: 'bin'})
-      file.raw = await image.resize(width, height)
-        .raw().toBuffer()
+      file.raw = await image.resize(width, height).raw().toBuffer()
+      // file.space = image.options.colourspace
+      console.info('image option:', image.options)
       return update
     } catch(err) {
       console.error(err)

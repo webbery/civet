@@ -12,9 +12,12 @@ class ColorParser {
     if (!!file.raw) {
       const count = file.raw.length / 3;
       let counter = new Map<number, number>()
+      // const space = file.space
+      // console.debug('image raw:', file.raw)
       for (let start = 0; start < count; start += 3) {
         // const idx = this.rgb2index([0, 255, 0])
         const idx = this.rgb2index([file.raw[start], file.raw[start + 1], file.raw[start + 2]])
+        // if (idx === 0) continue // remove black color
         const val = counter.get(idx)
         if (val === undefined) {
           counter.set(idx, 1)
@@ -23,6 +26,8 @@ class ColorParser {
         }
       }
       // console.info('counter', counter)
+      // remove 0
+      counter.delete(0)
       const topk = Array.from(counter).sort(([, a], [, b]) => {
         return b - a
       }).splice(0, 50)
@@ -73,6 +78,13 @@ class ColorParser {
     const ir = Math.floor(color[0] / 16)
     const ig = Math.floor(color[1] / 16)
     const ib = Math.floor(color[2] / 16)
+    return Math.floor(ir * 4096 * 256 + ig * 256 + ib)
+  }
+
+  srgb2index(color: number[]): number {
+    const ir = Math.floor(color[1] / 16)
+    const ig = Math.floor(color[2] / 16)
+    const ib = Math.floor(color[3] / 16)
     return Math.floor(ir * 4096 * 256 + ig * 256 + ib)
   }
 
