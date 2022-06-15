@@ -98,7 +98,7 @@
         ._cv_gv_border{
             border-color: white;
         }
-        input {
+        ._cv_gv_input {
             border:0;
             outline:0;
         }
@@ -339,7 +339,40 @@
                 onFolderClick: function (classid) {},
                 onDbNameClick: function (self, itemid) {
                     // rename
-                    console.debug('db name click')
+                    const label = document.getElementById('gv_' + itemid)
+                    const text = label.innerText
+                    label.setAttribute('style', 'display:none')
+                    const input = document.createElement('input')
+                    input.setAttribute('class', '_cv_gv_input')
+                    input.setAttribute('draggable', false)
+                    input.setAttribute('type', 'text')
+                    const disableDrag = (event) => {
+                        console.info('disable drag')
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    const renameEventListener = () => {
+                        console.debug('input lost focus', input)
+                        const newTitle = input.value
+                        input.removeEventListener('blur', renameEventListener)
+                        input.removeEventListener('dragstart', disableDrag)
+                        self.removeChild(input)
+                        if (newTitle !== '' && newTitle !== text) {
+                            acquireCivetApi().postMessage({
+                                command: 'changeResourceName',
+                                params: {id: itemid, name: newTitle}
+                            })
+                            label.innerText = newTitle
+                        }
+                        label.removeAttribute('style')
+                    }
+                    
+                    input.addEventListener('blur', renameEventListener)
+                    input.addEventListener('dragstart', disableDrag)
+                    self.appendChild(input)
+                    input.setRangeText(text)
+                    input.focus()
+                    console.debug('db name click, children:', label)
                 }
             }
         })('items')

@@ -33,6 +33,8 @@ export default {
       switch (key) {
         case 'Control': return 'Ctrl'
         case 'Command': return 'Cmd'
+        case 'Alt': return 'Alt'
+        case 'Option': return 'Opt'
         default: return key
       }
     },

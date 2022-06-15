@@ -17,6 +17,8 @@ import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { getCurrentViewName } from '@/common/RendererService'
 import { text2PNG } from '@/../public/Utility'
 import { Cache } from '@/store/modules/CacheInstance'
+import { isEmpty } from '@/../public/String'
+import { globalShortcut } from 'electron'
 
 export default {
   name: 'civet',
@@ -42,11 +44,13 @@ export default {
         this.$store.dispatch('init')
         this.$events.on('civet', 'showResourceDetail', this.onResourceShow)
         this.$events.on('civet', 'openClass', this.onClassOpen)
+        this.$events.on('civet', 'changeResourceName', this.onCommandChangeName)
       })
     }
     if (config.shouldUpgrade()) {
       config.save()
     }
+    this.initializeShortcut()
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },
@@ -121,6 +125,13 @@ export default {
       console.info('open class', classpath)
       this.$store.dispatch('getClassesAndFiles', classpath.params)
     },
+    onCommandChangeName(resource) {
+      console.debug('onCommandChangeName', resource)
+      const params = resource.params
+      if (params.id !== undefined && !isEmpty(params.name)) {
+        this.$store.dispatch('changeFileName', {id: params.id, filename: params.name})
+      }
+    },
     onErrorTips(info) {
       console.error(info)
       const h = this.$createElement
@@ -139,6 +150,11 @@ export default {
     onI18N(i18n) {
       console.debug('on i18n:', i18n)
       this.$store.commit('upsetI18n', i18n)
+    },
+    initializeShortcut() {
+      // globalShortcut
+      console.debug(globalShortcut)
+      // globalShortcut.unregister('CommandOrControl+R')
     }
   },
   destroyed: function() {
