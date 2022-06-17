@@ -338,21 +338,20 @@
                 },
                 onFolderClick: function (classid) {},
                 onDbNameClick: function (self, itemid) {
-                    // rename
                     const label = document.getElementById('gv_' + itemid)
                     const text = label.innerText
+                    const originStyle = label.getAttribute('style')
                     label.setAttribute('style', 'display:none')
                     const input = document.createElement('input')
                     input.setAttribute('class', '_cv_gv_input')
-                    input.setAttribute('draggable', false)
+                    input.setAttribute('draggable', true)
                     input.setAttribute('type', 'text')
                     const disableDrag = (event) => {
-                        console.info('disable drag')
                         event.preventDefault()
                         event.stopPropagation()
+                        return false
                     }
                     const renameEventListener = () => {
-                        console.debug('input lost focus', input)
                         const newTitle = input.value
                         input.removeEventListener('blur', renameEventListener)
                         input.removeEventListener('dragstart', disableDrag)
@@ -364,15 +363,13 @@
                             })
                             label.innerText = newTitle
                         }
-                        label.removeAttribute('style')
+                        label.setAttribute('style', originStyle)
                     }
-                    
                     input.addEventListener('blur', renameEventListener)
                     input.addEventListener('dragstart', disableDrag)
                     self.appendChild(input)
                     input.setRangeText(text)
                     input.focus()
-                    console.debug('db name click, children:', label)
                 }
             }
         })('items')
