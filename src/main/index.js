@@ -216,6 +216,7 @@ app.whenReady().then(() => {
   })
   globalShortcut.unregisterAll()
 })
+
 app.on('ready', async () => {
   Menu.setApplicationMenu(null)
   require('@electron/remote/main').initialize()
@@ -259,4 +260,26 @@ app.on('ready', async () => {
       }
     }
   })
+})
+
+function registKeydown(key) {
+  globalShortcut.register(key, () => {
+    const msg = {
+      type: 'keydown',
+      data: {
+        msg: [key]
+      }
+    }
+    sendWindowMessage(mainWindow, 'message-to-renderer', msg)
+  })
+}
+
+app.on('browser-window-focus', function () {
+  registKeydown('F5')
+  registKeydown('CommandOrControl+R')
+})
+
+app.on('browser-window-blur', function () {
+  globalShortcut.unregister('CommandOrControl+R')
+  globalShortcut.unregister('F5')
 })

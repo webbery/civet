@@ -18,7 +18,7 @@ import { getCurrentViewName } from '@/common/RendererService'
 import { text2PNG } from '@/../public/Utility'
 import { Cache } from '@/store/modules/CacheInstance'
 import { isEmpty } from '@/../public/String'
-import { globalShortcut } from 'electron'
+import { Shortcut } from './shortcut/Shortcut'
 
 export default {
   name: 'civet',
@@ -31,6 +31,7 @@ export default {
     this.$ipcRenderer.on(IPCRendererResponse.ON_RESOURCE_UPDATED, this.onUpdateResources)
     this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
     this.$ipcRenderer.on(IPCRendererResponse.ON_I18N, this.onI18N)
+    this.$ipcRenderer.on('keydown', this.onSystemKeydown)
     this.$events.on('civet', 'onErrorMessage', this.onErrorTips)
   },
   mounted() {
@@ -151,9 +152,14 @@ export default {
       console.debug('on i18n:', i18n)
       this.$store.commit('upsetI18n', i18n)
     },
+    onSystemKeydown(params) {
+      console.debug('system keydown:', params)
+      const key = params.toLowerCase()
+      const func = Shortcut.get(key)
+      if (func) func()
+    },
     initializeShortcut() {
       // globalShortcut
-      console.debug(globalShortcut)
       // globalShortcut.unregister('CommandOrControl+R')
     }
   },

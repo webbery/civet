@@ -157,3 +157,13 @@ export function text2PNG(text: string, width: number, height: number): string {
 export function hasProtocol(url: string) {
   return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://')
 }
+
+export function localKey(key: string) {
+  switch (key) {
+    case 'Control': return 'CommandOrControl'
+    case 'Command': return 'CommandOrControl'
+    case 'Alt': return 'Alt'
+    case 'Option': return 'Opt'
+    default: return key
+  }
+}

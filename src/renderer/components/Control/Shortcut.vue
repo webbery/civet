@@ -5,6 +5,7 @@
 </template>
 <script>
 import Vue from 'vue'
+import { localKey } from '@/../public/Utility'
 
 export default {
   data() {
@@ -29,17 +30,8 @@ export default {
     isCaptal(key) {
       return key === 'CapsLock'
     },
-    localKey(key) {
-      switch (key) {
-        case 'Control': return 'Ctrl'
-        case 'Command': return 'Cmd'
-        case 'Alt': return 'Alt'
-        case 'Option': return 'Opt'
-        default: return key
-      }
-    },
     onKeyDown(event) {
-      const key = this.localKey(event.key)
+      const key = localKey(event.key)
       if (this.index === 0) {
         this.currentShortcuts.splice(0, this.currentShortcuts.length - 1)
         this.currentShortcuts[this.index] = key
@@ -56,7 +48,7 @@ export default {
     },
     onKeyUp(event) {
       this.index = this.currentShortcuts.length - 1
-      const key = this.localKey(event.key)
+      const key = localKey(event.key)
       if (key === this.currentShortcuts[0]) {
         this.index = 0
         this.$emit('changed', this.defaultShortcuts, this.currentShortcuts)
