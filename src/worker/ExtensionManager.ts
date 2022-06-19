@@ -11,7 +11,7 @@ import { ExtensionInstallManager, ExtensionDescriptor } from './ExtensionInstall
 import fs from 'fs'
 import { injectable, showErrorInfo, getSingleton } from './Singleton'
 import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
-import { ExtensionPackage, ExtensionActiveType, MenuDetail } from './ExtensionPackage'
+import { ExtensionPackage, ExtensionActiveType, MenuDetail, KeybindDetail } from './ExtensionPackage'
 import { BaseService, IStorageService } from './service/ServiceInterface'
 import { StorageService } from './service/StorageService'
 import { ViewService } from './service/ViewService'
@@ -20,6 +20,7 @@ import { createMixService as applyMixService, MixService } from './service/MixSe
 import { ExtensionModule } from './api/ExtensionRequire'
 import { ExtSearchBarManager } from './view/extHostSearchBar'
 import { IResource, ResourceProperty } from 'civet'
+import { ExtOverviewEntry } from './view/extHostOverview'
 
 export interface ExtensionAccessor {
   visit(extension: ViewService): void;
@@ -71,6 +72,27 @@ class ExtensionMenuAccessor implements ExtensionAccessor {
 
   result(){
     return this.#menus
+  }
+}
+
+class ExtensionKeybindAccessor implements ExtensionAccessor {
+  #keybinds: KeybindDetail[] = [];
+  #context: string;
+
+  constructor(context: string) {
+    this.#context = context
+  }
+
+  visit(service: ViewService) {
+    const keybind = service.keybinds()
+    const items: KeybindDetail[] = keybind[this.#context]
+    if (items) {
+      this.#keybinds = this.#keybinds.concat(items)
+    }
+  }
+
+  result(){
+    return this.#keybinds
   }
 }
 
@@ -259,6 +281,7 @@ export class ExtensionManager {
     pipeline.regist(IPCNormalMessage.UPDATE_EXTENSION, this.update, this)
     pipeline.regist(IPCNormalMessage.LIST_EXTENSION, this.installedList, this)
     pipeline.regist(IPCNormalMessage.GET_OVERVIEW_MENUS, this.replyMenus, this)
+    pipeline.regist(IPCNormalMessage.GET_OVERVIEW_KEYBINDS, this.replyKeybinds, this)
     pipeline.regist(IPCNormalMessage.POST_COMMAND, this.onRecieveCommand, this)
   }
 
@@ -388,6 +411,14 @@ export class ExtensionManager {
     return {type: IPCRendererResponse.getOverviewMenus, data: menus}
   }
 
+  accessKeybind(keybindAccessor: ExtensionKeybindAccessor) {
+    this.#services.forEach((service: BaseService) => {
+      keybindAccessor.visit(service as ViewService)
+    })
+    const keybinds = keybindAccessor.result()
+    return {type: IPCRendererResponse.getOverviewKeybinds, data: keybinds}
+  }
+
   replyMenus(msgid: number, context: string|undefined) {
     if (context) {
       let menuAccessor: ExtensionMenuAccessor = new ExtensionMenuAccessor(context);
@@ -395,6 +426,17 @@ export class ExtensionManager {
     }
     let menuAccessor: ExtensionAllMenuAccessor = new ExtensionAllMenuAccessor()
     return this.accessMenu(menuAccessor)
+  }
+
+  replyKeybinds(msgid: number, context: string | undefined) {
+    if (context) {
+      const [view, id] = context.split('.')
+      const entry = getSingleton(ExtOverviewEntry)!
+      const overview = entry.getOverviewsByName(id)!
+      let keybidnAccessor: ExtensionKeybindAccessor = new ExtensionKeybindAccessor(view + '.' + overview.extensionName)
+      return this.accessKeybind(keybidnAccessor)
+    }
+    return undefined
   }
 
   replyAllCommand(msgid: number) {

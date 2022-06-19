@@ -166,7 +166,7 @@
                                             <div class="_cv_gv_frame" onclick="WaterfallLayout.onGridClick(${item.id}, this)" oncontextmenu="WaterfallLayout.onGridClick(${item.id}, this)" ondblclick="WaterfallLayout.onDbResourceClick(${item.id})">
                                                 <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
                                             </div>
-                                            <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;" ondblclick="WaterfallLayout.onDbNameClick(this, ${item.id})">
+                                            <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;" ondblclick="WaterfallLayout.onDbNameClick(${item.id})">
                                                 <span class="context" id="gv_${item.id}">${item.name}</span>
                                             </div>
                                         </div>
@@ -203,8 +203,8 @@
                 root.innerHTML = ''
             }
             function onViewClick(itemid, element) {
-                acquireCivetApi().Overview.click(itemid)
                 GridViewCache.resetSelection()
+                acquireCivetApi().Overview.click(itemid)
                 if (itemid) {
                     GridViewCache.addSelection(itemid, element)
                 }
@@ -241,6 +241,50 @@
                 const root = document.getElementById('_cv_classes')
                 root.innerHTML = ''
             }
+            function safeFromCharCode(codes) {
+                let result = ''
+                let chunk = 8 * 1024
+                let idx = 0
+                for (let len = codes.length / chunk; idx < len; ++idx) {
+                    result += String.fromCharCode.apply(null, codes.subarray(idx * chunk, (idx + 1) * chunk))
+                }
+                result += String.fromCharCode.apply(null, codes.subarray(idx * chunk, codes.length - idx * chunk - 1))
+                return result
+            }
+            function editName(itemid) {
+                const label = document.getElementById('gv_' + itemid)
+                const text = label.innerText
+                const originStyle = label.getAttribute('style')
+                label.setAttribute('style', 'display:none')
+                const input = document.createElement('input')
+                input.setAttribute('class', '_cv_gv_input')
+                input.setAttribute('draggable', true)
+                input.setAttribute('type', 'text')
+                const disableDrag = (event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    return false
+                }
+                const renameEventListener = () => {
+                    const newTitle = input.value
+                    input.removeEventListener('blur', renameEventListener)
+                    input.removeEventListener('dragstart', disableDrag)
+                    label.parentNode.removeChild(input)
+                    if (newTitle !== '' && newTitle !== text) {
+                        acquireCivetApi().postMessage({
+                            command: 'changeResourceName',
+                            params: {id: itemid, name: newTitle}
+                        })
+                        label.innerText = newTitle
+                    }
+                    label.setAttribute('style', originStyle)
+                }
+                input.addEventListener('blur', renameEventListener)
+                input.addEventListener('dragstart', disableDrag)
+                label.parentNode.appendChild(input)
+                input.setRangeText(text)
+                input.focus()
+            }
             acquireCivetApi().Overview.on('add', (resources) => {
                 // console.info('add resource in document', resources)
                 for (let resource of resources) {
@@ -267,6 +311,10 @@
             acquireCivetApi().Overview.on('click', (data) => {
                 GridViewCache.resetSelection()
             })
+            acquireCivetApi().Overview.on('rename', (item) => {
+                console.debug('rename item:', item)
+                editName(item)
+            })
             return {
                 add: function(item) {
                     let block = {}, src
@@ -283,7 +331,7 @@
                                 if (typeof meta.value === 'string') {
                                     block['thumbnail'] = meta.value
                                 } else {
-                                    block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value))
+                                    block['thumbnail'] = 'data:image/png;base64,' + btoa(safeFromCharCode(meta.value))
                                 }
                             }
                         }
@@ -337,40 +385,7 @@
                     })
                 },
                 onFolderClick: function (classid) {},
-                onDbNameClick: function (self, itemid) {
-                    const label = document.getElementById('gv_' + itemid)
-                    const text = label.innerText
-                    const originStyle = label.getAttribute('style')
-                    label.setAttribute('style', 'display:none')
-                    const input = document.createElement('input')
-                    input.setAttribute('class', '_cv_gv_input')
-                    input.setAttribute('draggable', true)
-                    input.setAttribute('type', 'text')
-                    const disableDrag = (event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        return false
-                    }
-                    const renameEventListener = () => {
-                        const newTitle = input.value
-                        input.removeEventListener('blur', renameEventListener)
-                        input.removeEventListener('dragstart', disableDrag)
-                        self.removeChild(input)
-                        if (newTitle !== '' && newTitle !== text) {
-                            acquireCivetApi().postMessage({
-                                command: 'changeResourceName',
-                                params: {id: itemid, name: newTitle}
-                            })
-                            label.innerText = newTitle
-                        }
-                        label.setAttribute('style', originStyle)
-                    }
-                    input.addEventListener('blur', renameEventListener)
-                    input.addEventListener('dragstart', disableDrag)
-                    self.appendChild(input)
-                    input.setRangeText(text)
-                    input.focus()
-                }
+                onDbNameClick: editName
             }
         })('items')
         
@@ -390,6 +405,7 @@
                         clazz = clazz.replace('_cv_gv_border', '_cv_gv_trans-border')
                         element.setAttribute('class', clazz)
                     }
+                    acquireCivetApi().Overview.click(undefined)
                     selections = []
                 },
                 getSelection: function() { return selections },

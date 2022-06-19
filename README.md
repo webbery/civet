@@ -78,6 +78,8 @@
 | Billfish  | Qt | C++ | Sqlite + 图片拷贝/索引 | 私有 | Windows/Mac
 | PicSee  | ObjectC | ObjectC | Realm | 私有 | Mac
 
+内置插件支持的文件格式：  
+图片: jpg png bmp tif glt  
 ## <a name='Contributors'></a>Contributors
 <!-- readme: contributors -start -->
 <table>

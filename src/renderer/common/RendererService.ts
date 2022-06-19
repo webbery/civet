@@ -7,6 +7,7 @@ declare let _cv_command_args: any;
 declare let _cv_activate_view_name: string;
 declare let _cv_content_view_name: string;
 declare let _cv_overview_listeners: any;
+declare let _cv_select_id_: any;
 declare const acquireCivetApi: any;
 export const civetApi = acquireCivetApi
 export const events = _cv_events;
@@ -15,6 +16,10 @@ export function updateCurrentViewName(name: string) {
 }
 export function getCurrentViewName(): string {
   return _cv_activate_view_name
+}
+
+export function getSelectionID(): number| undefined {
+  return _cv_select_id_
 }
 
 export function updateContentViewName(name: string) {

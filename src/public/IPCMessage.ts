@@ -49,6 +49,7 @@ export enum IPCNormalMessage {
   REQUEST_UPDATE_RESOURCES = 'onResourcesLoading',
   RETRIEVE_OVERVIEW = 'rtvOverview',
   GET_OVERVIEW_MENUS = 'getOverviewMenus',
+  GET_OVERVIEW_KEYBINDS = 'getOverviewKeybinds',
   // content view
   RETRIEVE_CONTENT_VIEW = 'rtvContentView',
   // commands
@@ -71,6 +72,7 @@ export enum IPCRendererResponse {
   reInitDB = 'replyReloadDBStatus',
   getFilesSnap = 'replyFilesSnap',
   getOverviewMenus = 'replyOverviewMenus',
+  getOverviewKeybinds = 'replyOverviewKeybinds',
   install = 'replyInstallResult',
   uninstall = 'replyUninstallResult',
   getActiveCmd = 'replyActiveCommands',

@@ -17,6 +17,7 @@
       let _cv_message_id_ = 0
       let _cv_activate_view_name = ''
       let _cv_content_view_name = ''
+      let _cv_select_id_ = undefined
       let _cv_overview_listeners = {}
       let _cv_contentview_listeners = {}
       const _cv_events = (function() {
@@ -62,6 +63,7 @@
       const acquireCivetApi = (function() {
         const Overview = {
           click: function(id) {
+            _cv_select_id_ = id
             _cv_events.emit('PropertyView', 'click', id)
             _cv_messageSender_.send('getSelectContentItemInfo', {id: [id]})
           },

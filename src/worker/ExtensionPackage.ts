@@ -8,6 +8,13 @@ export class MenuDetail {
   name: string;
 }
 
+export class KeybindDetail {
+  command: string;
+  key: string;
+  mac: string;
+  when: string;
+}
+
 const ViewTypeTable = {
   Navigation: ViewType.Navigation,
   Overview: ViewType.Overview,
@@ -45,6 +52,7 @@ export class ExtensionPackage extends BaseExtension {
   private _extensionInfo: number = 0;
   private _dependency: Object;
   private _menus: Map<string, MenuDetail[]> = new Map<string, MenuDetail[]>();  // 
+  private _keybindings: Map<string, KeybindDetail[]> = new Map(); // <when, detail>
   #activeEventsInitMap: Map<string, (params: string[]) => void>;
   #activeCommand: string[] = [];
 
@@ -78,6 +86,7 @@ export class ExtensionPackage extends BaseExtension {
     if (contrib) {
       // menu
       this._initMenus(contrib['menus'])
+      this._initKeyBindings(contrib['keybindings'])
     }
     // dependency
     this._dependency = pack['civet']['dependency']
@@ -90,14 +99,29 @@ export class ExtensionPackage extends BaseExtension {
       const m = menus[context]
       for (let menu of m) {
         let item = new MenuDetail()
-        item.command = menu['command']
-        item.group = menu['group']
-        item.name = menu['name']
+        if (!(item.command = menu['command'])) continue
+        if (!(item.group = menu['group'])) continue
+        if (!(item.name = menu['name'])) continue
         if (!this._menus[context]) this._menus[context] = [item]
         else this._menus[context].push(item)
       }
     }
     console.info(super.name, 'init menus', this._menus)
+  }
+
+  private _initKeyBindings(keybindings: any) {
+    if (!keybindings) return
+    for (const keybind of keybindings) {
+      let item = new KeybindDetail()
+      if (!(item.command = keybind['command'])) continue
+      if (!(item.key = keybind['key'])) continue
+      if (!(item.when = keybind['when'])) continue
+      const key = item.when + '.' + super.name
+      // console.debug('init keybind:', key, item)
+      item.mac = keybind['mac']
+      if (!this._keybindings[key]) this._keybindings[key] = [item]
+      else this._keybindings[key].push(item)
+    }
   }
 
   private _registContentTypeEvent(params: string[]) {
@@ -134,4 +158,5 @@ export class ExtensionPackage extends BaseExtension {
   get viewEvents() { return this._extensionInfo }
   get extensionType(): ExtensionActiveType { return (this._extensionInfo & (ExtensionActiveType.BackgroundExtension|ExtensionActiveType.ViewExtension)) }
   get menus() { return this._menus }
+  get keybindings() { return this._keybindings }
 }

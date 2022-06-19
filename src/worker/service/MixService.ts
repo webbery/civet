@@ -1,5 +1,5 @@
 import { ResourceProperty } from "civet";
-import { ExtensionPackage, MenuDetail } from "worker/ExtensionPackage";
+import { ExtensionPackage, KeybindDetail, MenuDetail } from "worker/ExtensionPackage";
 import { BaseService, IAnotationService, IBackgroundService, IStorageService, IViewService } from "./ServiceInterface";
 
 export class MixService extends BaseService implements IBackgroundService, IViewService, IStorageService, IAnotationService{
@@ -9,6 +9,9 @@ export class MixService extends BaseService implements IBackgroundService, IView
   }
   menus(): Map<string, MenuDetail[]> {
     return this.extension.menus
+  }
+  keybinds(): Map<string, KeybindDetail[]> {
+    return this.extension.keybindings
   }
 
   onBackgroundEvent(): void {

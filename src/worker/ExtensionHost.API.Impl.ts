@@ -50,7 +50,7 @@ export function createApiFactoryAndRegisterActors(pipeline: MessagePipeline, ext
     },
 
     createOverview(id: string, router: string): civet.OverView {
-      return extOverViewEntry.createOverviewEntry(id, router)
+      return extOverViewEntry.createOverviewEntry(id, router, extensionName)
     },
 
     getActiveOverview(): civet.OverView {

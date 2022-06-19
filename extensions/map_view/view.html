@@ -150,6 +150,16 @@ MapLayout = (function() {
         acquireCivetApi().setHtml('mapview', li, html)
         return li
     }
+    function safeFromCharCode(codes) {
+      let result = ''
+      let chunk = 8 * 1024
+      let idx = 0
+      for (let len = codes.length / chunk; idx < len; ++idx) {
+        result += String.fromCharCode.apply(null, codes.subarray(idx * chunk, (idx + 1) * chunk))
+      }
+      result += String.fromCharCode.apply(null, codes.subarray(idx * chunk, codes.length - idx * chunk - 1))
+      return result
+    }
     function addHorizonItem(item) {
         const root = document.getElementsByClassName('__cv_map_image')[0]
         const defaultHeight = root.offsetHeight
@@ -167,7 +177,7 @@ MapLayout = (function() {
                     if (typeof meta.value === 'string') {
                         block['thumbnail'] = meta.value
                     } else {
-                        block['thumbnail'] = 'data:image/jpg;base64,' + btoa(String.fromCharCode.apply(null, meta.value))
+                        block['thumbnail'] = 'data:image/png;base64,' + btoa(safeFromCharCode(meta.value))
                     }
                 }
             }

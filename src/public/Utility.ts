@@ -126,8 +126,19 @@ export function resetArray<T>(vue: any, array: T[], newVal: T[]) {
   }
 }
 
+function safeFromCharCode(codes: any) {
+  let result = ''
+  let chunk = 8 * 1024
+  let idx = 0
+  for (let len = codes.length / chunk; idx < len; ++idx) {
+      result += String.fromCharCode.apply(null, codes.subarray(idx * chunk, (idx + 1) * chunk))
+  }
+  result += String.fromCharCode.apply(null, codes.subarray(idx * chunk, codes.length - idx * chunk - 1))
+  return result
+}
+
 export function thumbnail2Base64(thumbnail: any) {
-  return 'data:image/png;base64,' + btoa(String.fromCharCode.apply(null, thumbnail))
+  return 'data:image/png;base64,' + btoa(safeFromCharCode(thumbnail))
 }
 
 export function buffer2Base64(buffer: Buffer) {

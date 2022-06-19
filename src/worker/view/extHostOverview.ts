@@ -39,10 +39,12 @@ function generateResourcesLoadingEvent(): ExtOverviewItemLoadEvent {
 export class ExtOverview extends ExtHostWebView {
   #hash: string;
   #updated: boolean;
+  #extname: string;
 
-  constructor(id: string, rpcProxy: RPCProtocal) {
+  constructor(id: string, rpcProxy: RPCProtocal, extensionName: string) {
     super(id, rpcProxy)
     this.#updated = false
+    this.#extname = extensionName
   }
 
   set html(val: string) {
@@ -63,6 +65,7 @@ export class ExtOverview extends ExtHostWebView {
   }
 
   get html() { return super.getHtml().html }
+  get extensionName() { return this.#extname }
 
   forceUpdate() {
     this.#updated = false
@@ -127,8 +130,8 @@ export class ExtOverviewEntry {
     rpcProxy.on(IPCNormalMessage.RETRIEVE_OVERVIEW, this.onRequestOverview, this)
   }
 
-  createOverviewEntry(id: string, router: string): ExtOverview{
-    const overview = new ExtOverview(id, this.#proxy)
+  createOverviewEntry(id: string, router: string, extensionName: string): ExtOverview{
+    const overview = new ExtOverview(id, this.#proxy, extensionName)
     this.#overviews.set(id, overview)
     const pipeline = this.#proxy.pipeline
     pipeline.post(IPCRendererResponse.ON_VIEW_ROUTER_ADD, [{name: id, display: router}])
@@ -173,5 +176,9 @@ export class ExtOverviewEntry {
       throw Error(msg)
     }
     return overview
+  }
+
+  getOverviewsByName(name: string): ExtOverview|undefined {
+    return this.#overviews.get(name)
   }
 }

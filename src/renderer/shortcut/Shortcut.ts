@@ -31,8 +31,8 @@ const keyDownHandler = (() => {
     console.info('keyDownHandler:', pressedKey)
     let accelerator = pressedKey.join('+')
     if (Shortcut.has(accelerator)) {
-      const func = Shortcut.get(accelerator)
-      if (func) return func()
+      const [func, when] = Shortcut.get(accelerator)!
+      return func(when)
     }
     return false
   }
@@ -42,13 +42,13 @@ document.addEventListener('keydown', keyDownHandler)
 document.addEventListener('keyup', keyUpHandler)
 
 export class Shortcut{
-  private static _shortcut: Map<string, (...args: Array<any>) => boolean> = new Map();
-  static register(shortcut: string, func: (...args: Array<any>) => boolean ) {
+  private static _shortcut: Map<string, [(...args: Array<any>) => boolean, any]> = new Map();
+  static register(shortcut: string, when: string, func: (...args: Array<any>) => boolean ) {
     const lower = shortcut.toLowerCase()
     if (this._shortcut.has(lower)) {
       console.warn(`shortcut ${shortcut} will be replace`)
     }
-    this._shortcut.set(lower, func)
+    this._shortcut.set(lower, [func, when])
   }
 
   static unregister(shortcut: string) {

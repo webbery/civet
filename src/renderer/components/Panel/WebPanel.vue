@@ -16,9 +16,10 @@ import HtmlLoader from '@/common/HtmlLoader'
 import PopMenu from '@/components/Menu/PopMenu'
 import { mapState } from 'vuex'
 import bus from '../utils/Bus'
-import { clearArgs, events, getCurrentViewName, updateCurrentViewName } from '../../common/RendererService'
+import { clearArgs, events, getCurrentViewName, updateCurrentViewName, getSelectionID } from '../../common/RendererService'
 import { InternalCommand, commandService } from '@/common/CommandService'
 import { config } from '@/../public/CivetConfig'
+import { Shortcut } from '../../shortcut/Shortcut'
 import Vue from 'vue'
 
 export default {
@@ -97,7 +98,6 @@ export default {
   async updated() {
     if (this.isUpdated) return
     const activateView = getCurrentViewName()
-    // HtmlLoader.injector(activateView)
     try {
       await SandBoxManager.switchSandbox(activateView, this.script)
     } catch (err) {
@@ -105,26 +105,9 @@ export default {
       this.isUpdated = true
       return
     }
-    // console.info(value, 'menu is', menus)
-    const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + activateView)
-    this.extensionMenus = []
-    for (let menu of menus) {
-      this.extensionMenus.push({
-        id: activateView,
-        name: menu.name,
-        command: menu.command
-      })
-      if (this.isInternalCommand(menu.command)) {
-        commandService.registInternalCommand(activateView, menu.command, this)
-      } else {
-        events.on(activateView, menu.command, function(args) {
-          console.info('on event', menu.command)
-          self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: activateView, command: 'ext:' + menu.command, args: args})
-        })
-      }
-    }
-    console.info('reply view menus', this.extensionMenus, menus)
     this.$store.dispatch('display')
+    await this.reinitMenu(activateView)
+    await this.reinitKeybinding(activateView)
     this.isUpdated = true
   },
   methods: {
@@ -192,6 +175,7 @@ export default {
     },
     onRightClick(event, root) {
       console.info('event', root)
+      if (getSelectionID() === undefined) return
       if (event.button === 2) { // 选择多个后右键
         // right click
         // this.imageSelected = false
@@ -213,6 +197,47 @@ export default {
         SandBoxManager.switchSandbox(viewid)
       }
       updateCurrentViewName(viewid)
+    },
+    async reinitMenu(activateView) {
+      const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + activateView)
+      this.extensionMenus = []
+      for (let menu of menus) {
+        this.extensionMenus.push({
+          id: activateView,
+          name: menu.name,
+          command: menu.command
+        })
+        if (this.isInternalCommand(menu.command)) {
+          commandService.registInternalCommand(activateView, menu.command, this)
+        } else {
+          const self = this
+          events.on(activateView, menu.command, function(args) {
+            console.info('on event', menu.command)
+            self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: activateView, command: 'ext:' + menu.command, args: args})
+          })
+        }
+      }
+      console.info('reply view menus', this.extensionMenus, menus)
+    },
+    async reinitKeybinding(activateView) {
+      const activeName = 'overviewFocus.' + activateView
+      const keybinds = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_KEYBINDS, activeName)
+      console.info(`init keybinds[${activeName}]: ${JSON.stringify(keybinds)}`)
+      for (const keybind of keybinds) {
+        const command = keybind.command
+        if (!this.isInternalCommand(command)) {
+          // command transmit to its view
+          const transmit = (when) => {
+            console.debug('transmit message to overview:', activateView)
+            const currentView = getCurrentViewName()
+            if (when === 'overviewFocus') {
+              if (currentView === activateView) events.emit('Overview:' + activateView, command, getSelectionID())
+            }
+            return true
+          }
+          Shortcut.register(keybind.key, keybind.when, transmit)
+        }
+      }
     }
   }
 }
