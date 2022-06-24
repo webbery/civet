@@ -35,7 +35,8 @@ export default {
         // {text: '导出到计算机', cb: this.onExportFiles},
         // {text: '删除', cb: this.onDeleteItem}
       ],
-      extensionMenus: []
+      extensionMenus: [],
+      context: null
     }
   },
   created() {
@@ -50,6 +51,7 @@ export default {
   },
   mounted() {
     console.info('web panel mounted', config.defaultView)
+    this.$events.on('Overview', 'click', this.onViewClick)
   },
   watch: {
     $route: function(to, from) {
@@ -174,18 +176,24 @@ export default {
       this.$store.dispatch('removeFiles', [fileid])
     },
     onRightClick(event, root) {
-      console.info('event', root)
-      if (getSelectionID() === undefined) return
+      console.info('Before Right Click event', root)
+      this.context = {menu: root, x: event.clientX, y: event.clientY, button: event.button}
       if (event.button === 2) { // 选择多个后右键
         // right click
         // this.imageSelected = false
+      }
+    },
+    onViewClick(selectID) {
+      console.debug('after Overiew Clicked', selectID)
+      if (selectID && this.context && this.context.button === 2) {
         clearArgs()
-        root.$emit('easyAxis', {
+        this.context.menu.$emit('easyAxis', {
           tag: 'overview',
           index: 0,
-          x: event.clientX,
-          y: event.clientY
+          x: this.context.x,
+          y: this.context.y
         })
+        this.context.button = -1
       }
     },
     onSwitchView(viewid) {
