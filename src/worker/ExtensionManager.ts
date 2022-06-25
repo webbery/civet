@@ -485,7 +485,7 @@ export class ExtensionManager {
     if (!extensions || extensions.length === 0) {
       const msg = `No extensions can read ${extname} file`
       showErrorInfo({msg: msg})
-      return Result.failure(msg)
+      // return Result.failure(msg)
     }
     let resource: Resource = APIFactory.createResource(this._pipeline);
     resource.filename = f.base
@@ -499,9 +499,14 @@ export class ExtensionManager {
     resource.putProperty({ name: 'path', value: uri.local(), type: PropertyType.String, query: false, store: true })
     this.emitStorageEvent(msgid, resource.id, resource.getProperties(), resource)
     const services = this.#extensionsOfContentType.get(extname)
-    for (const service of services!) {
-      console.debug(service.name, 'emit read')
-      service.emit('read', msgid, resource.id, uri.local(), resource)
+    if (!services || services.length === 0) {
+      resource.putProperty({ name: 'thumbnail', value: null, type: PropertyType.Binary, query: false, store: false })
+      this.#storageService[0].onUpdateEvent(msgid, resource.id, resource.getProperties(), resource)
+    } else {
+      for (const service of services!) {
+        console.debug(service.name, 'emit read')
+        service.emit('read', msgid, resource.id, uri.local(), resource)
+      }
     }
     return Result.success(resource)
   }

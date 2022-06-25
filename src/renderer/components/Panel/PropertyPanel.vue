@@ -68,7 +68,7 @@ import { i18n, formatOutput } from '@/../public/String'
 import InputLabel from '../Control/CVInputLabel'
 import { mapState } from 'vuex'
 import { logger } from '@/../public/Logger'
-import { resetArray, thumbnail2Base64 } from '@/../public/Utility'
+import { resetArray, thumbnail2Base64, text2PNG } from '@/../public/Utility'
 import { Cache } from '@/store/modules/CacheInstance'
 
 export default {
@@ -120,7 +120,15 @@ export default {
         }
       }
       if (!value.preview) {
-        this.thumbnail = Cache.icons[type]
+        if (Cache.icons[type]) {
+          this.thumbnail = Cache.icons[type]
+        } else {
+          const width = 120
+          const height = 180
+          const png = text2PNG(type, width, height)
+          this.thumbnail = png
+          Cache.icons[type] = png
+        }
       } else {
         this.thumbnail = thumbnail2Base64(value.preview)
       }
