@@ -9,14 +9,7 @@ import * as Assist from './CacheAssist'
 import { config } from '@/../public/CivetConfig'
 import { Search } from '@/common/SearchManager'
 import { PerformanceObserver, performance } from 'perf_hooks'
-
-const messageObs = new PerformanceObserver((items) => {
-  const measurements = items.getEntriesByType('measure')
-  measurements.forEach(measurement => {
-    console.debug('performance', measurement.name, measurement.duration)
-  })
-})
-messageObs.observe({ entryTypes: ['measure'] })
+import { performanceMesurement } from '@/common/PerformanceMesurement'
 
 function updateOverview(state, showClasses) {
   const view = getCurrentViewName()
@@ -90,7 +83,7 @@ const getters = {
   tags: state => { return state.tags },
   allCount: state => { return state.allCount },
   histories: state => { return state.histories },
-  i18n: (state, getters) => { 
+  i18n: (state, getters) => {
     return (key) => {
       console.debug('get i18n:', key, Cache.i18n)
       return Cache.i18n[key] || key
@@ -118,8 +111,8 @@ const mutations = {
       const resource = initResource(image)
       state.viewItems.push(resource)
     }
-    performance.mark('init view resources end')
-    performance.measure('view display time:', 'init resouce view begin', 'init view resources end')
+    performanceMesurement.mark('init view resources end')
+    performanceMesurement.measure('view display time:', 'init resouce view begin', 'init view resources end')
   },
   init(state, data) {
     console.info('cache init', data)
@@ -159,8 +152,8 @@ const mutations = {
         state.viewClass.push({name: clazz.name})
       }
       console.info('class result', state.classes)
-      performance.mark('init view infomation end')
-      performance.measure('infomation display time:', 'init view infomation begin', 'init view infomation end')
+      performanceMesurement.mark('init view infomation end')
+      performanceMesurement.measure('infomation display time:', 'init view infomation begin', 'init view infomation end')
     }
     updateOverview(state, true)
     // init classes name
@@ -448,7 +441,7 @@ const mutations = {
 const actions = {
   async init({ commit }, flag) {
     try {
-      performance.mark('init resouce view begin')
+      performanceMesurement.mark('init resouce view begin')
       const filesSnap = await service.get(IPCNormalMessage.GET_RESOURCES_SNAP)
       const imagesID = []
       for (const snap of filesSnap) {
@@ -481,7 +474,7 @@ const actions = {
         }
       }
       commit('initViewResources', allResources)
-      performance.mark('init view infomation begin')
+      performanceMesurement.mark('init view infomation begin')
       const { unclasses, untags } = await remote.recieveCounts()
       const allClasses = await service.get(IPCNormalMessage.GET_ALL_CLASSES, '/')
       console.info('all classes:', allClasses)

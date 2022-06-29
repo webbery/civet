@@ -66,7 +66,9 @@
             _cv_select_id_ = id
             _cv_events.emit('PropertyView', 'click', id)
             _cv_events.emit('Overview', 'click', id)
-            _cv_messageSender_.send('getSelectContentItemInfo', {id: [id]})
+            if (id) {
+              _cv_messageSender_.send('getSelectContentItemInfo', {id: [id]})
+            }
           },
           rclick: function(x, y, id) {
             console.debug('right click')

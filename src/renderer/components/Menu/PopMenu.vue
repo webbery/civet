@@ -122,10 +122,10 @@ export default {
       console.info('click', this.show)
       this.show = false
     }, true)
-    globalEvents.setEventFinishLisetner('click', () => {
-      const view = getCurrentViewName()
-      this.$events.emit('Overview:' + view, 'click')
-    })
+    // globalEvents.setEventFinishLisetner('click', () => {
+    //   const view = getCurrentViewName()
+    //   this.$events.emit('Overview:' + view, 'click')
+    // })
   },
   watch: {
     axis() {

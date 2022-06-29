@@ -5,28 +5,27 @@ const content = require('./testContentPanel')
 const classify = require('./testClassifyPanel')
 
 const CLASSICAL_LAYOUT = 0
-const SelectionIndex = 0
 
 const CSSFolder = '.folder'
-const CSSImage = '._cv_gv_frame'
+const CSSImage = '._cv_gv_mini-cover'
 const CSSMenus = '.cm-container li'
 
 async function selectResource(page) {
   await page.waitForSelector(CSSImage)
   const images = await page.$$(CSSImage)
   assert(images.length > 0)
-  await images[SelectionIndex].click()
+  await images[images.length - 1].click()
 }
 
 async function showMenu(page) {
   await page.waitForSelector(CSSImage)
   const images = await page.$$(CSSImage)
-  await images[SelectionIndex].click({button: 'right'})
+  await images[images.length - 1].click({button: 'right'})
 }
 
 async function validName(page, name) {
   const images = await page.$$(CSSImage)
-  const imageName = await images[SelectionIndex].evaluate(() => document.querySelector('.context').innerHTML)
+  const imageName = await images[images.length - 1].evaluate(() => document.querySelector('.context').innerHTML)
   console.info('image name', imageName)
   // assert(name === imageName)
 }
@@ -69,9 +68,14 @@ async function getResources(page) {
 async function showResourceContent(page) {
   const resources = await getResources(page)
   assert(resources !== null)
-  await resources[0].click({ clickCount: 2, delay: 100 })
+  console.debug('click 4')
+  await resources[resources.length - 1].click({ clickCount: 2, delay: 100 })
   const result = await content.isPanelDisplay(page)
   assert(result === true)
+}
+
+async function accelatorKey(page, key) {
+  await page.keyboard.press(key)
 }
 
 module.exports = {
@@ -82,6 +86,7 @@ module.exports = {
     await base.switchLayout(page, CLASSICAL_LAYOUT)
     await search.searchByKeyword(page, 'green')
   },
+  accelatorKey: accelatorKey,
   removeResource: removeResource,
   selectClass: selectClass,
   intoClass: async function(page) {

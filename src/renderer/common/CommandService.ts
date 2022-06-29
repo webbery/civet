@@ -14,7 +14,8 @@ class CommandMenu {
 
 export enum InternalCommand {
   DeleteResources = 'deleteResources',
-  ExportResources = 'exportResources'
+  ExportResources = 'exportResources',
+  OpenContainingFolder = 'OpenContainingFolder'
 }
 
 class CommandService {
@@ -38,6 +39,11 @@ class CommandService {
           const ipcRenderer = require('electron').ipcRenderer
           ipcRenderer.send('export2Diectory', filespath)
         })
+        break
+      case InternalCommand.OpenContainingFolder:
+        const { shell } = require('@electron/remote')
+        console.debug('open', target)
+        shell.showItemInFolder(target)
         break
       default:
         break

@@ -1,5 +1,5 @@
 <template>
-  <div class="_cv_property">
+  <div class="_cv_property" @click.stop="">
       <div :body-style="{ padding: '0px' }">
         <div style="padding: 4px;" class="image-name">
           <InputLabel v-on:changed="onNameChaged">{{filename}}</InputLabel>
