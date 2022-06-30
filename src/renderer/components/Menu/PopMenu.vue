@@ -193,7 +193,7 @@ export default {
       } else {
         // send item command
         console.info(`emit command ${item.command} to ${item.id}, args ${getCommandArgs(item.command)}`)
-        events.emit(item.id, item.command, getCommandArgs(item.command))
+        events.emit(item.id, item.command, getCommandArgs(item.command) || this.axis.resource)
       }
     }
   }

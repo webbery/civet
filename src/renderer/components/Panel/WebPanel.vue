@@ -164,6 +164,7 @@ export default {
       switch (command) {
         case InternalCommand.DeleteResources:
         case InternalCommand.ExportResources:
+        case InternalCommand.OpenContainingFolder:
           return true
         default:
           return false
@@ -191,7 +192,8 @@ export default {
           tag: 'overview',
           index: 0,
           x: this.context.x,
-          y: this.context.y
+          y: this.context.y,
+          resource: selectID
         })
         this.context.button = -1
       }
@@ -208,13 +210,22 @@ export default {
     },
     async reinitMenu(activateView) {
       const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + activateView)
-      this.extensionMenus = []
+      this.extensionMenus = [
+        {
+          id: activateView,
+          group: 0,
+          name: 'Open Containing Folder',
+          command: InternalCommand.OpenContainingFolder
+        }
+      ]
       for (let menu of menus) {
         this.extensionMenus.push({
           id: activateView,
           name: menu.name,
           command: menu.command
         })
+      }
+      for (let menu of this.extensionMenus) {
         if (this.isInternalCommand(menu.command)) {
           commandService.registInternalCommand(activateView, menu.command, this)
         } else {

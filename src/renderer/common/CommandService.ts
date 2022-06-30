@@ -1,6 +1,7 @@
 import { service } from './RendererService'
 import { IPCNormalMessage } from '../../public/IPCMessage'
-import EventEmitter from 'events';
+import EventEmitter from 'events'
+import path from 'path'
 
 declare let _cv_events: any;
 declare let _cv_messageSender_: any;
@@ -26,6 +27,8 @@ class CommandService {
     _cv_events.on(target, command, listener)
   }
 
+  clearCommand(target: string) {}
+
   registInternalCommand(target: string, command: string, vue: any) {
     switch(command) {
       case InternalCommand.DeleteResources:
@@ -41,9 +44,12 @@ class CommandService {
         })
         break
       case InternalCommand.OpenContainingFolder:
-        const { shell } = require('@electron/remote')
-        console.debug('open', target)
-        shell.showItemInFolder(target)
+        _cv_events.on(target, command, (fileid: Array<number>) => {
+          const { shell } = require('@electron/remote')
+          const files = vue.$store.getters.getFiles([fileid])
+          console.debug('open folder', fileid, files)
+          shell.showItemInFolder(path.normalize(files[0].path))
+        })
         break
       default:
         break
