@@ -58,6 +58,20 @@ export class Shortcut{
     }
   }
 
+  static updateKey(old: string, current: string) {
+    const lower = old.toLowerCase()
+    if (this._shortcut.has(lower)) {
+      const record = this._shortcut[lower]
+      if (this._shortcut.has(current)) {
+        console.warn(`shortcut ${current} is confict`)
+        const history = this._shortcut[current]
+        this._shortcut['old.' + current] = history
+      }
+      this._shortcut[current] = record
+      delete this._shortcut[lower]
+    }
+  }
+
   static has(shortcut: string) {
     return this._shortcut.has(shortcut)
   }

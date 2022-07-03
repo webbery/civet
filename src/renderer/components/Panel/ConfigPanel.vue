@@ -23,18 +23,20 @@
       <el-collapse accordion>
         <el-collapse-item title="快捷键" name="1">
           <el-row :gutter="20">
-            <el-col :span="6"><div>快捷键</div></el-col>
-            <el-col :span="6"><div>命令</div></el-col>
-            <el-col :span="6"><div>所属插件</div></el-col>
-            <el-col :span="6"><div>功能描述</div></el-col>
+            <el-col :span="4"><div>快捷键</div></el-col>
+            <el-col :span="4"><div>命令</div></el-col>
+            <el-col :span="4"><div>所属插件</div></el-col>
+            <el-col :span="8"><div>功能描述</div></el-col>
+            <el-col :span="4"><div>激活事件</div></el-col>
           </el-row>
           <el-divider></el-divider>
           <div v-for="(item, idx) of shortcuts" :key="idx">
             <el-row :gutter="20">
-              <el-col :span="6"><ShortCut :defaultShortcuts="item.shortcut" @changed="onShortCutChanged"></ShortCut></el-col>
-              <el-col :span="6"><div>{{item.command}}</div></el-col>
-              <el-col :span="6"><div>{{item.extension}}</div></el-col>
-              <el-col :span="6"><div>{{item.desc}}</div></el-col>
+              <el-col :span="4"><ShortCut :defaultShortcuts="item.shortcut" @changed="onShortCutChanged"></ShortCut></el-col>
+              <el-col :span="4"><div>{{item.command}}</div></el-col>
+              <el-col :span="4"><div>{{item.extension}}</div></el-col>
+              <el-col :span="8"><div>{{item.desc}}</div></el-col>
+              <el-col :span="4"><div>{{item.when}}</div></el-col>
             </el-row>
           </div>
         </el-collapse-item>
@@ -104,6 +106,7 @@ import fs from 'fs'
 import { config } from '@/../public/CivetConfig'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
 import ShortCut from '../Control/Shortcut'
+import { Shortcut } from '../../shortcut/Shortcut'
 
 export default {
   name: 'config-page',
@@ -139,6 +142,7 @@ export default {
       this.properties.push(s)
     }
     this.version = config.version
+    config.getConfig(true)
     const shortcuts = config.getShortCuts()
     console.debug('shortcuts:', shortcuts)
     for (const key in shortcuts) {
@@ -146,7 +150,8 @@ export default {
         shortcut: key,
         command: shortcuts[key].command,
         extension: shortcuts[key].extension,
-        desc: shortcuts[key].description
+        desc: shortcuts[key].description,
+        when: shortcuts[key].when
       })
     }
     const app = require('@/../public/System').default.app()
@@ -209,11 +214,8 @@ export default {
         return str.substr(0, str.length - 1)
       }
       const old = converter(originShortcut.split(' '))
-      globalShortcut.unregister(old)
       const newer = converter(newshortcut)
-      globalShortcut.register(newer, () => {
-        console.debug('run shortcut:', newer)
-      })
+      Shortcut.updateKey(old, newer)
     }
   }
 }

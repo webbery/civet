@@ -178,3 +178,8 @@ export function localKey(key: string) {
     default: return key
   }
 }
+
+export function isLocalResource(path: string) {
+  if (/http[s]{0,1}:\/\/(.*)/.test(path)) return false
+  return true
+}

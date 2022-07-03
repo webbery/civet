@@ -76,9 +76,7 @@
           config.app.default = {layout: 'gridview', dbname: dbname}
         }
         if (!config.app.shortcut) {
-          config.app.shortcut = {
-            'Ctrl R': { command: 'Rename', extension: 'System', description: 'rename resource'}
-          }
+          config.app.shortcut = {}
         }
       }
       if (!config.app.default) { // avoid first time exception cause a wrong format file
@@ -313,14 +311,40 @@
     return resource['command']
   }
 
-  getShortCuts(): any {
-    return this.config.app.shortcut
+  getShortCuts(extension: string): any {
+    if (!extension) return this.config.app.shortcut
+    let result = {}
+    for (const key in this.config.app.shortcut) {
+      const shorcut = this.config.app.shortcut[key]
+      if (shorcut.extension == extension) {
+        result[key] = shorcut
+      }
+    }
+    return result
   }
 
   updateShortCut(old: string, newest: string) {
     const shortcut = this.config.app.shortcut[old]
     this.config.app.shortcut[newest] = shortcut
     delete this.config.app.shortcut[old]
+  }
+
+  isShortCutExist(shortcut: any) {
+    const extension = shortcut.extension
+    const command = shortcut.command
+    for (const k in this.config.app.shortcut) {
+      const key = this.config.app.shortcut[k]
+      console.debug('key:', key, 'input:', shortcut)
+      if (key.extension === extension && command === key.command) return true
+    }
+    return false
+  }
+
+  addShortCut(shortcut: any, force: boolean) {
+    if (!force && this.isShortCutExist(shortcut)) return false
+    const name = shortcut.name
+    this.config.app.shortcut[name] = shortcut
+    return true
   }
 }
 

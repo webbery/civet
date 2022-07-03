@@ -77,18 +77,32 @@ class ExtensionMenuAccessor implements ExtensionAccessor {
 
 class ExtensionKeybindAccessor implements ExtensionAccessor {
   #keybinds: KeybindDetail[] = [];
-  #context: string;
+  #view: string;
+  #when: string;
 
   constructor(context: string) {
-    this.#context = context
+    [this.#when, this.#view] = context.split('.')
+    const keybind = config.getShortCuts(this.#view)
+    console.info('keybind:', keybind)
+    for (const key in keybind) {
+      const item = keybind[key]
+      this.#keybinds.push(
+        {
+          command: item.command,
+          key: key,
+          desc: item.desc,
+          when: this.#when,
+          mac: ''
+        }
+      )
+    }
   }
 
   visit(service: ViewService) {
-    const keybind = service.keybinds()
-    const items: KeybindDetail[] = keybind[this.#context]
-    if (items) {
-      this.#keybinds = this.#keybinds.concat(items)
-    }
+    // const items: KeybindDetail[] = keybind[this.#context]
+    // if (items) {
+    //   this.#keybinds = this.#keybinds.concat(items)
+    // }
   }
 
   result(){

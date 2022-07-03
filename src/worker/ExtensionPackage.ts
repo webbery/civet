@@ -1,5 +1,6 @@
 import { ViewType } from '@/../public/ExtensionHostType'
 import { getAbsolutePath } from '@/../public/Utility'
+import { config } from '@/../public/CivetConfig'
 const fs = require('fs')
 
 export class MenuDetail {
@@ -13,6 +14,7 @@ export class KeybindDetail {
   key: string;
   mac: string;
   when: string;
+  desc: string;
 }
 
 const ViewTypeTable = {
@@ -111,6 +113,7 @@ export class ExtensionPackage extends BaseExtension {
 
   private _initKeyBindings(keybindings: any) {
     if (!keybindings) return
+    let isNew = false
     for (const keybind of keybindings) {
       let item = new KeybindDetail()
       if (!(item.command = keybind['command'])) continue
@@ -121,7 +124,16 @@ export class ExtensionPackage extends BaseExtension {
       item.mac = keybind['mac']
       if (!this._keybindings[key]) this._keybindings[key] = [item]
       else this._keybindings[key].push(item)
+      const shortcut = {
+        name: item.key,
+        command: item.command,
+        extension: super.name,
+        description: item.desc,
+        when: item.when
+      }
+      isNew ||= config.addShortCut(shortcut, false)
     }
+    if (isNew) config.save()
   }
 
   private _registContentTypeEvent(params: string[]) {
