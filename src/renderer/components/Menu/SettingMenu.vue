@@ -61,7 +61,9 @@ export default {
     onSettingClicked() {
       if (this.activate === '') return
       this.$router.push({path: '/config', query: {name: this.$store.getters.i18n('setting')}})
+      this.show = false
       this.activate = ''
+      this.$emit('onDisplayChanged', this.show)
     },
     onLayoutClicked(name) {
       if (name === this.activate) return
