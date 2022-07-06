@@ -68,7 +68,6 @@ async function getResources(page) {
 async function showResourceContent(page) {
   const resources = await getResources(page)
   assert(resources !== null)
-  console.debug('click 4')
   await resources[resources.length - 1].click({ clickCount: 2, delay: 100 })
   const result = await content.isPanelDisplay(page)
   assert(result === true)
@@ -103,6 +102,8 @@ module.exports = {
     const name = await property.getCurrentResourceName(page)
     assert(name !== undefined && name.length !== 0, `name is ${name}`)
     // await property.updateName(page, newName)
+    await accelatorKey(page, 'F2')
+
     await property.addTag(page, 'green')
     await validName(page, newName)
     
