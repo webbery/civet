@@ -63,7 +63,7 @@ function createResourceDB(name) {
   }
   fs.writeFileSync('cfg.json',
     '{"app":{"first":false,"version":"0.2.0","default":{"dbname":"' + name + 
-    '", "layout": "mapview"}},"resources":[' + generateSchema(name) +', ' + generateSchema('testdb2') + ']}')
+    '", "layout": "mapview"}, "shortcut": {}},"resources":[' + generateSchema(name) +', ' + generateSchema('testdb2') + ']}')
 }
 
 createResourceDB('testdb')

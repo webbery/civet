@@ -1,3 +1,4 @@
+const {expect, assert} = require('chai')
 
 const CSSSettingBtn = '.sidenav .dock-bottom'
 const CSSLayouts = '.sm-container div'
@@ -9,6 +10,7 @@ async function switchLayout(page, index) {
   await settingBtn.click()
   await page.waitForSelector(CSSLayouts)
   const layouts = await page.$$(CSSLayouts)
+  assert(layouts.length > 2)
   const view = layouts[index]
   console.info(`switch layout[${layouts.length}]: ${index}`)
   await view.click()
