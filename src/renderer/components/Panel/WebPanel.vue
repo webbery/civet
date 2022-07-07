@@ -49,6 +49,11 @@ export default {
     this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_OVERVIEW, config.defaultView)
     bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
   },
+  async activated() {
+    if (!this.isUpdated) return
+    console.debug('****Web panel activated')
+    await this.onScriptInit()
+  },
   mounted() {
     console.info('web panel mounted', config.defaultView)
     this.$events.on('Overview', 'click', this.onViewClick)
@@ -99,20 +104,24 @@ export default {
   }),
   async updated() {
     if (this.isUpdated) return
-    const activateView = getCurrentViewName()
-    try {
-      await SandBoxManager.switchSandbox(activateView, this.script)
-    } catch (err) {
-      console.error(`load ${activateView} javascript exception: ${err}`)
-      this.isUpdated = true
-      return
-    }
-    this.$store.dispatch('display')
-    await this.reinitMenu(activateView)
-    await this.reinitKeybinding(activateView)
+    console.info('WebPanel Update****')
+    await this.onScriptInit()
     this.isUpdated = true
   },
   methods: {
+    async onScriptInit() {
+      const activateView = getCurrentViewName()
+      try {
+        await SandBoxManager.switchSandbox(activateView, this.script)
+      } catch (err) {
+        console.error(`load ${activateView} javascript exception: ${err}`)
+        this.isUpdated = true
+        return
+      }
+      this.$store.dispatch('display')
+      await this.reinitMenu(activateView)
+      await this.reinitKeybinding(activateView)
+    },
     dropFiles(event) {
       let files = event.dataTransfer.files
       let paths = []
