@@ -9,6 +9,7 @@ const CLASSICAL_LAYOUT = 0
 const CSSFolder = '.folder'
 const CSSImage = '._cv_gv_mini-cover'
 const CSSMenus = '.cm-container li'
+const CSSNameInput = '._cv_gv_input'
 
 async function selectResource(page) {
   await page.waitForSelector(CSSImage)
@@ -24,10 +25,11 @@ async function showMenu(page) {
 }
 
 async function validName(page, name) {
-  const images = await page.$$(CSSImage)
-  const imageName = await images[images.length - 1].evaluate(() => document.querySelector('.context').innerHTML)
+  await page.waitForTimeout(2000)
+  const property = require('./testResourceProperty')
+  const imageName = await property.getCurrentResourceName(page)
   console.info('image name', imageName)
-  // assert(name === imageName)
+  assert(name === imageName)
 }
 
 async function removeResource(page) {
@@ -85,7 +87,19 @@ module.exports = {
     await base.switchLayout(page, CLASSICAL_LAYOUT)
     await search.searchByKeyword(page, 'green')
   },
-  accelatorKey: accelatorKey,
+  accelatorKey4Rename: async function (page, newname) {
+    await page.waitForTimeout(1000)
+    await selectResource(page)
+    await page.waitForTimeout(1000)
+    await accelatorKey(page, 'F2')
+    await page.waitForSelector(CSSNameInput)
+    const editClass = await page.$(CSSNameInput)
+    editClass.type(newname)
+    await page.waitForTimeout(2000)
+    await selectResource(page)
+    await page.waitForTimeout(1500)
+    await validName(page, newname)
+  },
   removeResource: removeResource,
   selectClass: selectClass,
   intoClass: async function(page) {
@@ -98,11 +112,11 @@ module.exports = {
     await base.switchLayout(page, CLASSICAL_LAYOUT)
     const property = require('./testResourceProperty')
     await selectResource(page)
-    const newName = 'Image0'
     const name = await property.getCurrentResourceName(page)
     assert(name !== undefined && name.length !== 0, `name is ${name}`)
     // await property.updateName(page, newName)
-    await accelatorKey(page, 'F2')
+    const newName = 'Image0'
+    await this.accelatorKey4Rename(page, newName)
 
     await property.addTag(page, 'green')
     await validName(page, newName)

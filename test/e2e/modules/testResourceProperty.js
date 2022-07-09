@@ -98,7 +98,7 @@ module.exports = {
     let items = await page.$$(CSSName)
     const value = await page.evaluate(item => {
       return item.innerHTML
-    }, items[0])
+    }, items[items.length - 1])
     return value
   },
   getProperties: async function (page) {}

@@ -284,6 +284,7 @@
                 label.parentNode.appendChild(input)
                 input.setRangeText(text)
                 input.focus()
+                input.select()
             }
             acquireCivetApi().Overview.on('add', (resources) => {
                 // console.info('add resource in document', resources)
