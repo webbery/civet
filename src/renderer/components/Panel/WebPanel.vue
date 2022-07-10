@@ -20,6 +20,7 @@ import { clearArgs, events, getCurrentViewName, updateCurrentViewName, getSelect
 import { InternalCommand, commandService } from '@/common/CommandService'
 import { config } from '@/../public/CivetConfig'
 import { Shortcut } from '../../shortcut/Shortcut'
+import { i18n } from '@/../public/String'
 import Vue from 'vue'
 
 export default {
@@ -30,11 +31,6 @@ export default {
       htmls: {},
       script: '',
       isUpdated: false,
-      menus: [
-        // {text: '重命名', cb: this.onChangeName},
-        // {text: '导出到计算机', cb: this.onExportFiles},
-        // {text: '删除', cb: this.onDeleteItem}
-      ],
       extensionMenus: [],
       context: null
     }
@@ -223,14 +219,14 @@ export default {
         {
           id: activateView,
           group: 0,
-          name: 'Open Containing Folder',
+          name: i18n('Open Containing Folder'),
           command: InternalCommand.OpenContainingFolder
         }
       ]
       for (let menu of menus) {
         this.extensionMenus.push({
           id: activateView,
-          name: menu.name,
+          name: i18n(menu.name),
           command: menu.command
         })
       }
@@ -256,7 +252,7 @@ export default {
         if (!this.isInternalCommand(command)) {
           // command transmit to its view
           const transmit = (when) => {
-            console.debug('transmit message to overview:', activateView)
+            console.debug(`transmit press key ${keybind.key} to overview: ${activateView}`)
             const currentView = getCurrentViewName()
             if (when === 'overviewFocus') {
               if (currentView === activateView) events.emit('Overview:' + activateView, command, getSelectionID())
