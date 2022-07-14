@@ -20,6 +20,7 @@ export enum IPCNormalMessage {
   GET_UNTAG_RESOURCES = 'getUntagImages',
   ADD_RESOURCES_BY_DIRECORY = 'addImagesByDirectory',
   ADD_RESOURCES_BY_PATHS = 'addImagesByPaths',
+  UPDATE_RESOUCE_BY_ID = 'updateResourceByID',
   QUERY_RESOURCES = 'queryFiles',
   ON_RESOURCE_UPDATE = 'updateImageList',
   UPDATE_RESOURCE_CLASS = 'updateImageCategory',

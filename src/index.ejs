@@ -44,6 +44,21 @@
               console.info(id, 'EventEmitter On', event)
             }
             events[id].on(event, listener)
+          },
+          once: function(id, event, listener) {
+            if (!events[id]) {
+              events[id] = new EventEmitter()
+              console.info(id, 'EventEmitter Once', event)
+            }
+            events[id].once(event, listener)
+          },
+          clean: function(id, event) {
+            if (!events[id]) return
+            if (!event) {
+              events[id].removeAllListeners()
+              return
+            }
+            events[id].removeAllListeners(event)
           }
         }
       })()

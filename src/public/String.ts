@@ -30,7 +30,9 @@ const _i18n = {
   spot: '点',
   colorspace: '颜色空间',
   'reading files': '读取图片中',
-  'open containing folder': '打开文件所在目录'
+  'open containing folder': '打开文件所在目录',
+  'analysis resource': '分析素材',
+  'extension is not exist': '扩展不存在'
 }
 
 export function findString(strs: string, target: any) {

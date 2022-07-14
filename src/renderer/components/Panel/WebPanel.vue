@@ -1,6 +1,6 @@
 <template>
   <div class="webview" @drop="dropFiles($event)" @dragover.prevent>
-    <PopMenu :list="extensionMenus" :underline="false" @ecmcb="onRightMenu" tag="overview"></PopMenu>
+    <PopMenu :list="extensionMenus" :underline="false" @ecmcb="onRightMenu" @disappear="onMenuDisappear" tag="overview"></PopMenu>
     <div style="height: 100%" @mousedown.right="onRightClick($event, $root)">
       <div style="height: 100%" @dragend="dragEnd($event)" @dragstart="dragStart($event)" draggable="true" v-for="(item, index) in htmls" :key="index" v-show="htmls[index].show">
           <div style="height: 100%" v-html="item.html"></div>
@@ -100,9 +100,8 @@ export default {
   }),
   async updated() {
     if (this.isUpdated) return
-    console.info('WebPanel Update****')
-    await this.onScriptInit()
     this.isUpdated = true
+    await this.onScriptInit()
   },
   methods: {
     async onScriptInit() {
@@ -170,6 +169,7 @@ export default {
         case InternalCommand.DeleteResources:
         case InternalCommand.ExportResources:
         case InternalCommand.OpenContainingFolder:
+        case InternalCommand.AnalysisResource:
           return true
         default:
           return false
@@ -203,6 +203,10 @@ export default {
         this.context.button = -1
       }
     },
+    onMenuDisappear(tag) {
+      if (tag === 'overview') {
+      }
+    },
     onSwitchView(viewid) {
       const currentView = getCurrentViewName()
       console.info('switch view to', viewid)
@@ -221,6 +225,12 @@ export default {
           group: 0,
           name: i18n('Open Containing Folder'),
           command: InternalCommand.OpenContainingFolder
+        },
+        {
+          id: activateView,
+          group: 0,
+          name: i18n('Analysis Resource'),
+          command: InternalCommand.AnalysisResource
         }
       ]
       for (let menu of menus) {
@@ -235,6 +245,7 @@ export default {
           commandService.registInternalCommand(activateView, menu.command, this)
         } else {
           const self = this
+          // events.clean(activateView, menu.command)
           events.on(activateView, menu.command, function(args) {
             console.info('on event', menu.command)
             self.$ipcRenderer.send(IPCNormalMessage.POST_COMMAND, {target: activateView, command: 'ext:' + menu.command, args: args})

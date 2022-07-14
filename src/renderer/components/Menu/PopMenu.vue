@@ -130,6 +130,7 @@ export default {
     globalEvents.addEventListener('click', () => {
       console.info('click', this.show)
       this.show = false
+      this.$emit('disappear', this.tag)
     }, true)
     // globalEvents.setEventFinishLisetner('click', () => {
     //   const view = getCurrentViewName()

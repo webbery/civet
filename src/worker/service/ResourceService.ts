@@ -28,6 +28,7 @@ export class ResourceService{
     this.pipeline = pipeline
     pipeline.regist('addImagesByDirectory', this.addFilesByDir, this)
     pipeline.regist(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, this.addImagesByPaths, this)
+    pipeline.regist(IPCNormalMessage.UPDATE_RESOUCE_BY_ID, this.updateResource, this)
     pipeline.regist('getImagesInfo', this.getImagesInfo, this)  // deprect
     pipeline.regist('getFilesSnap', this.getFilesSnap, this)
     pipeline.regist('getImageInfo', this.getImageInfo, this)
@@ -74,6 +75,16 @@ export class ResourceService{
         emitEvent(id, IPCNormalMessage.ADD_RESOURCES_BY_PATHS, resource)
       })
     }
+  }
+
+  private updateResource(msgid: number, resourceID: number) {
+    this.observer.update(msgid, resourceID)
+  }
+
+  getResource(resourceID: number) {
+    let ids = [resourceID]
+    const imgs = CivetDatabase.getFilesInfo(ids)
+    return new Resource(imgs[0])
   }
 
   getImagesInfo(msgid: number, data: any) {
@@ -222,7 +233,7 @@ export class ResourceService{
       await this.observer.read(msgid, resourcePath)
     }
   }
-
+  
   private readDir(msgid: number, path: ResourcePath, cb?: (r: Resource) => void) {
     let self = this;
     fs.readdir(path.local(), async function(err: any, menu: any) {

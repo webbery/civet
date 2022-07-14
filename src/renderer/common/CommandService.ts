@@ -16,7 +16,8 @@ class CommandMenu {
 export enum InternalCommand {
   DeleteResources = 'deleteResources',
   ExportResources = 'exportResources',
-  OpenContainingFolder = 'OpenContainingFolder'
+  OpenContainingFolder = 'OpenContainingFolder',
+  AnalysisResource = 'ReAnalysisResource'
 }
 
 class CommandService {
@@ -27,7 +28,12 @@ class CommandService {
     _cv_events.on(target, command, listener)
   }
 
-  clearCommand(target: string) {}
+  clearCommand(target: string) {
+    for (let command in InternalCommand) {
+      console.debug('clean command', target, command)
+      _cv_events.clean(target, command)
+    }
+  }
 
   registInternalCommand(target: string, command: string, vue: any) {
     switch(command) {
@@ -49,6 +55,12 @@ class CommandService {
           const files = vue.$store.getters.getFiles([fileid])
           console.debug('open folder', fileid, files)
           shell.showItemInFolder(path.normalize(files[0].path))
+        })
+        break
+      case InternalCommand.AnalysisResource:
+        _cv_events.on(target, command, (fileid: string) => {
+          console.debug('reanalysis resource', fileid)
+          vue.$ipcRenderer.send(IPCNormalMessage.UPDATE_RESOUCE_BY_ID, fileid)
         })
         break
       default:

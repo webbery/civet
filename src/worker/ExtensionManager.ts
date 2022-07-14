@@ -1,6 +1,7 @@
 import path from 'path'
 import { MessagePipeline } from './MessageTransfer'
 import { Resource, StorageAccessor } from '@/../public/Resource'
+import { i18n } from '@/../public/String'
 import { ResourcePath } from './common/ResourcePath'
 import { Result } from './common/Result'
 import { config } from '@/../public/CivetConfig'
@@ -14,6 +15,7 @@ import { IPCRendererResponse, IPCNormalMessage } from '@/../public/IPCMessage'
 import { ExtensionPackage, ExtensionActiveType, MenuDetail, KeybindDetail } from './ExtensionPackage'
 import { BaseService, IStorageService } from './service/ServiceInterface'
 import { StorageService } from './service/StorageService'
+import { ResourceService } from './service/ResourceService'
 import { ViewService } from './service/ViewService'
 import { BackgroundService } from './service/BackgroundService'
 import { createMixService as applyMixService, MixService } from './service/MixService'
@@ -490,6 +492,21 @@ export class ExtensionManager {
       service[1].activate()
     }
     console.debug('finish active extension')
+  }
+
+  updateResource(msgid: number, resourceID: number) {
+    const resourceService = getSingleton(ResourceService)
+    const resource = resourceService?.getResource(resourceID)!
+    console.debug('update resource', resource, resourceID)
+    const services = this.#extensionsOfContentType.get(resource.type)
+    if (!services) {
+      showErrorInfo({msg: `${resource.type} ${i18n('extension is not exist')}`})
+      return
+    }
+    for (const service of services!) {
+      console.debug(service.name, 'emit read')
+      service.emit('read', msgid, resource.id, resource.path, resource)
+    }
   }
 
   async read(msgid: number, uri: ResourcePath): Promise<Result<Resource, string>> {

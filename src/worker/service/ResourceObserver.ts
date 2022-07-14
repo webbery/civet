@@ -25,6 +25,10 @@ export class ResourceObserver {
     return this._listener.read(msgid, uri)
   }
 
+  update(msgid: number, resouceID: number) {
+    return this._listener.updateResource(msgid, resouceID)
+  }
+
   initWorkbenchView(): Map<string, WorkbenchItem> {
     const items = new Map<string, WorkbenchItem>()
     return items
