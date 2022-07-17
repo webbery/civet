@@ -64,8 +64,8 @@
 **道阻且长，行则将至。**
     
 ##  3. <a name='RoadMap'></a>Feature/RoadMap
-:white_square_button: 自定义界面扩展，增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取和展示  
-+ [ ] 增加存储插件功能，以支持多种数据存储方式(如本地复制、云存储等)  
++ [x] 自定义界面扩展，增加数据源插件功能，以支持多种格式(本地及网页等)的数据读取和展示  
+:white_square_button: 增加存储插件功能，以支持多种数据存储方式(如本地复制、云存储等)  
 + [x] 支持信息提取的插件开发，利用插件可以为不同类型的文件抽取信息，并进行存储与检索  
 + [ ] 引入HTML5批注规范，为各种类型的文件增加批注功能  
 + [ ] 升级数据库，增强搜索(经典筛选+[向量搜索](https://zhuanlan.zhihu.com/p/458339468))功能  
@@ -78,9 +78,9 @@
 | Billfish  | Qt | C++ | Sqlite + 图片拷贝/索引 | 私有 | Windows/Mac
 | PicSee  | ObjectC | ObjectC | Realm | 私有 | Mac
 
-内置插件支持的文件格式：  
-图片: jpg png bmp tif  
-3D模型: glt  
+**内置插件支持的文件格式：**  
+- 图片: jpg png bmp tif  
+- 3D模型: glt  
 ## <a name='Contributors'></a>Contributors
 <!-- readme: contributors -start -->
 <table>

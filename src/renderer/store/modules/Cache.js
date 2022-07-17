@@ -14,12 +14,12 @@ import { performanceMesurement } from '@/common/PerformanceMesurement'
 function updateOverview(state, showClasses) {
   const view = getCurrentViewName()
   if (showClasses) {
-    events.emit('Overview:' + view, 'update', {
+    events.emit('Overview:' + view, 'updateAll', {
       'class': state.viewClass,
       'resource': state.viewItems
     })
   } else {
-    events.emit('Overview:' + view, 'update', {
+    events.emit('Overview:' + view, 'updateAll', {
       'class': [],
       'resource': state.viewItems
     })
@@ -218,7 +218,7 @@ const mutations = {
       state.viewItems.push(Cache.files[result[idx].id])
     }
     const view = getCurrentViewName()
-    events.emit('Overview:' + view, 'update', {
+    events.emit('Overview:' + view, 'updateAll', {
       'resource': state.viewItems
     })
   },

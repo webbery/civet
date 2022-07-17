@@ -69,6 +69,7 @@ export default {
   watch: {
     $route: function(to, from) {
       console.info('content panel, to: ', to, 'from:', from.path)
+      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
     }
   },
   async updated() {

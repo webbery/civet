@@ -43,7 +43,6 @@ export default new Router({
     },
     {
       path: '/',
-      // component: require('@/components/Panel/ViewPanel').default
       component: require('@/components/Panel/WebPanel').default
     },
     {

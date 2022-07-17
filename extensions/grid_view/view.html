@@ -292,7 +292,7 @@
                     WaterfallLayout.add(resource)
                 }
             })
-            acquireCivetApi().Overview.on('update', (data) => {
+            acquireCivetApi().Overview.on('updateAll', (data) => {
                 clearClass()
                 WaterfallLayout.clear()
                 const resources = data.resource
@@ -301,6 +301,9 @@
                 }
                 const classes = data['class']
                 loadClasses(classes)
+            })
+            acquireCivetApi().Overview.on('update', (data) => {
+                console.debug('update resource:', data)
             })
             acquireCivetApi().Overview.on('property', (data) => {
                 const resourceID = data.id

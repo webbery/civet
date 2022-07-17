@@ -310,7 +310,7 @@ MapLayout = (function() {
         event.stopPropagation()
     }
 
-    acquireCivetApi().Overview.on('update', (data) => {
+    acquireCivetApi().Overview.on('updateAll', (data) => {
         console.info('map view update', data)
         MapLayout.clear()
         const resources = data.resource

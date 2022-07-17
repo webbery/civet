@@ -42,17 +42,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 14
-      - name: test
-        run: |
-          npm install
-          npm run test --loglevel silly
-        env:
-          CI: true
-      - name: get release when fail
-        if: ${{ failure() }}
-        uses: bruceadams/get-release@v1.2.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: test
+      #   run: |
+      #     npm install
+      #     npm run test --loglevel silly
+      #   env:
+      #     CI: true
   publish:
     runs-on: windows-2019
     needs: build

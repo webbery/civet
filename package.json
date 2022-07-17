@@ -1,6 +1,6 @@
 {
   "name": "civet",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "webberg <webbery@foxmail.com>",
   "description": "素材管理软件",
   "license": "MIT",
@@ -57,8 +57,8 @@
     "files": [
       "dist/electron/**/*",
       "!**/*.{gyp,h,hpp,cpp,c,cc,svg,md,ts,map}",
-      "!**/*.{ilk,pdb,obj,tlog,vcxproj,filters,iobj,ipdb,exp,lib}",
-      "!**/*.{o,Makefile,mk,yml,vcxproj,filters,iobj,ipdb,exp,lib}",
+      "!**/*.{ilk,pdb,obj,tlog,vcxproj,filters,iobj,ipdb,exp,lib,a}",
+      "!**/*.{o,Makefile,mk,yml,vcxproj,filters,iobj,ipdb,exp,lib,a}",
       "!**/Makefile",
       "!**/LICENSE"
     ],
