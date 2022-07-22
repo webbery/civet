@@ -1,3 +1,4 @@
+import path from 'path'
 export class ResourcePath {
   private localPath: string;
   private remotePath: string | null;
@@ -8,7 +9,7 @@ export class ResourcePath {
   }
 
   local(): string {
-    return this.localPath;
+    return path.normalize(this.localPath);
   }
 
   remote(): string | null {

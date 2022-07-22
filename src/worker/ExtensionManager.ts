@@ -505,6 +505,7 @@ export class ExtensionManager {
     }
     for (const service of services!) {
       console.debug(service.name, 'emit read')
+      resource.path = path.normalize(resource.path)
       service.emit('read', msgid, resource.id, resource.path, resource)
     }
   }

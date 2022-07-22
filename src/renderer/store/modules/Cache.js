@@ -191,6 +191,8 @@ const mutations = {
       if (Cache.files.hasOwnProperty(file.id)) {
         // TODO: update file info
         Cache.files[file.id].update(file)
+        const view = getCurrentViewName()
+        events.emit('Overview:' + view, 'update', file)
         continue
       }
       initResource(file)

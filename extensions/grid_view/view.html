@@ -164,7 +164,7 @@
                                     <div class="el-card is-never-shadow" style="border: 0px;">
                                         <div class="el-card__body" style="padding: 1px;">
                                             <div class="_cv_gv_frame" onclick="WaterfallLayout.onGridClick(${item.id}, this)" oncontextmenu="WaterfallLayout.onGridClick(${item.id}, this)" ondblclick="WaterfallLayout.onDbResourceClick(${item.id})">
-                                                <img src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
+                                                <img id="gv_img_${item.id}" src="${item.thumbnail?item.thumbnail:item.src}" width="100%" class="_cv_gv_mini-cover _cv_gv_trans-border">
                                             </div>
                                             <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;" ondblclick="WaterfallLayout.onDbNameClick(${item.id})">
                                                 <span class="context" id="gv_${item.id}">${item.name}</span>
@@ -303,7 +303,12 @@
                 loadClasses(classes)
             })
             acquireCivetApi().Overview.on('update', (data) => {
-                console.debug('update resource:', data)
+                // reanalysis file here, so we should update its view
+                const img = document.getElementById('gv_img_' + data.id)
+                const label = document.getElementById('gv_' + data.id)
+                // console.debug('update resource:', data, img)
+                img.src = 'data:image/png;base64,' + btoa(safeFromCharCode(data.thumbnail))
+                label.innerText = data.filename
             })
             acquireCivetApi().Overview.on('property', (data) => {
                 const resourceID = data.id

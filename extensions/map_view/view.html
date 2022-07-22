@@ -141,10 +141,10 @@ MapLayout = (function() {
         // In Chrome 59, the right-mouse-button triggers onmousedown and onmouseup, but not onclick
         const html = `<div draggable="true" class="__cv_mapbox" style="border: 0px;padding: 4px;">
                             <div class="frame" onclick="MapLayout.onResourceClick(${item.id}, this)" oncontextmenu="MapLayout.onResourceClick(${item.id}, this)" ondblclick="MapLayout.onDbResourceClick(${item.id}, this)">
-                                <img src="${item.thumbnail?item.thumbnail:item.src}" height="95%" class="_cv_gv_mini-cover _cv_gv_trans-border">
+                                <img id="mv_img_${item.id}" src="${item.thumbnail?item.thumbnail:item.src}" height="95%" class="_cv_gv_mini-cover _cv_gv_trans-border">
                             </div>
                             <div style="padding: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center; font-size: 12px;" ondblclick="MapLayout.onDbNameClick(this, ${item.id})">
-                                <span class="context">${item.name}</span>
+                                <span class="context" id="mv_${item.id}">${item.name}</span>
                             </div>
                         </div>`
         acquireCivetApi().setHtml('mapview', li, html)
@@ -310,6 +310,42 @@ MapLayout = (function() {
         event.stopPropagation()
     }
 
+    function editName(itemid) {
+        const label = document.getElementById('mv_' + itemid)
+        const text = label.innerText
+        const originStyle = label.getAttribute('style')
+        label.setAttribute('style', 'display:none')
+        const input = document.createElement('input')
+        input.setAttribute('class', '_cv_gv_input')
+        input.setAttribute('draggable', true)
+        input.setAttribute('type', 'text')
+        const disableDrag = (event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            return false
+        }
+        const renameEventListener = () => {
+            const newTitle = input.value
+            input.removeEventListener('blur', renameEventListener)
+            input.removeEventListener('dragstart', disableDrag)
+            label.parentNode.removeChild(input)
+            if (newTitle !== '' && newTitle !== text) {
+                acquireCivetApi().postMessage({
+                    command: 'changeResourceName',
+                    params: {id: itemid, name: newTitle}
+                })
+                label.innerText = newTitle
+            }
+            label.setAttribute('style', originStyle)
+        }
+        input.addEventListener('blur', renameEventListener)
+        input.addEventListener('dragstart', disableDrag)
+        label.parentNode.appendChild(input)
+        input.setRangeText(text)
+        input.focus()
+        input.select()
+    }
+
     acquireCivetApi().Overview.on('updateAll', (data) => {
         console.info('map view update', data)
         MapLayout.clear()
@@ -326,6 +362,16 @@ MapLayout = (function() {
             console.debug('begin add', resource)
             MapLayout.add(resource)
         }
+    })
+    acquireCivetApi().Overview.on('update', (data) => {
+        const img = document.getElementById('mv_img_' + data.id)
+        const label = document.getElementById('gv_' + data.id)
+        img.src = 'data:image/png;base64,' + btoa(safeFromCharCode(data.thumbnail))
+        label.innerText = data.filename
+    })
+    acquireCivetApi().Overview.on('rename', (item) => {
+        console.debug('rename item:', item)
+        editName(item)
     })
     return {
         add: function(item) {
