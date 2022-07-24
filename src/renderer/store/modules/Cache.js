@@ -8,8 +8,8 @@ import { Cache } from './CacheInstance'
 import * as Assist from './CacheAssist'
 import { config } from '@/../public/CivetConfig'
 import { Search } from '@/common/SearchManager'
-import { PerformanceObserver, performance } from 'perf_hooks'
 import { performanceMesurement } from '@/common/PerformanceMesurement'
+import { Managebench } from './Managebench'
 
 function updateOverview(state, showClasses) {
   const view = getCurrentViewName()
@@ -45,7 +45,8 @@ const state = {
   untags: 0,
   unclasses: 0,
   // router histories count
-  histories: 0
+  histories: 0,
+  focusElement: null
 }
 
 const getters = {
@@ -87,6 +88,13 @@ const getters = {
     return (key) => {
       console.debug('get i18n:', key, Cache.i18n)
       return Cache.i18n[key] || key
+    }
+  },
+  focusElement: state => { return state.focusElement },
+  extensionName: (state, getters) => {
+    return (extensionID) => {
+      // return state.extensionName[extensionID]
+      return Managebench.getExtensionName(extensionID)
     }
   }
 }
@@ -437,6 +445,12 @@ const mutations = {
     config.switchResource(name)
     config.save()
     state.currentResource = name
+  },
+  bindExtension(state, bindData) {
+    Managebench.bindExtension(bindData.id, bindData.extension)
+  },
+  setFocus(state, focusElement) {
+    state.focusElement = focusElement
   }
 }
 
@@ -601,6 +615,12 @@ const actions = {
   },
   switchResource({commit}, name) {
     commit('switchResource', name)
+  },
+  bindExtension({commit}, bindData) {
+    commit('bindExtension', bindData)
+  },
+  setFocus({commit}, focusElement) {
+    commit('setFocus', focusElement)
   }
 }
 

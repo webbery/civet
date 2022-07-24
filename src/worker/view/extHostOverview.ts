@@ -135,6 +135,7 @@ export class ExtOverviewEntry {
     this.#overviews.set(id, overview)
     const pipeline = this.#proxy.pipeline
     pipeline.post(IPCRendererResponse.ON_VIEW_ROUTER_ADD, [{name: id, display: router}])
+    pipeline.post(IPCRendererResponse.ON_MANAGEBENCH_INIT, [{id: id, extension: extensionName}])
     return overview
   }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="_cv_basic-shortcut" @keydown="onKeyDown" @keyup="onKeyUp" tabindex="0" @click="onClick">
+  <div :class="['_cv_basic-shortcut', classFocus]" @keydown="onKeyDown" @keyup="onKeyUp" tabindex="0" @click="onClick" @blur="onBlur">
     <span v-for="(item, k) in currentShortcuts" :key="k">{{item}}</span>
   </div>
 </template>
@@ -12,15 +12,18 @@ export default {
     return {
       currentShortcuts: ['None'],
       index: 0,
-      total: 0
+      total: 0,
+      classFocus: ''
     }
   },
   props: {
-    defaultShortcuts: String
+    defaultShortcuts: String,
+    extension: String
   },
   mounted() {
     if (this.defaultShortcuts.length) {
-      this.currentShortcuts = this.defaultShortcuts.split(' ')
+      const [keys, _] = this.defaultShortcuts.split(',')
+      this.currentShortcuts = keys.split(' ')
     }
   },
   methods: {
@@ -51,13 +54,17 @@ export default {
       const key = localKey(event.key)
       if (key === this.currentShortcuts[0]) {
         this.index = 0
-        this.$emit('changed', this.defaultShortcuts, this.currentShortcuts)
+        this.$emit('changed', this.defaultShortcuts, this.currentShortcuts, this.extension)
         this.defaultShortcuts = this.currentShortcuts.join(' ')
       }
       console.debug('press cnt', this.index)
     },
     onClick() {
       this.index = 0
+      this.classFocus = '_cv-shortcut-focus'
+    },
+    onBlur() {
+      this.classFocus = ''
     }
   }
 }
@@ -72,5 +79,8 @@ outline: none;
   margin: 3px;
   padding: 2px;
   border-radius: 3px;
+}
+._cv-shortcut-focus span{
+  background-color: rgb(0, 157, 255);
 }
 </style>

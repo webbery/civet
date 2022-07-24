@@ -169,6 +169,11 @@ export function hasProtocol(url: string) {
   return url.startsWith('//') || url.startsWith('http://') || url.startsWith('https://')
 }
 
+/**
+ * @brief Convert input key name to Civet system key name
+ * @param key 
+ * @returns 
+ */
 export function localKey(key: string) {
   switch (key) {
     case 'Control': return 'CommandOrControl'

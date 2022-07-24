@@ -21,6 +21,7 @@ import { InternalCommand, commandService } from '@/common/CommandService'
 import { config } from '@/../public/CivetConfig'
 import { Shortcut } from '../../shortcut/Shortcut'
 import { i18n } from '@/../public/String'
+import { ViewType } from '@/../public/ExtensionHostType'
 import Vue from 'vue'
 
 export default {
@@ -114,6 +115,7 @@ export default {
         return
       }
       this.$store.dispatch('display')
+      this.$store.dispatch('setFocus', {id: activateView, type: ViewType.Overview, instance: null})
       await this.reinitMenu(activateView)
       await this.reinitKeybinding(activateView)
     },
@@ -216,6 +218,7 @@ export default {
         SandBoxManager.switchSandbox(viewid)
       }
       updateCurrentViewName(viewid)
+      this.$store.dispatch('setFocus', {id: viewid, type: ViewType.Overview, instance: null})
     },
     async reinitMenu(activateView) {
       const menus = await this.$ipcRenderer.get(IPCNormalMessage.GET_OVERVIEW_MENUS, 'overview/' + activateView)
@@ -263,14 +266,16 @@ export default {
         if (!this.isInternalCommand(command)) {
           // command transmit to its view
           const transmit = (when) => {
-            console.debug(`transmit press key ${keybind.key} to overview: ${activateView}`)
             const currentView = getCurrentViewName()
+            console.debug(`transmit press key ${keybind.key} to overview: ${currentView}`)
             if (when === 'overviewFocus') {
-              if (currentView === activateView) events.emit('Overview:' + activateView, command, getSelectionID())
+              events.emit('Overview:' + currentView, command, getSelectionID())
             }
             return true
           }
-          Shortcut.register(keybind.key, keybind.when, transmit)
+          // const extensionName = Managebench.getExtensionName(activateView)
+          const [key, extension] = keybind.key.split(',')
+          Shortcut.register(key, extension, keybind.when, transmit)
         }
       }
     }

@@ -85,5 +85,6 @@ export enum IPCRendererResponse {
   ON_EXTENSION_CONTENT_UPDATE = 'ContentView',
   ON_RESOURCE_UPDATED = 'onRU',
   ON_I18N = 'i18n',
+  ON_MANAGEBENCH_INIT = 'onMI',           /**< after view finished, this message send extension and its instance id to view*/
   ON_SEARCH_INIT_COMMAND = 'onSIC'
 }

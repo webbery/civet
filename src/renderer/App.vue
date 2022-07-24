@@ -18,7 +18,7 @@ import { getCurrentViewName } from '@/common/RendererService'
 import { text2PNG } from '@/../public/Utility'
 import { Cache } from '@/store/modules/CacheInstance'
 import { isEmpty } from '@/../public/String'
-import { Shortcut } from './shortcut/Shortcut'
+import { Shortcut, keyDownHandler } from './shortcut/Shortcut'
 
 export default {
   name: 'civet',
@@ -31,6 +31,7 @@ export default {
     this.$ipcRenderer.on(IPCRendererResponse.ON_RESOURCE_UPDATED, this.onUpdateResources)
     this.$ipcRenderer.on(IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
     this.$ipcRenderer.on(IPCRendererResponse.ON_I18N, this.onI18N)
+    this.$ipcRenderer.on(IPCRendererResponse.ON_MANAGEBENCH_INIT, this.onManagebenchInit)
     this.$ipcRenderer.on('keydown', this.onSystemKeydown)
     this.$events.on('civet', 'onErrorMessage', this.onErrorTips)
   },
@@ -51,7 +52,7 @@ export default {
     if (config.shouldUpgrade()) {
       config.save()
     }
-    this.initializeShortcut()
+    document.addEventListener('keydown', keyDownHandler(this))
     // send this message to worker, and recieve workbench extension view for initial.
     this.$ipcRenderer.send(IPCNormalMessage.RENDERER_MOUNTED)
   },
@@ -161,6 +162,9 @@ export default {
     initializeShortcut() {
       // globalShortcut
       // globalShortcut.unregister('CommandOrControl+R')
+    },
+    onManagebenchInit(bindData) {
+      this.$store.dispatch('bindExtension', bindData)
     }
   },
   destroyed: function() {

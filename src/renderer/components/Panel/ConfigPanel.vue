@@ -32,7 +32,7 @@
           <el-divider></el-divider>
           <div v-for="(item, idx) of shortcuts" :key="idx">
             <el-row :gutter="20">
-              <el-col :span="4"><ShortCut :defaultShortcuts="item.shortcut" @changed="onShortCutChanged"></ShortCut></el-col>
+              <el-col :span="4"><ShortCut :defaultShortcuts="item.shortcut" :extension="item.extension" @changed="onShortCutChanged"></ShortCut></el-col>
               <el-col :span="4"><div>{{item.command}}</div></el-col>
               <el-col :span="4"><div>{{item.extension}}</div></el-col>
               <el-col :span="8"><div>{{item.desc}}</div></el-col>
@@ -107,6 +107,7 @@ import { config } from '@/../public/CivetConfig'
 import { IPCNormalMessage } from '@/../public/IPCMessage'
 import ShortCut from '../Control/Shortcut'
 import { Shortcut } from '../../shortcut/Shortcut'
+import { getCurrentViewName } from '../../common/RendererService'
 
 export default {
   name: 'config-page',
@@ -200,22 +201,13 @@ export default {
         }
       }
     },
-    onShortCutChanged(originShortcut, newshortcut) {
+    onShortCutChanged(originShortcut, newshortcut, extension) {
       if (newshortcut.length === 0 || originShortcut.length === 0) return
-      console.debug('save short cut:', originShortcut, newshortcut)
-      config.updateShortCut(originShortcut, newshortcut.join(' '))
+      const newKeybind = newshortcut.join(' ')
+      console.debug('save short cut:', originShortcut, newKeybind, extension)
+      config.updateShortCut(originShortcut, newKeybind + ',' + extension)
       config.save()
-      const converter = function(shortcutArr) {
-        let str = ''
-        for (let item of shortcutArr) {
-          str += item
-          str += '+'
-        }
-        return str.substr(0, str.length - 1)
-      }
-      const old = converter(originShortcut.split(' '))
-      const newer = converter(newshortcut)
-      Shortcut.updateKey(old, newer)
+      Shortcut.updateKey(originShortcut, newKeybind, extension)
     }
   }
 }

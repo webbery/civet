@@ -1,38 +1,82 @@
 // import { debounce } from 'lodash'
-import { config } from '@/../public/CivetConfig'
 import { localKey } from '@/../public/Utility'
+import { IClientCommand } from '../common/CommandService'
+
+export interface IKeyBindingRules {
+  key: string,
+  command: IClientCommand;
+}
+
+/**
+ * this manager is a Map, which key is extension, value is callback and `when`
+ */
+type CommandHandlerManager = Map<string, [(...args: Array<any>) => boolean, string]>
 
 class Accelerator{
-  private _shortcut: Map<string, [(...args: Array<any>) => boolean, any]> = new Map();
-  register(shortcut: string, when: string, func: (...args: Array<any>) => boolean ) {
+  private _shortcut: Map<string, CommandHandlerManager> = new Map();
+  /**
+   * 
+   * @param shortcut A shortcut which format as: key
+   * @param when 
+   * @param func a callback handler that key is press
+   */
+  register(shortcut: string, extension: string, when: string, func: (...args: Array<any>) => boolean ) {
     const lower = shortcut.toLowerCase()
-    if (this._shortcut.has(lower)) {
-      console.warn(`shortcut ${shortcut} will be replace`)
+    let handlers = this._shortcut.get(lower)
+    if (!handlers) {
+      handlers = new Map
+    } else {
+      console.warn(`shortcut ${shortcut},${extension} will be replace`)
     }
-    this._shortcut.set(lower, [func, when])
+    handlers.set(extension, [func, when])
+    console.debug('regist keybinding:', shortcut, extension, func)
+    this._shortcut.set(lower, handlers)
   }
 
-  unregister(shortcut: string) {
+  unregister(shortcut: string, extension: string) {
     const lower = shortcut.toLowerCase()
     if (this._shortcut.has(lower)) {
-      this._shortcut.delete(lower)
+      let handler = this._shortcut.get(lower)
+      if (handler && handler.has(extension)) {
+        handler.delete(extension)
+      }
+      if (handler && handler.size === 0) {
+        this._shortcut.delete(lower)
+      }
     }
   }
 
-  updateKey(old: string, current: string) {
+  /**
+   * @brief update keybinding, use `current` replace `old`.
+   * @param old the key that will be replaced. 
+   * @param current the key to replace.
+   */
+  updateKey(old: string, current: string, extension: string) {
     const lower = old.toLowerCase()
-    const lowerCurrent = current.toLowerCase()
+    let handler = null
+    // get original handler and remove old keybind
     if (this._shortcut.has(lower)) {
       const record = this._shortcut.get(lower)!
-      if (this._shortcut.has(lowerCurrent)) {
-        console.warn(`shortcut ${lowerCurrent} is confict`)
-        const history = this._shortcut.get(lowerCurrent)
-        this._shortcut.set('old.' + lowerCurrent, history!)
+      if (record && record.has(extension)) {
+        handler = record.get(extension)
+        record.delete(extension)
       }
-      this._shortcut.set(lowerCurrent, record)
-      this._shortcut.delete(lower)
+      if (record && record.size === 0) {
+        this._shortcut.delete(lower)
+      }
       // console.debug('update key:', lower, 'with', lowerCurrent, this._shortcut)
     }
+    // set new keybind
+    const lowerCurrent = current.toLowerCase()
+    let currentManager = this._shortcut.get(lowerCurrent)
+    if (!currentManager) {
+      currentManager = new Map
+    }
+    if (currentManager.has(extension)) {
+      console.warn(`some keybind will be replace`)
+    }
+    currentManager.set(extension, handler!)
+    this._shortcut.set(lowerCurrent, currentManager)
   }
 
   has(shortcut: string) {
@@ -63,26 +107,38 @@ function removeKey(key: string) {
   }
 }
 
-const keyDownHandler = (() => {
-  return function (event: any) {
+/**
+ * @brief this function is added to event listener when key is press down in App.vue
+ * @param vue an vue instance
+ * @returns an event listener function
+ */
+export const keyDownHandler = function (vue: any) {
+  return function(event: any) {
     const key = localKey(event.key).toLowerCase()
     // console.info('key:', event.key, key)
     if (hasKey(key)) {
+      return false
+    }
+    const focus = vue.$store.getters.focusElement
+    console.debug('keyDownHandler', focus)
+    if (focus === null) {
+      console.debug('focus element is null')
       return false
     }
     pressedKey.push(key)
     console.info('keyDownHandler:', pressedKey)
     let accelerator = pressedKey.join('+')
     if (shortcut.has(accelerator)) {
-      const [func, when] = shortcut.get(accelerator)!
+      const manager = shortcut.get(accelerator)!
+      const extension = vue.$store.getters.extensionName(focus.id)
+      const [func, when] = manager.get(extension)!
       return func(when)
     }
-    console.debug('short key not exist:', accelerator)
+    console.debug('short key not exist:', accelerator, shortcut)
     return false
   }
-})()
+}
 
-document.addEventListener('keydown', keyDownHandler)
 document.addEventListener('keyup', keyUpHandler)
 
 function keyUpHandler(event: any) {

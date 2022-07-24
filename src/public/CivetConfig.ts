@@ -9,7 +9,7 @@
         layout: mapview,  // default layout of overview
       },
       shortcut: {
-        key: {command: command, extension: extension, description: desc},
+        key,extension: {command: command, description: desc},
       }
     },
     resources: [
@@ -36,8 +36,8 @@
     ]
   }
  */
-  const fs = require('fs')
-  class CivetConfig {
+const fs = require('fs')
+class CivetConfig {
   configPath: string;
   config: any;
   oldVersion: boolean = false;
@@ -63,29 +63,26 @@
     console.info('cfgPath', this.configPath)
     if (!fs.existsSync(this.configPath)) {
       fs.writeFileSync(this.configPath, JSON.stringify(cfg))
-    } else {
-      const config = JSON.parse(fs.readFileSync(this.configPath).toString())
-      // cfg.app.first = false
-      if (!config.app.version || config.app.version !== version) {
-        // upgrade config here
-        console.info(`software should be upgrade, old version: ${config.app.version}, current version: ${version}`)
-        this.oldVersion = true;
-        config.app.version = version
-        if (typeof config.app.default === 'string') { // 0.1.2 -> 0.2.0
-          const dbname = config.app.default
-          config.app.default = {layout: 'gridview', dbname: dbname}
-        }
-        if (!config.app.shortcut) {
-          config.app.shortcut = {}
-        }
+    }
+    this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
+    // cfg.app.first = false
+    if (!this.config.app.version || this.config.app.version !== version) {
+      // upgrade config here
+      console.info(`software should be upgrade, old version: ${this.config.app.version}, current version: ${version}`)
+      this.oldVersion = true;
+      this.config.app.version = version
+      if (typeof this.config.app.default === 'string') { // 0.1.2 -> 0.2.0
+        const dbname = this.config.app.default
+        this.config.app.default = {layout: 'gridview', dbname: dbname}
       }
-      if (!config.app.default) { // avoid first time exception cause a wrong format file
-        config.app.default = {layout: 'gridview'}
-      }
-      cfg = config
+    }
+    if (!this.config.app.shortcut) {
+      this.config.app.shortcut = {}
+    }
+    if (!this.config.app.default) { // avoid first time exception cause a wrong format file
+      this.config.app.default = {layout: 'gridview'}
     }
     this.#lastModify = this.getModifyTime()
-    this.config = cfg
   }
 
   private getModifyTime(): number {
@@ -99,7 +96,11 @@
 
   getConfig(reload: boolean) {
     if (reload) {
+      const shortcut = this.config.app.shortcut
       this.config = this.loadConfig()
+      if (!this.config.app.shortcut) {
+        this.config.app.shortcut = shortcut
+      }
     }
     return this.config
   }
@@ -315,9 +316,9 @@
     if (!extension) return this.config.app.shortcut
     let result = {}
     for (const key in this.config.app.shortcut) {
-      const shorcut = this.config.app.shortcut[key]
-      if (shorcut.extension == extension) {
-        result[key] = shorcut
+      const shortcut = this.config.app.shortcut[key]
+      if (shortcut.extension == extension) {
+        result[key] = shortcut
       }
     }
     return result
@@ -330,22 +331,24 @@
   }
 
   isShortCutExist(shortcut: any) {
-    const extension = shortcut.extension
-    const command = shortcut.command
-    for (const k in this.config.app.shortcut) {
-      const key = this.config.app.shortcut[k]
-      console.debug('key:', key, 'input:', shortcut)
-      if (key.extension === extension && command === key.command) return true
+    const id = shortcut.name + ',' +shortcut.extension
+    for (const key in this.config.app.shortcut) {
+      if (key === id) return true
+      const item = this.config.app.shortcut[key]
+      if (item['extension'] === shortcut.extension && shortcut.command === item['command']) return true
     }
     return false
   }
 
   addShortCut(shortcut: any, force: boolean) {
     if (!force && this.isShortCutExist(shortcut)) return false
-    const name = shortcut.name
-    this.config.app.shortcut[name] = shortcut
+    const id = shortcut.name + ',' + shortcut.extension
+    console.debug('add shortcut:', this.config)
+    this.config.app.shortcut[id] = shortcut
     return true
   }
 }
 
-export const config = new CivetConfig()
+const cvConfig = new CivetConfig()
+
+export const config = cvConfig

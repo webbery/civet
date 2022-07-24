@@ -1,17 +1,9 @@
 import { service } from './RendererService'
 import { IPCNormalMessage } from '../../public/IPCMessage'
-import EventEmitter from 'events'
 import path from 'path'
 
 declare let _cv_events: any;
 declare let _cv_messageSender_: any;
-
-class CommandMenu {
-  context: string;
-  command: string;
-  group: string;
-  name: string;
-}
 
 export enum InternalCommand {
   DeleteResources = 'deleteResources',
@@ -20,6 +12,14 @@ export enum InternalCommand {
   AnalysisResource = 'ReAnalysisResource'
 }
 
+/**
+ * An IClientCommand refers a command in renderer
+ */
+export interface IClientCommand {
+  id: string;
+  when: string;
+  handler: (params: any) => void;
+}
 class CommandService {
   constructor() {
   }
