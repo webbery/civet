@@ -213,12 +213,14 @@ class CivetConfig {
   }
 
   save() {
-    console.info('save config', this.config)
+    console.info('before save config', this.config)
     const modifyTime = this.getModifyTime()
     if (modifyTime > this.#lastModify) {
-      console.info('merge new config')
+      console.info('merge new config, last time:', this.#lastModify, 'latest time:', modifyTime)
       this.merge()
     }
+    this.#lastModify = modifyTime
+    console.info('after save config', this.config)
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }
 
@@ -231,13 +233,20 @@ class CivetConfig {
 
   private merge() {
     const latest = this.loadConfig()
-    if (latest['resources'].length != this.config['resources']) {
-      this.config['resources'] = latest['resources']
+    console.debug('before merge:', this.config, 'new config:', latest)
+    if (latest['resources'].length != this.config['resources'].length) {
+      // For the first time, host will read extension multiple times to save shortcut,
+      // so this function will be called many times.
+      if (latest['resources'].length) this.config['resources'] = latest['resources']
       let defaultInfo = this.config['app'].default
       const idx = this.isValidDB(defaultInfo.dbname, latest['resources'])
-      if (idx < 0) {
-        this.config['app'].default.name = latest['app'].default.name
+      if (idx < 0 && latest['resources'].length) {
+        this.config['app'].default.dbname = latest['app'].default.dbname
       }
+    }
+    // shortcut always increase, so use max one to replace it
+    if (Object.keys(this.config.app.shortcut) < Object.keys(latest.app.shortcut)) {
+      this.config.app.shortcut = latest.app.shortcut
     }
     this.config['app'].default.layout = latest['app'].default.layout
   }
