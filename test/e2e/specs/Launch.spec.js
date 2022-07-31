@@ -1,57 +1,10 @@
-import puppeteer from 'puppeteer-core'
 import util from '../util'
-const electron = require('electron')
-const { spawn } = require('child_process')
+import { startCivet, closeCivet, mainPage } from '../modules/base'
+
 const {describe, it} = require('mocha')
-const {expect, assert} = require('chai')
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-let spawnedProcess
-let app
-let mainWindowPage
-
-const run = async () => {
-  const port = 9200 // Debugging port
-  const startTime = Date.now()
-  const timeout = 20000 // Timeout in miliseconds
-
-  // Start Electron with custom debugging port
-  spawnedProcess = spawn(electron, ['.', `--remote-debugging-port=${port}`], {
-    shell: true
-  })
-
-  // Log errors of spawned process to console
-  spawnedProcess.stderr.on('data', data => {
-    console.error(`stderr: ${data}`)
-  })
-
-  // Wait for Puppeteer to connect
-  while (!app) {
-    try {
-      app = await puppeteer.connect({
-        browserURL: `http://localhost:${port}`,
-        defaultViewport: { width: 2060, height: 768 }
-      })
-    } catch (error) {
-      if (Date.now() > startTime + timeout) {
-        throw error
-      }
-    }
-  }
-
-  const pages = await app.pages();
-  // console.info(pages)
-  for (let page of pages) {
-    const t = await page.title()
-    console.info('title: ', t)
-    if (t === 'civet') {
-      mainWindowPage = page
-      break
-    }
-  }
 }
 
 function createResourceDB(name) {
@@ -68,54 +21,18 @@ function createResourceDB(name) {
 
 createResourceDB('testdb')
 
-describe('****************Start Functional Test*************', function (resolve, reject) {
+describe('****************Start Test*************', function (resolve, reject) {
   this.timeout(60 * 1000);
-  const testBrowserExtension = require('../modules/testBrowserExtension')
-  const testLocalExtension = require('../modules/testExtension')
-  const testClassPanel = require('../modules/testClassifyPanel')
-  const testClassicalView = require('../modules/testClassicalView')
-  const testMapView = require('../modules/testMapView')
   before((done) => {
-    run().then(result => {
+    startCivet().then(result => {
       done()
     })
   })
-  it('add operation in classify panel ', function(done) {
-    (async function() {
-      try{
-        await testClassPanel.addClass(mainWindowPage)
-        done()
-      } catch (err) {
-        done(err)
-      }
-    })()
-  })
-  it('install local extensions', function(done) {
-    (async function() {
-      try{
-        await testLocalExtension.install(mainWindowPage)
-        done()
-      } catch (err) {
-        done(err)
-      }
-    })()
-  })
-  it('browser extension: add files', function(done) {
-    // create process and use websocket as a browser extension to add resource
-    testBrowserExtension.run(done, mainWindowPage)
-  })
-  it('waterfall layout view', function(done) {
-    (async function () {
-      try{
-        await testClassicalView.test(mainWindowPage)
-        console.info('waterfall layout view finish')
-        done()
-      } catch (err) {
-        done(err)
-        util.printLog()
-      }
-    })()
-  })
+
+  require('./cases/Command')
+  require('./cases/Performance')
+  require('./cases/UI')
+
   // it('mapview layout', async function() {
   //   await testMapView.test(mainWindowPage)
   // })
@@ -150,40 +67,11 @@ describe('****************Start Functional Test*************', function (resolve
   //   files = await mainWindowPage.$$('.vue-waterfall-slot')
   //   expect(beforeLength).to.be.above(files.length)
   // })
-  it('uninstall local extension', function(done) {
-    (async function() {
-      try{
-        await testLocalExtension.uninstall(mainWindowPage)
-        done()
-      } catch (err) {
-        done(err)
-      }
-    })()
-  })
-  it('clean operation in classify panel ', function(done) {
-    (async function() {
-      try {
-        await testClassPanel.removeClass(mainWindowPage)
-        done()
-      } catch (err) {
-        done(err)
-      }
-    })()
-  })
+  
   after((done) => {
-    setTimeout(() => {
-      if (testBrowserExtension) testBrowserExtension.close()
-      try {
-        app.close().then(() => {
-          done()
-        })
-      } catch (err) {
-        console.error('test error:', err)
-        app.close().then(() => {
-          done()
-        })
-      }
+    setTimeout(async () => {
+      await closeCivet()
+      done()
     }, 10*1000)
   })
 })
-
