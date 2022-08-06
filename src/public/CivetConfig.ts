@@ -358,6 +358,4 @@ class CivetConfig {
   }
 }
 
-const cvConfig = new CivetConfig()
-
-export const config = cvConfig
+export const config = new CivetConfig()

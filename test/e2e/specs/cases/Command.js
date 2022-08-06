@@ -14,8 +14,17 @@ describe('# Command Test', function (resolve, reject) {
     const WebSock = require('ws')
     sock = new WebSock('ws://localhost:20401')
     sock.on('message', (str) => {
-      console.debug('pong:', str.toString())
-      finish = true
+      const msg = JSON.parse(str.toString())
+      console.debug('recieve command:', msg.cmd)
+      switch(msg['cmd']) {
+        case 'global.library.action.create':
+          break
+        case 'global.debug.action.close':
+          finish = true
+          break
+        default:
+        break
+      }
     })
   }
   before(() => {
@@ -27,14 +36,24 @@ describe('# Command Test', function (resolve, reject) {
     })()
   })
 
-  it('execute command: library.create', function(done) {
+  it('execute command: global.library.action.create', function(done) {
     (async function() {
       while(!connected) {
         await util.wait(1000)
       }
+      await util.wait(1500)
       console.debug('send websocket message 1')
-      sock.send('library.create')
+      sock.send(JSON.stringify({cmd: 'global.library.action.create', params: {name: 'newlib', path: '.'}}))
       console.debug('send websocket message 2')
+      done()
+    })()
+  })
+  it('execute command: global.debug.action.close', function(done) {
+    (async function() {
+      while(!connected) {
+        await util.wait(1000)
+      }
+      sock.send(JSON.stringify({cmd: 'global.debug.action.close'}))
       done()
     })()
   })

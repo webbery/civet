@@ -14,9 +14,7 @@
 </template>
 <script>
 import { dialog, getCurrentWindow } from '@electron/remote'
-import { config } from '../../../public/CivetConfig'
-import { IPCNormalMessage } from '@/../public/IPCMessage'
-import bus from '../utils/Bus'
+import { CommandSystem } from '@/common/CommandSystem'
 
 export default {
   name: 'Guider',
@@ -58,13 +56,9 @@ export default {
         this.msg = '文件已存在'
         return
       }
-      config.addResource(this.resourceName, this.resourceDBPath)
-      console.info('config:', config)
-      config.save()
-      // bus.emit(bus.EVENT_INIT_RESOURCE_DB, this.resourceName)
-      this.$store.dispatch('switchResource', this.resourceName)
-      await this.$ipcRenderer.get(IPCNormalMessage.REINIT_DB, this.resourceName)
-      this.$emit('onsuccess', this.resourceName)
+      if (await CommandSystem.execute('global.library.action.create', {name: this.resourceName, path: this.resourceDBPath})) {
+        this.$emit('onsuccess', this.resourceName)
+      }
     },
     onSelectDBPath() {
       let self = this
