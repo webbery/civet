@@ -3,10 +3,6 @@ import { startCivet, closeCivet, mainPage } from '../modules/base'
 
 const {describe, it} = require('mocha')
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 function createResourceDB(name) {
   // create cfg.json to add db
   const fs = require('fs')
