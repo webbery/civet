@@ -29,18 +29,18 @@ module.exports = {
       switch(data.method) {
         case NotifyCurrentDB:
           dbs = data['params']['curdb']
-          // console.info('recieve:', dbs)
+          console.info('recieve:', dbs)
           assert(dbs !== undefined)
           break;
         case NotifyDownloadSuccess:
-          // console.debug(`download success ${JSON.stringify(data['params'])}`)
+          console.debug(`download success ${JSON.stringify(data['params'])}`)
           assert(data.params.url || data.params.location )
           if (!data['params']['url']) {
             done()
           }
           break;
         case NotifyDownloadError:
-          // console.error(`download fail: ${JSON.stringify(data)}`)
+          console.error(`download fail: ${JSON.stringify(data)}`)
           assert(data.params.url.length > 0)
           break;
         case NotifyDBChanged:
@@ -51,7 +51,7 @@ module.exports = {
       }
     })
     sock.on('open', function (data) {
-      // console.info('websocket open', data)
+      console.info('websocket open', data)
     })
     while(dbs.length === 0) {
       await util.wait(1000)

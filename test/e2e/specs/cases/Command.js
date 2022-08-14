@@ -1,3 +1,4 @@
+import path from 'path'
 import { startCivet, closeCivet, mainPage } from '../../modules/base'
 const util = require('../../util')
 const {describe, it} = require('mocha')
@@ -15,15 +16,23 @@ describe('# Command Test', function (resolve, reject) {
     sock = new WebSock('ws://localhost:20401')
     sock.on('message', (str) => {
       const msg = JSON.parse(str.toString())
-      console.debug('recieve command:', msg.cmd)
       switch(msg['cmd']) {
         case 'global.library.action.create':
+          assert(true === msg['result'])
           break
         case 'global.debug.action.close':
           finish = true
           break
+        case 'global.library.action.getall':
+          assert(true === msg['result'])
+          break
+        case 'global.resource.action.add':
+          assert(true === msg['result'])
+          break
         default:
-        break
+          console.debug('recieve command:', msg.cmd)
+          assert(false)
+          break
       }
     })
   }
@@ -42,9 +51,29 @@ describe('# Command Test', function (resolve, reject) {
         await util.wait(1000)
       }
       await util.wait(1500)
-      console.debug('send websocket message 1')
       sock.send(JSON.stringify({cmd: 'global.library.action.create', params: {name: 'newlib', path: '.'}}))
-      console.debug('send websocket message 2')
+      done()
+    })()
+  })
+  it('execute command: global.resource.action.add', function(done) {
+    (async function() {
+      while(!connected) {
+        await util.wait(1000)
+      }
+      await util.wait(1500)
+      const fullpath = path.resolve(__dirname, '../../../../static/icon.png')
+      console.debug('add png:', fullpath)
+      sock.send(JSON.stringify({cmd: 'global.resource.action.add', params: fullpath}))
+      done()
+    })()
+  })
+  it('execute command: global.library.action.getall', function(done) {
+    (async function() {
+      while(!connected) {
+        await util.wait(1000)
+      }
+      await util.wait(1500)
+      sock.send(JSON.stringify({cmd: 'global.library.action.getall', params: '/'}))
       done()
     })()
   })

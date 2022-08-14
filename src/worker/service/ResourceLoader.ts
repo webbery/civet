@@ -11,14 +11,25 @@ export class ResourceLoader {
     let downloadDir = 'download'
     if (dbname === '') {
       dbname = config.getCurrentDB()
-      if (!dbname) return Result.failure('current resource is undefined')
+      console.debug('download from dbname:', dbname)
+      if (!dbname) {
+        const error = 'current resource is undefined'
+        console.error(error)
+        return Result.failure(error)
+      }
       const dir = config.getDBPath(dbname);
+      if (!dir) {
+        const error = `resource lib ${dbname}'s path is empty: ${dir}`
+        console.error(error)
+        return Result.failure(error)
+      }
       downloadDir = dir + '/' + downloadDir;
+      console.debug('download from dir:', downloadDir)
       if (!fs.existsSync(downloadDir)) {
         fs.mkdirSync(downloadDir);
       }
     }
-    console.info('download to', downloadDir)
+    console.info('download to', downloadDir, data)
     let fullpath: string | null = null;
     try{
       if (data['bin'] !== undefined) {
@@ -30,6 +41,7 @@ export class ResourceLoader {
         fullpath = await this.downloadByHttp(data['url'], downloadDir);
       }
     } catch (err: any) {
+      console.error('download error:', err)
       return Result.failure(err);
       // throw new Error(`download ${data} error`)
     }

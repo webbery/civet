@@ -54,7 +54,7 @@ export class RendererMock {
       switch(msg.method) {
         case ExtensionRequest.AddResource:
           logger.debug(`ws load file: ${msg.params.name}/${msg.params.url}`)
-          const result = await RendererMock.resourceLoader.download(msg.params)
+          const result = await self.resourceLoader.download(msg.params)
           if (result.isSuccess()) {
             logger.debug(`resource remote path: ${result.value}`)
             const resourcePath = new ResourcePath(result.value, msg.params['url'])
@@ -108,5 +108,5 @@ export class RendererMock {
   }
 
   private resourceService: ResourceService;
-  private static resourceLoader: ResourceLoader = new ResourceLoader();
+  public resourceLoader: ResourceLoader = new ResourceLoader();
 }

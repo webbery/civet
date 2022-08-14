@@ -22,6 +22,7 @@ import { config } from '@/../public/CivetConfig'
 import { Shortcut } from '../../shortcut/Shortcut'
 import { i18n } from '@/../public/String'
 import { ViewType } from '@/../public/ExtensionHostType'
+import { CommandSystem } from '@/common/CommandSystem'
 import Vue from 'vue'
 
 export default {
@@ -67,7 +68,7 @@ export default {
           // this.$store.dispatch('display')
           console.info('Overview update', this.$store.state.Cache.viewClass)
           if (to.query.name === '全部') {
-            this.$store.dispatch('getClassesAndFiles', '/')
+            CommandSystem.execute('global.library.action.create', '/')
           }
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break
@@ -75,10 +76,11 @@ export default {
           const view = getCurrentViewName()
           this.$store.dispatch('getUncategoryResources')
           // this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
+          CommandSystem.execute('global.library.action.unclassify')
           break
         case '/untag':
           // this.$events.emit('Overview:' + view, 'update', {resource: this.$store.state.Cache.viewItems})
-          this.$store.dispatch('getUntagResources')
+          CommandSystem.execute('global.library.action.untag')
           break
         case '/query':
           switch (to.query.type) {
@@ -126,7 +128,7 @@ export default {
         paths.push(item.path)
       }
       if (paths.length > 0) {
-        this.$ipcRenderer.send(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, paths)
+        CommandSystem.execute('global.resource.action.add', paths)
       }
       event.preventDefault()
     },

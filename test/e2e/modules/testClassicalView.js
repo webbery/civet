@@ -110,15 +110,18 @@ module.exports = {
   },
   test: async function(page) {
     await base.switchLayout(page, CLASSICAL_LAYOUT)
+    await page.waitForTimeout(1000)
     const property = require('./testResourceProperty')
     await selectResource(page)
     const name = await property.getCurrentResourceName(page)
     assert(name !== undefined && name.length !== 0, `name is ${name}`)
     // await property.updateName(page, newName)
     const newName = 'Image0'
+    await page.waitForTimeout(1000)
     await this.accelatorKey4Rename(page, newName)
-
+    await page.waitForTimeout(1000)
     await property.addTag(page, 'green')
+    await page.waitForTimeout(1000)
     await validName(page, newName)
     
     // search

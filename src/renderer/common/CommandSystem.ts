@@ -69,4 +69,18 @@ export function registCommandSystem(vue: any) {
     vue.$store.dispatch('switchResource', params.name)
     return vue.$ipcRenderer.get(IPCNormalMessage.REINIT_DB, params.name)
   })
+  // retrieve all resources, params indecate which resource's path should be retrieved.
+  CommandSystem.registCommand('global.library.action.getall', (params: any): Promise<boolean> => {
+    return vue.$store.dispatch('getClassesAndFiles', params)
+  })
+  CommandSystem.registCommand('global.library.action.unclassify', (params: any): Promise<boolean> => {
+    return vue.$store.dispatch('getUncategoryResources')
+  })
+  CommandSystem.registCommand('global.library.action.untag', (params: any): Promise<boolean> => {
+    return vue.$store.dispatch('getUntagResources')
+  })
+  CommandSystem.registCommand('global.resource.action.add', (params: any): Promise<boolean> => {
+    vue.$ipcRenderer.send(IPCNormalMessage.ADD_RESOURCES_BY_PATHS, params)
+    return new Promise(()=>{return true})
+  })
 }

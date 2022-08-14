@@ -180,10 +180,10 @@ class CivetConfig {
 
   getRecentResources() {}
 
-  addResource(name: string, path: string) {
+  addResource(name: string, dir: string) {
     for (const resource of this.config.resources) {
       if (resource.name === name) {
-        resource.db.path = path
+        resource.db.path = dir
         return
       }
     }
@@ -193,9 +193,10 @@ class CivetConfig {
       this.config.app.default = {layout: 'mapview', dbname: dbname}
     }
     this.config.app.default['dbname'] = name
+    const path =require('path')
     this.config.resources.push({
       name: name,
-      db: { path: path + '/' + name },
+      db: { path: path.resolve(dir, name) },
       extensions: [],
       meta: this.schema(),
       command: [
@@ -224,6 +225,12 @@ class CivetConfig {
     fs.writeFileSync(this.configPath, JSON.stringify(this.config))
   }
 
+  /**
+   * 
+   * @param name resource db name
+   * @param resources the resource that will be compared
+   * @returns -1 if not exist in resources library
+   */
   private isValidDB(name: string, resources: any): number {
     for (let idx = 0, len = resources.length; idx < len; ++idx) {
       if (resources[idx].name === name) return idx
@@ -237,7 +244,12 @@ class CivetConfig {
     if (latest['resources'].length != this.config['resources'].length) {
       // For the first time, host will read extension multiple times to save shortcut,
       // so this function will be called many times.
-      if (latest['resources'].length) this.config['resources'] = latest['resources']
+      for (const resource of latest['resources']) {
+        if (this.isValidDB(resource.name, this.config['resources']) >= 0) continue
+        // add latest
+        this.config.resources.push(resource)
+      }
+      // if (latest['resources'].length) this.config['resources'] = latest['resources']
       let defaultInfo = this.config['app'].default
       const idx = this.isValidDB(defaultInfo.dbname, latest['resources'])
       if (idx < 0 && latest['resources'].length) {
