@@ -25,7 +25,7 @@ describe('****************Start Test*************', function (resolve, reject) {
     })
   })
 
-  require('./cases/Command')
+  // require('./cases/Command')
   require('./cases/Performance')
   require('./cases/UI')
 

@@ -50,15 +50,31 @@ export class SearchManager {
     console.info('initialize search instance')
   }
   
-  async update(payload: any) {
+  /**
+   * Convert SearchCondition to server side query json
+   * @param payload 
+   * @returns 
+   */
+  async update(payload: SearchCondition[]|any) {
     console.info(`query begin: ${JSON.stringify(payload)}`)
     const name = payload.name
-    if (payload.selections.length === 0) {
-      delete this.conditions[name]
-    } else {
-      this.conditions[name] = []
-      for (const condition of payload.selections) {
-        this.conditions[name].push(condition.keyword)
+    if (name) { // if query come from view filter
+      if (payload.selections.length === 0) {
+        delete this.conditions[name]
+      } else {
+        this.conditions[name] = []
+        for (const condition of payload.selections) {
+          this.conditions[name].push(condition.keyword)
+        }
+      }
+    } else { // otherwise from input search
+      for (let condition of payload) {
+        if (condition.operation === ConditionOperation.Remove) {
+          delete this.conditions[condition.name]
+        }
+        else {
+          this.conditions[condition.name] = condition.keyword
+        }
       }
     }
     console.info(`query finish: ${JSON.stringify(this.conditions)}`)

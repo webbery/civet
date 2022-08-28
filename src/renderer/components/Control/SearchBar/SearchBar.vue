@@ -81,7 +81,8 @@ export default {
     onItemDelete(item) {
       for (let idx = this.conditions.length - 1; idx >= 0; --idx) {
         let condition = this.conditions[idx]
-        if (condition.type === item.type && condition.text === item.text) {
+        console.debug('delete search item:', condition)
+        if (condition.type === item.type && condition.keyword === item.keyword) {
           condition.operation = ConditionOperation.Remove
           Search.update([condition])
           this.conditions.splice(idx, 1)
@@ -102,7 +103,13 @@ export default {
       }
       console.info('start search', this.conditions)
       this.$store.dispatch('query', this.conditions)
-      this.$router.push({path: '/query', query: {name: '检索“' + this.keyword + '”', type: 'keyword'}})
+      let keywords = ''
+      for (let kw of this.conditions) {
+        keywords += kw.keyword + ','
+      }
+      if (keywords.length) keywords = keywords.slice(0, keywords.length - 1)
+      this.$router.push({path: '/query', query: {name: '检索“' + keywords + '”', type: 'keyword'}})
+      this.keyword = ''
     }
   }
 }
