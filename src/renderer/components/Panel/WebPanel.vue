@@ -68,7 +68,8 @@ export default {
           // this.$store.dispatch('display')
           console.info('Overview update', this.$store.state.Cache.viewClass)
           if (to.query.name === '全部') {
-            CommandSystem.execute('global.library.action.create', '/')
+            // CommandSystem.execute('global.library.action.create', '/')
+            CommandSystem.execute('global.library.action.getall', '/')
           }
           bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: name, cmd: 'display-all'})
           break
