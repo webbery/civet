@@ -190,17 +190,24 @@
                     }
                     minCol = getMinColumn(items.length, height)
                     root.appendChild(generateFromTemplate(item))
+                    // console.info('grid element 1', minCol, minVertical, item)
                     return
                 }
                 item['left'] = minCol * curWidth
                 item['top'] = minVertical[minCol]
                 root.appendChild(generateFromTemplate(item))
-                // console.info('grid element', minCol, minVertical, item)
+                // console.info('grid element 2', minCol, minVertical, item)
                 updateMinColumn(minCol, height)
             }
             function removeAll() {
                 const root = document.getElementById(rootID)
                 root.innerHTML = ''
+                curWidth = 0;
+                minCol = 0;
+                minVertical = [];
+                for (let idx = 0; idx < HORIZON_COUNT; ++idx) {
+                    minVertical.push(Infinity)
+                }
             }
             function onViewClick(itemid, element) {
                 GridViewCache.resetSelection()
@@ -321,7 +328,7 @@
                 GridViewCache.resetSelection()
             })
             acquireCivetApi().Overview.on('rename', (item) => {
-                console.debug('rename item:', item)
+                // console.debug('rename item:', item)
                 editName(item)
             })
             return {
