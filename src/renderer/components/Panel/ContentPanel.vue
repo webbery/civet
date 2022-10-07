@@ -69,10 +69,16 @@ export default {
   watch: {
     $route: function(to, from) {
       console.info('content panel, to: ', to, 'from:', from.path)
-      bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+      if (to.path !== '/') {
+        this.checkContentViewAndShow(to.query.name, to.params._path, to.params.type)
+        bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: to.query.name, cmd: to.query.cmd})
+      } else {
+        bus.emit(bus.EVENT_UPDATE_NAV_DESCRIBTION, {name: '全部', cmd: 'display-all'})
+      }
     }
   },
   async updated() {
+    console.info('update:', this.isUpdated)
     if (this.isUpdated) return
     const contentView = getContentViewName()
     try {
@@ -88,13 +94,21 @@ export default {
     this.isUpdated = true
   },
   methods: {
-    showContent(index) {
-      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, this.candidates[index].filename)
+    showContent(filename, filepath) {
+      bus.emit(bus.EVENT_DISPLAY_FILE_NAME, filename)
       const contentView = getContentViewName()
-      events.emit('ContentView:' + contentView, 'load', path.normalize(this.candidates[index].path))
-      const id = this.candidates[index].id
-      civetApi().Overview.click(id)
+      console.debug('load file:', path.normalize(filepath))
+      events.emit('ContentView:' + contentView, 'load', path.normalize(filepath))
       // this.$ipcRenderer.send(IPCNormalMessage.GET_SELECT_CONTENT_ITEM_INFO, {id: [id]})
+    },
+    checkContentViewAndShow(name, filepath, type) {
+      if (type !== this.resource.type) {
+        this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, type)
+      }
+      this.$nextTick(() => {
+        console.debug('next tick:', this.index)
+        this.showContent(name, filepath)
+      })
     },
     onClickNext() {
       console.info(`next image: ${this.index}, total: ${this.candidates.length}`)
@@ -108,7 +122,10 @@ export default {
         this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, this.resource.type)
       }
       this.$nextTick(() => {
-        this.showContent(this.index)
+        console.debug('next tick:', this.index)
+        this.showContent(this.candidates[this.index].filename, this.candidates[this.index].path)
+        const id = this.candidates[this.index].id
+        civetApi().Overview.click(id)
       })
     },
     onClickPrev() {
@@ -123,7 +140,9 @@ export default {
         this.$ipcRenderer.send(IPCNormalMessage.RETRIEVE_CONTENT_VIEW, this.resource.type)
       }
       this.$nextTick(() => {
-        this.showContent(this.index)
+        this.showContent(this.candidates[this.index].filename, this.candidates[this.index].path)
+        const id = this.candidates[this.index].id
+        civetApi().Overview.click(id)
       })
     },
     onContentViewUpdate(session, value) {
