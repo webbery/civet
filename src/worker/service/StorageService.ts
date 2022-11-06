@@ -33,10 +33,12 @@ export class StorageService implements IStorageService{
 
   onUpdateEvent(messageId: number, rId: number, data: ResourceProperty[], resource: Resource): void {
     console.debug('onUpdateEvent', rId, data)
+    // multiple times come in here
     if (data.length > 1) {
       const store = this.toJson(resource)
       CivetDatabase.addFiles([store])
       const thumbnail = resource.getPropertyValue('thumbnail')
+      console.debug('update event here')
       if (thumbnail) {
         CivetDatabase.addMeta([resource.id], { name: 'thumbnail', value: thumbnail, type: 'bin' })
       }

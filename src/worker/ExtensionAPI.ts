@@ -2,7 +2,6 @@ import { Resource } from '@/../public/Resource'
 import { MessagePipeline } from './MessageTransfer'
 import { thumbnail2Base64 } from '@/../public/Utility'
 import { CivetDatabase } from './Kernel'
-import { ReplyType } from './Message'
 
 export class APIFactory {
   constructor() {}

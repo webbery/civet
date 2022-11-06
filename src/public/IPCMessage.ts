@@ -8,8 +8,8 @@ export enum IPCExtensionMessage {
 
 export enum IPCNormalMessage {
   // system
-  // ON_ERROR_MESSAGE = 'onErrorMessage',
   RENDERER_MOUNTED = 'mounted',
+  IS_PATH_EXIST = 'isPathExist',
   // resource
   RENDERER_GET_RESOURCE_INFO = 'getImageInfo',
   RENDERER_GET_RESOURCES_INFO = 'getImagesInfo',
@@ -78,6 +78,7 @@ export enum IPCRendererResponse {
   uninstall = 'replyUninstallResult',
   getActiveCmd = 'replyActiveCommands',
   getExtensions = 'replyAllExtensions',
+  isPathExist = 'replyPathExist',
   ON_ERROR_MESSAGE = 'onEM',
   ON_VIEW_ROUTER_ADD = 'onVRI',
   ON_VIEW_ROUTER_CLEAR = 'onVRC',

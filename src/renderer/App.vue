@@ -33,7 +33,7 @@ export default {
     this.$ipcRenderer.on(IPCRendererResponse.ON_I18N, this.onI18N)
     this.$ipcRenderer.on(IPCRendererResponse.ON_MANAGEBENCH_INIT, this.onManagebenchInit)
     this.$ipcRenderer.on('keydown', this.onSystemKeydown)
-    this.$events.on('civet', 'onErrorMessage', this.onErrorTips)
+    this.$events.on('civet', IPCRendererResponse.ON_ERROR_MESSAGE, this.onErrorTips)
   },
   mounted() {
     console.info('mount:', config)

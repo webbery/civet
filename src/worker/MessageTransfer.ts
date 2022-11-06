@@ -1,8 +1,8 @@
-import { ReplyType } from './Message'
 import { injectable, registSingletonObject } from './Singleton'
 import { Event, Listener, CivetProtocol, MessageState } from '@/../public/Event'
 import { LinkedList } from 'public/LinkedList'
 import { Emitter } from 'public/Emitter'
+import { IPCRendererResponse } from 'public/IPCMessage'
 const { ipcRenderer } = require('electron')
 
 class Timer {
@@ -129,7 +129,7 @@ export class MessagePipeline {
       }, 200)
     }
     error(msg: string|null) {
-      ipcRenderer.send('message-from-worker', { type: ReplyType.INFOM_ERROR_MESSAGE, data: msg })
+      ipcRenderer.send('message-from-worker', { type: IPCRendererResponse.ON_ERROR_MESSAGE, data: msg })
     }
     regist(msgType: string, msgFunc: IMessageCallback, pointer?: any) {
       this.#processor.set(msgType, [msgFunc, pointer]);

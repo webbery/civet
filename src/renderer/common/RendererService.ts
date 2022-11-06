@@ -120,7 +120,7 @@ class RendererService {
         })
       } catch(err: any) {
         console.error(`RendererService error ${err}`)
-        events.emit('civet', 'onErrorMessage', {msg: err})
+        events.emit('civet', IPCRendererResponse.ON_ERROR_MESSAGE, {msg: err})
       }
     })
   }
