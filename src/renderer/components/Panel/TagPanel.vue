@@ -3,7 +3,7 @@
     <el-scrollbar style="height:96vh;">
     <div v-for="(aTags, letter) in tags" :key="letter">
       <div class="letter">{{letter}}</div>
-      <div><button  v-for="(tag, i) in aTags" :key="i" border :label="tag.name">{{tag.name + ' ' + tag.files.length}}</button></div>
+      <div><button  v-for="(tag, i) in aTags" :key="i" border :label="tag.name" @dblclick="onDbClickTag(tag.name)">{{tag.name + ' ' + tag.files.length}}</button></div>
       <el-divider></el-divider>
     </div>
     </el-scrollbar>
@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import { SearchCondition, ConditionType, ConditionOperation, DefaultQueryName, Search } from '@/common/SearchManager'
+
 export default {
   name: 'tag-page',
   data() {
@@ -25,6 +27,15 @@ export default {
     updateTags() {
       this.tags = this.$store.getters.tags
       console.info(this.tags)
+    },
+    onDbClickTag(tagName) {
+      let condition = new SearchCondition()
+      condition.type = ConditionType.String
+      condition.keyword = tagName
+      condition.name = DefaultQueryName.Keyword
+      condition.operation = ConditionOperation.Add
+      this.$store.dispatch('query', [condition])
+      this.$router.push({path: '/query', query: {name: '标签“' + tagName + '”', type: 'tag'}})
     }
   }
 }
