@@ -75,8 +75,9 @@
 | :----: | :----: | :----:  |  :----: | :----: | :----: |
 | Civet  | Electron | Typescript/C++ | [lmdb](https://zhuanlan.zhihu.com/p/70359311) | 开源MIT | Windows/Mac/Ubuntu
 | Eagle  | Electron | Js | Json/图片拷贝 | 私有 | Windows/Mac
-| Billfish  | Qt | C++ | Sqlite + 图片拷贝/索引 | 私有 | Windows/Mac
+| Billfish  | Qt | C++ | SQLite + 图片拷贝/索引 | 私有 | Windows/Mac
 | PicSee  | ObjectC | ObjectC | Realm | 私有 | Mac
+| Pixcall | Electron | Clojure/Rust | SQLite + 图片拷贝/索引 | 私有 | Windows/Mac
 
 **内置插件支持的文件格式：**  
 - 图片: jpg png bmp tif  
