@@ -235,7 +235,7 @@
     "mocha": "^8.2.1",
     "multispinner": "^0.2.1",
     "node-loader": "^1.0.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.0",
     "p-finally": "^2.0.1",
     "puppeteer-core": "^10.4.0",
     "puppeteer-in-electron": "^3.0.4",
